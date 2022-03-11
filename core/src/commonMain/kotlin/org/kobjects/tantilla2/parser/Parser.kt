@@ -10,7 +10,6 @@ fun String.unquote() = this.substring(1, this.length - 1)
 
 object Parser {
 
-
     fun getIndent(s: String): Int {
         val lastBreak = s.lastIndexOf('\n')
         if (lastBreak == -1) {
@@ -41,7 +40,6 @@ object Parser {
         return if (statements.size == 1) statements[0]
             else Control.Block<RuntimeContext>(*statements.toTypedArray())
     }
-
 
     fun consumeBody(tokenizer: TantillaTokenizer): String {
         var depth = 1
@@ -105,10 +103,17 @@ object Parser {
         }
 
     fun parseIf(tokenizer: TantillaTokenizer, context: ParsingContext, currentDepth: Int): Control.If<RuntimeContext> {
-        val condition = parseExpression(tokenizer, context)
-        tokenizer.consume(":")
-        val then = parseBlock(tokenizer, context, currentDepth)
-        return Control.If(condition, then)
+        val expressions = mutableListOf<Evaluable<RuntimeContext>>()
+        do {
+            expressions.add(parseExpression(tokenizer, context))
+            tokenizer.consume(":")
+        } while (tokenizer.tryConsume("elif"))
+
+        if (tokenizer.tryConsume("else")) {
+            expressions.add(parseBlock(tokenizer, context, currentDepth))
+        }
+
+        return Control.If(*expressions)
     }
 
     fun parseVar(tokenizer: TantillaTokenizer, context: ParsingContext) : Evaluable<RuntimeContext> {
