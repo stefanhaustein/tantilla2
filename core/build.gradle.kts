@@ -34,8 +34,8 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation("org.kobjects.parserlib:core:0.2.2")
-                implementation("org.kobjects.greenspun:core:0.2.0")
+                implementation("org.kobjects.parserlib:core:0.2.3")
+                implementation("org.kobjects.greenspun:core:0.2.1")
                         //          implementation("org.kobjects.greenspun:shared:0.1.0")
 //                implementation("org.kobjects.parserlib:shared:0.1.0")
             }

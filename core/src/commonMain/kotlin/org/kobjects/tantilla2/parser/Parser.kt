@@ -71,15 +71,21 @@ object Parser {
     ): Evaluable<RuntimeContext> {
         val statements = mutableListOf<Evaluable<RuntimeContext>>()
         var localDepth = returnDepth + 1
+
+        println("parsing block with local depth: $localDepth return depth $returnDepth")
+
         while (tokenizer.current.type != TokenType.EOF && tokenizer.current.text != "<|") {
             if (tokenizer.current.type == TokenType.LINE_BREAK) {
                 localDepth = getIndent(tokenizer.current.text)
+                println("line break with depth $localDepth")
                 if (localDepth <= returnDepth) {
                     break
                 }
                 tokenizer.next()
             } else {
-                statements.add(parseStatement(tokenizer, context, localDepth))
+                val statement = parseStatement(tokenizer, context, localDepth)
+                println("adding statement to block: $statement")
+                statements.add(statement)
             }
         }
         return if (statements.size == 1) statements[0] else Control.Block(*statements.toTypedArray())
@@ -102,18 +108,36 @@ object Parser {
             parseExpression(tokenizer, context)
         }
 
+    fun skipLineBreaks(tokenizer: TantillaTokenizer, currentDepth: Int) {
+        while (tokenizer.current.type == TokenType.LINE_BREAK
+            && getIndent(tokenizer.current.text) >= currentDepth) {
+            tokenizer.next()
+        }
+    }
+
     fun parseIf(tokenizer: TantillaTokenizer, context: ParsingContext, currentDepth: Int): Control.If<RuntimeContext> {
         val expressions = mutableListOf<Evaluable<RuntimeContext>>()
+        println("parsing if at depth $currentDepth")
         do {
-            expressions.add(parseExpression(tokenizer, context))
+            val condition = parseExpression(tokenizer, context)
+            println("parsed (el)if condition at depth $currentDepth: $condition")
+            expressions.add(condition)
             tokenizer.consume(":")
+            val block = parseBlock(tokenizer, context, currentDepth)
+            println("parsed block at depth $currentDepth: $block")
+            expressions.add(block)
+            skipLineBreaks(tokenizer, currentDepth)
         } while (tokenizer.tryConsume("elif"))
 
         if (tokenizer.tryConsume("else")) {
-            expressions.add(parseBlock(tokenizer, context, currentDepth))
+            println("Consumend else at level $currentDepth")
+            tokenizer.consume(":")
+            val otherwise = parseBlock(tokenizer, context, currentDepth)
+            println("parsed else at depth $currentDepth: $otherwise")
+            expressions.add(otherwise)
         }
 
-        return Control.If(*expressions)
+        return Control.If(*expressions.toTypedArray())
     }
 
     fun parseVar(tokenizer: TantillaTokenizer, context: ParsingContext) : Evaluable<RuntimeContext> {
@@ -169,18 +193,27 @@ object Parser {
         return Apply(base, arguments)
     }
 
+    fun consumeAndResoloveIdentifier(tokenizer: TantillaTokenizer, context: ParsingContext): Definition {
+        val name = tokenizer.consume(TokenType.IDENTIFIER)
+        try {
+            return context.resolve(name)
+        } catch (e: Exception) {
+            throw tokenizer.error(e.message ?: "Can't resolve $name")
+        }
+    }
+
     fun parsePrimary(tokenizer: TantillaTokenizer, context: ParsingContext): Evaluable<RuntimeContext> =
         when (tokenizer.current.type) {
             TokenType.NUMBER -> F64.Const(tokenizer.next().text.toDouble())
             TokenType.STRING -> Str.Const(tokenizer.next().text.unquote())
             TokenType.IDENTIFIER -> {
-                val name = tokenizer.consume(TokenType.IDENTIFIER)
-                val definition = context.resolve(name)
+                val definition = consumeAndResoloveIdentifier(tokenizer, context)
                 when (definition.kind) {
                     Definition.Kind.LOCAL_VARIABLE -> LocalVariableReference(
-                        name, definition.type(context), definition.index, definition.mutable)
+                       definition.name, definition.type(context), definition.index, definition.mutable)
                     Definition.Kind.CONST,
-                    Definition.Kind.FUNCTION -> SymbolReference(name, definition.type(context), definition.value(context))
+                    Definition.Kind.FUNCTION -> SymbolReference(
+                        definition.name, definition.type(context), definition.value(context))
                 }
             }
             else -> throw tokenizer.error("Number or identifier expected here.")

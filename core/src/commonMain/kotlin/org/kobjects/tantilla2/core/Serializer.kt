@@ -17,11 +17,20 @@ object Serializer {
     fun serializeIf(expr: Control.If<RuntimeContext>, indent: String): String {
         val sb = StringBuilder()
         sb.append("if ")
-        sb.append(serialize(expr.condition))
+        sb.append(serialize(expr.ifThenElse[0]))
         sb.append(":\n$indent")
-        sb.append(serialize(expr.then, "  $indent"))
-        sb.append("\n${indent}else:\n$indent")
-        sb.append(serialize(expr.otherwise, "  $indent"))
+        sb.append(serialize(expr.ifThenElse[1], "  $indent"))
+
+        for (i in 2 until expr.ifThenElse.size step 2) {
+            sb.append("elif ")
+            sb.append(serialize(expr.ifThenElse[i]))
+            sb.append(":\n$indent")
+            sb.append(serialize(expr.ifThenElse[i + 1], "  $indent"))
+        }
+        if (expr.ifThenElse.size % 2 == 1) {
+            sb.append("\n${indent}else:\n$indent")
+            sb.append(serialize(expr.ifThenElse[expr.ifThenElse.size - 1], "  $indent"))
+        }
         return sb.toString()
     }
 
