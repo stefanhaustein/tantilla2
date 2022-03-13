@@ -8,12 +8,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
-class ParserTest {
-
-    val SQUARE = """
-        def square(x: float):
-          x * x
-    """.trimIndent()
+class FizzBuzzTest {
 
     val FIZZ_BUZZ = """
         def fizz_buzz(): 
@@ -28,44 +23,41 @@ class ParserTest {
               print("Buzz")
             else:
               print(x)
+              
+            x = x + 1
     """.trimIndent()
 
-
-
-    @Test
-    fun testSquare() {
-        val context = ParsingContext(null)
-        Parser.parse(SQUARE, context)
-
-        val squareImpl = context.definitions["square"]!!
-
-        assertEquals("def square (x: float):\n  x * x", squareImpl.toString())
-
-        val runtimeContext = RuntimeContext(mutableListOf(4.0))
-        val result = (squareImpl.value(context)!! as Lambda).eval(runtimeContext)
-
-        assertEquals(16.0, result)
-
-    //    assertEquals("def square (x: float):\n  x * x", squareImpl.toString())
-    }
 
     @Test
     fun testFizzBuzz() {
         val output = mutableListOf<String>()
 
-        val context = ParsingContext(null)
+        val context = ParsingContext(ParsingContext.Kind.ROOT, null)
 
         context.defineValue(
             "print",
             Lambda(
                 FunctionType(Void, listOf(Parameter("text", Str))),
-            ) { output.add(it.variables[0] as String) } )
+            ) { try {
+                output.add(it.variables[0].toString())
+            } catch (e: Exception) {
+                throw RuntimeException("Issue with context $it", e)
+            } } )
 
         Parser.parse(FIZZ_BUZZ, context)
 
         val impl = context.definitions["fizz_buzz"]!!
 
         assertNotNull(impl.value(context))
+
+        val runtimeContext = RuntimeContext(mutableListOf(null))
+        (impl.value(context)!! as Lambda).eval(runtimeContext)
+
+        assertEquals(listOf(
+            1.0, 2.0, "Fizz", 4.0, "Buzz",
+            "Fizz", 7.0, 8.0, "Fizz", "Buzz",
+            11.0, "Fizz", 13.0, 14.0, "FizzBuzz",
+            16.0, 17.0, "Fizz", 19.0, "Buzz"), output)
     }
 
 }

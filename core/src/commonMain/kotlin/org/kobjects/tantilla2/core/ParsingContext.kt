@@ -3,6 +3,7 @@ package org.kobjects.tantilla2.core
 import org.kobjects.greenspun.core.Type
 
 class ParsingContext(
+    val kind: Kind,
     val parentContext: ParsingContext?
 ) {
     val definitions = mutableMapOf<String, Definition>()
@@ -26,6 +27,10 @@ class ParsingContext(
         definitions[name] = Definition(name, Definition.Kind.FUNCTION, definitionText = definition)
     }
 
+    fun defineClass(name: String, definition: String) {
+        definitions[name] = Definition(name, Definition.Kind.CLASS, definitionText = definition)
+    }
+
     override fun toString(): String {
         val sb = StringBuilder()
         for (entry in definitions.entries) {
@@ -38,5 +43,10 @@ class ParsingContext(
         return definitions[name] ?: (parentContext?.resolve(name)
             ?: throw RuntimeException("Undefined: '$name'"))
     }
+
+    enum class Kind {
+        ROOT, CLASS, FUNCTION
+    }
+
 
 }

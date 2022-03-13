@@ -17,7 +17,7 @@ class Definition(
 ) {
 
     enum class Kind {
-        LOCAL_VARIABLE, FUNCTION, CONST
+        LOCAL_VARIABLE, FUNCTION, CONST, CLASS
     }
 
     private fun tokenizer(): TantillaTokenizer {
@@ -29,6 +29,7 @@ class Definition(
     fun type(parsingContext: ParsingContext): Type {
         if (type == null) {
             type = when (kind) {
+                Kind.CLASS -> Parser.parseClassSignature(tokenizer(), parsingContext, name)
                 Kind.FUNCTION -> Parser.parseFunctionType(tokenizer(), parsingContext)
                 Kind.LOCAL_VARIABLE -> throw RuntimeException("Local variable type must not be null")
                 Kind.CONST -> typeOf(value)
@@ -41,9 +42,16 @@ class Definition(
         when (kind) {
             Kind.CONST -> value
             Kind.FUNCTION -> resolveFunction(parsingContext)
+            Kind.CLASS -> resolveClass(parsingContext)
             Kind.LOCAL_VARIABLE -> throw RuntimeException("Can't obtain local variable value from Definition.")
         }
 
+    private fun resolveClass(parsingContext: ParsingContext): Classifier {
+        if (value == null) {
+            throw UnsupportedOperationException()
+        }
+        return value as Classifier
+    }
 
     private fun resolveFunction(parsingContext: ParsingContext): Lambda {
         if (value == null) {
@@ -56,6 +64,7 @@ class Definition(
         when (kind) {
             Kind.LOCAL_VARIABLE -> "${if (mutable) "var" else "let"} $name"
             Kind.FUNCTION -> "def $name ${if (value == null) definitionText else value!!.toString()}"
+            Kind.CLASS ->  "class $name ${if (value == null) definitionText else value!!.toString()}"
             Kind.CONST -> "const $name = $value"
         }
 }

@@ -9,7 +9,13 @@ class Apply(
     override fun eval(context: RuntimeContext): Any? {
         val function = callable.eval(context) as Lambda
         val functionContext = RuntimeContext(MutableList<Any?>(function.type.parameters.size) {
-            if (it < parameters.size) parameters[it].eval(context) else null
+
+            if (it < parameters.size) {
+                println("Evaluating ${parameters[it]}")
+                val result = parameters[it].eval(context)
+                println("Result $result")
+                result
+            } else null
         })
         return function.eval(functionContext)
     }
