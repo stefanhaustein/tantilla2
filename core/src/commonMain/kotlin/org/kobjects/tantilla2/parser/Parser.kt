@@ -166,20 +166,32 @@ object Parser {
     fun parseFunctionType(tokenizer: TantillaTokenizer, context: ParsingContext): FunctionType {
         tokenizer.consume("(")
         val parameters = mutableListOf<Parameter>()
+        var isMethod = false
         if (!tokenizer.tryConsume(")")) {
-            do {
-                parameters.add(parseParameter(tokenizer, context))
-            } while (tokenizer.tryConsume(","))
+            if (tokenizer.tryConsume("self")) {
+                if (context.parentContext?.kind != ParsingContext.Kind.CLASS) {
+                    throw IllegalStateException("self supported for classes only.")
+                }
+                isMethod = true
+                parameters.add(Parameter("self", context.parentContext))
+                while (tokenizer.tryConsume(",")) {
+                    parameters.add(parseParameter(tokenizer, context))
+                }
+            } else {
+                do {
+                    parameters.add(parseParameter(tokenizer, context))
+                } while (tokenizer.tryConsume(","))
+            }
             tokenizer.consume(")", ", or ) expected here while parsing the parameter list.")
         }
         val returnType = if (tokenizer.tryConsume("->")) parseType(tokenizer, context) else Void
-        return FunctionType(returnType, parameters)
+        return FunctionType(isMethod, returnType, parameters)
     }
 
     fun parseLambda(tokenizer: TantillaTokenizer, context: ParsingContext): Lambda {
         val type = parseFunctionType(tokenizer, context)
         tokenizer.consume(":")
-        val functionContext = ParsingContext(ParsingContext.Kind.FUNCTION, context)
+        val functionContext = ParsingContext("", ParsingContext.Kind.FUNCTION, context)
         for (parameter in type.parameters) {
             functionContext.declareLocalVariable(parameter.name, parameter.type, mutable = false)
         }
@@ -237,14 +249,6 @@ object Parser {
             return F64
         }
         throw tokenizer.error("Unrecognized type.")
-    }
-
-    fun parseClassSignature(
-        tokenizer: TantillaTokenizer,
-        parsingContext: ParsingContext,
-        name: String,
-    ): Classifier {
-        throw UnsupportedOperationException()
     }
 
     val expressionParser = ExpressionParser<TantillaTokenizer, ParsingContext, Evaluable<RuntimeContext>>(

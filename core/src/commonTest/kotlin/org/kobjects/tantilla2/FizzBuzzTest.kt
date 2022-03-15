@@ -32,12 +32,12 @@ class FizzBuzzTest {
     fun testFizzBuzz() {
         val output = mutableListOf<String>()
 
-        val context = ParsingContext(ParsingContext.Kind.ROOT, null)
+        val context = ParsingContext("", ParsingContext.Kind.ROOT, null)
 
         context.defineValue(
             "print",
             Lambda(
-                FunctionType(Void, listOf(Parameter("text", Str))),
+                FunctionType(false, Void, listOf(Parameter("text", Str))),
             ) { try {
                 output.add(it.variables[0].toString())
             } catch (e: Exception) {

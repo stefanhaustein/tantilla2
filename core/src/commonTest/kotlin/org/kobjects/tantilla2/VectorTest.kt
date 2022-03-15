@@ -1,5 +1,12 @@
 package org.kobjects.tantilla2
 
+import org.kobjects.tantilla2.core.Lambda
+import org.kobjects.tantilla2.core.ParsingContext
+import org.kobjects.tantilla2.core.RuntimeContext
+import org.kobjects.tantilla2.parser.Parser
+import kotlin.test.Test
+import kotlin.test.assertEquals
+
 class VectorTest {
     val VECTOR = """
         class Vector:
@@ -26,5 +33,13 @@ class VectorTest {
             self.times(1/self.mag())
     """.trimIndent()
 
+    @Test
+    fun testVector() {
+        val context = ParsingContext("", ParsingContext.Kind.ROOT, null)
+        Parser.parse(VECTOR, context)
+
+        val vectorImpl = context.definitions["Vector"]!!
+
+    }
 
 }

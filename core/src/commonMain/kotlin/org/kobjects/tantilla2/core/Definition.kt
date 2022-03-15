@@ -29,7 +29,7 @@ class Definition(
     fun type(parsingContext: ParsingContext): Type {
         if (type == null) {
             type = when (kind) {
-                Kind.CLASS -> Parser.parseClassSignature(tokenizer(), parsingContext, name)
+                Kind.CLASS -> MetaType(value(parsingContext) as ParsingContext)
                 Kind.FUNCTION -> Parser.parseFunctionType(tokenizer(), parsingContext)
                 Kind.LOCAL_VARIABLE -> throw RuntimeException("Local variable type must not be null")
                 Kind.CONST -> typeOf(value)
@@ -46,11 +46,13 @@ class Definition(
             Kind.LOCAL_VARIABLE -> throw RuntimeException("Can't obtain local variable value from Definition.")
         }
 
-    private fun resolveClass(parsingContext: ParsingContext): Classifier {
+    private fun resolveClass(parsingContext: ParsingContext): ParsingContext {
         if (value == null) {
-            throw UnsupportedOperationException()
+            val classContext = ParsingContext(name, ParsingContext.Kind.CLASS, parsingContext)
+            Parser.parse(tokenizer(), classContext)
+            value = classContext
         }
-        return value as Classifier
+        return value as ParsingContext
     }
 
     private fun resolveFunction(parsingContext: ParsingContext): Lambda {

@@ -3,9 +3,10 @@ package org.kobjects.tantilla2.core
 import org.kobjects.greenspun.core.Type
 
 class ParsingContext(
+    override val name: String,
     val kind: Kind,
     val parentContext: ParsingContext?
-) {
+): Type {
     val definitions = mutableMapOf<String, Definition>()
     var localCount = 0
 

@@ -17,7 +17,7 @@ class SquareTest {
 
     @Test
     fun testSquare() {
-        val context = ParsingContext(ParsingContext.Kind.ROOT, null)
+        val context = ParsingContext("", ParsingContext.Kind.ROOT, null)
         Parser.parse(SQUARE, context)
 
         val squareImpl = context.definitions["square"]!!
