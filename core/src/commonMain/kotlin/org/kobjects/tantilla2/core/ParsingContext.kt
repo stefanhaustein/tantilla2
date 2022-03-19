@@ -1,14 +1,36 @@
 package org.kobjects.tantilla2.core
 
+import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.greenspun.core.Type
+import org.kobjects.greenspun.core.Void
 
 class ParsingContext(
     override val name: String,
     val kind: Kind,
     val parentContext: ParsingContext?
-): Type {
+): Type, Lambda {
+    override val parameters = mutableListOf<Parameter>()
     val definitions = mutableMapOf<String, Definition>()
     var localCount = 0
+    var body: Evaluable<RuntimeContext>? = null
+    override var returnType: Type = Void
+
+    override fun eval(context: RuntimeContext) = body!!.eval(context)
+
+    fun declareParameter(name: String, type: Type): Int {
+        if (localCount != parameters.size) {
+            throw IllegalStateException("Can't declare parameter after local variable")
+        }
+        val definition = Definition(
+            name,
+            Definition.Kind.LOCAL_VARIABLE,
+            type = type,
+            index = localCount,
+            mutable = false)
+        parameters.add(Parameter(name, type))
+        definitions[name] = definition
+        return localCount++
+    }
 
     fun declareLocalVariable(name: String, type: Type, mutable: Boolean): Int {
         definitions[name] = Definition(
@@ -46,7 +68,7 @@ class ParsingContext(
     }
 
     enum class Kind {
-        ROOT, CLASS, FUNCTION
+        ROOT, CLASS, FUNCTION, METHOD
     }
 
 

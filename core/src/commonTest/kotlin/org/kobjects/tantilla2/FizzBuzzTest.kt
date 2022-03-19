@@ -36,8 +36,8 @@ class FizzBuzzTest {
 
         context.defineValue(
             "print",
-            Lambda(
-                FunctionType(false, Void, listOf(Parameter("text", Str))),
+            LambdaImpl(
+                listOf(Parameter("text", Str)), Void,
             ) { try {
                 output.add(it.variables[0].toString())
             } catch (e: Exception) {

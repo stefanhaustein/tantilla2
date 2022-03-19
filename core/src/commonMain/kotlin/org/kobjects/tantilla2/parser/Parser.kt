@@ -21,12 +21,12 @@ object Parser {
     fun parse(s: String, context: ParsingContext): Evaluable<RuntimeContext> {
         val tokenizer = TantillaTokenizer(s)
         tokenizer.consume(TokenType.BOF);
-        val result = parse(tokenizer, context)
+        val result = parseRoot(tokenizer, context)
         tokenizer.consume(TokenType.EOF)
         return result
     }
 
-    fun parse(tokenizer: TantillaTokenizer, context: ParsingContext): Evaluable<RuntimeContext> {
+    fun parseRoot(tokenizer: TantillaTokenizer, context: ParsingContext): Evaluable<RuntimeContext> {
         val statements = mutableListOf<Evaluable<RuntimeContext>>()
         while (tokenizer.current.type != TokenType.EOF) {
             if (tokenizer.tryConsume("def")) {
@@ -191,12 +191,16 @@ object Parser {
     fun parseLambda(tokenizer: TantillaTokenizer, context: ParsingContext): Lambda {
         val type = parseFunctionType(tokenizer, context)
         tokenizer.consume(":")
-        val functionContext = ParsingContext("", ParsingContext.Kind.FUNCTION, context)
+        val functionContext = ParsingContext(
+            "",
+            if (type.isMethod) ParsingContext.Kind.METHOD else ParsingContext.Kind.FUNCTION,
+            context)
         for (parameter in type.parameters) {
-            functionContext.declareLocalVariable(parameter.name, parameter.type, mutable = false)
+            functionContext.declareParameter(parameter.name, parameter.type)
         }
-        val body = parseBlock(tokenizer, functionContext, 0)
-        return LambdaImpl(type, body)
+        functionContext.body = parseBlock(tokenizer, functionContext, 0)
+        functionContext.returnType = type.returnType
+        return functionContext
     }
 
     fun parseParameter(tokenizer: TantillaTokenizer, context: ParsingContext): Parameter {

@@ -49,7 +49,7 @@ class Definition(
     private fun resolveClass(parsingContext: ParsingContext): ParsingContext {
         if (value == null) {
             val classContext = ParsingContext(name, ParsingContext.Kind.CLASS, parsingContext)
-            Parser.parse(tokenizer(), classContext)
+            Parser.parseRoot(tokenizer(), classContext)
             value = classContext
         }
         return value as ParsingContext

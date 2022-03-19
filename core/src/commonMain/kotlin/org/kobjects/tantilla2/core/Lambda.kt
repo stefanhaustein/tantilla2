@@ -1,12 +1,12 @@
 package org.kobjects.tantilla2.core
 
 import org.kobjects.greenspun.core.Evaluable
+import org.kobjects.greenspun.core.Type
 import org.kobjects.tantilla2.parser.Parser
 import org.kobjects.tantilla2.parser.TantillaTokenizer
 
-open class Lambda (
-    val type: FunctionType,
-    val impl: (RuntimeContext) -> Any?
-)  {
-    fun eval(context: RuntimeContext) = impl(context)
+interface Lambda : Type {
+    val parameters: List<Parameter>
+    val returnType: Type
+    fun eval(context: RuntimeContext): Any?
 }

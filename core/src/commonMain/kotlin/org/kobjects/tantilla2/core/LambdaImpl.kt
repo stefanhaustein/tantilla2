@@ -1,12 +1,18 @@
 package org.kobjects.tantilla2.core
 
 import org.kobjects.greenspun.core.Evaluable
+import org.kobjects.greenspun.core.Type
 
 class LambdaImpl(
-    type: FunctionType,
-    body: Evaluable<RuntimeContext>,
-) : Lambda(type, {body.eval(it)}) {
-    val body = body
+    override val parameters: List<Parameter>,
+    override val returnType: Type,
+    val body: (RuntimeContext) -> Any?,
+) : Lambda {
 
-    override fun toString() = "$type:\n  ${Serializer.serialize(body, "  ")}"
+    override val name: String
+        get() = "($parameters) -> $returnType"
+
+    override fun eval(context: RuntimeContext) = body(context)
+
+    override fun toString() = "($parameters) -> $returnType:\n  $body"
 }
