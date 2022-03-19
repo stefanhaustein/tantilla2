@@ -21,15 +21,29 @@ object Parser {
     fun parse(s: String, context: ParsingContext): Evaluable<RuntimeContext> {
         val tokenizer = TantillaTokenizer(s)
         tokenizer.consume(TokenType.BOF);
-        val result = parseRoot(tokenizer, context)
+        val result = parse(tokenizer, context)
         tokenizer.consume(TokenType.EOF)
         return result
     }
 
-    fun parseRoot(tokenizer: TantillaTokenizer, context: ParsingContext): Evaluable<RuntimeContext> {
+    fun parse(
+        tokenizer: TantillaTokenizer,
+        context: ParsingContext,
+        returnDepth: Int = -1,
+    ): Evaluable<RuntimeContext> {
         val statements = mutableListOf<Evaluable<RuntimeContext>>()
-        while (tokenizer.current.type != TokenType.EOF) {
-            if (tokenizer.tryConsume("def")) {
+        var localDepth = returnDepth + 1
+        while (tokenizer.current.type != TokenType.EOF && tokenizer.current.text != "<|") {
+            if (tokenizer.current.type == TokenType.LINE_BREAK) {
+                localDepth = getIndent(tokenizer.current.text)
+                println("line break with depth $localDepth")
+                if (localDepth <= returnDepth) {
+                    break
+                }
+                tokenizer.next()
+            } else if (tokenizer.tryConsume("var")) {
+                parseVar(tokenizer, context)
+            } else if (tokenizer.tryConsume("def")) {
                 val name = tokenizer.consume(TokenType.IDENTIFIER, "Function name expected.")
                 val text = consumeBody(tokenizer)
                 context.defineFunction(name, text)
@@ -38,7 +52,7 @@ object Parser {
                 val text = consumeBody(tokenizer)
                 context.defineClass(name, text)
             } else {
-                statements.add(parseStatement(tokenizer, context, 0))
+                statements.add(parseStatement(tokenizer, context, localDepth))
             }
         }
         return if (statements.size == 1) statements[0]
@@ -68,33 +82,6 @@ object Parser {
         return tokenizer.input.substring(pos)
     }
 
-    fun parseBlock(
-        tokenizer: TantillaTokenizer,
-        context: ParsingContext,
-        returnDepth: Int
-    ): Evaluable<RuntimeContext> {
-        val statements = mutableListOf<Evaluable<RuntimeContext>>()
-        var localDepth = returnDepth + 1
-
-        println("parsing block with local depth: $localDepth return depth $returnDepth")
-
-        while (tokenizer.current.type != TokenType.EOF && tokenizer.current.text != "<|") {
-            if (tokenizer.current.type == TokenType.LINE_BREAK) {
-                localDepth = getIndent(tokenizer.current.text)
-                println("line break with depth $localDepth")
-                if (localDepth <= returnDepth) {
-                    break
-                }
-                tokenizer.next()
-            } else {
-                val statement = parseStatement(tokenizer, context, localDepth)
-                println("adding statement to block: $statement")
-                statements.add(statement)
-            }
-        }
-        return if (statements.size == 1) statements[0] else Control.Block(*statements.toTypedArray())
-    }
-
     fun parseStatement(
         tokenizer: TantillaTokenizer,
         context: ParsingContext,
@@ -105,9 +92,7 @@ object Parser {
         } else if (tokenizer.tryConsume("while")) {
             val condition = parseExpression(tokenizer, context)
             tokenizer.consume(":")
-            Control.While(condition, parseBlock(tokenizer, context, currentDepth))
-        } else if (tokenizer.tryConsume("var")) {
-            parseVar(tokenizer, context)
+            Control.While(condition, parse(tokenizer, context, currentDepth))
         } else {
             val expr = parseExpression(tokenizer, context)
             if (tokenizer.tryConsume("=")) {
@@ -135,7 +120,7 @@ object Parser {
             println("parsed (el)if condition at depth $currentDepth: $condition")
             expressions.add(condition)
             tokenizer.consume(":")
-            val block = parseBlock(tokenizer, context, currentDepth)
+            val block = parse(tokenizer, context, currentDepth)
             println("parsed block at depth $currentDepth: $block")
             expressions.add(block)
             skipLineBreaks(tokenizer, currentDepth)
@@ -144,7 +129,7 @@ object Parser {
         if (tokenizer.tryConsume("else")) {
             println("Consumend else at level $currentDepth")
             tokenizer.consume(":")
-            val otherwise = parseBlock(tokenizer, context, currentDepth)
+            val otherwise = parse(tokenizer, context, currentDepth)
             println("parsed else at depth $currentDepth: $otherwise")
             expressions.add(otherwise)
         }
@@ -198,7 +183,7 @@ object Parser {
         for (parameter in type.parameters) {
             functionContext.declareParameter(parameter.name, parameter.type)
         }
-        functionContext.body = parseBlock(tokenizer, functionContext, 0)
+        functionContext.body = parse(tokenizer, functionContext, 0)
         functionContext.returnType = type.returnType
         return functionContext
     }
