@@ -42,7 +42,9 @@ object Parser {
                 }
                 tokenizer.next()
             } else if (tokenizer.tryConsume("var")) {
-                parseVar(tokenizer, context)
+                statements.add(parseLocalVariable(tokenizer, context, true))
+            } else if (tokenizer.tryConsume("let")) {
+                statements.add(parseLocalVariable(tokenizer, context, false))
             } else if (tokenizer.tryConsume("def")) {
                 val name = tokenizer.consume(TokenType.IDENTIFIER, "Function name expected.")
                 val text = consumeBody(tokenizer)
@@ -137,12 +139,33 @@ object Parser {
         return Control.If(*expressions.toTypedArray())
     }
 
-    fun parseVar(tokenizer: TantillaTokenizer, context: ParsingContext) : Evaluable<RuntimeContext> {
+    fun parseLocalVariable(
+        tokenizer: TantillaTokenizer,
+        context: ParsingContext,
+        mutable: Boolean,
+    ) : Evaluable<RuntimeContext> {
         val name = tokenizer.consume(TokenType.IDENTIFIER)
-        tokenizer.consume("=")
-        val initializer = parseExpression(tokenizer, context)
-        val index = context.declareLocalVariable(name, initializer.type, true)
-        return Assignment(LocalVariableReference(name, initializer.type, index, true), initializer)
+        var type: Type? = null
+        if (tokenizer.tryConsume(":")) {
+            type = parseType(tokenizer, context)
+        }
+        var initializer: Evaluable<RuntimeContext>? = null
+        val asParameter = context.kind == ParsingContext.Kind.CLASS
+        if (tokenizer.tryConsume("=")) {
+            if (asParameter) {
+                throw IllegalStateException("Parameter initializers NYI")
+            }
+            initializer = parseExpression(tokenizer, context)
+            if (type != null && type.isAssignableFrom(initializer.type)) {
+                throw IllegalStateException("Initializer type mismatch: ${initializer.type} can't be assigned to $type")
+            }
+            type = initializer.type
+        } else if (type == null) {
+            throw IllegalStateException("Explicit type or initializer expression required.")
+        }
+        val index = context.declareLocalVariable(name, type, mutable, asParameter)
+        return if (initializer == null) Control.Block<RuntimeContext>()
+            else Assignment(LocalVariableReference(name, type, index, mutable), initializer)
     }
 
     fun parseExpression(tokenizer: TantillaTokenizer, context: ParsingContext): Evaluable<RuntimeContext> =
@@ -181,7 +204,7 @@ object Parser {
             if (type.isMethod) ParsingContext.Kind.METHOD else ParsingContext.Kind.FUNCTION,
             context)
         for (parameter in type.parameters) {
-            functionContext.declareParameter(parameter.name, parameter.type)
+            functionContext.declareLocalVariable(parameter.name, parameter.type, false, true)
         }
         functionContext.body = parse(tokenizer, functionContext, 0)
         functionContext.returnType = type.returnType

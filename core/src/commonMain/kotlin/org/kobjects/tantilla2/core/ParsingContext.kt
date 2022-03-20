@@ -17,28 +17,20 @@ class ParsingContext(
 
     override fun eval(context: RuntimeContext) = body!!.eval(context)
 
-    fun declareParameter(name: String, type: Type): Int {
-        if (localCount != parameters.size) {
-            throw IllegalStateException("Can't declare parameter after local variable")
-        }
+    fun declareLocalVariable(name: String, type: Type, mutable: Boolean, asParameter: Boolean): Int {
         val definition = Definition(
             name,
             Definition.Kind.LOCAL_VARIABLE,
             type = type,
             index = localCount,
             mutable = false)
-        parameters.add(Parameter(name, type))
         definitions[name] = definition
-        return localCount++
-    }
-
-    fun declareLocalVariable(name: String, type: Type, mutable: Boolean): Int {
-        definitions[name] = Definition(
-            name,
-            Definition.Kind.LOCAL_VARIABLE,
-            type = type,
-            index = localCount,
-            mutable = mutable)
+        if (asParameter) {
+            if (localCount != parameters.size) {
+                throw IllegalStateException("Can't declare parameter after local variable")
+            }
+            parameters.add(Parameter(name, type))
+        }
         return localCount++
     }
 
@@ -59,6 +51,10 @@ class ParsingContext(
         for (entry in definitions.entries) {
             sb.append(entry.value).append('\n')
         }
+        if (body != null) {
+            sb.append(body)
+        }
+
         return sb.toString()
     }
 

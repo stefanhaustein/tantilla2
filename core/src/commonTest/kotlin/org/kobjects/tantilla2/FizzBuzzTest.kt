@@ -50,14 +50,16 @@ class FizzBuzzTest {
 
         assertNotNull(impl.value(context))
 
+        // assertEquals("", impl.toString())
+
         val runtimeContext = RuntimeContext(mutableListOf(null))
         (impl.value(context)!! as Lambda).eval(runtimeContext)
 
         assertEquals(listOf(
-            1.0, 2.0, "Fizz", 4.0, "Buzz",
-            "Fizz", 7.0, 8.0, "Fizz", "Buzz",
-            11.0, "Fizz", 13.0, 14.0, "FizzBuzz",
-            16.0, 17.0, "Fizz", 19.0, "Buzz"), output)
+            "1.0", "2.0", "Fizz", "4.0", "Buzz",
+            "Fizz", "7.0", "8.0", "Fizz", "Buzz",
+            "11.0", "Fizz", "13.0", "14.0", "FizzBuzz",
+            "16.0", "17.0", "Fizz", "19.0", "Buzz"), output)
     }
 
 }
