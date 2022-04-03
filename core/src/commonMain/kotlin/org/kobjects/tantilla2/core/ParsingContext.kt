@@ -3,35 +3,30 @@ package org.kobjects.tantilla2.core
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.greenspun.core.Type
 import org.kobjects.greenspun.core.Void
+import org.kobjects.tantilla2.core.Serializer.serialize
 
 class ParsingContext(
     override val name: String,
     val kind: Kind,
     val parentContext: ParsingContext?
-): Type, Lambda {
-    override val parameters = mutableListOf<Parameter>()
+): Type, Typed {
     val definitions = mutableMapOf<String, Definition>()
-    var localCount = 0
-    var body: Evaluable<RuntimeContext>? = null
-    override var returnType: Type = Void
+    var locals = mutableListOf<Definition>()
 
-    override fun eval(context: RuntimeContext) = body!!.eval(context)
+    override val type: Type
+        get() = if (kind == Kind.CLASS) ClassMetaType(this) else MetaType(this)
 
-    fun declareLocalVariable(name: String, type: Type, mutable: Boolean, asParameter: Boolean): Int {
+    fun declareLocalVariable(name: String, type: Type, mutable: Boolean): Int {
+        val index = locals.size
         val definition = Definition(
             name,
             Definition.Kind.LOCAL_VARIABLE,
             type = type,
-            index = localCount,
-            mutable = false)
+            index = index,
+            mutable = mutable)
         definitions[name] = definition
-        if (asParameter) {
-            if (localCount != parameters.size) {
-                throw IllegalStateException("Can't declare parameter after local variable")
-            }
-            parameters.add(Parameter(name, type))
-        }
-        return localCount++
+        locals.add((definition))
+        return index
     }
 
     fun defineValue(name: String, value: Any) {
@@ -46,13 +41,21 @@ class ParsingContext(
         definitions[name] = Definition(name, Definition.Kind.CLASS, definitionText = definition)
     }
 
-    override fun toString(): String {
+    override fun toString() = serialize()
+
+    fun serialize(indent: String = ""): String {
         val sb = StringBuilder()
-        for (entry in definitions.entries) {
-            sb.append(entry.value).append('\n')
+        val innerIndent = indent + "  "
+
+        when (kind) {
+            Kind.CLASS -> sb.append("${indent}class $name:\n")
+            Kind.FUNCTION -> {
+                sb.append("${indent}def $name")
+            }
         }
-        if (body != null) {
-            sb.append(body)
+
+        for (definition in definitions.values) {
+            sb.append(definition.serialize(innerIndent)).append('\n')
         }
 
         return sb.toString()

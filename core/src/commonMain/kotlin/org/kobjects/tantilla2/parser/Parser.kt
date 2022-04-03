@@ -15,7 +15,7 @@ object Parser {
         if (lastBreak == -1) {
             throw IllegalArgumentException("Line break expected")
         }
-        return s.length - lastBreak
+        return s.length - lastBreak - 1
     }
 
     fun parse(s: String, context: ParsingContext): Evaluable<RuntimeContext> {
@@ -47,36 +47,41 @@ object Parser {
                 statements.add(parseLocalVariable(tokenizer, context, false))
             } else if (tokenizer.tryConsume("def")) {
                 val name = tokenizer.consume(TokenType.IDENTIFIER, "Function name expected.")
-                val text = consumeBody(tokenizer)
+                println("consuming def $name")
+                val text = consumeBody(tokenizer, localDepth)
                 context.defineFunction(name, text)
             } else if (tokenizer.tryConsume("class")) {
                 val name = tokenizer.consume(TokenType.IDENTIFIER, "Class name expected.")
-                val text = consumeBody(tokenizer)
+                println("consuming class $name; return depth: $localDepth")
+                val text = consumeBody(tokenizer, localDepth)
                 context.defineClass(name, text)
             } else {
-                statements.add(parseStatement(tokenizer, context, localDepth))
+                val statement = parseStatement(tokenizer, context, localDepth)
+                println("parsed statement: $statement")
+                statements.add(statement)
             }
         }
         return if (statements.size == 1) statements[0]
             else Control.Block<RuntimeContext>(*statements.toTypedArray())
     }
 
-    fun consumeBody(tokenizer: TantillaTokenizer): String {
-        var depth = 1
+    fun consumeBody(
+        tokenizer: TantillaTokenizer,
+        returnDepth: Int = -1
+    ): String {
+        var localDepth = returnDepth + 1
         val pos = tokenizer.current.pos
         while (tokenizer.current.type != TokenType.EOF) {
             if (tokenizer.current.type == TokenType.LINE_BREAK) {
-                depth = getIndent(tokenizer.current.text)
+                localDepth = getIndent(tokenizer.current.text)
+                println("- new local depth: $localDepth")
             } else {
                 when (tokenizer.current.text) {
-                    "def", "if", "while", "class" -> depth++
-                    "<|" -> {
-                        tokenizer.next()
-                        depth--
-                    }
+                    "def", "if", "while", "class" -> localDepth++
+                    "<|" -> localDepth--
                 }
             }
-            if (depth == 0) {
+            if (localDepth <= returnDepth) {
                 return tokenizer.input.substring(pos, tokenizer.current.pos)
             }
             tokenizer.next()
@@ -163,7 +168,7 @@ object Parser {
         } else if (type == null) {
             throw IllegalStateException("Explicit type or initializer expression required.")
         }
-        val index = context.declareLocalVariable(name, type, mutable, asParameter)
+        val index = context.declareLocalVariable(name, type, mutable)
         return if (initializer == null) Control.Block<RuntimeContext>()
             else Assignment(LocalVariableReference(name, type, index, mutable), initializer)
     }
@@ -178,7 +183,7 @@ object Parser {
         if (!tokenizer.tryConsume(")")) {
             if (tokenizer.tryConsume("self")) {
                 if (context.parentContext?.kind != ParsingContext.Kind.CLASS) {
-                    throw IllegalStateException("self supported for classes only.")
+                    throw IllegalStateException("self supported for classes only; got: ${context.parentContext?.kind}")
                 }
                 isMethod = true
                 parameters.add(Parameter("self", context.parentContext))
@@ -204,11 +209,10 @@ object Parser {
             if (type.isMethod) ParsingContext.Kind.METHOD else ParsingContext.Kind.FUNCTION,
             context)
         for (parameter in type.parameters) {
-            functionContext.declareLocalVariable(parameter.name, parameter.type, false, true)
+            functionContext.declareLocalVariable(parameter.name, parameter.type, false)
         }
-        functionContext.body = parse(tokenizer, functionContext, 0)
-        functionContext.returnType = type.returnType
-        return functionContext
+        val body = parse(tokenizer, functionContext, 0)
+        return LambdaImpl(type, body)
     }
 
     fun parseParameter(tokenizer: TantillaTokenizer, context: ParsingContext): Parameter {
@@ -243,14 +247,26 @@ object Parser {
             TokenType.NUMBER -> F64.Const(tokenizer.next().text.toDouble())
             TokenType.STRING -> Str.Const(tokenizer.next().text.unquote())
             TokenType.IDENTIFIER -> {
-                val definition = consumeAndResoloveIdentifier(tokenizer, context)
-                when (definition.kind) {
-                    Definition.Kind.LOCAL_VARIABLE -> LocalVariableReference(
-                       definition.name, definition.type(context), definition.index, definition.mutable)
-                    Definition.Kind.CLASS,
-                    Definition.Kind.CONST,
-                    Definition.Kind.FUNCTION -> SymbolReference(
-                        definition.name, definition.type(context), definition.value(context))
+                if (tokenizer.current.text == "self") {
+                    if (context.kind != ParsingContext.Kind.METHOD) {
+                        tokenizer.error("self supported in methods only")
+                    }
+                    Self(context.parentContext!!)
+                } else {
+                    val definition = consumeAndResoloveIdentifier(tokenizer, context)
+                    when (definition.kind) {
+                        Definition.Kind.LOCAL_VARIABLE -> LocalVariableReference(
+                            definition.name,
+                            definition.type(context),
+                            definition.index,
+                            definition.mutable
+                        )
+                        Definition.Kind.CLASS,
+                        Definition.Kind.CONST,
+                        Definition.Kind.FUNCTION -> SymbolReference(
+                            definition.name, definition.type(context), definition.value(context)
+                        )
+                    }
                 }
             }
             else -> throw tokenizer.error("Number or identifier expected here.")
@@ -263,9 +279,59 @@ object Parser {
         throw tokenizer.error("Unrecognized type.")
     }
 
+    fun parseList(
+        tokenizer: TantillaTokenizer,
+        context: ParsingContext,
+        endMarker: String): List<Evaluable<RuntimeContext>> {
+        val result = mutableListOf<Evaluable<RuntimeContext>>()
+        if (tokenizer.current.text != endMarker) {
+            do {
+                result.add(parseExpression(tokenizer, context))
+            } while (tokenizer.tryConsume(","))
+        }
+        tokenizer.consume(endMarker, ") or , expected")
+        return result.toList()
+    }
+
+    fun parseProperty(
+        tokenizer: TantillaTokenizer,
+        context: ParsingContext,
+        base: Evaluable<RuntimeContext>,
+    ): Evaluable<RuntimeContext> {
+        val name = tokenizer.consume(TokenType.IDENTIFIER)
+        if (!(base.type is ParsingContext)) {
+            tokenizer.error("Base type must be parsing context; got: ${base.type} for $base.")
+        }
+        val baseType = base.type as ParsingContext
+        val definition = baseType.resolve(name)
+
+        when (definition.kind) {
+            Definition.Kind.LOCAL_VARIABLE ->
+            return PropertyReference(
+                base,
+                name,
+                definition.type(context),
+                definition.index,
+                definition.mutable
+            )
+            Definition.Kind.FUNCTION -> {
+                val fn = SymbolReference(name, definition.type(context), definition.value(context))
+                val args = if (tokenizer.tryConsume("(")) parseList(tokenizer, context, ")")
+                    else emptyList()
+                val params = List<Evaluable<RuntimeContext>>(args.size + 1) {
+                    if (it == 0) base else args[it - 1]
+                }
+                return Apply(fn, params)
+            }
+            else -> throw tokenizer.error("Unsupported definition kind ${definition.kind} for $base.$name")
+        }
+    }
+
     val expressionParser = ExpressionParser<TantillaTokenizer, ParsingContext, Evaluable<RuntimeContext>>(
         ExpressionParser.suffix(5, "(") {
                 tokenizer, context, _, base -> parseApply(tokenizer, context, base) },
+        ExpressionParser.suffix(6, ".") {
+                tokenizer, context, _, base -> parseProperty(tokenizer, context, base) },
         ExpressionParser.infix(4, "*") { _, _, _, l, r -> F64.Mul(l, r)},
         ExpressionParser.infix(4, "/") { _, _, _, l, r -> F64.Div(l, r)},
         ExpressionParser.infix(4, "%") { _, _, _, l, r -> F64.Mod(l, r)},

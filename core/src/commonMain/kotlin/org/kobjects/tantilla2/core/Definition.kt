@@ -29,10 +29,9 @@ class Definition(
     fun type(parsingContext: ParsingContext): Type {
         if (type == null) {
             type = when (kind) {
-                Kind.CLASS -> MetaType(value(parsingContext) as ParsingContext)
                 Kind.FUNCTION -> Parser.parseFunctionType(tokenizer(), parsingContext)
                 Kind.LOCAL_VARIABLE -> throw RuntimeException("Local variable type must not be null")
-                Kind.CONST -> typeOf(value)
+                else -> typeOf(value(parsingContext))
             }
         }
         return type!!
@@ -48,8 +47,12 @@ class Definition(
 
     private fun resolveClass(parsingContext: ParsingContext): ParsingContext {
         if (value == null) {
+            println("Resolving class $name: $definitionText")
             val classContext = ParsingContext(name, ParsingContext.Kind.CLASS, parsingContext)
-            Parser.parse(tokenizer(), classContext)
+            val tokenizer = tokenizer()
+            tokenizer.next()
+            Parser.parse(tokenizer, classContext)
+            println("Class successfully resolved!")
             value = classContext
         }
         return value as ParsingContext
@@ -57,16 +60,21 @@ class Definition(
 
     private fun resolveFunction(parsingContext: ParsingContext): Lambda {
         if (value == null) {
+            println("Resolving function $name: $definitionText")
             value = Parser.parseLambda(tokenizer(), parsingContext)
         }
         return value as Lambda
     }
 
-    override fun toString(): String =
+    override fun toString() = serialize()
+
+    fun serialize(indent: String = "") =
+        "$indent#start $name\n" +
         when (kind) {
             Kind.LOCAL_VARIABLE -> "${if (mutable) "var" else "let"} $name"
             Kind.FUNCTION -> "def $name ${if (value == null) definitionText else value!!.toString()}"
             Kind.CLASS ->  "class $name ${if (value == null) definitionText else value!!.toString()}"
             Kind.CONST -> "const $name = $value"
-        }
+        } +
+                "\n$indent#end $name\n"
 }

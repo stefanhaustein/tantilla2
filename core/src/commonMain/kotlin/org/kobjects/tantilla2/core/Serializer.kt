@@ -8,28 +8,28 @@ object Serializer {
 
     fun serializeInfix(expr: Evaluable<RuntimeContext>, name: String, precedence: Int, parentPrecedence: Int): String {
         val sb = StringBuilder()
-        sb.append(serialize(expr.children()[0], "", precedence))
+        sb.append(expr.children()[0].serialize("", precedence))
         sb.append(" $name ")
-        sb.append(serialize(expr.children()[1], "", precedence))
+        sb.append(expr.children()[1].serialize( "", precedence))
         return sb.toString()
     }
 
     fun serializeIf(expr: Control.If<RuntimeContext>, indent: String): String {
         val sb = StringBuilder()
         sb.append("if ")
-        sb.append(serialize(expr.ifThenElse[0]))
+        sb.append(expr.ifThenElse[0].serialize())
         sb.append(":\n$indent")
-        sb.append(serialize(expr.ifThenElse[1], "  $indent"))
+        sb.append(expr.ifThenElse[1].serialize(), "  $indent")
 
         for (i in 2 until expr.ifThenElse.size step 2) {
             sb.append("elif ")
-            sb.append(serialize(expr.ifThenElse[i]))
+            sb.append(expr.ifThenElse[i].serialize())
             sb.append(":\n$indent")
-            sb.append(serialize(expr.ifThenElse[i + 1], "  $indent"))
+            sb.append(expr.ifThenElse[i + 1].serialize("  $indent"))
         }
         if (expr.ifThenElse.size % 2 == 1) {
             sb.append("\n${indent}else:\n$indent")
-            sb.append(serialize(expr.ifThenElse[expr.ifThenElse.size - 1], "  $indent"))
+            sb.append(expr.ifThenElse[expr.ifThenElse.size - 1].serialize("  $indent"))
         }
         return sb.toString()
     }
@@ -38,22 +38,22 @@ object Serializer {
     fun serializeWhile(expr: Control.While<RuntimeContext>, indent: String): String {
         val sb = StringBuilder()
         sb.append("while ")
-        sb.append(serialize(expr.condition))
+        sb.append(expr.condition.serialize(indent))
         sb.append(":\n$indent")
-        sb.append(serialize(expr.body, "  $indent"))
+        sb.append(expr.body.serialize( "  $indent"))
         return sb.toString()
     }
 
-    fun serialize(expr: Evaluable<RuntimeContext>, indent: String = "", parentPrecedence: Int = 0): String =
-        when (expr) {
-            is F64.Add -> serializeInfix(expr, "+", 1, parentPrecedence)
-            is F64.Sub -> serializeInfix(expr, "-", 1, parentPrecedence)
-            is F64.Mul -> serializeInfix(expr, "*", 2, parentPrecedence)
-            is F64.Div -> serializeInfix(expr, "/", 2, parentPrecedence)
-            is Control.If -> serializeIf(expr, indent)
-            is Control.Block -> expr.statements.joinToString("\n$indent") { serialize(it, indent) }
-            is Control.While -> serializeWhile(expr, indent)
-            else -> expr.toString()
+    fun Evaluable<RuntimeContext>.serialize(indent: String = "", parentPrecedence: Int = 0): String =
+        when (this) {
+            is F64.Add -> serializeInfix(this, "+", 1, parentPrecedence)
+            is F64.Sub -> serializeInfix(this, "-", 1, parentPrecedence)
+            is F64.Mul -> serializeInfix(this, "*", 2, parentPrecedence)
+            is F64.Div -> serializeInfix(this, "/", 2, parentPrecedence)
+            is Control.If -> serializeIf(this, indent)
+            is Control.Block -> statements.joinToString("\n$indent") { it.serialize(indent) }
+            is Control.While -> serializeWhile(this, indent)
+            else -> toString()
         }
 
 

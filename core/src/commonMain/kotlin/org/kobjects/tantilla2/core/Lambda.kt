@@ -6,7 +6,6 @@ import org.kobjects.tantilla2.parser.Parser
 import org.kobjects.tantilla2.parser.TantillaTokenizer
 
 interface Lambda : Type {
-    val parameters: List<Parameter>
-    val returnType: Type
+    val type: FunctionType
     fun eval(context: RuntimeContext): Any?
 }

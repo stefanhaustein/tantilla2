@@ -4,7 +4,7 @@ import org.kobjects.greenspun.core.Bool
 import org.kobjects.greenspun.core.Type
 import org.kobjects.greenspun.core.Void
 
-data class FunctionType(
+open class FunctionType(
     val isMethod: Boolean,
     val returnType: Type,
     val parameters: List<Parameter>,

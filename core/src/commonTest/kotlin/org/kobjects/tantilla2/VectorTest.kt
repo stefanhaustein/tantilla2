@@ -1,8 +1,8 @@
 package org.kobjects.tantilla2
 
-import org.kobjects.tantilla2.core.Lambda
 import org.kobjects.tantilla2.core.ParsingContext
 import org.kobjects.tantilla2.core.RuntimeContext
+import org.kobjects.tantilla2.core.Serializer.serialize
 import org.kobjects.tantilla2.parser.Parser
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -10,9 +10,9 @@ import kotlin.test.assertEquals
 class VectorTest {
     val VECTOR = """
         class Vector:
-          x: float
-          y: float
-          z: float
+          let x: float
+          let y: float
+          let z: float
 
           def times(self, k: float) -> Vector:
             Vector(k * self.x, k * self.y, k * self.z)
@@ -31,15 +31,27 @@ class VectorTest {
       
           def norm(self) -> Vector:
             self.times(1/self.mag())
+                
+        Vector(1, 2, 3).mag()
     """.trimIndent()
 
     @Test
     fun testVector() {
-        val context = ParsingContext("", ParsingContext.Kind.ROOT, null)
-        Parser.parse(VECTOR, context)
+        val parsingContext = ParsingContext("", ParsingContext.Kind.ROOT, null)
+        val result = Parser.parse(VECTOR, parsingContext)
 
-        val vectorImpl = context.definitions["Vector"]!!
+        assertEquals(setOf("Vector"), parsingContext.definitions.keys)
 
+        assertEquals("", result.serialize())
+        assertEquals("", parsingContext.serialize())
+
+        val vectorImpl = parsingContext.definitions["Vector"]!!.value(parsingContext) as ParsingContext
+        assertEquals(setOf(), vectorImpl.definitions.keys)
+
+        assertEquals("", parsingContext.toString())
+
+        val runtimeContext = RuntimeContext(mutableListOf())
+        assertEquals(3.3, result.eval(runtimeContext))
     }
 
 }
