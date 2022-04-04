@@ -19,6 +19,7 @@ class ParsingContext(
     fun declareLocalVariable(name: String, type: Type, mutable: Boolean): Int {
         val index = locals.size
         val definition = Definition(
+            this,
             name,
             Definition.Kind.LOCAL_VARIABLE,
             type = type,
@@ -30,15 +31,15 @@ class ParsingContext(
     }
 
     fun defineValue(name: String, value: Any) {
-        definitions[name] = Definition(name, Definition.Kind.CONST, value = value)
+        definitions[name] = Definition(this, name, Definition.Kind.CONST, value = value)
     }
 
     fun defineFunction(name: String, definition: String) {
-        definitions[name] = Definition(name, Definition.Kind.FUNCTION, definitionText = definition)
+        definitions[name] = Definition(this, name, Definition.Kind.FUNCTION, definitionText = definition)
     }
 
     fun defineClass(name: String, definition: String) {
-        definitions[name] = Definition(name, Definition.Kind.CLASS, definitionText = definition)
+        definitions[name] = Definition(this, name, Definition.Kind.CLASS, definitionText = definition)
     }
 
     override fun toString() = serialize()

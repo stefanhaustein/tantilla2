@@ -1,9 +1,12 @@
 package org.kobjects.tantilla2
 
-import org.kobjects.tantilla2.core.ParsingContext
-import org.kobjects.tantilla2.core.RuntimeContext
+import org.kobjects.greenspun.core.F64
+import org.kobjects.greenspun.core.Str
+import org.kobjects.greenspun.core.Void
+import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.Serializer.serialize
 import org.kobjects.tantilla2.parser.Parser
+import kotlin.math.sqrt
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -38,6 +41,13 @@ class VectorTest {
     @Test
     fun testVector() {
         val parsingContext = ParsingContext("", ParsingContext.Kind.ROOT, null)
+
+        parsingContext.defineValue(
+            "sqrt",
+            NativeFunction(
+                FunctionType(false, F64, listOf(Parameter("x", F64)))
+            ) { sqrt(it.variables[0] as Double ) })
+
         val result = Parser.parse(VECTOR, parsingContext)
 
         assertEquals(setOf("Vector"), parsingContext.definitions.keys)
@@ -45,7 +55,7 @@ class VectorTest {
         assertEquals("", result.serialize())
         assertEquals("", parsingContext.serialize())
 
-        val vectorImpl = parsingContext.definitions["Vector"]!!.value(parsingContext) as ParsingContext
+        val vectorImpl = parsingContext.definitions["Vector"]!!.value() as ParsingContext
         assertEquals(setOf(), vectorImpl.definitions.keys)
 
         assertEquals("", parsingContext.toString())

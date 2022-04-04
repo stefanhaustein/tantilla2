@@ -25,7 +25,7 @@ class SquareTest {
         // assertEquals("def square (x: float):\n  x * x", squareImpl.toString())
 
         val runtimeContext = RuntimeContext(mutableListOf(4.0))
-        val result = (squareImpl.value(context)!! as Lambda).eval(runtimeContext)
+        val result = (squareImpl.value()!! as Lambda).eval(runtimeContext)
 
         assertEquals(16.0, result)
 

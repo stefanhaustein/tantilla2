@@ -6,5 +6,5 @@ class ClassMetaType(
     false,
     wrapped,
     List<Parameter>(wrapped.locals.size) {
-        Parameter(wrapped.locals[it].name, wrapped.locals[it].type(wrapped)) }
+        Parameter(wrapped.locals[it].name, wrapped.locals[it].type()) }
 )

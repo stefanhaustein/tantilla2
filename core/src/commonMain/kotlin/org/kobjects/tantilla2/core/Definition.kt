@@ -7,6 +7,7 @@ import org.kobjects.tantilla2.parser.TokenType
 import typeOf
 
 class Definition(
+    val parsingContext: ParsingContext,
     val name: String, // Not really necessary but should make debugging and printing easier.
     val kind: Kind,
     val definitionText: String = "",
@@ -26,26 +27,26 @@ class Definition(
         return tokenizer
     }
 
-    fun type(parsingContext: ParsingContext): Type {
+    fun type(): Type {
         if (type == null) {
             type = when (kind) {
                 Kind.FUNCTION -> Parser.parseFunctionType(tokenizer(), parsingContext)
                 Kind.LOCAL_VARIABLE -> throw RuntimeException("Local variable type must not be null")
-                else -> typeOf(value(parsingContext))
+                else -> typeOf(value())
             }
         }
         return type!!
     }
 
-    fun value(parsingContext: ParsingContext): Any? =
+    fun value(): Any? =
         when (kind) {
             Kind.CONST -> value
-            Kind.FUNCTION -> resolveFunction(parsingContext)
-            Kind.CLASS -> resolveClass(parsingContext)
+            Kind.FUNCTION -> resolveFunction()
+            Kind.CLASS -> resolveClass()
             Kind.LOCAL_VARIABLE -> throw RuntimeException("Can't obtain local variable value from Definition.")
         }
 
-    private fun resolveClass(parsingContext: ParsingContext): ParsingContext {
+    private fun resolveClass(): ParsingContext {
         if (value == null) {
             println("Resolving class $name: $definitionText")
             val classContext = ParsingContext(name, ParsingContext.Kind.CLASS, parsingContext)
@@ -58,7 +59,7 @@ class Definition(
         return value as ParsingContext
     }
 
-    private fun resolveFunction(parsingContext: ParsingContext): Lambda {
+    private fun resolveFunction(): Lambda {
         if (value == null) {
             println("Resolving function $name: $definitionText")
             value = Parser.parseLambda(tokenizer(), parsingContext)

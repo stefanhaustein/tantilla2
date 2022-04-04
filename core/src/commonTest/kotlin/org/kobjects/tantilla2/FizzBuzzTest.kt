@@ -47,12 +47,12 @@ class FizzBuzzTest {
 
         val impl = context.definitions["fizz_buzz"]!!
 
-        assertNotNull(impl.value(context))
+        assertNotNull(impl.value())
 
         // assertEquals("", impl.toString())
 
         val runtimeContext = RuntimeContext(mutableListOf(null))
-        (impl.value(context)!! as Lambda).eval(runtimeContext)
+        (impl.value()!! as Lambda).eval(runtimeContext)
 
         assertEquals(listOf(
             "1.0", "2.0", "Fizz", "4.0", "Buzz",

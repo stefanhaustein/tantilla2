@@ -182,11 +182,11 @@ object Parser {
         var isMethod = false
         if (!tokenizer.tryConsume(")")) {
             if (tokenizer.tryConsume("self")) {
-                if (context.parentContext?.kind != ParsingContext.Kind.CLASS) {
-                    throw IllegalStateException("self supported for classes only; got: ${context.parentContext?.kind}")
+                if (context.kind != ParsingContext.Kind.CLASS) {
+                    throw IllegalStateException("self supported for classes only; got: ${context.kind}")
                 }
                 isMethod = true
-                parameters.add(Parameter("self", context.parentContext))
+                parameters.add(Parameter("self", context))
                 while (tokenizer.tryConsume(",")) {
                     parameters.add(parseParameter(tokenizer, context))
                 }
@@ -226,7 +226,9 @@ object Parser {
         val arguments = mutableListOf<Evaluable<RuntimeContext>>()
         if (!tokenizer.tryConsume(")")) {
             do {
-                arguments.add(parseExpression(tokenizer, context))
+                val argument = parseExpression(tokenizer, context)
+                println("Parsed argument: $argument")
+                arguments.add(argument)
             } while (tokenizer.tryConsume(","))
             tokenizer.consume(")")
         }
@@ -247,7 +249,7 @@ object Parser {
             TokenType.NUMBER -> F64.Const(tokenizer.next().text.toDouble())
             TokenType.STRING -> Str.Const(tokenizer.next().text.unquote())
             TokenType.IDENTIFIER -> {
-                if (tokenizer.current.text == "self") {
+                if (tokenizer.tryConsume("self")) {
                     if (context.kind != ParsingContext.Kind.METHOD) {
                         tokenizer.error("self supported in methods only")
                     }
@@ -257,14 +259,14 @@ object Parser {
                     when (definition.kind) {
                         Definition.Kind.LOCAL_VARIABLE -> LocalVariableReference(
                             definition.name,
-                            definition.type(context),
+                            definition.type(),
                             definition.index,
                             definition.mutable
                         )
                         Definition.Kind.CLASS,
                         Definition.Kind.CONST,
                         Definition.Kind.FUNCTION -> SymbolReference(
-                            definition.name, definition.type(context), definition.value(context)
+                            definition.name, definition.type(), definition.value()
                         )
                     }
                 }
@@ -310,12 +312,12 @@ object Parser {
             return PropertyReference(
                 base,
                 name,
-                definition.type(context),
+                definition.type(),
                 definition.index,
                 definition.mutable
             )
             Definition.Kind.FUNCTION -> {
-                val fn = SymbolReference(name, definition.type(context), definition.value(context))
+                val fn = SymbolReference(name, definition.type(), definition.value())
                 val args = if (tokenizer.tryConsume("(")) parseList(tokenizer, context, ")")
                     else emptyList()
                 val params = List<Evaluable<RuntimeContext>>(args.size + 1) {
@@ -328,10 +330,10 @@ object Parser {
     }
 
     val expressionParser = ExpressionParser<TantillaTokenizer, ParsingContext, Evaluable<RuntimeContext>>(
-        ExpressionParser.suffix(5, "(") {
-                tokenizer, context, _, base -> parseApply(tokenizer, context, base) },
         ExpressionParser.suffix(6, ".") {
                 tokenizer, context, _, base -> parseProperty(tokenizer, context, base) },
+        ExpressionParser.suffix(5, "(") {
+                tokenizer, context, _, base -> parseApply(tokenizer, context, base) },
         ExpressionParser.infix(4, "*") { _, _, _, l, r -> F64.Mul(l, r)},
         ExpressionParser.infix(4, "/") { _, _, _, l, r -> F64.Div(l, r)},
         ExpressionParser.infix(4, "%") { _, _, _, l, r -> F64.Mod(l, r)},
