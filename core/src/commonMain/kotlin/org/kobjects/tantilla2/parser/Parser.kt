@@ -249,12 +249,6 @@ object Parser {
             TokenType.NUMBER -> F64.Const(tokenizer.next().text.toDouble())
             TokenType.STRING -> Str.Const(tokenizer.next().text.unquote())
             TokenType.IDENTIFIER -> {
-                if (tokenizer.tryConsume("self")) {
-                    if (context.kind != ParsingContext.Kind.METHOD) {
-                        tokenizer.error("self supported in methods only")
-                    }
-                    Self(context.parentContext!!)
-                } else {
                     val definition = consumeAndResoloveIdentifier(tokenizer, context)
                     when (definition.kind) {
                         Definition.Kind.LOCAL_VARIABLE -> LocalVariableReference(
@@ -269,7 +263,6 @@ object Parser {
                             definition.name, definition.type(), definition.value()
                         )
                     }
-                }
             }
             else -> throw tokenizer.error("Number or identifier expected here.")
         }

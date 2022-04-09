@@ -9,12 +9,14 @@ class ParsingContext(
     override val name: String,
     val kind: Kind,
     val parentContext: ParsingContext?
-): Type, Typed {
+): Type, Typed, Lambda {
     val definitions = mutableMapOf<String, Definition>()
     var locals = mutableListOf<Definition>()
 
     override val type: Type
         get() = if (kind == Kind.CLASS) ClassMetaType(this) else MetaType(this)
+
+    override fun eval(context: RuntimeContext) = context
 
     fun declareLocalVariable(name: String, type: Type, mutable: Boolean): Int {
         val index = locals.size
@@ -46,7 +48,7 @@ class ParsingContext(
 
     fun serialize(indent: String = ""): String {
         val sb = StringBuilder()
-        val innerIndent = indent + "  "
+        val innerIndent = "  $indent"
 
         when (kind) {
             Kind.CLASS -> sb.append("${indent}class $name:\n")

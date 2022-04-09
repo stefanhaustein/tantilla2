@@ -5,10 +5,10 @@ import org.kobjects.tantilla2.core.Lambda
 import org.kobjects.tantilla2.core.MetaType
 import org.kobjects.tantilla2.core.Typed
 
-fun typeToString(type: Any) =
+fun typeToString(type: Type) =
     when (type) {
         Double::class -> "float"
-        else -> type.toString()
+        else -> type.name
     }
 
 fun typeOf(value: Any?): Type =

@@ -5,10 +5,10 @@ class NativeFunction(
     val body: (RuntimeContext) -> Any?,
 ) : Lambda {
 
-    override val name: String
+    /*override val name: String
         get() = "(${type.parameters}) -> ${type.returnType}"
-
+*/
     override fun eval(context: RuntimeContext) = body(context)
 
-    override fun toString() = "$name:\n  $body"
+    override fun toString() = "$type:\n  $body"
 }
