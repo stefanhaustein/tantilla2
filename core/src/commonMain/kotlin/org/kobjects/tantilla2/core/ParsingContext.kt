@@ -70,7 +70,7 @@ class ParsingContext(
     }
 
     enum class Kind {
-        ROOT, CLASS, FUNCTION, METHOD
+        ROOT, CLASS, FUNCTION, TRAIT
     }
 
 

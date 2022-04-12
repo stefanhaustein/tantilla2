@@ -36,7 +36,7 @@ class FizzBuzzTest {
 
         context.defineValue(
             "print",
-            NativeFunction(FunctionType(false, Void, listOf(Parameter("text", Str)))
+            NativeFunction(FunctionType(Void, listOf(Parameter("text", Str)))
             ) { try {
                 output.add(it.variables[0].toString())
             } catch (e: Exception) {

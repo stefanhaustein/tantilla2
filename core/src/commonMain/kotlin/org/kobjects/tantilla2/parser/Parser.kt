@@ -55,6 +55,11 @@ object Parser {
                 println("consuming class $name; return depth: $localDepth")
                 val text = consumeBody(tokenizer, localDepth)
                 context.defineClass(name, text)
+            } else if (tokenizer.tryConsume("trait")) {
+                val name = tokenizer.consume(TokenType.IDENTIFIER, "Trait name expected.")
+                println("consuming trait $name; return depth: $localDepth")
+                val text = consumeBody(tokenizer, localDepth)
+                context.defineClass(name, text)
             } else {
                 val statement = parseStatement(tokenizer, context, localDepth)
                 println("parsed statement: $statement")
@@ -198,7 +203,7 @@ object Parser {
             tokenizer.consume(")", ", or ) expected here while parsing the parameter list.")
         }
         val returnType = if (tokenizer.tryConsume("->")) parseType(tokenizer, context) else Void
-        return FunctionType(isMethod, returnType, parameters)
+        return FunctionType(returnType, parameters)
     }
 
     fun parseLambda(tokenizer: TantillaTokenizer, context: ParsingContext): Lambda {
@@ -206,7 +211,7 @@ object Parser {
         tokenizer.consume(":")
         val functionContext = ParsingContext(
             "",
-            if (type.isMethod) ParsingContext.Kind.METHOD else ParsingContext.Kind.FUNCTION,
+            ParsingContext.Kind.FUNCTION,
             context)
         for (parameter in type.parameters) {
             functionContext.declareLocalVariable(parameter.name, parameter.type, false)

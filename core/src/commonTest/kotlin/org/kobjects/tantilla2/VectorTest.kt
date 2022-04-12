@@ -45,7 +45,7 @@ class VectorTest {
         parsingContext.defineValue(
             "sqrt",
             NativeFunction(
-                FunctionType(false, F64, listOf(Parameter("x", F64)))
+                FunctionType(F64, listOf(Parameter("x", F64)))
             ) { sqrt(it.variables[0] as Double ) })
 
         val result = Parser.parse(VECTOR, parsingContext)
