@@ -18,7 +18,7 @@ class Definition(
 ) {
 
     enum class Kind {
-        LOCAL_VARIABLE, FUNCTION, CONST, CLASS
+        LOCAL_VARIABLE, FUNCTION, CONST, CLASS, TRAIT, IMPL
     }
 
     private fun tokenizer(): TantillaTokenizer {
@@ -38,33 +38,54 @@ class Definition(
         return type!!
     }
 
-    fun value(): Any? =
-        when (kind) {
-            Kind.CONST -> value
-            Kind.FUNCTION -> resolveFunction()
-            Kind.CLASS -> resolveClass()
-            Kind.LOCAL_VARIABLE -> throw RuntimeException("Can't obtain local variable value from Definition.")
+    fun value(): Any?  {
+        if (value == null && kind != Kind.CONST) {
+            value = when (kind) {
+                Kind.CONST -> value
+                Kind.FUNCTION -> resolveFunction()
+                Kind.CLASS -> resolveClass()
+                Kind.TRAIT -> resolveTrait()
+                Kind.IMPL -> resolveImpl()
+                Kind.LOCAL_VARIABLE -> throw RuntimeException("Can't obtain local variable value from Definition.")
+            }
         }
+        return value
+    }
 
     private fun resolveClass(): ParsingContext {
-        if (value == null) {
             println("Resolving class $name: $definitionText")
             val classContext = ParsingContext(name, ParsingContext.Kind.CLASS, parsingContext)
             val tokenizer = tokenizer()
             tokenizer.next()
             Parser.parse(tokenizer, classContext)
             println("Class successfully resolved!")
-            value = classContext
-        }
-        return value as ParsingContext
+            return classContext
+    }
+
+    private fun resolveTrait(): ParsingContext {
+            println("Resolving trait $name: $definitionText")
+            val traitContext = ParsingContext(name, ParsingContext.Kind.TRAIT, parsingContext)
+            val tokenizer = tokenizer()
+            tokenizer.next()
+            Parser.parse(tokenizer, traitContext)
+            println("Trait successfully resolved!")
+            return traitContext
+    }
+
+    private fun resolveImpl(): ParsingContext {
+        println("Resolving impl $name: $definitionText")
+        val implContext = ParsingContext(name, ParsingContext.Kind.IMPL, parsingContext)
+        val tokenizer = tokenizer()
+        tokenizer.next()
+        Parser.parse(tokenizer, implContext)
+        println("Impl successfully resolved!")
+        return implContext
     }
 
     private fun resolveFunction(): Lambda {
-        if (value == null) {
+
             println("Resolving function $name: $definitionText")
-            value = Parser.parseLambda(tokenizer(), parsingContext)
-        }
-        return value as Lambda
+            return Parser.parseLambda(tokenizer(), parsingContext)
     }
 
     override fun toString() = serialize()
@@ -74,6 +95,8 @@ class Definition(
         when (kind) {
             Kind.LOCAL_VARIABLE -> "${if (mutable) "var" else "let"} $name"
             Kind.FUNCTION -> "def $name ${if (value == null) definitionText else value!!.toString()}"
+            Kind.TRAIT ->  "trait $name ${if (value == null) definitionText else value!!.toString()}"
+            Kind.IMPL ->  "impl $name ${if (value == null) definitionText else value!!.toString()}"
             Kind.CLASS ->  "class $name ${if (value == null) definitionText else value!!.toString()}"
             Kind.CONST -> "const $name = $value"
         } +

@@ -49,17 +49,24 @@ object Parser {
                 val name = tokenizer.consume(TokenType.IDENTIFIER, "Function name expected.")
                 println("consuming def $name")
                 val text = consumeBody(tokenizer, localDepth)
-                context.defineFunction(name, text)
+                context.defineDelayed(Definition.Kind.FUNCTION, name, text)
             } else if (tokenizer.tryConsume("class")) {
                 val name = tokenizer.consume(TokenType.IDENTIFIER, "Class name expected.")
                 println("consuming class $name; return depth: $localDepth")
                 val text = consumeBody(tokenizer, localDepth)
-                context.defineClass(name, text)
+                context.defineDelayed(Definition.Kind.CLASS, name, text)
             } else if (tokenizer.tryConsume("trait")) {
                 val name = tokenizer.consume(TokenType.IDENTIFIER, "Trait name expected.")
                 println("consuming trait $name; return depth: $localDepth")
                 val text = consumeBody(tokenizer, localDepth)
-                context.defineClass(name, text)
+                context.defineDelayed(Definition.Kind.TRAIT, name, text)
+            } else if (tokenizer.tryConsume("impl")) {
+                val traitName = tokenizer.consume(TokenType.IDENTIFIER, "Trait name expected.")
+                tokenizer.consume("for")
+                val name = tokenizer.consume(TokenType.IDENTIFIER, "Class name expected.")
+                println("consuming impl $traitName for $name; return depth: $localDepth")
+                val text = consumeBody(tokenizer, localDepth)
+                context.defineDelayed(Definition.Kind.IMPL, "$traitName for $name", text)
             } else {
                 val statement = parseStatement(tokenizer, context, localDepth)
                 println("parsed statement: $statement")
@@ -208,6 +215,11 @@ object Parser {
 
     fun parseLambda(tokenizer: TantillaTokenizer, context: ParsingContext): Lambda {
         val type = parseFunctionType(tokenizer, context)
+        if (context.kind == ParsingContext.Kind.TRAIT) {
+            tokenizer.consume(TokenType.EOF, "Trait methods must not have function bodies.")
+            return TraitMethod(type, context.traitIndex++)
+        }
+
         tokenizer.consume(":")
         val functionContext = ParsingContext(
             "",
@@ -263,7 +275,9 @@ object Parser {
                             definition.mutable
                         )
                         Definition.Kind.CLASS,
+                            Definition.Kind.TRAIT,
                         Definition.Kind.CONST,
+                            Definition.Kind.IMPL,
                         Definition.Kind.FUNCTION -> SymbolReference(
                             definition.name, definition.type(), definition.value()
                         )

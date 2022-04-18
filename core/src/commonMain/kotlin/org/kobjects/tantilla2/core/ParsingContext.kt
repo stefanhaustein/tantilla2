@@ -12,6 +12,7 @@ class ParsingContext(
 ): Type, Typed, Lambda {
     val definitions = mutableMapOf<String, Definition>()
     var locals = mutableListOf<Definition>()
+    var traitIndex = 0
 
     override val type: Type
         get() = if (kind == Kind.CLASS) ClassMetaType(this) else MetaType(this)
@@ -36,12 +37,8 @@ class ParsingContext(
         definitions[name] = Definition(this, name, Definition.Kind.CONST, value = value)
     }
 
-    fun defineFunction(name: String, definition: String) {
-        definitions[name] = Definition(this, name, Definition.Kind.FUNCTION, definitionText = definition)
-    }
-
-    fun defineClass(name: String, definition: String) {
-        definitions[name] = Definition(this, name, Definition.Kind.CLASS, definitionText = definition)
+    fun defineDelayed(kind: Definition.Kind, name: String, definition: String) {
+        definitions[name] = Definition(this, name, kind, definitionText = definition)
     }
 
     override fun toString() = serialize()
@@ -70,7 +67,7 @@ class ParsingContext(
     }
 
     enum class Kind {
-        ROOT, CLASS, FUNCTION, TRAIT
+        ROOT, CLASS, FUNCTION, TRAIT, IMPL
     }
 
 
