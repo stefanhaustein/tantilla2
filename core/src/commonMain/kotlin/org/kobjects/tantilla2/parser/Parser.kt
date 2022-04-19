@@ -275,9 +275,9 @@ object Parser {
                             definition.mutable
                         )
                         Definition.Kind.CLASS,
-                            Definition.Kind.TRAIT,
+                        Definition.Kind.TRAIT,
                         Definition.Kind.CONST,
-                            Definition.Kind.IMPL,
+                        Definition.Kind.IMPL,
                         Definition.Kind.FUNCTION -> SymbolReference(
                             definition.name, definition.type(), definition.value()
                         )
