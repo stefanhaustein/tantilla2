@@ -13,6 +13,8 @@ class ParsingContext(
     val definitions = mutableMapOf<String, Definition>()
     var locals = mutableListOf<Definition>()
     var traitIndex = 0
+    var implements: ParsingContext? = null
+    var vmt = listOf<Lambda>()
 
     override val type: Type
         get() = if (kind == Kind.CLASS) ClassMetaType(this) else MetaType(this)

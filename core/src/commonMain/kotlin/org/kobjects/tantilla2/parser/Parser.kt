@@ -307,6 +307,17 @@ object Parser {
         return result.toList()
     }
 
+    fun parseAs(
+        tokenizer: TantillaTokenizer,
+        context: ParsingContext,
+        base: Evaluable<RuntimeContext>,
+    ): Evaluable<RuntimeContext> {
+        val traitName = tokenizer.consume(TokenType.IDENTIFIER)
+        val className = base.type.name
+        val impl = context.resolve("$traitName for $className").value() as ParsingContext
+        return As(base, impl)
+    }
+
     fun parseProperty(
         tokenizer: TantillaTokenizer,
         context: ParsingContext,
@@ -342,6 +353,8 @@ object Parser {
     }
 
     val expressionParser = ExpressionParser<TantillaTokenizer, ParsingContext, Evaluable<RuntimeContext>>(
+        ExpressionParser.suffix(7, "as") {
+          tokenizer, context, _, base -> parseAs(tokenizer, context, base) },
         ExpressionParser.suffix(6, ".") {
                 tokenizer, context, _, base -> parseProperty(tokenizer, context, base) },
         ExpressionParser.suffix(5, "(") {
