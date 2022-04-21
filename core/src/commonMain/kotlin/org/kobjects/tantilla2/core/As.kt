@@ -5,7 +5,7 @@ import org.kobjects.greenspun.core.Type
 
 class As(
     val base: Evaluable<RuntimeContext>,
-    val impl: TraitImpl,
+    val impl: ImplDefinition,
 ) : Evaluable<RuntimeContext> {
     override val type: Type
         get() = impl.trait

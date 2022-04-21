@@ -1,7 +1,7 @@
 package org.kobjects.tantilla2.core
 
 class ClassMetaType(
-    val wrapped: ParsingContext,
+    val wrapped: Scope,
 ) : FunctionType(
     wrapped,
     List<Parameter>(wrapped.locals.size) {

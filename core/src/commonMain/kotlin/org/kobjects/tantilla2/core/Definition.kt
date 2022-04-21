@@ -7,7 +7,7 @@ import org.kobjects.tantilla2.parser.TokenType
 import typeOf
 
 class Definition(
-    val parsingContext: ParsingContext,
+    val scope: Scope,
     val name: String, // Not really necessary but should make debugging and printing easier.
     val kind: Kind,
     val definitionText: String = "",
@@ -30,7 +30,7 @@ class Definition(
     fun type(): Type {
         if (type == null) {
             type = when (kind) {
-                Kind.FUNCTION -> Parser.parseFunctionType(tokenizer(), parsingContext)
+                Kind.FUNCTION -> Parser.parseFunctionType(tokenizer(), scope)
                 Kind.LOCAL_VARIABLE -> throw RuntimeException("Local variable type must not be null")
                 else -> typeOf(value())
             }
@@ -52,9 +52,9 @@ class Definition(
         return value
     }
 
-    private fun resolveClass(): ParsingContext {
+    private fun resolveClass(): Scope {
             println("Resolving class $name: $definitionText")
-            val classContext = ParsingContext(name, ParsingContext.Kind.CLASS, parsingContext)
+            val classContext = ClassDefinition(name, scope)
             val tokenizer = tokenizer()
             tokenizer.next()
             Parser.parse(tokenizer, classContext)
@@ -62,9 +62,9 @@ class Definition(
             return classContext
     }
 
-    private fun resolveTrait(): ParsingContext {
+    private fun resolveTrait(): Scope {
             println("Resolving trait $name: $definitionText")
-            val traitContext = Trait(name, parsingContext)
+            val traitContext = TraitDefinition(name, scope)
             val tokenizer = tokenizer()
             tokenizer.next()
             Parser.parse(tokenizer, traitContext)
@@ -72,13 +72,13 @@ class Definition(
             return traitContext
     }
 
-    private fun resolveImpl(): ParsingContext {
+    private fun resolveImpl(): Scope {
         println("Resolving impl $name: $definitionText")
         val traitName = name.substring(0, name.indexOf(' '))
-        val trait = parsingContext.resolve(traitName).value() as Trait
+        val trait = scope.resolve(traitName).value() as TraitDefinition
         val className = name.substring(name.lastIndexOf(' ') + 1)
-        val implFor = parsingContext.resolve(className).value() as ParsingContext
-        val implContext = TraitImpl(name, parsingContext, trait, implFor)
+        val implFor = scope.resolve(className).value() as Scope
+        val implContext = ImplDefinition(name, scope, trait, implFor)
         val tokenizer = tokenizer()
         tokenizer.next()
         Parser.parse(tokenizer, implContext)
@@ -86,10 +86,10 @@ class Definition(
         return implContext
     }
 
-    private fun resolveFunction(): Lambda {
+    private fun resolveFunction(): Callable {
 
             println("Resolving function $name: $definitionText")
-            return Parser.parseLambda(tokenizer(), parsingContext)
+            return Parser.parseLambda(tokenizer(), scope)
     }
 
     override fun toString() = serialize()

@@ -5,7 +5,7 @@ import org.kobjects.greenspun.core.Evaluable
 class LambdaImpl(
     override val type: FunctionType,
     val body: Evaluable<RuntimeContext>,
-    ) : Lambda {
+    ) : Callable {
 
 
         // get() = "(${type.parameters}) -> ${type.returnType}"

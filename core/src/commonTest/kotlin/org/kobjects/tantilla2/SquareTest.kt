@@ -1,12 +1,9 @@
 package org.kobjects.tantilla2
 
-import org.kobjects.greenspun.core.Str
-import org.kobjects.greenspun.core.Void
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.parser.Parser
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 
 class SquareTest {
 
@@ -17,7 +14,7 @@ class SquareTest {
 
     @Test
     fun testSquare() {
-        val context = ParsingContext("", ParsingContext.Kind.ROOT, null)
+        val context = RootScope()
         Parser.parse(SQUARE, context)
 
         val squareImpl = context.definitions["square"]!!
@@ -25,7 +22,7 @@ class SquareTest {
         // assertEquals("def square (x: float):\n  x * x", squareImpl.toString())
 
         val runtimeContext = RuntimeContext(mutableListOf(4.0))
-        val result = (squareImpl.value()!! as Lambda).eval(runtimeContext)
+        val result = (squareImpl.value()!! as Callable).eval(runtimeContext)
 
         assertEquals(16.0, result)
 

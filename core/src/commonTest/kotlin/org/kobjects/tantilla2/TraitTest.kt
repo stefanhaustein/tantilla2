@@ -1,7 +1,6 @@
 package org.kobjects.tantilla2
 
 import org.kobjects.tantilla2.core.*
-import org.kobjects.tantilla2.core.Serializer.serialize
 import org.kobjects.tantilla2.parser.Parser
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -22,7 +21,7 @@ class TraitTest {
 
     @Test
     fun testTrait() {
-        val parsingContext = ParsingContext("", ParsingContext.Kind.ROOT, null)
+        val parsingContext = RootScope()
 
         val result = Parser.parse(TEST, parsingContext)
 
@@ -31,7 +30,7 @@ class TraitTest {
         // assertEquals("mag(Vector(1.0, 2.0, 3.0))", result.serialize())
         //    assertEquals("", parsingContext.serialize())
 
-        val animal = parsingContext.definitions["Animal"]!!.value() as ParsingContext
+        val animal = parsingContext.definitions["Animal"]!!.value() as Scope
         assertEquals(setOf("noise"), animal.definitions.keys)
 
         //  assertEquals("", parsingContext.toString())

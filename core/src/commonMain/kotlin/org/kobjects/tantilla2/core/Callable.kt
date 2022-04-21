@@ -5,6 +5,6 @@ import org.kobjects.greenspun.core.Type
 import org.kobjects.tantilla2.parser.Parser
 import org.kobjects.tantilla2.parser.TantillaTokenizer
 
-interface Lambda : Typed {
+interface Callable : Typed {
     fun eval(context: RuntimeContext): Any?
 }

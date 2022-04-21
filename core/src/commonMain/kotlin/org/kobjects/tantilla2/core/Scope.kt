@@ -1,15 +1,12 @@
 package org.kobjects.tantilla2.core
 
-import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.greenspun.core.Type
-import org.kobjects.greenspun.core.Void
-import org.kobjects.tantilla2.core.Serializer.serialize
 
-open class ParsingContext(
+abstract class Scope(
     override val name: String,
     val kind: Kind,
-    val parentContext: ParsingContext?
-): Type, Typed, Lambda {
+    val parentContext: Scope?
+): Type, Typed, Callable {
     val definitions = mutableMapOf<String, Definition>()
     var locals = mutableListOf<Definition>()
 

@@ -3,7 +3,7 @@ package org.kobjects.tantilla2.core
 class NativeFunction(
     override val type: FunctionType,
     val body: (RuntimeContext) -> Any?,
-) : Lambda {
+) : Callable {
 
     /*override val name: String
         get() = "(${type.parameters}) -> ${type.returnType}"

@@ -8,10 +8,10 @@ class Apply(
 ) : Evaluable<RuntimeContext> {
     override fun eval(context: RuntimeContext): Any? {
         val shouldBeFunction = callable.eval(context)
-        if (!(shouldBeFunction is Lambda)) {
+        if (!(shouldBeFunction is Callable)) {
             throw IllegalStateException("Lambda expected; got $shouldBeFunction")
         }
-        val function = shouldBeFunction as Lambda
+        val function = shouldBeFunction as Callable
         val functionContext = RuntimeContext(MutableList<Any?>((function.type as FunctionType).parameters.size) {
 
             if (it < parameters.size) {

@@ -1,8 +1,6 @@
 package org.kobjects.tantilla2
 
 import org.kobjects.greenspun.core.F64
-import org.kobjects.greenspun.core.Str
-import org.kobjects.greenspun.core.Void
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.Serializer.serialize
 import org.kobjects.tantilla2.parser.Parser
@@ -40,7 +38,7 @@ class VectorTest {
 
     @Test
     fun testVector() {
-        val parsingContext = ParsingContext("", ParsingContext.Kind.ROOT, null)
+        val parsingContext = RootScope()
 
         parsingContext.defineValue(
             "sqrt",
@@ -55,7 +53,7 @@ class VectorTest {
         assertEquals("mag(Vector(1.0, 2.0, 3.0))", result.serialize())
     //    assertEquals("", parsingContext.serialize())
 
-        val vectorImpl = parsingContext.definitions["Vector"]!!.value() as ParsingContext
+        val vectorImpl = parsingContext.definitions["Vector"]!!.value() as Scope
         assertEquals(setOf("x", "y", "z", "times", "minus", "plus", "dot", "mag", "norm"), vectorImpl.definitions.keys)
 
       //  assertEquals("", parsingContext.toString())

@@ -1,7 +1,6 @@
 import org.kobjects.greenspun.core.F64
 import org.kobjects.greenspun.core.Type
 import org.kobjects.greenspun.core.Void
-import org.kobjects.tantilla2.core.Lambda
 import org.kobjects.tantilla2.core.MetaType
 import org.kobjects.tantilla2.core.Typed
 

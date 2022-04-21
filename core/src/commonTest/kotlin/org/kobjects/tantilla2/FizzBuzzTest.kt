@@ -32,7 +32,7 @@ class FizzBuzzTest {
     fun testFizzBuzz() {
         val output = mutableListOf<String>()
 
-        val context = ParsingContext("", ParsingContext.Kind.ROOT, null)
+        val context = RootScope()
 
         context.defineValue(
             "print",
@@ -52,7 +52,7 @@ class FizzBuzzTest {
         // assertEquals("", impl.toString())
 
         val runtimeContext = RuntimeContext(mutableListOf(null))
-        (impl.value()!! as Lambda).eval(runtimeContext)
+        (impl.value()!! as Callable).eval(runtimeContext)
 
         assertEquals(listOf(
             "1.0", "2.0", "Fizz", "4.0", "Buzz",
