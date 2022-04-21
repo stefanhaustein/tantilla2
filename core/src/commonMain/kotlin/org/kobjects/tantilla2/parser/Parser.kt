@@ -194,8 +194,11 @@ object Parser {
         var isMethod = false
         if (!tokenizer.tryConsume(")")) {
             if (tokenizer.tryConsume("self")) {
-                if (context.kind != ParsingContext.Kind.CLASS) {
-                    throw IllegalStateException("self supported for classes only; got: ${context.kind}")
+                if (context.kind != ParsingContext.Kind.CLASS
+                    && context.kind != ParsingContext.Kind.IMPL
+                    && context.kind != ParsingContext.Kind.TRAIT
+                ) {
+                    throw IllegalStateException("self supported for classes, traits and implemenetations only; got: ${context.kind}")
                 }
                 isMethod = true
                 parameters.add(Parameter("self", context))
@@ -215,9 +218,13 @@ object Parser {
 
     fun parseLambda(tokenizer: TantillaTokenizer, context: ParsingContext): Lambda {
         val type = parseFunctionType(tokenizer, context)
-        if (context.kind == ParsingContext.Kind.TRAIT) {
+        if (context is Trait) {
             tokenizer.consume(TokenType.EOF, "Trait methods must not have function bodies.")
             return TraitMethod(type, context.traitIndex++)
+        }
+
+        if (context is TraitImpl) {
+            throw tokenizer.error("NYI: TraitImpl lambda parsing")
         }
 
         tokenizer.consume(":")
@@ -290,7 +297,11 @@ object Parser {
         if (tokenizer.tryConsume("float")) {
             return F64
         }
-        throw tokenizer.error("Unrecognized type.")
+        if (tokenizer.tryConsume("str")) {
+            return Str
+        }
+        val name = tokenizer.consume(TokenType.IDENTIFIER)
+        return context.resolve(name).value() as Type
     }
 
     fun parseList(
@@ -314,7 +325,8 @@ object Parser {
     ): Evaluable<RuntimeContext> {
         val traitName = tokenizer.consume(TokenType.IDENTIFIER)
         val className = base.type.name
-        val impl = context.resolve("$traitName for $className").value() as ParsingContext
+        val impl = context.resolve("$traitName for $className").value() as TraitImpl
+        impl.resolveAll()
         return As(base, impl)
     }
 
@@ -324,8 +336,8 @@ object Parser {
         base: Evaluable<RuntimeContext>,
     ): Evaluable<RuntimeContext> {
         val name = tokenizer.consume(TokenType.IDENTIFIER)
-        if (!(base.type is ParsingContext)) {
-            tokenizer.error("Base type must be parsing context; got: ${base.type} for $base.")
+        if (base.type !is ParsingContext) {
+            throw tokenizer.error("Base type must be parsing context; got: ${base.type} for $base.")
         }
         val baseType = base.type as ParsingContext
         val definition = baseType.resolve(name)

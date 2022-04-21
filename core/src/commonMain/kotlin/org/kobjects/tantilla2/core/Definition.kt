@@ -64,7 +64,7 @@ class Definition(
 
     private fun resolveTrait(): ParsingContext {
             println("Resolving trait $name: $definitionText")
-            val traitContext = ParsingContext(name, ParsingContext.Kind.TRAIT, parsingContext)
+            val traitContext = Trait(name, parsingContext)
             val tokenizer = tokenizer()
             tokenizer.next()
             Parser.parse(tokenizer, traitContext)
@@ -74,7 +74,11 @@ class Definition(
 
     private fun resolveImpl(): ParsingContext {
         println("Resolving impl $name: $definitionText")
-        val implContext = ParsingContext(name, ParsingContext.Kind.IMPL, parsingContext)
+        val traitName = name.substring(0, name.indexOf(' '))
+        val trait = parsingContext.resolve(traitName).value() as Trait
+        val className = name.substring(name.lastIndexOf(' ') + 1)
+        val implFor = parsingContext.resolve(className).value() as ParsingContext
+        val implContext = TraitImpl(name, parsingContext, trait, implFor)
         val tokenizer = tokenizer()
         tokenizer.next()
         Parser.parse(tokenizer, implContext)

@@ -9,12 +9,12 @@ import kotlin.test.assertEquals
 class TraitTest {
     val TEST = """
         trait Animal:
-           def noise(self) -> String
+           def noise(self) -> str
            
         class Dog:
         
         impl Animal for Dog:
-            def noise(self) -> String:
+            def noise(self) -> str:
               return "Woof"
               
         Dog() as Animal.noise()
@@ -26,18 +26,18 @@ class TraitTest {
 
         val result = Parser.parse(TEST, parsingContext)
 
-        assertEquals(setOf("Animal", "Dog", "Animal Dog"), parsingContext.definitions.keys)
+        assertEquals(setOf("Animal", "Dog", "Animal for Dog"), parsingContext.definitions.keys)
 
-        assertEquals("mag(Vector(1.0, 2.0, 3.0))", result.serialize())
+        // assertEquals("mag(Vector(1.0, 2.0, 3.0))", result.serialize())
         //    assertEquals("", parsingContext.serialize())
 
-        val vectorImpl = parsingContext.definitions["Vector"]!!.value() as ParsingContext
-        assertEquals(setOf("x", "y", "z", "times", "minus", "plus", "dot", "mag", "norm"), vectorImpl.definitions.keys)
+        val animal = parsingContext.definitions["Animal"]!!.value() as ParsingContext
+        assertEquals(setOf("noise"), animal.definitions.keys)
 
         //  assertEquals("", parsingContext.toString())
 
         val runtimeContext = RuntimeContext(mutableListOf())
-        assertEquals(3.3, result.eval(runtimeContext))
+        assertEquals("woof", result.eval(runtimeContext))
     }
 
 

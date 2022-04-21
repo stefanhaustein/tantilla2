@@ -5,16 +5,14 @@ import org.kobjects.greenspun.core.Type
 import org.kobjects.greenspun.core.Void
 import org.kobjects.tantilla2.core.Serializer.serialize
 
-class ParsingContext(
+open class ParsingContext(
     override val name: String,
     val kind: Kind,
     val parentContext: ParsingContext?
 ): Type, Typed, Lambda {
     val definitions = mutableMapOf<String, Definition>()
     var locals = mutableListOf<Definition>()
-    var traitIndex = 0
-    var implements: ParsingContext? = null
-    var vmt = listOf<Lambda>()
+
 
     override val type: Type
         get() = if (kind == Kind.CLASS) ClassMetaType(this) else MetaType(this)
@@ -68,9 +66,17 @@ class ParsingContext(
             ?: throw RuntimeException("Undefined: '$name'"))
     }
 
+    open fun resolveAll() {
+        for (definition in definitions.values) {
+            definition.value()
+        }
+    }
+
+
     enum class Kind {
         ROOT, CLASS, FUNCTION, TRAIT, IMPL
     }
+
 
 
 }

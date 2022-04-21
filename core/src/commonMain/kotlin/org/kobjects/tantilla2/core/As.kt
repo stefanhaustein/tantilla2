@@ -5,10 +5,10 @@ import org.kobjects.greenspun.core.Type
 
 class As(
     val base: Evaluable<RuntimeContext>,
-    val impl: ParsingContext,
+    val impl: TraitImpl,
 ) : Evaluable<RuntimeContext> {
     override val type: Type
-        get() = impl.implements!!
+        get() = impl.trait
 
     override fun children() = listOf(base)
 
