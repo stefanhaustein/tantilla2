@@ -1,4 +1,6 @@
-package org.kobjects.tantilla2.core
+package org.kobjects.tantilla2.function
+
+import org.kobjects.tantilla2.core.RuntimeContext
 
 class NativeFunction(
     override val type: FunctionType,

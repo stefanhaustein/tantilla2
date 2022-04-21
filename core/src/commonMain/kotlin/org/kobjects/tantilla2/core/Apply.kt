@@ -1,6 +1,8 @@
 package org.kobjects.tantilla2.core
 
 import org.kobjects.greenspun.core.Evaluable
+import org.kobjects.tantilla2.function.Callable
+import org.kobjects.tantilla2.function.FunctionType
 
 class Apply(
     val callable: Evaluable<RuntimeContext>,

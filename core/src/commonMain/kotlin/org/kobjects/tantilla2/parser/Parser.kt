@@ -2,8 +2,10 @@ package org.kobjects.tantilla2.parser
 
 import org.kobjects.greenspun.core.*
 import org.kobjects.parserlib.expressionparser.ExpressionParser
+import org.kobjects.tantilla2.classifier.*
 import org.kobjects.tantilla2.core.SymbolReference
 import org.kobjects.tantilla2.core.*
+import org.kobjects.tantilla2.function.*
 
 
 fun String.unquote() = this.substring(1, this.length - 1)
@@ -167,7 +169,7 @@ object Parser {
             type = parseType(tokenizer, context)
         }
         var initializer: Evaluable<RuntimeContext>? = null
-        val asParameter = context.kind == Scope.Kind.CLASS
+        val asParameter = context is ClassDefinition
         if (tokenizer.tryConsume("=")) {
             if (asParameter) {
                 throw IllegalStateException("Parameter initializers NYI")
@@ -194,11 +196,11 @@ object Parser {
         var isMethod = false
         if (!tokenizer.tryConsume(")")) {
             if (tokenizer.tryConsume("self")) {
-                if (context.kind != Scope.Kind.CLASS
-                    && context.kind != Scope.Kind.IMPL
-                    && context.kind != Scope.Kind.TRAIT
+                if (context !is ClassDefinition
+                    && context !is ImplDefinition
+                    && context !is TraitDefinition
                 ) {
-                    throw IllegalStateException("self supported for classes, traits and implemenetations only; got: ${context.kind}")
+                    throw IllegalStateException("self supported for classes, traits and implemenetations only; got: ${context}")
                 }
                 isMethod = true
                 parameters.add(Parameter("self", context))

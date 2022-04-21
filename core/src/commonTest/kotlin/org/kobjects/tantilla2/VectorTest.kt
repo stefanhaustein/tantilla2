@@ -3,6 +3,9 @@ package org.kobjects.tantilla2
 import org.kobjects.greenspun.core.F64
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.Serializer.serialize
+import org.kobjects.tantilla2.function.FunctionType
+import org.kobjects.tantilla2.function.NativeFunction
+import org.kobjects.tantilla2.function.Parameter
 import org.kobjects.tantilla2.parser.Parser
 import kotlin.math.sqrt
 import kotlin.test.Test

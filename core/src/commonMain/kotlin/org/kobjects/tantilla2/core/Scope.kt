@@ -1,10 +1,15 @@
 package org.kobjects.tantilla2.core
 
 import org.kobjects.greenspun.core.Type
+import org.kobjects.tantilla2.classifier.ClassDefinition
+import org.kobjects.tantilla2.classifier.ClassMetaType
+import org.kobjects.tantilla2.classifier.ImplDefinition
+import org.kobjects.tantilla2.classifier.TraitDefinition
+import org.kobjects.tantilla2.function.Callable
+import org.kobjects.tantilla2.function.FunctionScope
 
 abstract class Scope(
     override val name: String,
-    val kind: Kind,
     val parentContext: Scope?
 ): Type, Typed, Callable {
     val definitions = mutableMapOf<String, Definition>()
@@ -12,7 +17,7 @@ abstract class Scope(
 
 
     override val type: Type
-        get() = if (kind == Kind.CLASS) ClassMetaType(this) else MetaType(this)
+        get() = if (this is ClassDefinition) ClassMetaType(this) else MetaType(this)
 
     override fun eval(context: RuntimeContext) = context
 
@@ -44,9 +49,11 @@ abstract class Scope(
         val sb = StringBuilder()
         val innerIndent = "  $indent"
 
-        when (kind) {
-            Kind.CLASS -> sb.append("${indent}class $name:\n")
-            Kind.FUNCTION -> {
+        when (this) {
+            is ClassDefinition -> sb.append("${indent}class $name:\n")
+            is TraitDefinition -> sb.append("${indent}trait $name:\n")
+            is ImplDefinition -> sb.append("${indent}impl $name:\n")
+            is FunctionScope -> {
                 sb.append("${indent}def $name")
             }
         }
@@ -69,10 +76,6 @@ abstract class Scope(
         }
     }
 
-
-    enum class Kind {
-        ROOT, CLASS, FUNCTION, TRAIT, IMPL
-    }
 
 
 
