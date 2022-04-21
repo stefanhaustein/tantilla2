@@ -193,17 +193,16 @@ object Parser {
     fun parseFunctionType(tokenizer: TantillaTokenizer, context: Scope): FunctionType {
         tokenizer.consume("(")
         val parameters = mutableListOf<Parameter>()
-        var isMethod = false
         if (!tokenizer.tryConsume(")")) {
             if (tokenizer.tryConsume("self")) {
-                if (context !is ClassDefinition
-                    && context !is ImplDefinition
-                    && context !is TraitDefinition
-                ) {
+                val selfType: Type = when (context) {
+                    is ClassDefinition -> context
+                        is TraitDefinition -> context
+                    is ImplDefinition -> context.classifier
+                    else ->
                     throw IllegalStateException("self supported for classes, traits and implemenetations only; got: ${context}")
                 }
-                isMethod = true
-                parameters.add(Parameter("self", context))
+                parameters.add(Parameter("self", selfType))
                 while (tokenizer.tryConsume(",")) {
                     parameters.add(parseParameter(tokenizer, context))
                 }
@@ -225,14 +224,8 @@ object Parser {
             return TraitMethod(type, context.traitIndex++)
         }
 
-        if (context is ImplDefinition) {
-            throw tokenizer.error("NYI: TraitImpl lambda parsing")
-        }
-
         tokenizer.consume(":")
-        val functionContext = FunctionScope(
-            "",
-            context)
+        val functionContext = FunctionScope(context)
         for (parameter in type.parameters) {
             functionContext.declareLocalVariable(parameter.name, parameter.type, false)
         }

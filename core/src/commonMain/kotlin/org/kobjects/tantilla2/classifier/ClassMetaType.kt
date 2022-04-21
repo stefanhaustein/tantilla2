@@ -5,7 +5,7 @@ import org.kobjects.tantilla2.function.Parameter
 import org.kobjects.tantilla2.core.Scope
 
 class ClassMetaType(
-    val wrapped: Scope,
+    val wrapped: ClassDefinition,
 ) : FunctionType(
     wrapped,
     List<Parameter>(wrapped.locals.size) {

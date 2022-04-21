@@ -14,7 +14,7 @@ class TraitTest {
         
         impl Animal for Dog:
             def noise(self) -> str:
-              return "Woof"
+              "Woof"
               
         Dog() as Animal.noise()
     """.trimIndent()
@@ -36,7 +36,7 @@ class TraitTest {
         //  assertEquals("", parsingContext.toString())
 
         val runtimeContext = RuntimeContext(mutableListOf())
-        assertEquals("woof", result.eval(runtimeContext))
+        assertEquals("Woof", result.eval(runtimeContext))
     }
 
 

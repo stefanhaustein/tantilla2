@@ -13,9 +13,8 @@ class As(
 
     override fun children() = listOf(base)
 
-    override fun eval(ctx: RuntimeContext) = RuntimeContext(mutableListOf(
-        impl.vmt, base.eval(ctx)
-    ))
+    override fun eval(ctx: RuntimeContext) =
+        Adapter(impl.vmt, base.eval(ctx) as RuntimeContext)
 
     override fun reconstruct(newChildren: List<Evaluable<RuntimeContext>>) = As(newChildren[0], impl)
 }

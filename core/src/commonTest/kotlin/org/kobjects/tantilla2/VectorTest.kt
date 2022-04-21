@@ -62,7 +62,7 @@ class VectorTest {
       //  assertEquals("", parsingContext.toString())
 
         val runtimeContext = RuntimeContext(mutableListOf())
-        assertEquals(3.3, result.eval(runtimeContext))
+        assertEquals(3.7416573867739413, result.eval(runtimeContext))
     }
 
 }

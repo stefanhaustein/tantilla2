@@ -81,7 +81,7 @@ class Definition(
         val traitName = name.substring(0, name.indexOf(' '))
         val trait = scope.resolve(traitName).value() as TraitDefinition
         val className = name.substring(name.lastIndexOf(' ') + 1)
-        val implFor = scope.resolve(className).value() as Scope
+        val implFor = scope.resolve(className).value() as ClassDefinition
         val implContext = ImplDefinition(name, scope, trait, implFor)
         val tokenizer = tokenizer()
         tokenizer.next()

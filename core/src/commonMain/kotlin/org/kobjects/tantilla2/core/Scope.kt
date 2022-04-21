@@ -9,18 +9,16 @@ import org.kobjects.tantilla2.function.Callable
 import org.kobjects.tantilla2.function.FunctionScope
 
 abstract class Scope(
-    override val name: String,
     val parentContext: Scope?
-): Type, Typed, Callable {
+) {
     val definitions = mutableMapOf<String, Definition>()
     var locals = mutableListOf<Definition>()
 
-
+/*
     override val type: Type
         get() = if (this is ClassDefinition) ClassMetaType(this) else MetaType(this)
 
-    override fun eval(context: RuntimeContext) = context
-
+*/
     fun declareLocalVariable(name: String, type: Type, mutable: Boolean): Int {
         val index = locals.size
         val definition = Definition(
@@ -54,7 +52,7 @@ abstract class Scope(
             is TraitDefinition -> sb.append("${indent}trait $name:\n")
             is ImplDefinition -> sb.append("${indent}impl $name:\n")
             is FunctionScope -> {
-                sb.append("${indent}def $name")
+                sb.append("${indent}lambda ")
             }
         }
 
