@@ -3,11 +3,11 @@ package org.kobjects.tantilla2
 import org.kobjects.greenspun.core.Str
 import org.kobjects.greenspun.core.Void
 import org.kobjects.tantilla2.core.*
-import org.kobjects.tantilla2.function.Callable
-import org.kobjects.tantilla2.function.FunctionType
-import org.kobjects.tantilla2.function.NativeFunction
-import org.kobjects.tantilla2.function.Parameter
-import org.kobjects.tantilla2.parser.Parser
+import org.kobjects.tantilla2.core.function.Callable
+import org.kobjects.tantilla2.core.function.FunctionType
+import org.kobjects.tantilla2.core.function.NativeFunction
+import org.kobjects.tantilla2.core.function.Parameter
+import org.kobjects.tantilla2.core.parser.Parser
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull

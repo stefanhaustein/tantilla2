@@ -1,8 +1,8 @@
 package org.kobjects.tantilla2.core
 
-import org.kobjects.tantilla2.classifier.Adapter
-import org.kobjects.tantilla2.function.Callable
-import org.kobjects.tantilla2.function.FunctionType
+import org.kobjects.tantilla2.core.classifier.Adapter
+import org.kobjects.tantilla2.core.function.Callable
+import org.kobjects.tantilla2.core.function.FunctionType
 
 class TraitMethod(override val type: FunctionType, val index: Int): Callable {
     override fun eval(context: RuntimeContext): Any? {

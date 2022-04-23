@@ -1,13 +1,13 @@
 package org.kobjects.tantilla2.core
 
 import org.kobjects.greenspun.core.Type
-import org.kobjects.tantilla2.classifier.ClassDefinition
-import org.kobjects.tantilla2.classifier.ImplDefinition
-import org.kobjects.tantilla2.classifier.TraitDefinition
-import org.kobjects.tantilla2.function.Callable
-import org.kobjects.tantilla2.parser.Parser
-import org.kobjects.tantilla2.parser.TantillaTokenizer
-import org.kobjects.tantilla2.parser.TokenType
+import org.kobjects.tantilla2.core.classifier.ClassDefinition
+import org.kobjects.tantilla2.core.classifier.ImplDefinition
+import org.kobjects.tantilla2.core.classifier.TraitDefinition
+import org.kobjects.tantilla2.core.function.Callable
+import org.kobjects.tantilla2.core.parser.Parser
+import org.kobjects.tantilla2.core.parser.TantillaTokenizer
+import org.kobjects.tantilla2.core.parser.TokenType
 import typeOf
 
 class Definition(

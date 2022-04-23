@@ -1,4 +1,4 @@
-package org.kobjects.tantilla2.function
+package org.kobjects.tantilla2.core.function
 
 import org.kobjects.greenspun.core.Type
 import org.kobjects.greenspun.core.Void

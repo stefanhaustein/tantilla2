@@ -3,13 +3,14 @@ package org.kobjects.tantilla2
 import org.kobjects.greenspun.core.F64
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.Serializer.serialize
-import org.kobjects.tantilla2.function.FunctionType
-import org.kobjects.tantilla2.function.NativeFunction
-import org.kobjects.tantilla2.function.Parameter
-import org.kobjects.tantilla2.parser.Parser
+import org.kobjects.tantilla2.core.function.FunctionType
+import org.kobjects.tantilla2.core.function.NativeFunction
+import org.kobjects.tantilla2.core.function.Parameter
+import org.kobjects.tantilla2.core.parser.Parser
 import kotlin.math.sqrt
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class VectorTest {
     val VECTOR = """
@@ -43,15 +44,9 @@ class VectorTest {
     fun testVector() {
         val parsingContext = RootScope()
 
-        parsingContext.defineValue(
-            "sqrt",
-            NativeFunction(
-                FunctionType(F64, listOf(Parameter("x", F64)))
-            ) { sqrt(it.variables[0] as Double ) })
-
         val result = Parser.parse(VECTOR, parsingContext)
 
-        assertEquals(setOf("Vector", "sqrt"), parsingContext.definitions.keys)
+        assertTrue(parsingContext.definitions.keys.contains("Vector"))
 
         assertEquals("mag(Vector(1.0, 2.0, 3.0))", result.serialize())
     //    assertEquals("", parsingContext.serialize())

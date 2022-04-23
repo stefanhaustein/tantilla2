@@ -7,6 +7,7 @@ import org.kobjects.tantilla2.core.Typed
 fun typeToString(type: Type) =
     when (type) {
         Double::class -> "float"
+        String::class -> "str"
         else -> type.name
     }
 

@@ -1,11 +1,11 @@
-package org.kobjects.tantilla2.parser
+package org.kobjects.tantilla2.core.parser
 
 import org.kobjects.greenspun.core.*
 import org.kobjects.parserlib.expressionparser.ExpressionParser
-import org.kobjects.tantilla2.classifier.*
 import org.kobjects.tantilla2.core.SymbolReference
 import org.kobjects.tantilla2.core.*
-import org.kobjects.tantilla2.function.*
+import org.kobjects.tantilla2.core.classifier.*
+import org.kobjects.tantilla2.core.function.*
 
 
 fun String.unquote() = this.substring(1, this.length - 1)
@@ -111,9 +111,7 @@ object Parser {
         if (tokenizer.tryConsume("if")) {
             parseIf(tokenizer, context, currentDepth)
         } else if (tokenizer.tryConsume("while")) {
-            val condition = parseExpression(tokenizer, context)
-            tokenizer.consume(":")
-            Control.While(condition, parse(tokenizer, context, currentDepth))
+            parseWhile(tokenizer, context, currentDepth)
         } else {
             val expr = parseExpression(tokenizer, context)
             if (tokenizer.tryConsume("=")) {
@@ -131,6 +129,12 @@ object Parser {
             && getIndent(tokenizer.current.text) >= currentDepth) {
             tokenizer.next()
         }
+    }
+
+    fun parseWhile(tokenizer: TantillaTokenizer, context: Scope, currentDepth: Int): Control.While<RuntimeContext> {
+        val condition = parseExpression(tokenizer, context)
+        tokenizer.consume(":")
+        return Control.While(condition, parse(tokenizer, context, currentDepth))
     }
 
     fun parseIf(tokenizer: TantillaTokenizer, context: Scope, currentDepth: Int): Control.If<RuntimeContext> {

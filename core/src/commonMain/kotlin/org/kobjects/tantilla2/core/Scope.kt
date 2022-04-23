@@ -1,12 +1,12 @@
 package org.kobjects.tantilla2.core
 
 import org.kobjects.greenspun.core.Type
-import org.kobjects.tantilla2.classifier.ClassDefinition
-import org.kobjects.tantilla2.classifier.ClassMetaType
-import org.kobjects.tantilla2.classifier.ImplDefinition
-import org.kobjects.tantilla2.classifier.TraitDefinition
-import org.kobjects.tantilla2.function.Callable
-import org.kobjects.tantilla2.function.FunctionScope
+import org.kobjects.tantilla2.core.classifier.ClassDefinition
+import org.kobjects.tantilla2.core.classifier.ClassMetaType
+import org.kobjects.tantilla2.core.classifier.ImplDefinition
+import org.kobjects.tantilla2.core.classifier.TraitDefinition
+import org.kobjects.tantilla2.core.function.Callable
+import org.kobjects.tantilla2.core.function.FunctionScope
 
 abstract class Scope(
     val parentContext: Scope?

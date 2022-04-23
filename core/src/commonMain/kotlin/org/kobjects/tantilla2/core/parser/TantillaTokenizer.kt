@@ -1,4 +1,4 @@
-package org.kobjects.tantilla2.parser
+package org.kobjects.tantilla2.core.parser
 
 import org.kobjects.parserlib.tokenizer.Tokenizer
 import org.kobjects.parserlib.tokenizer.RegularExpressions

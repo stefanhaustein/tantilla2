@@ -1,4 +1,4 @@
-package org.kobjects.tantilla2.classifier
+package org.kobjects.tantilla2.core.classifier
 
 import org.kobjects.greenspun.core.Type
 import org.kobjects.tantilla2.core.Scope
