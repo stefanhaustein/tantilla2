@@ -1,5 +1,6 @@
 package org.kobjects.tantilla2.core
 
+import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.greenspun.core.Type
 import org.kobjects.tantilla2.core.classifier.ClassDefinition
 import org.kobjects.tantilla2.core.classifier.ClassMetaType
@@ -12,34 +13,38 @@ abstract class Scope(
     val parentContext: Scope?
 ) {
     val definitions = mutableMapOf<String, Definition>()
-    var locals = mutableListOf<Definition>()
+    var locals = mutableListOf<String>()
 
 /*
     override val type: Type
         get() = if (this is ClassDefinition) ClassMetaType(this) else MetaType(this)
 
 */
-    fun declareLocalVariable(name: String, type: Type, mutable: Boolean): Int {
-        val index = locals.size
-        val definition = Definition(
+
+    fun createLocalVariable(name: String, type: Type, mutable: Boolean, initializer: Evaluable<RuntimeContext>?) =
+        Definition(
             this,
             name,
             Definition.Kind.LOCAL_VARIABLE,
             type = type,
-            index = index,
-            mutable = mutable)
+            builtin = false,
+            mutable = mutable,
+            initializer = initializer)
+
+    fun declareLocalVariable(name: String, type: Type, mutable: Boolean): Int {
+        val definition = createLocalVariable(name, type, mutable, null)
         definitions[name] = definition
-        locals.add((definition))
-        return index
+        locals.add(name)
+        return locals.size - 1
     }
 
-    fun defineValue(name: String, value: Any) {
-        definitions[name] = Definition(this, name, Definition.Kind.CONST, value = value)
-    }
 
-    fun defineDelayed(kind: Definition.Kind, name: String, definition: String) {
-        definitions[name] = Definition(this, name, kind, definitionText = definition)
-    }
+    fun createValue(name: String, value: Any, builtin: Boolean = false) =
+        Definition(this, name, Definition.Kind.CONST, builtin = builtin, value = value)
+
+    fun createUnparsed(kind: Definition.Kind, name: String, definition: String) =
+        Definition(this, name, kind, definitionText = definition)
+
 
     override fun toString() = serialize()
 
@@ -73,7 +78,6 @@ abstract class Scope(
             definition.value()
         }
     }
-
 
 
 

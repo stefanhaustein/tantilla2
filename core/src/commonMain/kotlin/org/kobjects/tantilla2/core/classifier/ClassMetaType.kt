@@ -9,5 +9,7 @@ class ClassMetaType(
 ) : FunctionType(
     wrapped,
     List<Parameter>(wrapped.locals.size) {
-        Parameter(wrapped.locals[it].name, wrapped.locals[it].type()) }
+        val name = wrapped.locals[it]
+        val def = wrapped.definitions[name]!!
+        Parameter(name, def.type()) }
 )

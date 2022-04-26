@@ -8,6 +8,7 @@ import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.NativeFunction
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.parser.Parser
+import org.kobjects.tantilla2.core.runtime.RootScope
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -38,14 +39,14 @@ class FizzBuzzTest {
 
         val context = RootScope()
 
-        context.defineValue(
+        context.defineNative(
             "print",
-            NativeFunction(FunctionType(Void, listOf(Parameter("text", Str)))
-            ) { try {
+            Void,
+            Parameter("text", Str)) { try {
                 output.add(it.variables[0].toString())
             } catch (e: Exception) {
                 throw RuntimeException("Issue with context $it", e)
-            } } )
+            } }
 
         Parser.parse(FIZZ_BUZZ, context)
 

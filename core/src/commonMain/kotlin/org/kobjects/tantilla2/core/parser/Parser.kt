@@ -5,12 +5,14 @@ import org.kobjects.parserlib.expressionparser.ExpressionParser
 import org.kobjects.tantilla2.core.SymbolReference
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.classifier.*
+import org.kobjects.tantilla2.core.control.For
 import org.kobjects.tantilla2.core.function.*
 
 
 fun String.unquote() = this.substring(1, this.length - 1)
 
 object Parser {
+    val DECLARATION_KEYWORDS = setOf("def", "var", "let", "class", "trait", "impl")
 
     fun getIndent(s: String): Int {
         val lastBreak = s.lastIndexOf('\n')
@@ -43,32 +45,25 @@ object Parser {
                     break
                 }
                 tokenizer.next()
-            } else if (tokenizer.tryConsume("var")) {
-                statements.add(parseLocalVariable(tokenizer, context, true))
-            } else if (tokenizer.tryConsume("let")) {
-                statements.add(parseLocalVariable(tokenizer, context, false))
-            } else if (tokenizer.tryConsume("def")) {
-                val name = tokenizer.consume(TokenType.IDENTIFIER, "Function name expected.")
-                println("consuming def $name")
-                val text = consumeBody(tokenizer, localDepth)
-                context.defineDelayed(Definition.Kind.FUNCTION, name, text)
-            } else if (tokenizer.tryConsume("class")) {
-                val name = tokenizer.consume(TokenType.IDENTIFIER, "Class name expected.")
-                println("consuming class $name; return depth: $localDepth")
-                val text = consumeBody(tokenizer, localDepth)
-                context.defineDelayed(Definition.Kind.CLASS, name, text)
-            } else if (tokenizer.tryConsume("trait")) {
-                val name = tokenizer.consume(TokenType.IDENTIFIER, "Trait name expected.")
-                println("consuming trait $name; return depth: $localDepth")
-                val text = consumeBody(tokenizer, localDepth)
-                context.defineDelayed(Definition.Kind.TRAIT, name, text)
-            } else if (tokenizer.tryConsume("impl")) {
-                val traitName = tokenizer.consume(TokenType.IDENTIFIER, "Trait name expected.")
-                tokenizer.consume("for")
-                val name = tokenizer.consume(TokenType.IDENTIFIER, "Class name expected.")
-                println("consuming impl $traitName for $name; return depth: $localDepth")
-                val text = consumeBody(tokenizer, localDepth)
-                context.defineDelayed(Definition.Kind.IMPL, "$traitName for $name", text)
+            } else if (DECLARATION_KEYWORDS.contains(tokenizer.current.text)) {
+                val definition = parseDefinition(tokenizer, context, localDepth)
+                context.definitions[definition.name] = definition
+                if (definition.kind == Definition.Kind.LOCAL_VARIABLE) {
+                    context.locals.add(definition.name)
+                    if (definition.initializer != null) {
+                        statements.add(
+                            Assignment(
+                                LocalVariableReference(
+                                    definition.name,
+                                    definition.type(),
+                                    definition.index(),
+                                    definition.mutable
+                                ),
+                                definition.initializer!!
+                            )
+                        )
+                    }
+                }
             } else {
                 val statement = parseStatement(tokenizer, context, localDepth)
                 println("parsed statement: $statement")
@@ -78,6 +73,40 @@ object Parser {
         return if (statements.size == 1) statements[0]
             else Control.Block<RuntimeContext>(*statements.toTypedArray())
     }
+
+    fun parseDefinition(tokenizer: TantillaTokenizer, scope: Scope, localDepth: Int) =
+        when (tokenizer.consume(TokenType.IDENTIFIER)) {
+            "var" -> parseVariableDeclaration(tokenizer, scope, true)
+            "let" -> parseVariableDeclaration(tokenizer, scope, false)
+            "def" -> {
+                val name = tokenizer.consume(TokenType.IDENTIFIER, "Function name expected.")
+                println("consuming def $name")
+                val text = consumeBody(tokenizer, localDepth)
+                scope.createUnparsed(Definition.Kind.FUNCTION, name, text)
+            }
+            "class" -> {
+                val name = tokenizer.consume(TokenType.IDENTIFIER, "Class name expected.")
+                println("consuming class $name; return depth: $localDepth")
+                val text = consumeBody(tokenizer, localDepth)
+                scope.createUnparsed(Definition.Kind.CLASS, name, text)
+            }
+            "trait" -> {
+                val name = tokenizer.consume(TokenType.IDENTIFIER, "Trait name expected.")
+                println("consuming trait $name; return depth: $localDepth")
+                val text = consumeBody(tokenizer, localDepth)
+                scope.createUnparsed(Definition.Kind.TRAIT, name, text)
+            }
+            "impl" -> {
+                val traitName = tokenizer.consume(TokenType.IDENTIFIER, "Trait name expected.")
+                tokenizer.consume("for")
+                val name = tokenizer.consume(TokenType.IDENTIFIER, "Class name expected.")
+                println("consuming impl $traitName for $name; return depth: $localDepth")
+                val text = consumeBody(tokenizer, localDepth)
+                scope.createUnparsed(Definition.Kind.IMPL, "$traitName for $name", text)
+            }
+            else ->  throw tokenizer.error("Declaration expected.")
+    }
+
 
     fun consumeBody(
         tokenizer: TantillaTokenizer,
@@ -112,6 +141,8 @@ object Parser {
             parseIf(tokenizer, context, currentDepth)
         } else if (tokenizer.tryConsume("while")) {
             parseWhile(tokenizer, context, currentDepth)
+        } else if (tokenizer.tryConsume("for")) {
+            parseFor(tokenizer, context, currentDepth)
         } else {
             val expr = parseExpression(tokenizer, context)
             if (tokenizer.tryConsume("=")) {
@@ -135,6 +166,16 @@ object Parser {
         val condition = parseExpression(tokenizer, context)
         tokenizer.consume(":")
         return Control.While(condition, parse(tokenizer, context, currentDepth))
+    }
+
+    fun parseFor(tokenizer: TantillaTokenizer, context: Scope, currentDepth: Int): For {
+        val iteratorName = tokenizer.consume(TokenType.IDENTIFIER, "Loop variable name expected.")
+        tokenizer.consume("in")
+        val rangeExpression = parseExpression(tokenizer, context)
+        tokenizer.consume(":")
+        val iteratorIndex = context.declareLocalVariable(iteratorName, F64, false)
+        val body = parse(tokenizer, context, currentDepth)
+        return For(iteratorName, iteratorIndex, rangeExpression, body)
     }
 
     fun parseIf(tokenizer: TantillaTokenizer, context: Scope, currentDepth: Int): Control.If<RuntimeContext> {
@@ -162,11 +203,11 @@ object Parser {
         return Control.If(*expressions.toTypedArray())
     }
 
-    fun parseLocalVariable(
+    fun parseVariableDeclaration(
         tokenizer: TantillaTokenizer,
         context: Scope,
         mutable: Boolean,
-    ) : Evaluable<RuntimeContext> {
+    ) : Definition {
         val name = tokenizer.consume(TokenType.IDENTIFIER)
         var type: Type? = null
         if (tokenizer.tryConsume(":")) {
@@ -186,9 +227,7 @@ object Parser {
         } else if (type == null) {
             throw IllegalStateException("Explicit type or initializer expression required.")
         }
-        val index = context.declareLocalVariable(name, type, mutable)
-        return if (initializer == null) Control.Block<RuntimeContext>()
-            else Assignment(LocalVariableReference(name, type, index, mutable), initializer)
+        return context.createLocalVariable(name, type, mutable, initializer)
     }
 
     fun parseExpression(tokenizer: TantillaTokenizer, context: Scope): Evaluable<RuntimeContext> =
@@ -276,7 +315,7 @@ object Parser {
                         Definition.Kind.LOCAL_VARIABLE -> LocalVariableReference(
                             definition.name,
                             definition.type(),
-                            definition.index,
+                            context.locals.indexOf(definition.name),
                             definition.mutable
                         )
                         Definition.Kind.CLASS,
@@ -346,7 +385,7 @@ object Parser {
                 base,
                 name,
                 definition.type(),
-                definition.index,
+                baseType.locals.indexOf(name),
                 definition.mutable
             )
             Definition.Kind.FUNCTION -> {

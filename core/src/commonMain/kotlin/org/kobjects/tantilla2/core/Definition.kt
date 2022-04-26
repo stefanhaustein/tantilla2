@@ -1,5 +1,6 @@
 package org.kobjects.tantilla2.core
 
+import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.greenspun.core.Type
 import org.kobjects.tantilla2.core.classifier.ClassDefinition
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
@@ -14,11 +15,12 @@ class Definition(
     val scope: Scope,
     val name: String, // Not really necessary but should make debugging and printing easier.
     val kind: Kind,
+    val builtin: Boolean = false,
     val definitionText: String = "",
-    val index: Int = -1,
     val mutable: Boolean = false,
     private var type: Type? = null,
     private var value: Any? = null,
+    var initializer: Evaluable<RuntimeContext>? = null,
 ) {
 
     enum class Kind {
@@ -109,4 +111,6 @@ class Definition(
             Kind.CONST -> "const $name = $value"
         } +
                 "\n$indent#end $name\n"
+
+    fun index() = scope.locals.indexOf(name)
 }

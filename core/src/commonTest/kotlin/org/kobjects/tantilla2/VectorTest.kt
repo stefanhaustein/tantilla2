@@ -1,13 +1,9 @@
 package org.kobjects.tantilla2
 
-import org.kobjects.greenspun.core.F64
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.Serializer.serialize
-import org.kobjects.tantilla2.core.function.FunctionType
-import org.kobjects.tantilla2.core.function.NativeFunction
-import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.parser.Parser
-import kotlin.math.sqrt
+import org.kobjects.tantilla2.core.runtime.RootScope
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

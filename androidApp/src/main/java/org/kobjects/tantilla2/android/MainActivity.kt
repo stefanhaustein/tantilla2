@@ -3,7 +3,6 @@ package org.kobjects.tantilla2.android
 import android.graphics.Bitmap
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.TextView
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
@@ -24,11 +23,10 @@ import org.kobjects.greenspun.core.Void
 import org.kobjects.konsole.compose.ComposeKonsole
 import org.kobjects.konsole.compose.RenderKonsole
 import org.kobjects.tantilla2.console.ConsoleLoop
-import org.kobjects.tantilla2.core.RootScope
+import org.kobjects.tantilla2.core.runtime.RootScope
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.NativeFunction
 import org.kobjects.tantilla2.core.function.Parameter
-import kotlin.math.sqrt
 
 
 fun greet(): String {
@@ -37,7 +35,6 @@ fun greet(): String {
 
 class MainActivity : AppCompatActivity() {
 
-    lateinit var bitmap: Bitmap
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,7 +43,7 @@ class MainActivity : AppCompatActivity() {
 
         val config = resources.configuration
 
-        bitmap = Bitmap.createBitmap(
+        val bitmap = Bitmap.createBitmap(
             config.screenWidthDp, config.screenHeightDp, Bitmap.Config.ARGB_8888)
 
         for (y in 0 until bitmap.height) {
@@ -55,59 +52,36 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        setContent {
-            Render(konsole)
-        }
-
         val rootScope = RootScope()
-
-        rootScope.defineValue(
+        rootScope.defineNative(
             "setPixel",
-            NativeFunction(
-                FunctionType(
-                    Void,
-                    listOf(
+             Void,
                         Parameter("x", F64),
                         Parameter("y", F64),
                         Parameter("color", F64)
-                    )
-                )
             ) {
                 bitmap.setPixel(
                     (it.variables[0] as Double).toInt(),
                     (it.variables[1] as Double).toInt(),
                     (it.variables[2] as Double).toInt())
-            })
+            }
 
-
+        val viewModel = TantillaViewModel(rootScope, konsole, bitmap)
         lifecycle.coroutineScope.launchWhenCreated {
             ConsoleLoop(konsole, rootScope)
         }
-    }
 
-
-
-    @Composable
-    fun Render(konsole: ComposeKonsole) {
-        MaterialTheme(
-            colors = LIGHT_COLORS
-        ) {
-            Column() {
-                TopAppBar(
-                    title = { Text(text = "Tantilla 2") })
-                Box() {
-                    Image(
-                        bitmap = bitmap.asImageBitmap(),
-                        contentDescription = "Canvas",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.FillBounds
-                        )
-
-                    RenderKonsole(konsole = konsole)
-                }
+        setContent {
+            MaterialTheme(
+                colors = LIGHT_COLORS
+            ) {
+                Render(viewModel)
             }
         }
+
     }
+
+
 
 
     companion object {
