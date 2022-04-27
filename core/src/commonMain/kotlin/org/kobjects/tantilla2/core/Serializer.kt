@@ -4,7 +4,13 @@ import org.kobjects.greenspun.core.Control
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.greenspun.core.F64
 
-object Serializer {
+fun Any?.serialize() =
+    when (this) {
+        is Evaluable<*> -> (this as Evaluable<RuntimeContext>).serialize("")
+        else -> this.toString()
+    }
+
+
 
     fun serializeInfix(expr: Evaluable<RuntimeContext>, name: String, precedence: Int, parentPrecedence: Int): String {
         val sb = StringBuilder()
@@ -57,7 +63,3 @@ object Serializer {
         }
 
 
-
-
-
-}

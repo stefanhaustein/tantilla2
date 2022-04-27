@@ -2,6 +2,7 @@ package org.kobjects.tantilla2.core.runtime
 
 import org.kobjects.greenspun.core.F64
 import org.kobjects.greenspun.core.Type
+import org.kobjects.tantilla2.core.Definition
 import org.kobjects.tantilla2.core.RuntimeContext
 import org.kobjects.tantilla2.core.Scope
 import org.kobjects.tantilla2.core.function.FunctionType
@@ -16,7 +17,15 @@ class RootScope : Scope(null) {
         returnType: Type,
         vararg parameter: Parameter,
         operation: (RuntimeContext) -> Any?) {
-        definitions[name] = createValue(name, NativeFunction(FunctionType(returnType, parameter.toList()), operation), builtin = true)
+        val type = FunctionType(returnType, parameter.toList())
+        val function = NativeFunction(type, operation)
+        definitions[name] = Definition(
+            this,
+            name,
+            Definition.Kind.FUNCTION,
+            explicitType = type,
+            explicitValue = function,
+            builtin = true)
     }
 
     init {

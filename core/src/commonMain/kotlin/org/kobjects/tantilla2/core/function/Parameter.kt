@@ -1,11 +1,11 @@
 package org.kobjects.tantilla2.core.function
 
 import org.kobjects.greenspun.core.Type
-import typeToString
+import tantillaName
 
 data class Parameter(
     val name: String,
     val type: Type,
 ) {
-    override fun toString() = "$name: ${typeToString(type)}"
+    override fun toString() = "$name: ${type.tantillaName}"
 }

@@ -118,7 +118,7 @@ fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
         Column(
             modifier = Modifier.padding(8.dp)
         ) {
-            Text(definition.name)
+            Text(definition.title())
         }
     }
 }
@@ -141,14 +141,11 @@ fun RenderEditor(viewModel: TantillaViewModel) {
                     onDismissRequest = { showMenu.value = false }
                 ) {
                     DropdownMenuItem(onClick = {  }) {
-                        Text("Rename / Move")
-                    }
-                    DropdownMenuItem(onClick = {  }) {
-                        Text("Change Signature")
-                    }
-                    DropdownMenuItem(onClick = {  }) {
                         Text("Delete")
                     }
+                   /* DropdownMenuItem(onClick = {  }) {
+                        Text("Move")
+                    } */
                     DropdownMenuItem(onClick = { viewModel.mode.value = TantillaViewModel.Mode.USER_SCOPE }) {
                         Text("Cancel")
                     }

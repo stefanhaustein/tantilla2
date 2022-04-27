@@ -26,7 +26,7 @@ abstract class Scope(
             this,
             name,
             Definition.Kind.LOCAL_VARIABLE,
-            type = type,
+            explicitType = type,
             builtin = false,
             mutable = mutable,
             initializer = initializer)
@@ -40,7 +40,7 @@ abstract class Scope(
 
 
     fun createValue(name: String, value: Any, builtin: Boolean = false) =
-        Definition(this, name, Definition.Kind.CONST, builtin = builtin, value = value)
+        Definition(this, name, Definition.Kind.CONST, builtin = builtin, explicitValue = value)
 
     fun createUnparsed(kind: Definition.Kind, name: String, definition: String) =
         Definition(this, name, kind, definitionText = definition)

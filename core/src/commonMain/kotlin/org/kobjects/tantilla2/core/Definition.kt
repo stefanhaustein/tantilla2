@@ -9,7 +9,8 @@ import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.parser.Parser
 import org.kobjects.tantilla2.core.parser.TantillaTokenizer
 import org.kobjects.tantilla2.core.parser.TokenType
-import typeOf
+import tantillaName
+import type
 
 class Definition(
     val scope: Scope,
@@ -18,10 +19,13 @@ class Definition(
     val builtin: Boolean = false,
     val definitionText: String = "",
     val mutable: Boolean = false,
-    private var type: Type? = null,
-    private var value: Any? = null,
+    private val explicitType: Type? = null,
+    private val explicitValue: Any? = null,
     var initializer: Evaluable<RuntimeContext>? = null,
 ) {
+
+    private var cachedType = explicitType
+    private var cachedValue = explicitValue
 
     enum class Kind {
         LOCAL_VARIABLE, FUNCTION, CONST, CLASS, TRAIT, IMPL
@@ -34,20 +38,20 @@ class Definition(
     }
 
     fun type(): Type {
-        if (type == null) {
-            type = when (kind) {
+        if (cachedType == null) {
+            cachedType = when (kind) {
                 Kind.FUNCTION -> Parser.parseFunctionType(tokenizer(), scope)
                 Kind.LOCAL_VARIABLE -> throw RuntimeException("Local variable type must not be null")
-                else -> typeOf(value())
+                else -> value().type
             }
         }
-        return type!!
+        return cachedType!!
     }
 
     fun value(): Any?  {
-        if (value == null && kind != Kind.CONST) {
-            value = when (kind) {
-                Kind.CONST -> value
+        if (cachedValue == null && kind != Kind.CONST) {
+            cachedValue = when (kind) {
+                Kind.CONST -> explicitValue
                 Kind.FUNCTION -> resolveFunction()
                 Kind.CLASS -> resolveClass()
                 Kind.TRAIT -> resolveTrait()
@@ -55,7 +59,7 @@ class Definition(
                 Kind.LOCAL_VARIABLE -> throw RuntimeException("Can't obtain local variable value from Definition.")
             }
         }
-        return value
+        return cachedValue
     }
 
     private fun resolveClass(): Scope {
@@ -100,17 +104,26 @@ class Definition(
 
     override fun toString() = serialize()
 
+    fun title() = when (kind) {
+        Kind.LOCAL_VARIABLE -> "${if (mutable) "var" else "let"} $name${if (explicitType != null) ": " + explicitType.tantillaName else ""}"
+        Kind.FUNCTION -> "def $name ${type()}"
+        Kind.TRAIT ->  "trait $name"
+        Kind.IMPL ->  "impl $name"
+        Kind.CLASS ->  "class $name"
+        Kind.CONST -> "const $name = $explicitValue"
+    }
+
     fun serialize(indent: String = "") =
-        "$indent#start $name\n" +
+      //  "$indent#start $name\n" +
         when (kind) {
             Kind.LOCAL_VARIABLE -> "${if (mutable) "var" else "let"} $name"
-            Kind.FUNCTION -> "def $name ${if (value == null) definitionText else value!!.toString()}"
-            Kind.TRAIT ->  "trait $name ${if (value == null) definitionText else value!!.toString()}"
-            Kind.IMPL ->  "impl $name ${if (value == null) definitionText else value!!.toString()}"
-            Kind.CLASS ->  "class $name ${if (value == null) definitionText else value!!.toString()}"
-            Kind.CONST -> "const $name = $value"
-        } +
-                "\n$indent#end $name\n"
+            Kind.CONST -> "const $name = $explicitValue"
+            Kind.FUNCTION -> "def $name ${if (cachedValue == null) definitionText else cachedValue.serialize()}"
+            Kind.TRAIT ->  "trait $name ${if (cachedValue == null) definitionText else cachedValue.serialize()}"
+            Kind.IMPL ->  "impl $name ${if (cachedValue == null) definitionText else cachedValue.serialize()}"
+            Kind.CLASS ->  "class $name ${if (cachedValue == null) definitionText else cachedValue.serialize()}"
+        }
+        //        "\n$indent#end $name\n"
 
     fun index() = scope.locals.indexOf(name)
 }
