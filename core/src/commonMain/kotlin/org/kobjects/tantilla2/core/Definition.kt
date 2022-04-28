@@ -28,7 +28,7 @@ class Definition(
     private var cachedValue = explicitValue
 
     enum class Kind {
-        LOCAL_VARIABLE, FUNCTION, CONST, CLASS, TRAIT, IMPL
+        LOCAL_VARIABLE, FUNCTION, CONST, CLASS, TRAIT, IMPL, UNPARSEABLE
     }
 
     private fun tokenizer(): TantillaTokenizer {
@@ -56,11 +56,27 @@ class Definition(
                 Kind.CLASS -> resolveClass()
                 Kind.TRAIT -> resolveTrait()
                 Kind.IMPL -> resolveImpl()
+                Kind.UNPARSEABLE -> throw RuntimeException("Can't obtain value for unparseable definition.")
                 Kind.LOCAL_VARIABLE -> throw RuntimeException("Can't obtain local variable value from Definition.")
             }
         }
         return cachedValue
     }
+
+    // TODO: Move up to scope so it can be used with null to add a new value.
+    fun replace(newContent: String) {
+        val tokenizer = TantillaTokenizer(newContent)
+        tokenizer.next()
+        var replacement: Definition
+        try {
+            replacement = Parser.parseDefinition(tokenizer, scope, 0)
+        } catch (e: Exception) {
+            replacement = Definition(scope, name, Kind.UNPARSEABLE, definitionText = newContent)
+        }
+        scope.definitions.remove(name)
+        scope.definitions[replacement.name] = replacement
+    }
+
 
     private fun resolveClass(): Scope {
             println("Resolving class $name: $definitionText")
@@ -110,6 +126,7 @@ class Definition(
         Kind.TRAIT ->  "trait $name"
         Kind.IMPL ->  "impl $name"
         Kind.CLASS ->  "class $name"
+        Kind.UNPARSEABLE -> "(unparseable: $name)"
         Kind.CONST -> "const $name = $explicitValue"
     }
 
@@ -122,6 +139,7 @@ class Definition(
             Kind.TRAIT ->  "trait $name ${if (cachedValue == null) definitionText else cachedValue.serialize()}"
             Kind.IMPL ->  "impl $name ${if (cachedValue == null) definitionText else cachedValue.serialize()}"
             Kind.CLASS ->  "class $name ${if (cachedValue == null) definitionText else cachedValue.serialize()}"
+            Kind.UNPARSEABLE -> definitionText
         }
         //        "\n$indent#end $name\n"
 

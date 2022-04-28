@@ -3,6 +3,7 @@ package org.kobjects.tantilla2.android
 import android.graphics.Bitmap
 import androidx.compose.runtime.mutableStateOf
 import org.kobjects.konsole.compose.ComposeKonsole
+import org.kobjects.tantilla2.core.Definition
 import org.kobjects.tantilla2.core.Scope
 
 class TantillaViewModel(
@@ -13,7 +14,7 @@ class TantillaViewModel(
     val userScope = ScopeDetails(scope)
     val builtinScope = ScopeDetails(scope)
     val mode = mutableStateOf(Mode.INTERACTIVE)
-    val detail = mutableStateOf("")
+    val definition = mutableStateOf<Definition?>(null)
     val currentText = mutableStateOf("")
 
     enum class Mode {
@@ -22,9 +23,9 @@ class TantillaViewModel(
 
     fun scopeDetails(): ScopeDetails = if (mode.value == Mode.BUILTIN_SCOPE) builtinScope else userScope
 
-    fun edit(name: String) {
-       detail.value = name
-       currentText.value = userScope.scope.value.definitions[name].toString()
+    fun edit(definition: Definition) {
+       this.definition.value = definition
+       currentText.value = definition.serialize()
        mode.value = Mode.EDIT
     }
 

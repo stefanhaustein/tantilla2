@@ -325,6 +325,7 @@ object Parser {
                         Definition.Kind.FUNCTION -> SymbolReference(
                             definition.name, definition.type(), definition.value()
                         )
+                        Definition.Kind.UNPARSEABLE -> throw tokenizer.error("Unparseable reference.")
                     }
             }
             else -> throw tokenizer.error("Number or identifier expected here.")

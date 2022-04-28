@@ -111,7 +111,7 @@ fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
             .padding(4.dp),
         onClick = {
             if (viewModel.mode.value== TantillaViewModel.Mode.USER_SCOPE) {
-                viewModel.edit(definition.name)
+                viewModel.edit(definition)
             }
         }
     ) {
@@ -126,11 +126,16 @@ fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
 @Composable
 fun RenderEditor(viewModel: TantillaViewModel) {
     var showMenu = remember { mutableStateOf(false) }
+    val scope = viewModel.userScope.scope.value
+    val definition = viewModel.definition.value
     Column() {
         TopAppBar(
-            title = { Text(text = viewModel.detail.value) },
+            title = { Text(text = definition?.name ?: "New Property") },
             actions = {
-                IconButton(onClick = { viewModel.mode.value = TantillaViewModel.Mode.USER_SCOPE }) {
+                IconButton(onClick = {
+                    definition!!.replace(viewModel.currentText.value)
+                    viewModel.mode.value = TantillaViewModel.Mode.USER_SCOPE
+                }) {
                     Icon(Icons.Default.Check, contentDescription = "Save")
                 }
                 IconButton(onClick = { showMenu.value = !showMenu.value }) {
@@ -140,13 +145,18 @@ fun RenderEditor(viewModel: TantillaViewModel) {
                     expanded = showMenu.value,
                     onDismissRequest = { showMenu.value = false }
                 ) {
-                    DropdownMenuItem(onClick = {  }) {
+                    DropdownMenuItem(onClick = {
+                        scope.definitions.remove(definition!!.name)
+                        viewModel.mode.value = TantillaViewModel.Mode.USER_SCOPE
+                    }) {
                         Text("Delete")
                     }
                    /* DropdownMenuItem(onClick = {  }) {
                         Text("Move")
                     } */
-                    DropdownMenuItem(onClick = { viewModel.mode.value = TantillaViewModel.Mode.USER_SCOPE }) {
+                    DropdownMenuItem(onClick = {
+                        viewModel.mode.value = TantillaViewModel.Mode.USER_SCOPE
+                    }) {
                         Text("Cancel")
                     }
                 }
