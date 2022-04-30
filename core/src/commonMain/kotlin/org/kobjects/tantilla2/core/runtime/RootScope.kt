@@ -28,6 +28,9 @@ class RootScope : Scope(null) {
             builtin = true)
     }
 
+    override val title: String
+        get() = "Root Scope"
+
     init {
         defineNative(
             "sqrt", F64, Parameter("x", F64)
@@ -41,5 +44,7 @@ class RootScope : Scope(null) {
             "hsl", F64, Parameter("h", F64), Parameter("s", F64), Parameter("l", F64)
         ) { hsl(it.variables[0] as Double, it.variables[1] as Double, it.variables[2] as Double).toDouble() }
     }
+
+
 
 }

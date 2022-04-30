@@ -7,5 +7,5 @@ data class Parameter(
     val name: String,
     val type: Type,
 ) {
-    override fun toString() = "$name: ${type.tantillaName}"
+    override fun toString() = if (name == "self") "self" else "$name: ${type.tantillaName}"
 }

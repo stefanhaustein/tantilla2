@@ -39,7 +39,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val konsole = ComposeKonsole()
+        val console = ConsoleLoop(ComposeKonsole())
 
         val config = resources.configuration
 
@@ -52,23 +52,14 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        val rootScope = RootScope()
-        rootScope.defineNative(
-            "setPixel",
-             Void,
-                        Parameter("x", F64),
-                        Parameter("y", F64),
-                        Parameter("color", F64)
-            ) {
-                bitmap.setPixel(
-                    (it.variables[0] as Double).toInt(),
-                    (it.variables[1] as Double).toInt(),
-                    (it.variables[2] as Double).toInt())
-            }
+        val viewModel = TantillaViewModel(
+            console,
+            bitmap,
+            ::loadExample,
+        )
 
-        val viewModel = TantillaViewModel(rootScope, konsole, bitmap)
         lifecycle.coroutineScope.launchWhenCreated {
-            ConsoleLoop(konsole, rootScope)
+            console.run()
         }
 
         setContent {
@@ -78,10 +69,10 @@ class MainActivity : AppCompatActivity() {
                 Render(viewModel)
             }
         }
-
     }
 
-
+    fun loadExample(name: String) =
+        assets.open("examples/$name").bufferedReader().use { it.readText() }
 
 
     companion object {

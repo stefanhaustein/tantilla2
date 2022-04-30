@@ -63,19 +63,7 @@ class Definition(
         return cachedValue
     }
 
-    // TODO: Move up to scope so it can be used with null to add a new value.
-    fun replace(newContent: String) {
-        val tokenizer = TantillaTokenizer(newContent)
-        tokenizer.next()
-        var replacement: Definition
-        try {
-            replacement = Parser.parseDefinition(tokenizer, scope, 0)
-        } catch (e: Exception) {
-            replacement = Definition(scope, name, Kind.UNPARSEABLE, definitionText = newContent)
-        }
-        scope.definitions.remove(name)
-        scope.definitions[replacement.name] = replacement
-    }
+
 
 
     private fun resolveClass(): Scope {

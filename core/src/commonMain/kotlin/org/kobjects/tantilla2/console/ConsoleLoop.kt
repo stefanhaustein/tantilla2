@@ -5,32 +5,50 @@ import org.kobjects.greenspun.core.Void
 import org.kobjects.konsole.Konsole
 import org.kobjects.tantilla2.core.runtime.RootScope
 import org.kobjects.tantilla2.core.RuntimeContext
+import org.kobjects.tantilla2.core.Scope
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.parser.Parser
 
-suspend fun ConsoleLoop(konsole: Konsole, scope: RootScope = RootScope()) {
-    val runtimeContext = RuntimeContext(mutableListOf<Any?>())
+class ConsoleLoop(
+    val konsole: Konsole,
+    var scope: RootScope = RootScope()
+) {
+    var runtimeContext = RuntimeContext(mutableListOf<Any?>())
 
-    scope.defineNative("print", Void, Parameter("text", Str)) {
-        konsole.write(it.variables[0].toString())
+    init {
+        declareNatives()
     }
 
-    while (true) {
-        val line = konsole.read()
-        try {
-            var parsed = Parser.parse(line, scope)
-            konsole.write("parsed: $parsed")
-            println("scope: $scope")
+    fun setRootScope(scope: RootScope) {
+        this.scope = scope;
+        runtimeContext = RuntimeContext(mutableListOf<Any?>())
+        declareNatives()
+    }
 
-            while (runtimeContext.variables.size < scope.locals.size) {
-                runtimeContext.variables.add(null)
+    fun declareNatives() {
+        scope.defineNative("print", Void, Parameter("text", Str)) {
+            konsole.write(it.variables[0].toString())
+        }
+    }
+
+    suspend fun run() {
+        while (true) {
+            val line = konsole.read()
+            try {
+                var parsed = Parser.parse(line, scope)
+                konsole.write("parsed: $parsed")
+                println("scope: $scope")
+
+                while (runtimeContext.variables.size < scope.locals.size) {
+                    runtimeContext.variables.add(null)
+                }
+
+                val evaluationResult = parsed.eval(runtimeContext)
+                konsole.write("eval result: $evaluationResult")
+            } catch (e: Exception) {
+                konsole.write(e.toString())
+                e.printStackTrace()
             }
-
-            val evaluationResult = parsed.eval(runtimeContext)
-            konsole.write("eval result: $evaluationResult")
-        } catch (e: Exception) {
-            konsole.write(e.toString())
-            e.printStackTrace()
         }
     }
 

@@ -8,12 +8,15 @@ import org.kobjects.tantilla2.core.classifier.ImplDefinition
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.FunctionScope
+import org.kobjects.tantilla2.core.parser.Parser
+import org.kobjects.tantilla2.core.parser.TantillaTokenizer
 
 abstract class Scope(
     val parentContext: Scope?
 ) {
     val definitions = mutableMapOf<String, Definition>()
     var locals = mutableListOf<String>()
+    abstract val title: String
 
 /*
     override val type: Type
@@ -38,6 +41,22 @@ abstract class Scope(
         return locals.size - 1
     }
 
+
+    fun update(newContent: String, oldDefinition: Definition? = null) {
+        if (oldDefinition != null) {
+            definitions.remove(oldDefinition.name)
+        }
+        val tokenizer = TantillaTokenizer(newContent)
+        tokenizer.next()
+        var replacement: Definition
+        try {
+            replacement = Parser.parseDefinition(tokenizer, this, 0)
+        } catch (e: Exception) {
+            val name = oldDefinition?.name ?: "[error]"
+            replacement = Definition(this, name, Definition.Kind.UNPARSEABLE, definitionText = newContent)
+        }
+        definitions[replacement.name] = replacement
+    }
 
     fun createValue(name: String, value: Any, builtin: Boolean = false) =
         Definition(this, name, Definition.Kind.CONST, builtin = builtin, explicitValue = value)

@@ -7,5 +7,9 @@ class TraitDefinition(
     override val name: String,
     parent: Scope,
 ) : Scope(parent), Type {
+
+    override val title: String
+        get() = name
+
     var traitIndex = 0
 }

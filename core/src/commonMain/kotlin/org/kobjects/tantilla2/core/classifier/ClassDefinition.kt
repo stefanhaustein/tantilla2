@@ -13,6 +13,8 @@ class ClassDefinition(
     override val type: Type
         get() = ClassMetaType(this)
 
+    override val title: String
+        get() = name
 
     override fun eval(context: RuntimeContext) = context
 }

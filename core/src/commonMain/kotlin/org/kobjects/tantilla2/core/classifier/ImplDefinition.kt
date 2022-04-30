@@ -13,6 +13,9 @@ class ImplDefinition(
 ) : Scope(parentContext), Type {
     var vmt = listOf<Callable>()
 
+    override val title: String
+        get() = name
+
     override fun resolveAll() {
         trait.resolveAll()
         classifier.resolveAll()
