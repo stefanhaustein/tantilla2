@@ -73,21 +73,6 @@ fun RenderScope(viewModel: TantillaViewModel) {
 
     Scaffold(
         backgroundColor = Color.Transparent,
-        bottomBar = {
-            if (scope.parentContext != null) {
-                BottomAppBar(
-                    Modifier.clickable {
-                        viewModel.scope().value = scope.parentContext!!
-                    }
-
-                ) {
-                    IconButton(onClick ={viewModel.scope().value = scope.parentContext!!} ) {
-                        Icon(Icons.Default.ArrowBack, "Back")
-                    }
-                    Text(scope.parentContext!!.title)
-                }
-            }
-        },
         topBar = {
             if (viewModel.mode.value == TantillaViewModel.Mode.HELP) {
                 RenderAppBar(viewModel, if (scope.parentContext == null) "Help" else scope.title)
@@ -142,25 +127,16 @@ fun RenderEditor(viewModel: TantillaViewModel) {
     val definition = viewModel.definition.value
     Scaffold(
         backgroundColor = Color.Transparent,
-        bottomBar = { BottomAppBar(
-            Modifier.clickable {
-                scope.update(viewModel.currentText.value, definition)
-                viewModel.editing.value = false
-            }
-        ) {
-            IconButton(onClick = {
-                scope.update(viewModel.currentText.value, definition)
-                viewModel.editing.value = false
-            }) {
-                Icon(Icons.Default.Check, contentDescription = "Save")
-            }
-            Text("Save in ${viewModel.editorParentScope.title}")
-        }},
         topBar = {
             TopAppBar(
                 title = { Text(text = definition?.name ?: "New Property") },
                 actions = {
-
+                    IconButton(onClick = {
+                        scope.update(viewModel.currentText.value, definition)
+                        viewModel.editing.value = false
+                    }) {
+                        Icon(Icons.Default.Check, contentDescription = "Save")
+                    }
                     IconButton(onClick = { showMenu.value = !showMenu.value }) {
                         Icon(Icons.Default.MoreVert, contentDescription = "More")
                     }
@@ -207,7 +183,19 @@ fun RenderAppBar(
     var showExamplesMenu = remember { mutableStateOf(false) }
 
     TopAppBar(
-        title = { Text(text = title) },
+        title = {
+            if (viewModel.mode.value != TantillaViewModel.Mode.SHELL
+                && viewModel.scope().value.parentContext != null
+            ) {
+                Text(
+                    text = "❮ $title",
+                    Modifier.clickable {
+                        viewModel.scope().value = viewModel.scope().value.parentContext!!
+                    })
+            } else {
+                Text(text = title)
+            }
+        },
         actions = {
             for (mode in TantillaViewModel.Mode.values()) {
                 val icon = when (mode) {
