@@ -20,3 +20,13 @@ class Vector:
 
   def norm(self) -> Vector:
     self.times(1/self.mag())
+
+
+def toByte(n: float) -> float:
+ if n <= 0:
+   0
+ elif n >= 1:
+   255
+ else:
+   int(n * 255)
+
