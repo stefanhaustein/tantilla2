@@ -14,6 +14,7 @@ import org.kobjects.tantilla2.core.parser.TantillaTokenizer
 abstract class Scope(
     val parentContext: Scope?
 ) {
+    var docString: String = ""
     val definitions = mutableMapOf<String, Definition>()
     var locals = mutableListOf<String>()
     abstract val title: String

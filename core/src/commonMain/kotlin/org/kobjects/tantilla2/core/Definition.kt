@@ -22,6 +22,7 @@ class Definition(
     private val explicitType: Type? = null,
     private val explicitValue: Any? = null,
     var initializer: Evaluable<RuntimeContext>? = null,
+    var docString: String = "",
 ) {
 
     private var cachedType = explicitType

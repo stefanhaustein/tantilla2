@@ -84,11 +84,26 @@ fun RenderScope(viewModel: TantillaViewModel) {
             .fillMaxWidth()
             .padding(4.dp)
         ) {
-            itemsIndexed(definitions, { index, def -> def.name }) { index, def ->
-                RenderDefinition(viewModel, def)
+            for (kind in Definition.Kind.values()) {
+                var list = (if (kind == Definition.Kind.LOCAL_VARIABLE)
+                    scope.locals.map { scope.definitions[it]!! }
+                else
+                    scope.definitions.values).filter {
+                    it.kind == kind && it.builtin == builtin }
+
+                if (list.isNotEmpty()) {
+                        item {
+                            Text(kind.name, Modifier.padding(0.dp, 4.dp, 0.dp, 0.dp))
+                        }
+                        for (definition in list) {
+                            item {
+                                RenderDefinition(viewModel, definition)
+                            }
+                        }
+
+                }
             }
         }
-
     }
 }
 
@@ -101,22 +116,30 @@ fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
             .clip(RoundedCornerShape(4.dp))
             .padding(4.dp),
         onClick = {
-            if (viewModel.mode.value == TantillaViewModel.Mode.HIERARCHY) {
                 if (definition.value() is Scope) {
-                    viewModel.userScope.value = definition.value() as Scope
+                    viewModel.scope().value = definition.value() as Scope
                 } else {
-                    viewModel.edit(definition.scope, definition)
+                    if (viewModel.mode.value == TantillaViewModel.Mode.HIERARCHY) {
+                        viewModel.edit(definition.scope, definition)
+                    } else {
+                        if (viewModel.showDocString.value == definition) {
+                            viewModel.showDocString.value = null
+                        } else {
+                            viewModel.showDocString.value = definition
+                        }
+                    }
                 }
             }
-        }
-    ) {
-      /*  Column(
-            modifier = Modifier.padding(8.dp)
-        ) {*/
-            Text(
 
-                definition.title(), Modifier.padding(8.dp))
-       // }
+    ) {
+        Column(Modifier.padding(8.dp)) {
+            Text(definition.title())
+            if (viewModel.showDocString.value == definition) {
+                Divider(Modifier.padding(0.dp, 6.dp), color = Color.Transparent)
+                Text(definition.docString)
+            }
+
+        }
     }
 }
 
@@ -200,7 +223,7 @@ fun RenderAppBar(
             for (mode in TantillaViewModel.Mode.values()) {
                 val icon = when (mode) {
                     TantillaViewModel.Mode.HELP -> Icons.Default.Help
-                    TantillaViewModel.Mode.HIERARCHY -> Icons.Default.ListAlt
+                    TantillaViewModel.Mode.HIERARCHY -> Icons.Default.ViewList // Article
                     TantillaViewModel.Mode.SHELL -> Icons.Default.Forum
                 }
                 if (mode == viewModel.mode.value) {

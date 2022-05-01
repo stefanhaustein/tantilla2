@@ -14,6 +14,7 @@ class RootScope : Scope(null) {
 
     fun defineNative(
         name: String,
+        docString: String,
         returnType: Type,
         vararg parameter: Parameter,
         operation: (RuntimeContext) -> Any?) {
@@ -25,7 +26,9 @@ class RootScope : Scope(null) {
             Definition.Kind.FUNCTION,
             explicitType = type,
             explicitValue = function,
-            builtin = true)
+            builtin = true,
+            docString = docString
+        )
     }
 
     override val title: String
@@ -33,15 +36,19 @@ class RootScope : Scope(null) {
 
     init {
         defineNative(
-            "sqrt", F64, Parameter("x", F64)
+            "sqrt", "Calculates the square root of the argument",
+            F64, Parameter("x", F64)
             ) { sqrt(it.variables[0] as Double ) }
 
         defineNative(
-            "range", F64, Parameter("start", F64), Parameter("end", F64)
+            "range", "Creates a range from start (inclusive) to end (exclusive)",
+            F64, Parameter("start", F64), Parameter("end", F64)
         ) { Range(it.variables[0] as Double, it.variables[1] as Double ) }
 
         defineNative(
-            "hsl", F64, Parameter("h", F64), Parameter("s", F64), Parameter("l", F64)
+            "hsl",
+            "Converts the given hue (degree), saturation (0..1) and light (0..1) values to a 32 bit ARGB value (as used in setPixel).",
+            F64, Parameter("h", F64), Parameter("s", F64), Parameter("l", F64)
         ) { hsl(it.variables[0] as Double, it.variables[1] as Double, it.variables[2] as Double).toDouble() }
     }
 

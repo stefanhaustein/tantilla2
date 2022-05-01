@@ -25,6 +25,7 @@ class TantillaViewModel(
     val definition = mutableStateOf<Definition?>(null)
     val currentText = mutableStateOf("")
     var editorParentScope: Scope = console.scope
+    val showDocString = mutableStateOf<Definition?>(null)
 
     init {
         defineNatives()
@@ -33,6 +34,7 @@ class TantillaViewModel(
     fun defineNatives() {
         console.scope.defineNative(
             "setPixel",
+            "Sets the pixel at the given x/y coordinate to the given 32bit color value in ARGB format.",
             Void,
             Parameter("x", F64),
             Parameter("y", F64),
