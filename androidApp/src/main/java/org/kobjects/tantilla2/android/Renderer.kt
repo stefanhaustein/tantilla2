@@ -69,7 +69,7 @@ fun RenderScope(viewModel: TantillaViewModel) {
     val scope = viewModel.scope().value
 
     val builtin = viewModel.mode.value == TantillaViewModel.Mode.HELP
-    val definitions = scope.definitions.values.sortedBy { it.name }.filter { it.builtin == builtin }
+    val definitions = scope.definitions.values.sortedBy { it.name }
 
     Scaffold(
         backgroundColor = Color.Transparent,
@@ -82,13 +82,16 @@ fun RenderScope(viewModel: TantillaViewModel) {
     ) { LazyColumn(
         Modifier
             .fillMaxWidth()
-            .padding(4.dp)
+//            .padding(4.dp),
+                ,
+
+        contentPadding = PaddingValues(8.dp),
         ) {
             for (kind in Definition.Kind.values()) {
                 var list = (if (kind == Definition.Kind.LOCAL_VARIABLE)
                     scope.locals.map { scope.definitions[it]!! }
                 else
-                    scope.definitions.values).filter {
+                    definitions).filter {
                     it.kind == kind && it.builtin == builtin }
 
                 if (list.isNotEmpty()) {
@@ -113,9 +116,8 @@ fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(4.dp))
-            .padding(4.dp),
-        onClick = {
+            .clip(RoundedCornerShape(4.dp)),
+                onClick = {
             when (definition.kind) {
                 Definition.Kind.TRAIT,
                 Definition.Kind.CLASS,
