@@ -217,15 +217,15 @@ object Parser {
         val asParameter = context is ClassDefinition
         if (tokenizer.tryConsume("=")) {
             if (asParameter) {
-                throw IllegalStateException("Parameter initializers NYI")
+                throw tokenizer.error("Parameter initializers NYI")
             }
             initializer = parseExpression(tokenizer, context)
-            if (type != null && type.isAssignableFrom(initializer.type)) {
-                throw IllegalStateException("Initializer type mismatch: ${initializer.type} can't be assigned to $type")
+            if (type != null && !type.isAssignableFrom(initializer.type)) {
+                throw tokenizer.error("Initializer type mismatch: ${initializer.type} can't be assigned to $type")
             }
             type = initializer.type
         } else if (type == null) {
-            throw IllegalStateException("Explicit type or initializer expression required.")
+            throw tokenizer.error("Explicit type or initializer expression required.")
         }
         return context.createLocalVariable(name, type, mutable, initializer)
     }
@@ -320,7 +320,6 @@ object Parser {
                         )
                         Definition.Kind.CLASS,
                         Definition.Kind.TRAIT,
-                        Definition.Kind.CONST,
                         Definition.Kind.IMPL,
                         Definition.Kind.FUNCTION -> SymbolReference(
                             definition.name, definition.type(), definition.value()

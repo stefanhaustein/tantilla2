@@ -53,14 +53,12 @@ abstract class Scope(
         try {
             replacement = Parser.parseDefinition(tokenizer, this, 0)
         } catch (e: Exception) {
+            e.printStackTrace()
             val name = oldDefinition?.name ?: "[error]"
             replacement = Definition(this, name, Definition.Kind.UNPARSEABLE, definitionText = newContent)
         }
         definitions[replacement.name] = replacement
     }
-
-    fun createValue(name: String, value: Any, builtin: Boolean = false) =
-        Definition(this, name, Definition.Kind.CONST, builtin = builtin, explicitValue = value)
 
     fun createUnparsed(kind: Definition.Kind, name: String, definition: String) =
         Definition(this, name, kind, definitionText = definition)

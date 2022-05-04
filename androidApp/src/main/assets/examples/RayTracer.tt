@@ -30,3 +30,43 @@ def toByte(n: float) -> float:
  else:
    int(n * 255)
 
+class Color:
+ let r: float
+ let g: float
+ let b: float
+
+ def scale(self, k: float) -> Color:
+  Color(k * self.r, k * self.g, k * self.b)
+
+ def plus(self, c2: Color) -> Color:
+  Color(self.r + c2.r, self.g + c2.g, self.b + c2.b)
+
+ def times(self, c2: Color) -> Color:
+    Color(self.r * c2.r, self.g * c2.g, self.b * c2.b)
+
+ def toDrawingColor(self) -> float:
+  255*256*65536 + toByte(self.r) * 65536 + toByte(self.g) * 256 + toByte(self.b)
+
+let BLACK = Color(0,0,0)
+let WHITE = Color(1,1,1)
+let GREY = Color(0.5, 0.5, 0.5)
+
+
+class Camera:
+  let pos: Vector
+  let forward: Vector
+  let right: Vector
+  let up: Vector
+
+ def lookingAt(pos: Vector, lookAt: Vector) -> Camera:
+   let down = Vector(0, -1, 0)
+   let forward = lookAt.minus(pos).norm()
+   let right = forward.cross(down).norm().times(1.5)
+   let up = forward.cross(right).norm().times(1.5)
+   Camera(pos, forward, right, up)
+
+
+class Ray:
+ let start: Vector
+ let dir: Vector
+

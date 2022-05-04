@@ -29,7 +29,7 @@ class Definition(
     private var cachedValue = explicitValue
 
     enum class Kind {
-        LOCAL_VARIABLE, FUNCTION, CONST, CLASS, TRAIT, IMPL, UNPARSEABLE
+        LOCAL_VARIABLE, FUNCTION, CLASS, TRAIT, IMPL, UNPARSEABLE
     }
 
     private fun tokenizer(): TantillaTokenizer {
@@ -50,9 +50,8 @@ class Definition(
     }
 
     fun value(): Any?  {
-        if (cachedValue == null && kind != Kind.CONST) {
+        if (cachedValue == null) {
             cachedValue = when (kind) {
-                Kind.CONST -> explicitValue
                 Kind.FUNCTION -> resolveFunction()
                 Kind.CLASS -> resolveClass()
                 Kind.TRAIT -> resolveTrait()
@@ -116,14 +115,14 @@ class Definition(
         Kind.IMPL ->  "impl $name"
         Kind.CLASS ->  "class $name"
         Kind.UNPARSEABLE -> "(unparseable: $name)"
-        Kind.CONST -> "const $name = $explicitValue"
     }
 
     fun serialize(indent: String = "") =
       //  "$indent#start $name\n" +
         when (kind) {
-            Kind.LOCAL_VARIABLE -> "${if (mutable) "var" else "let"} $name"
-            Kind.CONST -> "const $name = $explicitValue"
+            Kind.LOCAL_VARIABLE ->
+                if (initializer == null) title() else "${title()} = ${initializer.serialize()}"
+
             Kind.FUNCTION -> "def $name ${if (cachedValue == null) definitionText else cachedValue.serialize()}"
             Kind.TRAIT ->  "trait $name ${if (cachedValue == null) definitionText else cachedValue.serialize()}"
             Kind.IMPL ->  "impl $name ${if (cachedValue == null) definitionText else cachedValue.serialize()}"

@@ -116,9 +116,11 @@ fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
             .clip(RoundedCornerShape(4.dp))
             .padding(4.dp),
         onClick = {
-                if (definition.value() is Scope) {
-                    viewModel.scope().value = definition.value() as Scope
-                } else {
+            when (definition.kind) {
+                Definition.Kind.TRAIT,
+                Definition.Kind.CLASS,
+                Definition.Kind.IMPL -> viewModel.scope().value = definition.value() as Scope
+                else -> {
                     if (viewModel.mode.value == TantillaViewModel.Mode.HIERARCHY) {
                         viewModel.edit(definition.scope, definition)
                     } else {
@@ -130,7 +132,7 @@ fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
                     }
                 }
             }
-
+        }
     ) {
         Column(Modifier.padding(8.dp)) {
             Text(definition.title())

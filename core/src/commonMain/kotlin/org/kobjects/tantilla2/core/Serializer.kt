@@ -22,20 +22,21 @@ fun Any?.serialize() =
 
     fun serializeIf(expr: Control.If<RuntimeContext>, indent: String): String {
         val sb = StringBuilder()
+        val innerIndent = "  $indent"
         sb.append("if ")
         sb.append(expr.ifThenElse[0].serialize())
-        sb.append(":\n$indent")
-        sb.append(expr.ifThenElse[1].serialize(), "  $indent")
+        sb.append(":\n$innerIndent")
+        sb.append(expr.ifThenElse[1].serialize(), innerIndent)
 
-        for (i in 2 until expr.ifThenElse.size step 2) {
-            sb.append("elif ")
+        for (i in 2 until expr.ifThenElse.size - 1 step 2) {
+            sb.append("\n${indent}elif ")
             sb.append(expr.ifThenElse[i].serialize())
-            sb.append(":\n$indent")
-            sb.append(expr.ifThenElse[i + 1].serialize("  $indent"))
+            sb.append(":\n$innerIndent")
+            sb.append(expr.ifThenElse[i + 1].serialize(innerIndent))
         }
         if (expr.ifThenElse.size % 2 == 1) {
-            sb.append("\n${indent}else:\n$indent")
-            sb.append(expr.ifThenElse[expr.ifThenElse.size - 1].serialize("  $indent"))
+            sb.append("\n${indent}else:\n$innerIndent")
+            sb.append(expr.ifThenElse[expr.ifThenElse.size - 1].serialize(innerIndent))
         }
         return sb.toString()
     }
