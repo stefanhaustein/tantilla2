@@ -40,7 +40,7 @@ class FizzBuzzTest {
         val context = RootScope()
 
         context.defineNative(
-            "print",
+            "print", "internal",
             Void,
             Parameter("text", Str)) { try {
                 output.add(it.variables[0].toString())
