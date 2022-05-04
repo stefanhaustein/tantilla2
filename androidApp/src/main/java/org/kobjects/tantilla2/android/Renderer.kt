@@ -79,14 +79,8 @@ fun RenderScope(viewModel: TantillaViewModel) {
             } else {
                 RenderAppBar(viewModel, scope.title, "Add" to {viewModel.edit(scope, null)})
             } },
-    ) { LazyColumn(
-        Modifier
-            .fillMaxWidth()
-//            .padding(4.dp),
-                ,
-
-        contentPadding = PaddingValues(8.dp),
-        ) {
+    ) {
+        LazyColumn(Modifier.fillMaxWidth(), contentPadding = PaddingValues(8.dp)) {
             for (kind in Definition.Kind.values()) {
                 var list = (if (kind == Definition.Kind.LOCAL_VARIABLE)
                     scope.locals.map { scope.definitions[it]!! }
@@ -103,7 +97,6 @@ fun RenderScope(viewModel: TantillaViewModel) {
                                 RenderDefinition(viewModel, definition)
                             }
                         }
-
                 }
             }
         }
@@ -181,7 +174,7 @@ fun RenderEditor(viewModel: TantillaViewModel) {
                         }
                         if (definition != null) {
                             DropdownMenuItem(onClick = {
-                                scope.definitions.remove(definition!!.name)
+                                scope.definitions.remove(definition.name)
                                 viewModel.editing.value = false
                             }) {
                                 Text("Delete")
