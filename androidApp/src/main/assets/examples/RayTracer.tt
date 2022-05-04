@@ -30,22 +30,24 @@ def toByte(n: float) -> float:
  else:
    int(n * 255)
 
+
 class Color:
- let r: float
- let g: float
- let b: float
+  let r: float
+  let g: float
+  let b: float
 
- def scale(self, k: float) -> Color:
-  Color(k * self.r, k * self.g, k * self.b)
+  def scale(self, k: float) -> Color:
+    Color(k * self.r, k * self.g, k * self.b)
 
- def plus(self, c2: Color) -> Color:
-  Color(self.r + c2.r, self.g + c2.g, self.b + c2.b)
+  def plus(self, c2: Color) -> Color:
+    Color(self.r + c2.r, self.g + c2.g, self.b + c2.b)
 
- def times(self, c2: Color) -> Color:
+  def times(self, c2: Color) -> Color:
     Color(self.r * c2.r, self.g * c2.g, self.b * c2.b)
 
- def toDrawingColor(self) -> float:
-  255*256*65536 + toByte(self.r) * 65536 + toByte(self.g) * 256 + toByte(self.b)
+  def toDrawingColor(self) -> float:
+    255*256*65536 + toByte(self.r) * 65536 + toByte(self.g) * 256 + toByte(self.b)
+
 
 let BLACK = Color(0,0,0)
 let WHITE = Color(1,1,1)
@@ -58,15 +60,38 @@ class Camera:
   let right: Vector
   let up: Vector
 
- def lookingAt(pos: Vector, lookAt: Vector) -> Camera:
-   let down = Vector(0, -1, 0)
-   let forward = lookAt.minus(pos).norm()
-   let right = forward.cross(down).norm().times(1.5)
-   let up = forward.cross(right).norm().times(1.5)
-   Camera(pos, forward, right, up)
+  def lookingAt(pos: Vector, lookAt: Vector) -> Camera:
+    let down = Vector(0, -1, 0)
+    let forward = lookAt.minus(pos).norm()
+    let right = forward.cross(down).norm().times(1.5)
+    let up = forward.cross(right).norm().times(1.5)
+    Camera(pos, forward, right, up)
 
 
 class Ray:
- let start: Vector
- let dir: Vector
+  let start: Vector
+  let dir: Vector
 
+
+class Intersection:
+  let thing: Thing
+  let ray: Ray
+  let dist: float
+
+
+trait Surface:
+  def roughness(self) -> float
+  def diffuse(self, pos: Vector) -> Color
+  def specular(self, pos: Vector) ->  Color
+  def reflect(self, pos: Vector) -> float
+
+
+trait Thing:
+  def surface(self) -> Surface
+  def normal(self, pos: Vector) -> Vector
+  def intersect(self, ray: Ray) -> Intersection
+
+
+class Light:
+  let pos: Vector
+  let color: Color
