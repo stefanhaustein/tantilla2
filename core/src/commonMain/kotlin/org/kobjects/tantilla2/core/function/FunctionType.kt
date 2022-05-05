@@ -17,7 +17,4 @@ open class FunctionType(
         }
         return sb.toString()
     }
-
-    override val name: String
-        get() = toString()
 }

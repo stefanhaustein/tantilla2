@@ -7,6 +7,7 @@ import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.classifier.*
 import org.kobjects.tantilla2.core.control.For
 import org.kobjects.tantilla2.core.function.*
+import tantillaName
 
 
 fun String.unquote() = this.substring(1, this.length - 1)
@@ -260,7 +261,7 @@ object Parser {
         return FunctionType(returnType, parameters)
     }
 
-    fun parseLambda(tokenizer: TantillaTokenizer, context: Scope): Callable {
+    fun parseLambda(tokenizer: TantillaTokenizer, context: Scope): Lambda {
         val type = parseFunctionType(tokenizer, context)
         if (context is TraitDefinition) {
             tokenizer.consume(TokenType.EOF, "Trait methods must not have function bodies.")
@@ -361,7 +362,7 @@ object Parser {
         base: Evaluable<RuntimeContext>,
     ): Evaluable<RuntimeContext> {
         val traitName = tokenizer.consume(TokenType.IDENTIFIER)
-        val className = base.type.name
+        val className = base.type.tantillaName
         val impl = context.resolve("$traitName for $className").value() as ImplDefinition
         impl.resolveAll()
         return As(base, impl)

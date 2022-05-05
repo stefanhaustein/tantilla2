@@ -3,9 +3,7 @@ package org.kobjects.tantilla2
 import org.kobjects.greenspun.core.Str
 import org.kobjects.greenspun.core.Void
 import org.kobjects.tantilla2.core.*
-import org.kobjects.tantilla2.core.function.Callable
-import org.kobjects.tantilla2.core.function.FunctionType
-import org.kobjects.tantilla2.core.function.NativeFunction
+import org.kobjects.tantilla2.core.function.Lambda
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.parser.Parser
 import org.kobjects.tantilla2.core.runtime.RootScope
@@ -57,7 +55,7 @@ class FizzBuzzTest {
         // assertEquals("", impl.toString())
 
         val runtimeContext = RuntimeContext(mutableListOf(null))
-        (impl.value()!! as Callable).eval(runtimeContext)
+        (impl.value()!! as Lambda).eval(runtimeContext)
 
         assertEquals(listOf(
             "1.0", "2.0", "Fizz", "4.0", "Buzz",

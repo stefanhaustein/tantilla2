@@ -5,7 +5,7 @@ import org.kobjects.greenspun.core.Type
 import org.kobjects.tantilla2.core.classifier.ClassDefinition
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
-import org.kobjects.tantilla2.core.function.Callable
+import org.kobjects.tantilla2.core.function.Lambda
 import org.kobjects.tantilla2.core.parser.Parser
 import org.kobjects.tantilla2.core.parser.TantillaTokenizer
 import org.kobjects.tantilla2.core.parser.TokenType
@@ -100,7 +100,7 @@ class Definition(
         return implContext
     }
 
-    private fun resolveFunction(): Callable {
+    private fun resolveFunction(): Lambda {
 
             println("Resolving function $name: $definitionText")
             return Parser.parseLambda(tokenizer(), scope)

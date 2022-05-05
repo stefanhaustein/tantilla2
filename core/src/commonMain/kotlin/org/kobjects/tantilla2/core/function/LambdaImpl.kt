@@ -7,7 +7,7 @@ import org.kobjects.tantilla2.core.serialize
 class LambdaImpl(
     override val type: FunctionType,
     val body: Evaluable<RuntimeContext>,
-    ) : Callable {
+    ) : Lambda {
 
 
         // get() = "(${type.parameters}) -> ${type.returnType}"

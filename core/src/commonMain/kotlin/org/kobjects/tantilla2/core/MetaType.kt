@@ -3,6 +3,5 @@ package org.kobjects.tantilla2.core
 import org.kobjects.greenspun.core.Type
 
 open class MetaType(open val wrapped: Type) : Type {
-    override val name: String
-        get() = "Meta<$wrapped>"
+    override fun toString(): String = "Meta<$wrapped>"
 }

@@ -3,6 +3,7 @@ package org.kobjects.tantilla2.core.function
 import org.kobjects.tantilla2.core.RuntimeContext
 import org.kobjects.tantilla2.core.Typed
 
-interface Callable : Typed {
+interface Lambda : Typed {
+    override val type: FunctionType
     fun eval(context: RuntimeContext): Any?
 }

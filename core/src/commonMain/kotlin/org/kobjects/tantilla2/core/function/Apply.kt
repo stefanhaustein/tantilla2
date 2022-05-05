@@ -3,17 +3,18 @@ package org.kobjects.tantilla2.core.function
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.tantilla2.core.RuntimeContext
 
+
 class Apply(
     val callable: Evaluable<RuntimeContext>,
     val parameters: List<Evaluable<RuntimeContext>>
 ) : Evaluable<RuntimeContext> {
     override fun eval(context: RuntimeContext): Any? {
-        val shouldBeFunction = callable.eval(context)
-        if (!(shouldBeFunction is Callable)) {
-            throw IllegalStateException("Lambda expected; got $shouldBeFunction")
+        val shouldBeLambda = callable.eval(context)
+        if (shouldBeLambda !is Lambda) {
+            throw IllegalStateException("Lambda expected; got $shouldBeLambda")
         }
-        val function = shouldBeFunction as Callable
-        val functionContext = RuntimeContext(MutableList<Any?>((function.type as FunctionType).parameters.size) {
+        val function = shouldBeLambda as Lambda
+        val functionContext = RuntimeContext(MutableList<Any?>(function.type.parameters.size) {
 
             if (it < parameters.size) {
                 println("Evaluating ${parameters[it]}")

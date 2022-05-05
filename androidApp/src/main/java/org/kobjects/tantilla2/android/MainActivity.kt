@@ -4,29 +4,12 @@ import android.graphics.Bitmap
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Colors
-import androidx.compose.runtime.Composable
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.layout.ContentScale
 import androidx.lifecycle.coroutineScope
-import org.kobjects.greenspun.core.F64
-import org.kobjects.greenspun.core.Void
 import org.kobjects.konsole.compose.ComposeKonsole
-import org.kobjects.konsole.compose.RenderKonsole
 import org.kobjects.tantilla2.console.ConsoleLoop
-import org.kobjects.tantilla2.core.runtime.RootScope
-import org.kobjects.tantilla2.core.function.FunctionType
-import org.kobjects.tantilla2.core.function.NativeFunction
-import org.kobjects.tantilla2.core.function.Parameter
 
 
 fun greet(): String {
