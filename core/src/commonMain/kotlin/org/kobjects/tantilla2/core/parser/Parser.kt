@@ -2,12 +2,13 @@ package org.kobjects.tantilla2.core.parser
 
 import org.kobjects.greenspun.core.*
 import org.kobjects.parserlib.expressionparser.ExpressionParser
-import org.kobjects.tantilla2.core.SymbolReference
+import org.kobjects.tantilla2.core.node.SymbolReference
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.classifier.*
-import org.kobjects.tantilla2.core.control.For
+import org.kobjects.tantilla2.core.node.For
 import org.kobjects.tantilla2.core.function.*
-import tantillaName
+import org.kobjects.tantilla2.core.node.*
+import org.kobjects.tantilla2.core.runtime.ListType
 
 
 fun String.unquote() = this.substring(1, this.length - 1)
@@ -328,7 +329,21 @@ object Parser {
                         Definition.Kind.UNPARSEABLE -> throw tokenizer.error("Unparseable reference.")
                     }
             }
-            else -> throw tokenizer.error("Number or identifier expected here.")
+            else -> {
+                when (tokenizer.current.text) {
+                    "(" -> {
+                        tokenizer.consume("(")
+                        val result = parseExpression(tokenizer, context)
+                        tokenizer.consume(")")
+                        result
+                    }
+                    "[" -> {
+                        tokenizer.consume("[")
+                        ListLiteral(parseList(tokenizer, context, "]"))
+                    }
+                    else -> throw tokenizer.error("Number, identifier or opening bracket expected here.")
+                }
+            }
         }
 
     fun parseType(tokenizer: TantillaTokenizer, context: Scope): Type {
@@ -339,6 +354,12 @@ object Parser {
             return Str
         }
         val name = tokenizer.consume(TokenType.IDENTIFIER)
+        if (name.equals("List")) {
+            tokenizer.consume("[")
+            val elementType = parseType(tokenizer, context)
+            tokenizer.consume("]")
+            return ListType(elementType)
+        }
         return context.resolve(name).value() as Type
     }
 
@@ -352,7 +373,7 @@ object Parser {
                 result.add(parseExpression(tokenizer, context))
             } while (tokenizer.tryConsume(","))
         }
-        tokenizer.consume(endMarker, ") or , expected")
+        tokenizer.consume(endMarker, "$endMarker or , expected")
         return result.toList()
     }
 
@@ -403,15 +424,16 @@ object Parser {
     }
 
     val expressionParser = ExpressionParser<TantillaTokenizer, Scope, Evaluable<RuntimeContext>>(
-        ExpressionParser.suffix(7, "as") {
+        ExpressionParser.suffix(8, "as") {
           tokenizer, context, _, base -> parseAs(tokenizer, context, base) },
-        ExpressionParser.suffix(6, ".") {
+        ExpressionParser.suffix(7, ".") {
                 tokenizer, context, _, base -> parseProperty(tokenizer, context, base) },
-        ExpressionParser.suffix(5, "(") {
+        ExpressionParser.suffix(6, "(") {
                 tokenizer, context, _, base -> parseApply(tokenizer, context, base) },
-        ExpressionParser.infix(4, "*") { _, _, _, l, r -> F64.Mul(l, r)},
-        ExpressionParser.infix(4, "/") { _, _, _, l, r -> F64.Div(l, r)},
-        ExpressionParser.infix(4, "%") { _, _, _, l, r -> F64.Mod(l, r)},
+        ExpressionParser.infix(5, "*") { _, _, _, l, r -> F64.Mul(l, r)},
+        ExpressionParser.infix(5, "/") { _, _, _, l, r -> F64.Div(l, r)},
+        ExpressionParser.infix(5, "%") { _, _, _, l, r -> F64.Mod(l, r)},
+        ExpressionParser.prefix(4, "-") {_, _, _, expr -> F64.Sub(F64.Const<RuntimeContext>(0.0), expr)},
         ExpressionParser.infix(3, "+") { _, _, _, l, r -> F64.Add(l, r)},
         ExpressionParser.infix(3, "-") { _, _, _, l, r -> F64.Sub(l, r)},
         ExpressionParser.infix(2, "==") { _, _, _, l, r -> F64.Eq(l, r)},

@@ -9,8 +9,6 @@ import org.kobjects.tantilla2.core.function.Lambda
 import org.kobjects.tantilla2.core.parser.Parser
 import org.kobjects.tantilla2.core.parser.TantillaTokenizer
 import org.kobjects.tantilla2.core.parser.TokenType
-import tantillaName
-import type
 
 class Definition(
     val scope: Scope,

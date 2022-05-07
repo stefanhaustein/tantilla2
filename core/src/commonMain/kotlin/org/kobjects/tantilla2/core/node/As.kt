@@ -1,8 +1,10 @@
-package org.kobjects.tantilla2.core.classifier
+package org.kobjects.tantilla2.core.node
 
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.greenspun.core.Type
 import org.kobjects.tantilla2.core.RuntimeContext
+import org.kobjects.tantilla2.core.classifier.Adapter
+import org.kobjects.tantilla2.core.classifier.ImplDefinition
 
 class As(
     val base: Evaluable<RuntimeContext>,

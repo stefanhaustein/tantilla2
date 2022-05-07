@@ -2,7 +2,7 @@ package org.kobjects.tantilla2.core.function
 
 import org.kobjects.greenspun.core.Type
 import org.kobjects.greenspun.core.Void
-import tantillaName
+import org.kobjects.tantilla2.core.tantillaName
 
 open class FunctionType(
     val returnType: Type,

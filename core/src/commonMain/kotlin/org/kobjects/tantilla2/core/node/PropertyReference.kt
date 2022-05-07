@@ -1,8 +1,7 @@
-package org.kobjects.tantilla2.core.classifier
+package org.kobjects.tantilla2.core.node
 
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.greenspun.core.Type
-import org.kobjects.tantilla2.core.Assignable
 import org.kobjects.tantilla2.core.RuntimeContext
 
 class PropertyReference(

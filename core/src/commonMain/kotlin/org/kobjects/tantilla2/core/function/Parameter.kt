@@ -1,7 +1,7 @@
 package org.kobjects.tantilla2.core.function
 
 import org.kobjects.greenspun.core.Type
-import tantillaName
+import org.kobjects.tantilla2.core.tantillaName
 
 data class Parameter(
     val name: String,
