@@ -2,7 +2,7 @@ package org.kobjects.tantilla2.core.runtime
 
 import kotlin.math.abs
 
-fun hsl(h: Double, s: Double, l: Double): Int {
+fun hsl(h: Double, s: Double, l: Double, a: Double = 1.0): Int {
     val c = (1.0 - abs(2*l - 1)) * s
     val h2 = h/60
     val x = c * (1.0 - abs(h2 % 2 - 1))
@@ -38,5 +38,6 @@ fun hsl(h: Double, s: Double, l: Double): Int {
     val r255 = ((r + m) * 255).toInt()
     val g255 = ((g + m) * 255).toInt()
     val b255 = ((b + m) * 255).toInt()
-    return (255 shl 24) or (r255 shl 16) or (g255 shl 8) or b255
+    val a255 = (a * 255).toInt()
+    return (a255 shl 24) or (r255 shl 16) or (g255 shl 8) or b255
 }

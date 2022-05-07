@@ -7,9 +7,12 @@ import androidx.activity.compose.setContent
 import androidx.compose.material.Colors
 import androidx.compose.material.MaterialTheme
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.coroutineScope
 import org.kobjects.konsole.compose.ComposeKonsole
 import org.kobjects.tantilla2.console.ConsoleLoop
+import org.kobjects.tantilla2.core.runtime.hsl
+import java.lang.Math.abs
 
 
 fun greet(): String {
@@ -29,9 +32,17 @@ class MainActivity : AppCompatActivity() {
         val bitmap = Bitmap.createBitmap(
             config.screenWidthDp, config.screenHeightDp, Bitmap.Config.ARGB_8888)
 
+        val h2 = bitmap.height / 2
+        val w2 = bitmap.width / 2
+        val gray = Color.Gray.toArgb()
+
         for (y in 0 until bitmap.height) {
             for (x in 0 until bitmap.width) {
-                bitmap.setPixel(x, y, x*y or 0x7f000000)
+                val color: Int = if ((x == w2 || y == h2) && (abs(x - w2) <= 100) && (abs(y - h2) <= 100)) gray
+             //   else if (x + y > w2 + h2 + 320 && x + y < w2 + h2 + 320 + 90)
+              //      hsl((x + y - w2 - h2 - 320) * 4.0, 1.0, 0.5, 0.3)
+                else 0
+                bitmap.setPixel(x, y, color)
             }
         }
 

@@ -29,7 +29,7 @@ class ConsoleLoop(
         scope.defineNative("print",
             "Print the value of the text parameter to the console.",
             Void, Parameter("text", Str)) {
-            konsole.write(it.variables[0].toString())
+            konsole.write(it[0].toString())
         }
     }
 

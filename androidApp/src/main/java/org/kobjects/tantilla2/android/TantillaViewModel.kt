@@ -1,6 +1,7 @@
 package org.kobjects.tantilla2.android
 
 import android.graphics.Bitmap
+import android.graphics.Canvas
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import org.kobjects.greenspun.core.F64
@@ -45,6 +46,24 @@ class TantillaViewModel(
                 (it.variables[1] as Double).toInt(),
                 (it.variables[2] as Double).toInt())
         }
+
+        val penDefinition = PenDefinition(console.scope)
+        console.scope.definitions["Pen"] = Definition(
+            scope = console.scope,
+            kind = Definition.Kind.CLASS,
+            builtin = true,
+            name = "Pen",
+            explicitValue = penDefinition)
+
+        val penIndex = console.scope.declareLocalVariable("pen", penDefinition, false)
+        while (console.runtimeContext.variables.size < penIndex) {
+            console.runtimeContext.variables.add(null)
+        }
+        val canvas = Canvas(bitmap)
+        canvas.translate(bitmap.width / 2f, bitmap.height / 2f)
+        canvas.scale(1f, -1f)
+
+        console.runtimeContext.variables.add(Pen(canvas))
     }
 
     fun scope(): MutableState<Scope> = if (mode.value == Mode.HELP) builtinScope else userScope

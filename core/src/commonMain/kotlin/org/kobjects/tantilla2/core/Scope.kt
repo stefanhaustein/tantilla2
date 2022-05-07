@@ -6,6 +6,9 @@ import org.kobjects.tantilla2.core.classifier.ClassDefinition
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.function.FunctionScope
+import org.kobjects.tantilla2.core.function.FunctionType
+import org.kobjects.tantilla2.core.function.NativeFunction
+import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.parser.Parser
 import org.kobjects.tantilla2.core.parser.TantillaTokenizer
 
@@ -96,5 +99,23 @@ abstract class Scope(
     }
 
 
+    fun defineNative(
+        name: String,
+        docString: String,
+        returnType: Type,
+        vararg parameter: Parameter,
+        operation: (RuntimeContext) -> Any?) {
+        val type = FunctionType(returnType, parameter.toList())
+        val function = NativeFunction(type, operation)
+        definitions[name] = Definition(
+            this,
+            name,
+            Definition.Kind.FUNCTION,
+            explicitType = type,
+            explicitValue = function,
+            builtin = true,
+            docString = docString
+        )
+    }
 
 }
