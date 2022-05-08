@@ -26,18 +26,18 @@ abstract class Scope(
 
 */
 
-    fun createLocalVariable(name: String, type: Type, mutable: Boolean, initializer: Evaluable<RuntimeContext>?) =
+    fun createLocalVariable(name: String, type: Type, mutable: Boolean, initializer: Evaluable<RuntimeContext>?, builtin: Boolean = false) =
         Definition(
             this,
             name,
             Definition.Kind.LOCAL_VARIABLE,
             explicitType = type,
-            builtin = false,
+            builtin = builtin,
             mutable = mutable,
             initializer = initializer)
 
-    fun declareLocalVariable(name: String, type: Type, mutable: Boolean): Int {
-        val definition = createLocalVariable(name, type, mutable, null)
+    fun declareLocalVariable(name: String, type: Type, mutable: Boolean, builtin: Boolean = false): Int {
+        val definition = createLocalVariable(name, type, mutable, null, builtin)
         definitions[name] = definition
         locals.add(name)
         return locals.size - 1

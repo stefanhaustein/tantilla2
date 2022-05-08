@@ -5,6 +5,7 @@ import android.graphics.Canvas
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import org.kobjects.greenspun.core.F64
+import org.kobjects.greenspun.core.Type
 import org.kobjects.greenspun.core.Void
 import org.kobjects.tantilla2.console.ConsoleLoop
 import org.kobjects.tantilla2.core.Definition
@@ -12,6 +13,8 @@ import org.kobjects.tantilla2.core.Scope
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.parser.Parser
 import org.kobjects.tantilla2.core.runtime.RootScope
+import org.kobjects.tantilla2.stdlib.PenDefinition
+import org.kobjects.tantilla2.stdlib.StdLib
 
 class TantillaViewModel(
     val console: ConsoleLoop,
@@ -47,15 +50,11 @@ class TantillaViewModel(
                 (it.variables[2] as Double).toInt())
         }
 
-        val penDefinition = PenDefinition(console.scope)
-        console.scope.definitions["Pen"] = Definition(
-            scope = console.scope,
-            kind = Definition.Kind.CLASS,
-            builtin = true,
-            name = "Pen",
-            explicitValue = penDefinition)
+        StdLib.setup(console.scope)
+        val penDefinition = console.scope.definitions["Pen"]!!.value() as Type
 
-        val penIndex = console.scope.declareLocalVariable("pen", penDefinition, false)
+        val penIndex = console.scope.declareLocalVariable(
+            "pen", penDefinition, false, true)
         while (console.runtimeContext.variables.size < penIndex) {
             console.runtimeContext.variables.add(null)
         }
@@ -63,7 +62,7 @@ class TantillaViewModel(
         canvas.translate(bitmap.width / 2f, bitmap.height / 2f)
         canvas.scale(1f, -1f)
 
-        console.runtimeContext.variables.add(Pen(canvas))
+        console.runtimeContext.variables.add(PenImpl(penDefinition, canvas))
     }
 
     fun scope(): MutableState<Scope> = if (mode.value == Mode.HELP) builtinScope else userScope

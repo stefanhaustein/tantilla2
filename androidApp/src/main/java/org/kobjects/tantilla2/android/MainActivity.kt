@@ -38,7 +38,9 @@ class MainActivity : AppCompatActivity() {
 
         for (y in 0 until bitmap.height) {
             for (x in 0 until bitmap.width) {
-                val color: Int = if ((x == w2 || y == h2) && (abs(x - w2) <= 100) && (abs(y - h2) <= 100)) gray
+                val color: Int = if ((x == w2 || y == h2)
+                    && (abs(x - w2) <= 100 && abs(x - w2) % 10 == 0)
+                    && (abs(y - h2) <= 100 && abs(y - h2) % 10 == 0)) gray
              //   else if (x + y > w2 + h2 + 320 && x + y < w2 + h2 + 320 + 90)
               //      hsl((x + y - w2 - h2 - 320) * 4.0, 1.0, 0.5, 0.3)
                 else 0

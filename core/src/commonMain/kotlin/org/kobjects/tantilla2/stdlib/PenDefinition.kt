@@ -1,6 +1,5 @@
-package org.kobjects.tantilla2.android
+package org.kobjects.tantilla2.stdlib
 
-import android.graphics.Canvas
 import org.kobjects.greenspun.core.F64
 import org.kobjects.greenspun.core.Type
 import org.kobjects.greenspun.core.Void
@@ -22,11 +21,7 @@ class PenDefinition(parent: Scope) : NativeScope("Pen", parent), Type {
             Parameter("y2", F64)
         ) {
             val pen = it[0] as Pen
-            pen.canvas.drawLine(
-                it.f64(1).toFloat(),
-                it.f64(2).toFloat(),
-                it.f64(3).toFloat(),
-                it.f64(4).toFloat(), pen.linePaint)
+            pen.drawLine(it.f64(1), it.f64(2), it.f64(3), it.f64(4))
         }
     }
 

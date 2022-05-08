@@ -4,12 +4,13 @@ import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.tantilla2.core.RuntimeContext
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Lambda
+import org.kobjects.tantilla2.core.serialize
 
 
 class Apply(
     val callable: Evaluable<RuntimeContext>,
     val parameters: List<Evaluable<RuntimeContext>>
-) : Evaluable<RuntimeContext> {
+) : Evaluable<RuntimeContext>, Serializable {
     override fun eval(context: RuntimeContext): Any? {
         val shouldBeLambda = callable.eval(context)
         if (shouldBeLambda !is Lambda) {
@@ -38,6 +39,16 @@ class Apply(
     override val type
         get() = (callable.type as FunctionType).returnType
 
-    override fun toString(): String =
-        "${callable}(${parameters.joinToString(", ")})"
+    override fun serialize(sb: StringBuilder, indent: String, parentPrcedence: Int) {
+        callable.serialize(sb, indent)
+        sb.append("(")
+        if (parameters.size > 0) {
+            parameters[0].serialize(sb, indent)
+            for (i in 1 until parameters.size) {
+                sb.append(", ")
+                parameters[i].serialize(sb, indent)
+            }
+        }
+        sb.append(")")
+    }
 }
