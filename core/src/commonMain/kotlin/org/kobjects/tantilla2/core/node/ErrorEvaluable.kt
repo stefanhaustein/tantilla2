@@ -15,5 +15,4 @@ class ErrorEvaluable(val errorMessage: String) : Evaluable<RuntimeContext> {
 
     override val type
         get() = Void
-
 }

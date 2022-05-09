@@ -2,7 +2,9 @@ package org.kobjects.tantilla2.core.node
 
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.greenspun.core.Type
+import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.RuntimeContext
+import org.kobjects.tantilla2.core.serialize
 
 class PropertyReference(
     val base: Evaluable<RuntimeContext>,
@@ -10,7 +12,7 @@ class PropertyReference(
     override val type: Type,
     val index: Int,
     val mutable: Boolean
-) : Assignable {
+) : Assignable, Serializable {
     override fun children(): List<Evaluable<RuntimeContext>> = emptyList()
 
     override fun eval(ctx: RuntimeContext): Any? {
@@ -26,5 +28,9 @@ class PropertyReference(
         self.variables[index] = value
     }
 
-    override fun toString(): String = "$base.$name"
+    override fun serialize(writer: CodeWriter, prcedence: Int) {
+        base.serialize(writer)
+        writer.append('.').append(name)
+    }
+
 }

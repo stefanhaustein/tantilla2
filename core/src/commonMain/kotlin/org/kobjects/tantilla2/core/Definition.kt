@@ -119,12 +119,12 @@ class Definition(
       //  "$indent#start $name\n" +
         when (kind) {
             Kind.LOCAL_VARIABLE ->
-                if (initializer == null) title() else "${title()} = ${initializer.serialize()}"
+                if (initializer == null) title() else "${title()} = ${initializer.serialize(indent)}"
 
-            Kind.FUNCTION -> "def $name ${if (cachedValue == null) definitionText else cachedValue.serialize()}"
-            Kind.TRAIT ->  "trait $name ${if (cachedValue == null) definitionText else cachedValue.serialize()}"
-            Kind.IMPL ->  "impl $name ${if (cachedValue == null) definitionText else cachedValue.serialize()}"
-            Kind.CLASS ->  "class $name ${if (cachedValue == null) definitionText else cachedValue.serialize()}"
+            Kind.FUNCTION -> "def $name ${if (cachedValue == null) definitionText else cachedValue.serialize(indent)}"
+            Kind.TRAIT ->  "trait $name ${if (cachedValue == null) definitionText else cachedValue.serialize(indent)}"
+            Kind.IMPL ->  "impl $name ${if (cachedValue == null) definitionText else cachedValue.serialize(indent)}"
+            Kind.CLASS ->  "class $name ${if (cachedValue == null) definitionText else cachedValue.serialize(indent)}"
             Kind.UNPARSEABLE -> definitionText
         }
         //        "\n$indent#end $name\n"

@@ -2,7 +2,9 @@ package org.kobjects.tantilla2.core.node
 
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.greenspun.core.Type
+import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.RuntimeContext
+import org.kobjects.tantilla2.core.serialize
 
 
 data class SymbolReference(
@@ -15,5 +17,7 @@ data class SymbolReference(
 
     override fun reconstruct(newChildren: List<Evaluable<RuntimeContext>>) = this
 
-    override fun toString() = name
+    override fun serialize(writer: CodeWriter, prcedence: Int) {
+        writer.append(name)
+    }
 }

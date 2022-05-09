@@ -2,6 +2,7 @@ package org.kobjects.tantilla2.core.node
 
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.greenspun.core.Type
+import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.RuntimeContext
 
 class LocalVariableReference(
@@ -9,7 +10,7 @@ class LocalVariableReference(
     override val type: Type,
     val index: Int,
     val mutable: Boolean
-) : Assignable {
+) : Assignable, Serializable {
     override fun children(): List<Evaluable<RuntimeContext>> = emptyList()
 
     override fun eval(ctx: RuntimeContext): Any? = ctx.variables[index]
@@ -21,5 +22,7 @@ class LocalVariableReference(
         context.variables[index] = value
     }
 
-    override fun toString(): String = name
+    override fun serialize(writer: CodeWriter, prcedence: Int) {
+        writer.append(name)
+    }
 }

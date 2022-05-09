@@ -1,6 +1,7 @@
 package org.kobjects.tantilla2.core.node
 
 import org.kobjects.greenspun.core.Evaluable
+import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.RuntimeContext
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Lambda
@@ -39,14 +40,14 @@ class Apply(
     override val type
         get() = (callable.type as FunctionType).returnType
 
-    override fun serialize(sb: StringBuilder, indent: String, parentPrcedence: Int) {
-        callable.serialize(sb, indent)
+    override fun serialize(sb: CodeWriter, parentPrcedence: Int) {
+        callable.serialize(sb)
         sb.append("(")
         if (parameters.size > 0) {
-            parameters[0].serialize(sb, indent)
+            parameters[0].serialize(sb)
             for (i in 1 until parameters.size) {
                 sb.append(", ")
-                parameters[i].serialize(sb, indent)
+                parameters[i].serialize(sb)
             }
         }
         sb.append(")")
