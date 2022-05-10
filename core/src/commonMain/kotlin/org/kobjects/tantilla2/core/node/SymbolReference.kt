@@ -10,7 +10,7 @@ import org.kobjects.tantilla2.core.serialize
 data class SymbolReference(
     val name: String,
     override val type: Type,
-    val value: Any?) : Evaluable<RuntimeContext> {
+    val value: Any?) : Evaluable<RuntimeContext>, Serializable {
     override fun children() = emptyList<Evaluable<RuntimeContext>>()
 
     override fun eval(ctx: RuntimeContext): Any? = value
