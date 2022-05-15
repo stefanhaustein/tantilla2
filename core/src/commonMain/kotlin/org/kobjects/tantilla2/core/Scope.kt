@@ -14,7 +14,7 @@ import org.kobjects.tantilla2.core.parser.TantillaTokenizer
 
 abstract class Scope(
     val parentContext: Scope?
-) {
+): SerializableCode {
     var docString: String = ""
     val definitions = mutableMapOf<String, Definition>()
     var locals = mutableListOf<String>()
@@ -66,26 +66,24 @@ abstract class Scope(
         Definition(this, name, kind, definitionText = definition)
 
 
-    override fun toString() = serialize()
-
-    fun serialize(indent: String = ""): String {
+    override fun serializeCode(writer: CodeWriter, precedence: Int) {
         val sb = StringBuilder()
-        val innerIndent = "  $indent"
 
         when (this) {
-            is ClassDefinition -> sb.append("${indent}class $name:\n")
-            is TraitDefinition -> sb.append("${indent}trait $name:\n")
-            is ImplDefinition -> sb.append("${indent}impl $name:\n")
+            is ClassDefinition -> writer.keyword("class").append(' ').declaration(name)
+            is TraitDefinition -> writer.keyword("trait").append(' ').declaration(name)
+            is ImplDefinition -> writer.keyword("impl").append(' ').declaration(name)
             is FunctionScope -> {
-                sb.append("${indent}lambda ")
+                sb.append("lambda ")
             }
         }
-
+        writer.indent()
         for (definition in definitions.values) {
-            sb.append(definition.serializeCode(innerIndent)).append('\n')
+            writer.newline()
+            writer.newline()
+            writer.appendCode(definition)
         }
-
-        return sb.toString()
+        writer.outdent()
     }
 
     fun resolve(name: String): Definition {
