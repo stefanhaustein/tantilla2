@@ -5,7 +5,6 @@ import org.kobjects.greenspun.core.Type
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.RuntimeContext
 import org.kobjects.tantilla2.core.SerializableCode
-import org.kobjects.tantilla2.core.serializeCode
 
 class PropertyReference(
     val base: Evaluable<RuntimeContext>,
@@ -30,7 +29,7 @@ class PropertyReference(
     }
 
     override fun serializeCode(writer: CodeWriter, precedence: Int) {
-        base.serializeCode(writer)
+        writer.appendCode(base)
         writer.append('.').append(name)
     }
 

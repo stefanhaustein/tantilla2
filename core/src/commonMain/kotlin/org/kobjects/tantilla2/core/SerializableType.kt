@@ -9,21 +9,7 @@ interface SerializableType : Type {
 }
 
 
-fun Type.serializeType(writer: CodeWriter) {
-    when (this) {
-        is SerializableType -> serializeType(writer)
-        F64 -> writer.append("float")
-        Str -> writer.append("str")
-        else -> writer.append(toString())
-    }
-}
-
-
 val Type.typeName: String
-    get() {
-        val writer = CodeWriter()
-        serializeType(writer)
-        return writer.toString()
-    }
+    get() = CodeWriter().appendType(this).toString()
 
 

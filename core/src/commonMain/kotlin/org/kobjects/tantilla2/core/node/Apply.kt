@@ -6,7 +6,6 @@ import org.kobjects.tantilla2.core.RuntimeContext
 import org.kobjects.tantilla2.core.SerializableCode
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Lambda
-import org.kobjects.tantilla2.core.serializeCode
 
 
 class Apply(
@@ -42,13 +41,13 @@ class Apply(
         get() = (callable.type as FunctionType).returnType
 
     override fun serializeCode(sb: CodeWriter, parentPrcedence: Int) {
-        callable.serializeCode(sb)
+        sb.appendCode(callable)
         sb.append("(")
         if (parameters.size > 0) {
-            parameters[0].serializeCode(sb)
+            sb.appendCode(parameters[0])
             for (i in 1 until parameters.size) {
                 sb.append(", ")
-                parameters[i].serializeCode(sb)
+                sb.appendCode(parameters[i])
             }
         }
         sb.append(")")

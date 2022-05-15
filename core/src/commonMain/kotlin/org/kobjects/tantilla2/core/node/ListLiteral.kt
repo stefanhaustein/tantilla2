@@ -22,10 +22,10 @@ class ListLiteral(
     override fun serializeCode(writer: CodeWriter, precedence: Int) {
         writer.append('[')
         if (elements.isNotEmpty()) {
-            elements[0].serializeCode(writer)
+            writer.appendCode(elements[0])
             for (i in 1 until elements.size) {
                 writer.append(", ")
-                elements[i].serializeCode(writer)
+                writer.appendCode(elements[i])
             }
         }
         writer.append(']')

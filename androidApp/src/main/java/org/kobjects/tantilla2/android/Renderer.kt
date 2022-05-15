@@ -135,7 +135,7 @@ fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
     ) {
         Column(Modifier.padding(8.dp)) {
             val writer = CodeWriter()
-            definition.title(writer)
+            definition.serializeTitle(writer)
             Text(ansiToAnnotatedString(writer.toString()))
             if (viewModel.showDocString.value == definition) {
                 Divider(Modifier.padding(0.dp, 6.dp), color = Color.Transparent)

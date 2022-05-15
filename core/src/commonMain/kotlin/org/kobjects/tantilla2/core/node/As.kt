@@ -7,7 +7,6 @@ import org.kobjects.tantilla2.core.RuntimeContext
 import org.kobjects.tantilla2.core.SerializableCode
 import org.kobjects.tantilla2.core.classifier.Adapter
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
-import org.kobjects.tantilla2.core.serializeCode
 
 class As(
     val base: Evaluable<RuntimeContext>,
@@ -21,10 +20,11 @@ class As(
     override fun eval(ctx: RuntimeContext) =
         Adapter(impl.vmt, base.eval(ctx) as RuntimeContext)
 
-    override fun reconstruct(newChildren: List<Evaluable<RuntimeContext>>) = As(newChildren[0], impl)
+    override fun reconstruct(newChildren: List<Evaluable<RuntimeContext>>) =
+        As(newChildren[0], impl)
 
     override fun serializeCode(sb: CodeWriter, precedence: Int) {
-        base.serializeCode(sb)
+        sb.appendCode(base)
         sb.append(" as ")
         sb.append(impl.trait.name)
     }

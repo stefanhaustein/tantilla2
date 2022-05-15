@@ -7,7 +7,6 @@ import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.RuntimeContext
 import org.kobjects.tantilla2.core.SerializableCode
 import org.kobjects.tantilla2.core.runtime.Range
-import org.kobjects.tantilla2.core.serializeCode
 
 class For(
     val iteratorName: String,
@@ -34,9 +33,9 @@ class For(
 
     override fun serializeCode(writer: CodeWriter, precedence: Int) {
         writer.append("for ").append(iteratorName).append(" in ")
-        rangeExpression.serializeCode(writer)
+        writer.appendCode(rangeExpression)
         writer.append(':').indent().newline()
-        bodyExpression.serializeCode(writer)
+        writer.appendCode(bodyExpression)
         writer.outdent()
     }
 

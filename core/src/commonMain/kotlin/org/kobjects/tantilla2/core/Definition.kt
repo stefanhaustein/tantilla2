@@ -104,47 +104,51 @@ class Definition(
 
     override fun toString() = serializeCode()
 
-    fun title(writer: CodeWriter) {
-        serialize(writer, true)
-    }
 
-    fun serialize(writer: CodeWriter, titleOnly: Boolean) {
+    fun serializeTitle(writer: CodeWriter) {
         when (kind) {
             Kind.LOCAL_VARIABLE -> writer.keyword(if (mutable) "var " else "let ")
                 .declaration(name)
                 .append(if (explicitType != null) ": " + explicitType.typeName else "")
-            Kind.FUNCTION -> writer.keyword("def ").declaration(name).append(type().typeName)
-            Kind.TRAIT -> writer.keyword("trait ").declaration(name)
-            Kind.IMPL -> writer.keyword("impl ").declaration(name)
-            Kind.CLASS -> writer.keyword("class ").declaration(name)
-            Kind.UNPARSEABLE -> if (titleOnly) {
-                writer.append("(unparseable: $name)")
-            }
-        }
-        if (titleOnly) {
-            return
-        }
-        if (kind == Kind.LOCAL_VARIABLE) {
-            if (initializer != null) {
-                writer.append(" = ")
-                serializeCode(writer)
-            }
-        } else if (kind == Kind.UNPARSEABLE) {
-            writer.append(definitionText)
-        } else if (cachedValue == null) {
-            writer.append(definitionText)
-        } else {
-            writer.append(":")
-            writer.indent()
-            writer.newline()
-            cachedValue.serializeCode(writer)
+            Kind.FUNCTION -> writer.keyword("def ").declaration(name).appendType(type())
+            Kind.TRAIT,
+            Kind.IMPL,
+            Kind.CLASS -> writer.keyword(kind.name.lowercase()).append(' ').declaration(name)
+            Kind.UNPARSEABLE -> writer.append("(unparseable: $name)")
         }
     }
 
 
     override fun serializeCode(writer: CodeWriter, precedence: Int) {
-        serialize(writer, false)
+       when (kind) {
+           Kind.LOCAL_VARIABLE -> {
+               serializeTitle(writer)
+               if (initializer != null) {
+                   writer.append(" = ")
+                   writer.appendCode(initializer)
+               }
+           }
+           Kind.UNPARSEABLE -> writer.append(definitionText)
+           Kind.TRAIT,
+           Kind.CLASS,
+           Kind.IMPL -> {
+               if (cachedValue != null) {
+                   writer.appendCode(cachedValue)
+               } else {
+                   writer.append(definitionText)
+               }
+           }
+           Kind.FUNCTION -> {
+               writer.keyword("def ").declaration(name)
+               if (cachedValue != null) {
+                   writer.appendCode(cachedValue)
+               } else {
+                    writer.append(definitionText)
+               }
+           }
+       }
     }
+
 
 
     fun index() = scope.locals.indexOf(name)

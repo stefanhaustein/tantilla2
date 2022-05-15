@@ -6,7 +6,6 @@ import org.kobjects.greenspun.core.Void
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.RuntimeContext
 import org.kobjects.tantilla2.core.SerializableCode
-import org.kobjects.tantilla2.core.serializeCode
 
 class Assignment(
     val target: Assignable,
@@ -24,8 +23,8 @@ class Assignment(
         Assignment(newChildren[0] as Assignable, newChildren[1])
 
     override fun serializeCode(sb: CodeWriter, precedence: Int) {
-        target.serializeCode(sb)
+        sb.appendCode(target)
         sb.append(" = ")
-        source.serializeCode(sb)
+        sb.appendCode(source)
     }
 }
