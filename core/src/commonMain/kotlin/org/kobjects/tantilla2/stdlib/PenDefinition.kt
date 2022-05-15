@@ -5,7 +5,7 @@ import org.kobjects.greenspun.core.Type
 import org.kobjects.greenspun.core.Void
 import org.kobjects.tantilla2.core.Scope
 import org.kobjects.tantilla2.core.function.Parameter
-import org.kobjects.tantilla2.core.runtime.NativeScope
+import org.kobjects.tantilla2.core.classifier.NativeScope
 
 class PenDefinition(parent: Scope) : NativeScope("Pen", parent), Type {
 

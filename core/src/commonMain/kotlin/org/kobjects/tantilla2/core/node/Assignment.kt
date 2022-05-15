@@ -5,12 +5,13 @@ import org.kobjects.greenspun.core.Type
 import org.kobjects.greenspun.core.Void
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.RuntimeContext
-import org.kobjects.tantilla2.core.serialize
+import org.kobjects.tantilla2.core.SerializableCode
+import org.kobjects.tantilla2.core.serializeCode
 
 class Assignment(
     val target: Assignable,
     val source: Evaluable<RuntimeContext>
-) : Evaluable<RuntimeContext>, Serializable {
+) : Evaluable<RuntimeContext>, SerializableCode {
 
     override val type: Type
         get() = Void
@@ -22,9 +23,9 @@ class Assignment(
     override fun reconstruct(newChildren: List<Evaluable<RuntimeContext>>) =
         Assignment(newChildren[0] as Assignable, newChildren[1])
 
-    override fun serialize(sb: CodeWriter, prcedence: Int) {
-        target.serialize(sb)
+    override fun serializeCode(sb: CodeWriter, precedence: Int) {
+        target.serializeCode(sb)
         sb.append(" = ")
-        source.serialize(sb)
+        source.serializeCode(sb)
     }
 }

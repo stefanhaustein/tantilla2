@@ -4,14 +4,15 @@ import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.greenspun.core.Type
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.RuntimeContext
+import org.kobjects.tantilla2.core.SerializableCode
 import org.kobjects.tantilla2.core.classifier.Adapter
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
-import org.kobjects.tantilla2.core.serialize
+import org.kobjects.tantilla2.core.serializeCode
 
 class As(
     val base: Evaluable<RuntimeContext>,
     val impl: ImplDefinition,
-) : Evaluable<RuntimeContext>, Serializable {
+) : Evaluable<RuntimeContext>, SerializableCode {
     override val type: Type
         get() = impl.trait
 
@@ -22,8 +23,8 @@ class As(
 
     override fun reconstruct(newChildren: List<Evaluable<RuntimeContext>>) = As(newChildren[0], impl)
 
-    override fun serialize(sb: CodeWriter, prcedence: Int) {
-        base.serialize(sb)
+    override fun serializeCode(sb: CodeWriter, precedence: Int) {
+        base.serializeCode(sb)
         sb.append(" as ")
         sb.append(impl.trait.name)
     }

@@ -383,7 +383,7 @@ object Parser {
         base: Evaluable<RuntimeContext>,
     ): Evaluable<RuntimeContext> {
         val traitName = tokenizer.consume(TokenType.IDENTIFIER)
-        val className = base.type.tantillaName
+        val className = base.type.typeName
         val impl = context.resolve("$traitName for $className").value() as ImplDefinition
         impl.resolveAll()
         return As(base, impl)

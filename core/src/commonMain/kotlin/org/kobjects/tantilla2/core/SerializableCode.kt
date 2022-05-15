@@ -3,21 +3,26 @@ package org.kobjects.tantilla2.core
 import org.kobjects.greenspun.core.Control
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.greenspun.core.F64
-import org.kobjects.tantilla2.core.node.Serializable
+import org.kobjects.tantilla2.core.CodeWriter
 
-fun Any?.serialize(indent: String = ""): String {
+interface SerializableCode {
+    fun serializeCode(writer: CodeWriter, precedence: Int = 0)
+}
+
+fun Any?.serializeCode(indent: String = ""): String {
     val sb = CodeWriter(indent)
-    this.serialize(sb)
+    this.serializeCode(sb)
     return sb.toString()
 }
 
-fun Any?.serialize(sb: CodeWriter, parentPrecedence: Int = 0) {
+fun Any?.serializeCode(sb: CodeWriter, parentPrecedence: Int = 0) {
     when (this) {
-        is Serializable -> serialize(sb, parentPrecedence)
+        is SerializableCode -> serializeCode(sb, parentPrecedence)
         is Evaluable<*> -> serializeEvaluable(sb, parentPrecedence, this as Evaluable<RuntimeContext>)
         else -> sb.append(toString())
     }
 }
+
 
 fun serializeInfix(
     sb: CodeWriter,
@@ -26,9 +31,9 @@ fun serializeInfix(
     name: String,
     precedence: Int,
 ) {
-    expr.children()[0].serialize(sb, precedence)
+    expr.children()[0].serializeCode(sb, precedence)
     sb.append(" $name ")
-    expr.children()[1].serialize(sb, precedence)
+    expr.children()[1].serializeCode(sb, precedence)
 }
 
 fun serializeIf(
@@ -37,21 +42,21 @@ fun serializeIf(
     expr: Control.If<RuntimeContext>,
 ) {
     sb.append("if ")
-    expr.ifThenElse[0].serialize(sb)
+    expr.ifThenElse[0].serializeCode(sb)
     sb.append(':').indent().newline()
-    expr.ifThenElse[1].serialize(sb)
+    expr.ifThenElse[1].serializeCode(sb)
     sb.outdent()
 
     for (i in 2 until expr.ifThenElse.size - 1 step 2) {
         sb.newline().append("elif ").indent()
-        expr.ifThenElse[i].serialize(sb)
+        expr.ifThenElse[i].serializeCode(sb)
         sb.append(':').newline()
-        expr.ifThenElse[i + 1].serialize(sb)
+        expr.ifThenElse[i + 1].serializeCode(sb)
         sb.outdent()
     }
     if (expr.ifThenElse.size % 2 == 1) {
         sb.newline().append("else:").indent().newline()
-        expr.ifThenElse[expr.ifThenElse.size - 1].serialize(sb)
+        expr.ifThenElse[expr.ifThenElse.size - 1].serializeCode(sb)
         sb.outdent()
     }
 }
@@ -62,18 +67,18 @@ fun serializeWhile(
     expr: Control.While<RuntimeContext>,
 ) {
     sb.append("while ")
-    expr.condition.serialize(sb)
+    expr.condition.serializeCode(sb)
     sb.append(':').indent().newline()
-    expr.body.serialize(sb)
+    expr.body.serializeCode(sb)
     sb.outdent()
 }
 
 fun serializeBlock(sb: CodeWriter, parentPrecedence: Int, block: Control.Block<RuntimeContext>) {
     if (block.statements.size > 0) {
-        block.statements[0].serialize(sb)
+        block.statements[0].serializeCode(sb)
         for (i in 1 until block.statements.size) {
             sb.newline()
-            block.statements[i].serialize(sb)
+            block.statements[i].serializeCode(sb)
         }
     }
 }

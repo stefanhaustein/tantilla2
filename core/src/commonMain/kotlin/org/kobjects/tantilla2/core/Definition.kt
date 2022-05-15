@@ -21,7 +21,7 @@ class Definition(
     private val explicitValue: Any? = null,
     var initializer: Evaluable<RuntimeContext>? = null,
     var docString: String = "",
-) {
+) : SerializableCode {
 
     private var cachedType = explicitType
     private var cachedValue = explicitValue
@@ -60,9 +60,6 @@ class Definition(
         }
         return cachedValue
     }
-
-
-
 
     private fun resolveClass(): Scope {
             println("Resolving class $name: $definitionText")
@@ -104,30 +101,51 @@ class Definition(
             return Parser.parseLambda(tokenizer(), scope)
     }
 
-    override fun toString() = serialize()
 
-    fun title() = when (kind) {
-        Kind.LOCAL_VARIABLE -> "${if (mutable) "var" else "let"} $name${if (explicitType != null) ": " + explicitType.tantillaName else ""}"
-        Kind.FUNCTION -> "def $name ${type()}"
-        Kind.TRAIT ->  "trait $name"
-        Kind.IMPL ->  "impl $name"
-        Kind.CLASS ->  "class $name"
-        Kind.UNPARSEABLE -> "(unparseable: $name)"
+    override fun toString() = serializeCode()
+
+    fun title(writer: CodeWriter) {
+        serialize(writer, true)
     }
 
-    fun serialize(indent: String = "") =
-      //  "$indent#start $name\n" +
+    fun serialize(writer: CodeWriter, titleOnly: Boolean) {
         when (kind) {
-            Kind.LOCAL_VARIABLE ->
-                if (initializer == null) title() else "${title()} = ${initializer.serialize(indent)}"
-
-            Kind.FUNCTION -> "def $name ${if (cachedValue == null) definitionText else cachedValue.serialize(indent)}"
-            Kind.TRAIT ->  "trait $name ${if (cachedValue == null) definitionText else cachedValue.serialize(indent)}"
-            Kind.IMPL ->  "impl $name ${if (cachedValue == null) definitionText else cachedValue.serialize(indent)}"
-            Kind.CLASS ->  "class $name ${if (cachedValue == null) definitionText else cachedValue.serialize(indent)}"
-            Kind.UNPARSEABLE -> definitionText
+            Kind.LOCAL_VARIABLE -> writer.keyword(if (mutable) "var " else "let ")
+                .declaration(name)
+                .append(if (explicitType != null) ": " + explicitType.typeName else "")
+            Kind.FUNCTION -> writer.keyword("def ").declaration(name).append(type().typeName)
+            Kind.TRAIT -> writer.keyword("trait ").declaration(name)
+            Kind.IMPL -> writer.keyword("impl ").declaration(name)
+            Kind.CLASS -> writer.keyword("class ").declaration(name)
+            Kind.UNPARSEABLE -> if (titleOnly) {
+                writer.append("(unparseable: $name)")
+            }
         }
-        //        "\n$indent#end $name\n"
+        if (titleOnly) {
+            return
+        }
+        if (kind == Kind.LOCAL_VARIABLE) {
+            if (initializer != null) {
+                writer.append(" = ")
+                serializeCode(writer)
+            }
+        } else if (kind == Kind.UNPARSEABLE) {
+            writer.append(definitionText)
+        } else if (cachedValue == null) {
+            writer.append(definitionText)
+        } else {
+            writer.append(":")
+            writer.indent()
+            writer.newline()
+            cachedValue.serializeCode(writer)
+        }
+    }
+
+
+    override fun serializeCode(writer: CodeWriter, precedence: Int) {
+        serialize(writer, false)
+    }
+
 
     fun index() = scope.locals.indexOf(name)
 }

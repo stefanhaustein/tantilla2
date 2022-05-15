@@ -7,13 +7,14 @@ import androidx.compose.runtime.mutableStateOf
 import org.kobjects.greenspun.core.F64
 import org.kobjects.greenspun.core.Type
 import org.kobjects.greenspun.core.Void
+import org.kobjects.konsole.compose.AnsiConverter.ansiToAnnotatedString
 import org.kobjects.tantilla2.console.ConsoleLoop
+import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.Definition
 import org.kobjects.tantilla2.core.Scope
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.parser.Parser
 import org.kobjects.tantilla2.core.runtime.RootScope
-import org.kobjects.tantilla2.stdlib.PenDefinition
 import org.kobjects.tantilla2.stdlib.StdLib
 
 class TantillaViewModel(
@@ -70,7 +71,9 @@ class TantillaViewModel(
     fun edit(parent: Scope, definition: Definition?) {
         editorParentScope = parent
         this.definition.value = definition
-        currentText.value = definition?.serialize() ?: ""
+        val writer = CodeWriter()
+        definition?.serializeCode(writer)
+        currentText.value = ansiToAnnotatedString(writer.toString()).toString()
         editing.value = true
     }
 

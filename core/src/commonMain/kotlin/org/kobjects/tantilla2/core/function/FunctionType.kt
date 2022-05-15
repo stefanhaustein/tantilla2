@@ -2,7 +2,7 @@ package org.kobjects.tantilla2.core.function
 
 import org.kobjects.greenspun.core.Type
 import org.kobjects.greenspun.core.Void
-import org.kobjects.tantilla2.core.tantillaName
+import org.kobjects.tantilla2.core.typeName
 
 open class FunctionType(
     val returnType: Type,
@@ -13,7 +13,7 @@ open class FunctionType(
         sb.append(parameters.joinToString { it.toString()  })
         sb.append(")")
         if (returnType != Void) {
-            sb.append(" -> ").append(returnType.tantillaName)
+            sb.append(" -> ").append(returnType.typeName)
         }
         return sb.toString()
     }

@@ -1,17 +1,13 @@
 package org.kobjects.tantilla2.core.node
 
 import org.kobjects.greenspun.core.Evaluable
-import org.kobjects.greenspun.core.Type
-import org.kobjects.tantilla2.core.CodeWriter
-import org.kobjects.tantilla2.core.RuntimeContext
-import org.kobjects.tantilla2.core.commonType
+import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.runtime.ListType
 import org.kobjects.tantilla2.core.runtime.TypedList
-import org.kobjects.tantilla2.core.serialize
 
 class ListLiteral(
     val elements: List<Evaluable<RuntimeContext>>,
-) : Evaluable<RuntimeContext>, Serializable {
+) : Evaluable<RuntimeContext>, SerializableCode {
 
     override fun eval(context: RuntimeContext): TypedList {
         return type.create(elements.size) { elements[it].eval(context) }
@@ -23,13 +19,13 @@ class ListLiteral(
 
     override fun reconstruct(newChildren: List<Evaluable<RuntimeContext>>) = ListLiteral(newChildren)
 
-    override fun serialize(writer: CodeWriter, prcedence: Int) {
+    override fun serializeCode(writer: CodeWriter, precedence: Int) {
         writer.append('[')
         if (elements.isNotEmpty()) {
-            elements[0].serialize(writer)
+            elements[0].serializeCode(writer)
             for (i in 1 until elements.size) {
                 writer.append(", ")
-                elements[i].serialize(writer)
+                elements[i].serializeCode(writer)
             }
         }
         writer.append(']')

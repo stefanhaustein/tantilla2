@@ -43,7 +43,7 @@ class VectorTest {
 
         assertTrue(parsingContext.definitions.keys.contains("Vector"))
 
-        assertEquals("mag(Vector(1.0, 2.0, 3.0))", result.serialize())
+        assertEquals("mag(Vector(1.0, 2.0, 3.0))", result.serializeCode())
     //    assertEquals("", parsingContext.serialize())
 
         val vectorImpl = parsingContext.definitions["Vector"]!!.value() as Scope

@@ -20,8 +20,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import org.kobjects.konsole.compose.AnsiConverter.ansiToAnnotatedString
 import org.kobjects.konsole.compose.ComposeKonsole
 import org.kobjects.konsole.compose.RenderKonsole
+import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.Definition
 import org.kobjects.tantilla2.core.Scope
 
@@ -132,10 +134,12 @@ fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
         }
     ) {
         Column(Modifier.padding(8.dp)) {
-            Text(definition.title())
+            val writer = CodeWriter()
+            definition.title(writer)
+            Text(ansiToAnnotatedString(writer.toString()))
             if (viewModel.showDocString.value == definition) {
                 Divider(Modifier.padding(0.dp, 6.dp), color = Color.Transparent)
-                Text(definition.docString)
+                Text(ansiToAnnotatedString(definition.docString))
             }
 
         }

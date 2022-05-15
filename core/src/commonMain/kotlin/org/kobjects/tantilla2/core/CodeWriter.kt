@@ -1,5 +1,7 @@
 package org.kobjects.tantilla2.core
 
+import org.kobjects.konsole.Ansi
+
 class CodeWriter(indent: String = "") : Appendable {
     val sb = StringBuilder()
     val indent = StringBuilder(indent)
@@ -11,6 +13,20 @@ class CodeWriter(indent: String = "") : Appendable {
 
     fun outdent(): CodeWriter {
         indent.setLength(indent.length - 2)
+        return this
+    }
+
+    fun keyword(name: String): CodeWriter {
+        sb.append(Ansi.BOLD)
+        sb.append(name)
+        sb.append(Ansi.NORMAL_INTENSITY)
+        return this
+    }
+
+    fun declaration(name: String): CodeWriter {
+        sb.append(Ansi.BOLD).append(Ansi.FOREGROUND_CYAN)
+        sb.append(name)
+        sb.append(Ansi.NORMAL_INTENSITY).append(Ansi.FOREGROUND_DEFAULT)
         return this
     }
 

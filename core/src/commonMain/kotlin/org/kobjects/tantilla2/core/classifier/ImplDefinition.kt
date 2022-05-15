@@ -1,7 +1,9 @@
 package org.kobjects.tantilla2.core.classifier
 
 import org.kobjects.greenspun.core.Type
+import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.Scope
+import org.kobjects.tantilla2.core.SerializableType
 import org.kobjects.tantilla2.core.TraitMethod
 import org.kobjects.tantilla2.core.function.Lambda
 
@@ -10,7 +12,7 @@ class ImplDefinition(
     parentContext: Scope?,
     val trait: TraitDefinition,
     val classifier: ClassDefinition,
-) : Scope(parentContext), Type {
+) : Scope(parentContext), SerializableType {
     var vmt = listOf<Lambda>()
 
     override val title: String
@@ -29,5 +31,10 @@ class ImplDefinition(
         }
         this.vmt = vmt.toList() as List<Lambda>
     }
+
+    override fun serializeType(writer: CodeWriter) {
+        writer.append(name)
+    }
+
 
 }

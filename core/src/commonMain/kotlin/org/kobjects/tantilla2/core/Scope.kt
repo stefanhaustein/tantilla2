@@ -36,6 +36,7 @@ abstract class Scope(
             mutable = mutable,
             initializer = initializer)
 
+
     fun declareLocalVariable(name: String, type: Type, mutable: Boolean, builtin: Boolean = false): Int {
         val definition = createLocalVariable(name, type, mutable, null, builtin)
         definitions[name] = definition
@@ -81,7 +82,7 @@ abstract class Scope(
         }
 
         for (definition in definitions.values) {
-            sb.append(definition.serialize(innerIndent)).append('\n')
+            sb.append(definition.serializeCode(innerIndent)).append('\n')
         }
 
         return sb.toString()
