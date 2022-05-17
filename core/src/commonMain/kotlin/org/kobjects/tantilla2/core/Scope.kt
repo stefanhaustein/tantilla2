@@ -86,9 +86,11 @@ abstract class Scope(
         writer.outdent()
     }
 
-    fun resolve(name: String): Definition {
-        return definitions[name] ?: (parentContext?.resolve(name)
-            ?: throw RuntimeException("Undefined: '$name'"))
+    fun resolve(name: String, includeLocals: Boolean = true): Definition {
+        val result = definitions[name]
+        return if (result == null || (!includeLocals && result.kind == Definition.Kind.LOCAL_VARIABLE))
+            parentContext?.resolve(name, false) ?: throw RuntimeException("Undefined: '$name'")
+            else result
     }
 
     open fun resolveAll() {

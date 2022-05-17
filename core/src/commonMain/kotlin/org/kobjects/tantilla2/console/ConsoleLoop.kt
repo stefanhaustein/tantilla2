@@ -6,12 +6,13 @@ import org.kobjects.konsole.Konsole
 import org.kobjects.tantilla2.core.runtime.RootScope
 import org.kobjects.tantilla2.core.RuntimeContext
 import org.kobjects.tantilla2.core.Scope
+import org.kobjects.tantilla2.core.UserScope
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.parser.Parser
 
 class ConsoleLoop(
     val konsole: Konsole,
-    var scope: RootScope = RootScope()
+    var scope: UserScope = UserScope(RootScope)
 ) {
     var runtimeContext = RuntimeContext(mutableListOf<Any?>())
 
@@ -19,7 +20,7 @@ class ConsoleLoop(
         declareNatives()
     }
 
-    fun setRootScope(scope: RootScope) {
+    fun setUserScope(scope: UserScope) {
         this.scope = scope;
         runtimeContext = RuntimeContext(mutableListOf<Any?>())
         declareNatives()

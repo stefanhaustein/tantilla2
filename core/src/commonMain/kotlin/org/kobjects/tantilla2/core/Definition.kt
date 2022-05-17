@@ -24,10 +24,10 @@ class Definition(
 ) : SerializableCode {
 
     private var cachedType = explicitType
-    private var cachedValue = explicitValue
+    private var currentValue = explicitValue
 
     enum class Kind {
-        LOCAL_VARIABLE, FUNCTION, CLASS, TRAIT, IMPL, UNPARSEABLE
+        LOCAL_VARIABLE, STATIC_VARIABLE, FUNCTION, CLASS, TRAIT, IMPL, UNPARSEABLE
     }
 
     private fun tokenizer(): TantillaTokenizer {
@@ -48,8 +48,9 @@ class Definition(
     }
 
     fun value(): Any?  {
-        if (cachedValue == null) {
-            cachedValue = when (kind) {
+        if (currentValue == null) {
+            currentValue = when (kind) {
+                Kind.STATIC_VARIABLE -> null
                 Kind.FUNCTION -> resolveFunction()
                 Kind.CLASS -> resolveClass()
                 Kind.TRAIT -> resolveTrait()
@@ -58,7 +59,7 @@ class Definition(
                 Kind.LOCAL_VARIABLE -> throw RuntimeException("Can't obtain local variable value from Definition.")
             }
         }
-        return cachedValue
+        return currentValue
     }
 
     private fun resolveClass(): Scope {
@@ -107,6 +108,7 @@ class Definition(
 
     fun serializeTitle(writer: CodeWriter) {
         when (kind) {
+            Kind.STATIC_VARIABLE,
             Kind.LOCAL_VARIABLE -> writer.keyword(if (mutable) "var " else "let ")
                 .declaration(name)
                 .append(if (explicitType != null) ": " + explicitType.typeName else "")
@@ -121,6 +123,7 @@ class Definition(
 
     override fun serializeCode(writer: CodeWriter, precedence: Int) {
        when (kind) {
+           Kind.STATIC_VARIABLE,
            Kind.LOCAL_VARIABLE -> {
                serializeTitle(writer)
                if (initializer != null) {
@@ -132,16 +135,16 @@ class Definition(
            Kind.TRAIT,
            Kind.CLASS,
            Kind.IMPL -> {
-               if (cachedValue != null) {
-                   writer.appendCode(cachedValue)
+               if (currentValue != null) {
+                   writer.appendCode(currentValue)
                } else {
                    writer.append(definitionText)
                }
            }
            Kind.FUNCTION -> {
                writer.keyword("def ").declaration(name)
-               if (cachedValue != null) {
-                   writer.appendCode(cachedValue)
+               if (currentValue != null) {
+                   writer.appendCode(currentValue)
                } else {
                     writer.append(definitionText)
                }

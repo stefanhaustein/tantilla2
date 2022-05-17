@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -26,6 +25,8 @@ import org.kobjects.konsole.compose.RenderKonsole
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.Definition
 import org.kobjects.tantilla2.core.Scope
+import org.kobjects.tantilla2.core.UserScope
+import org.kobjects.tantilla2.core.runtime.RootScope
 
 
 @Composable
@@ -72,7 +73,6 @@ fun RenderKonsole(viewModel: TantillaViewModel) {
 fun RenderScope(viewModel: TantillaViewModel) {
     val scope = viewModel.scope().value
 
-    val builtin = viewModel.mode.value == TantillaViewModel.Mode.HELP
     val definitions = scope.definitions.values.sortedBy { it.name }
 
     Scaffold(
@@ -89,8 +89,7 @@ fun RenderScope(viewModel: TantillaViewModel) {
                 var list = (if (kind == Definition.Kind.LOCAL_VARIABLE)
                     scope.locals.map { scope.definitions[it]!! }
                 else
-                    definitions).filter {
-                    it.kind == kind && it.builtin == builtin }
+                    definitions).filter { it.kind == kind }
 
                 if (list.isNotEmpty()) {
                         item {
@@ -211,7 +210,7 @@ fun RenderAppBar(
     TopAppBar(
         title = {
             if (viewModel.mode.value != TantillaViewModel.Mode.SHELL
-                && viewModel.scope().value.parentContext != null
+                && viewModel.scope().value !is RootScope && viewModel.scope().value !is UserScope
             ) {
                 Text(
                     text = "❮ $title",

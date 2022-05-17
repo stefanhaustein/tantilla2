@@ -320,13 +320,8 @@ object Parser {
                             context.locals.indexOf(definition.name),
                             definition.mutable
                         )
-                        Definition.Kind.CLASS,
-                        Definition.Kind.TRAIT,
-                        Definition.Kind.IMPL,
-                        Definition.Kind.FUNCTION -> SymbolReference(
-                            definition.name, definition.type(), definition.value()
-                        )
                         Definition.Kind.UNPARSEABLE -> throw tokenizer.error("Unparseable reference.")
+                        else -> SymbolReference(definition)
                     }
             }
             else -> {
@@ -411,7 +406,7 @@ object Parser {
                 definition.mutable
             )
             Definition.Kind.FUNCTION -> {
-                val fn = SymbolReference(name, definition.type(), definition.value())
+                val fn = SymbolReference(definition)
                 val args = if (tokenizer.tryConsume("(")) parseList(tokenizer, context, ")")
                     else emptyList()
                 val params = List<Evaluable<RuntimeContext>>(args.size + 1) {

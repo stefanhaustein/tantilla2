@@ -12,6 +12,7 @@ import org.kobjects.tantilla2.console.ConsoleLoop
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.Definition
 import org.kobjects.tantilla2.core.Scope
+import org.kobjects.tantilla2.core.UserScope
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.parser.Parser
 import org.kobjects.tantilla2.core.runtime.RootScope
@@ -26,7 +27,7 @@ class TantillaViewModel(
     val mode = mutableStateOf(Mode.SHELL)
     var fileName = mutableStateOf("")
     val userScope = mutableStateOf<Scope>(console.scope)
-    val builtinScope = mutableStateOf<Scope>(console.scope)
+    val builtinScope = mutableStateOf<Scope>(console.scope.parentContext!!)
     val definition = mutableStateOf<Definition?>(null)
     val currentText = mutableStateOf("")
     var editorParentScope: Scope = console.scope
@@ -51,8 +52,8 @@ class TantillaViewModel(
                 (it.variables[2] as Double).toInt())
         }
 
-        StdLib.setup(console.scope)
-        val penDefinition = console.scope.definitions["Pen"]!!.value() as Type
+        StdLib.setup(console.scope.parentContext as RootScope)
+        val penDefinition = console.scope.resolve("Pen").value() as Type
 
         val penIndex = console.scope.declareLocalVariable(
             "pen", penDefinition, false, true)
@@ -78,10 +79,10 @@ class TantillaViewModel(
     }
 
     fun reset() {
-        console.setRootScope(RootScope())
+        console.setUserScope(UserScope(RootScope))
         defineNatives()
         userScope.value = console.scope
-        builtinScope.value = console.scope
+        builtinScope.value = console.scope.parentContext!!
         fileName.value = ""
     }
 
