@@ -56,8 +56,8 @@ class CodeWriter(indent: String = "") : Appendable {
     fun appendType(type: Type): CodeWriter {
         when (type) {
             is SerializableType -> type.serializeType(this)
-            F64 -> append("float")
-            Str -> append("str")
+            Type.F64 -> append("float")
+            Type.Str -> append("str")
             else -> append(type.toString())
         }
         return this

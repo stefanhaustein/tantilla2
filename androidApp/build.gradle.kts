@@ -44,7 +44,7 @@ android {
 dependencies {
     implementation(project(":core"))
     implementation("org.kobjects.konsole:core:0.2.0")
-    implementation("org.kobjects.greenspun:core:0.2.2")
+    implementation("org.kobjects.greenspun:core:0.3.0")
     implementation("org.kobjects.konsole:compose:0.1.1")
     implementation("androidx.activity:activity-compose:1.4.0")
     implementation("androidx.compose.ui:ui:1.1.1")

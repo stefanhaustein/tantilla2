@@ -3,15 +3,15 @@ package org.kobjects.tantilla2.core.node
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.RuntimeContext
-import org.kobjects.tantilla2.core.SerializableCode
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Lambda
+import org.kobjects.tantilla2.core.type
 
 
 class Apply(
     val callable: Evaluable<RuntimeContext>,
     val parameters: List<Evaluable<RuntimeContext>>
-) : Evaluable<RuntimeContext>, SerializableCode {
+) : TantillaNode {
     override fun eval(context: RuntimeContext): Any? {
         val shouldBeLambda = callable.eval(context)
         if (shouldBeLambda !is Lambda) {

@@ -1,7 +1,6 @@
 package org.kobjects.tantilla2.core
 
 import org.kobjects.greenspun.core.Evaluable
-import org.kobjects.greenspun.core.Type
 import org.kobjects.tantilla2.core.classifier.ClassDefinition
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
 import org.kobjects.tantilla2.core.classifier.TraitDefinition

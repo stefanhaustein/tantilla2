@@ -1,11 +1,11 @@
 package org.kobjects.tantilla2.console
 
 import org.kobjects.greenspun.core.Str
-import org.kobjects.greenspun.core.Void
 import org.kobjects.konsole.Konsole
 import org.kobjects.tantilla2.core.runtime.RootScope
 import org.kobjects.tantilla2.core.RuntimeContext
 import org.kobjects.tantilla2.core.Scope
+import org.kobjects.tantilla2.core.Type
 import org.kobjects.tantilla2.core.UserScope
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.parser.Parser
@@ -29,7 +29,7 @@ class ConsoleLoop(
     fun declareNatives() {
         scope.defineNative("print",
             "Print the value of the text parameter to the console.",
-            Void, Parameter("text", Str)) {
+            Type.Void, Parameter("text", Type.Str)) {
             konsole.write(it[0].toString())
         }
     }

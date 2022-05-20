@@ -7,7 +7,7 @@ import org.kobjects.tantilla2.core.runtime.TypedList
 
 class ListLiteral(
     val elements: List<Evaluable<RuntimeContext>>,
-) : Evaluable<RuntimeContext>, SerializableCode {
+) : TantillaNode {
 
     override fun eval(context: RuntimeContext): TypedList {
         return type.create(elements.size) { elements[it].eval(context) }

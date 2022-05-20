@@ -3,7 +3,7 @@ package org.kobjects.tantilla2.android
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import org.kobjects.greenspun.core.Type
+import org.kobjects.tantilla2.core.Type
 import org.kobjects.tantilla2.stdlib.Pen
 
 class PenImpl(override val type: Type, val canvas: Canvas): Pen {

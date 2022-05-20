@@ -2,6 +2,18 @@ package org.kobjects.tantilla2.core
 
 import org.kobjects.greenspun.core.*
 
+val Evaluable<*>.type: Type
+    get() = when(this) {
+        is F64.Binary -> Type.F64
+        is F64.Const -> Type.F64
+        is F64.Unary -> Type.F64
+        is I64.Binary -> Type.I64
+        is I64.Unary -> Type.I64
+        is I64.Const -> Type.I64
+        else -> throw IllegalArgumentException("Unrecognized type: ${this::class}")
+    }
+
+
 fun Type.commonType(other: Type): Type =
    if (other.isAssignableFrom(this)) {
        other
@@ -13,7 +25,7 @@ fun Type.commonType(other: Type): Type =
 
 fun commonType(types: List<Type>): Type {
     if (types.size == 0) {
-        return Void
+        return Type.Void
     }
     var result = types[0]
     for (i in 1 until types.size) {
@@ -25,11 +37,11 @@ fun commonType(types: List<Type>): Type {
 
 val Any?.type: Type
     get() = when (this) {
-        null -> Void
+        null -> Type.Void
         is Typed -> type
-        is Double -> F64
-        is Long -> I64
+        is Double -> Type.F64
+        is Long -> Type.I64
         is Type -> MetaType(this)
-        is String -> Str
+        is String -> Type.Str
         else -> throw IllegalArgumentException("Can't determine type of $this")
     }

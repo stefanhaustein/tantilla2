@@ -5,14 +5,9 @@ import android.graphics.Canvas
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import org.kobjects.greenspun.core.F64
-import org.kobjects.greenspun.core.Type
-import org.kobjects.greenspun.core.Void
 import org.kobjects.konsole.compose.AnsiConverter.ansiToAnnotatedString
 import org.kobjects.tantilla2.console.ConsoleLoop
-import org.kobjects.tantilla2.core.CodeWriter
-import org.kobjects.tantilla2.core.Definition
-import org.kobjects.tantilla2.core.Scope
-import org.kobjects.tantilla2.core.UserScope
+import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.parser.Parser
 import org.kobjects.tantilla2.core.runtime.RootScope
@@ -41,10 +36,10 @@ class TantillaViewModel(
         console.scope.defineNative(
             "setPixel",
             "Sets the pixel at the given x/y coordinate to the given 32bit color value in ARGB format.",
-            Void,
-            Parameter("x", F64),
-            Parameter("y", F64),
-            Parameter("color", F64)
+            Type.Void,
+            Parameter("x", Type.F64),
+            Parameter("y", Type.F64),
+            Parameter("color", Type.F64)
         ) {
             bitmap.setPixel(
                 (it.variables[0] as Double).toInt(),

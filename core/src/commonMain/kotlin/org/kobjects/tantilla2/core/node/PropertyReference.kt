@@ -1,10 +1,9 @@
 package org.kobjects.tantilla2.core.node
 
 import org.kobjects.greenspun.core.Evaluable
-import org.kobjects.greenspun.core.Type
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.RuntimeContext
-import org.kobjects.tantilla2.core.SerializableCode
+import org.kobjects.tantilla2.core.Type
 
 class PropertyReference(
     val base: Evaluable<RuntimeContext>,
@@ -12,7 +11,7 @@ class PropertyReference(
     override val type: Type,
     val index: Int,
     val mutable: Boolean
-) : Assignable, SerializableCode {
+) : Assignable {
     override fun children(): List<Evaluable<RuntimeContext>> = emptyList()
 
     override fun eval(ctx: RuntimeContext): Any? {

@@ -1,6 +1,6 @@
 package org.kobjects.tantilla2.core.function
 
-import org.kobjects.greenspun.core.Type
+import org.kobjects.tantilla2.core.Type
 import org.kobjects.tantilla2.core.typeName
 
 data class Parameter(

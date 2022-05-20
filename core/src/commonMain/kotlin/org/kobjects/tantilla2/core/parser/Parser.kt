@@ -175,7 +175,7 @@ object Parser {
         tokenizer.consume("in")
         val rangeExpression = parseExpression(tokenizer, context)
         tokenizer.consume(":")
-        val iteratorIndex = context.declareLocalVariable(iteratorName, F64, false)
+        val iteratorIndex = context.declareLocalVariable(iteratorName, Type.F64, false)
         val body = parse(tokenizer, context, currentDepth)
         return For(iteratorName, iteratorIndex, rangeExpression, body)
     }
@@ -258,7 +258,7 @@ object Parser {
             }
             tokenizer.consume(")", ", or ) expected here while parsing the parameter list.")
         }
-        val returnType = if (tokenizer.tryConsume("->")) parseType(tokenizer, context) else Void
+        val returnType = if (tokenizer.tryConsume("->")) parseType(tokenizer, context) else Type.Void
         return FunctionType(returnType, parameters)
     }
 
@@ -343,10 +343,10 @@ object Parser {
 
     fun parseType(tokenizer: TantillaTokenizer, context: Scope): Type {
         if (tokenizer.tryConsume("float")) {
-            return F64
+            return Type.F64
         }
         if (tokenizer.tryConsume("str")) {
-            return Str
+            return Type.Str
         }
         val name = tokenizer.consume(TokenType.IDENTIFIER)
         if (name.equals("List")) {

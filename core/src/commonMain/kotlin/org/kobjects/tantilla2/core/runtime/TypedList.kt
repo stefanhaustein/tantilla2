@@ -1,6 +1,5 @@
 package org.kobjects.tantilla2.core.runtime
 
-import org.kobjects.greenspun.core.Type
 import org.kobjects.tantilla2.core.Typed
 
 class TypedList(
