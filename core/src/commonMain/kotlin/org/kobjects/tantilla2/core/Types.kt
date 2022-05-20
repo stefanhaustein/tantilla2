@@ -22,6 +22,7 @@ fun commonType(types: List<Type>): Type {
     return result
 }
 
+
 val Any?.type: Type
     get() = when (this) {
         null -> Void
