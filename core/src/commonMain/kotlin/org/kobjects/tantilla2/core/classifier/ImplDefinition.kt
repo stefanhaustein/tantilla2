@@ -10,7 +10,7 @@ class ImplDefinition(
     val name: String,
     parentContext: Scope?,
     val trait: TraitDefinition,
-    val classifier: ClassDefinition,
+    val classifier: UserClassDefinition,
 ) : Scope(parentContext), SerializableType {
     var vmt = listOf<Lambda>()
 

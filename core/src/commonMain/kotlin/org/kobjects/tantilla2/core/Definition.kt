@@ -1,7 +1,7 @@
 package org.kobjects.tantilla2.core
 
 import org.kobjects.greenspun.core.Evaluable
-import org.kobjects.tantilla2.core.classifier.ClassDefinition
+import org.kobjects.tantilla2.core.classifier.UserClassDefinition
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.function.Lambda
@@ -63,7 +63,7 @@ class Definition(
 
     private fun resolveClass(): Scope {
             println("Resolving class $name: $definitionText")
-            val classContext = ClassDefinition(name, scope)
+            val classContext = UserClassDefinition(name, scope)
             val tokenizer = tokenizer()
             tokenizer.next()
             Parser.parse(tokenizer, classContext)
@@ -86,7 +86,7 @@ class Definition(
         val traitName = name.substring(0, name.indexOf(' '))
         val trait = scope.resolve(traitName).value() as TraitDefinition
         val className = name.substring(name.lastIndexOf(' ') + 1)
-        val implFor = scope.resolve(className).value() as ClassDefinition
+        val implFor = scope.resolve(className).value() as UserClassDefinition
         val implContext = ImplDefinition(name, scope, trait, implFor)
         val tokenizer = tokenizer()
         tokenizer.next()

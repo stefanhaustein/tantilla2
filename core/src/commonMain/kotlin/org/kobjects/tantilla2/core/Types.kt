@@ -1,15 +1,17 @@
 package org.kobjects.tantilla2.core
 
 import org.kobjects.greenspun.core.*
+import org.kobjects.tantilla2.core.runtime.Str
+import org.kobjects.tantilla2.core.runtime.Void
 
 val Evaluable<*>.type: Type
     get() = when(this) {
-        is F64.Binary -> Type.F64
-        is F64.Const -> Type.F64
-        is F64.Unary -> Type.F64
-        is I64.Binary -> Type.I64
-        is I64.Unary -> Type.I64
-        is I64.Const -> Type.I64
+        is F64.Binary -> org.kobjects.tantilla2.core.runtime.F64
+        is F64.Const -> org.kobjects.tantilla2.core.runtime.F64
+        is F64.Unary -> org.kobjects.tantilla2.core.runtime.F64
+        is I64.Binary -> org.kobjects.tantilla2.core.runtime.I64
+        is I64.Unary -> org.kobjects.tantilla2.core.runtime.I64
+        is I64.Const -> org.kobjects.tantilla2.core.runtime.I64
         else -> throw IllegalArgumentException("Unrecognized type: ${this::class}")
     }
 
@@ -25,7 +27,7 @@ fun Type.commonType(other: Type): Type =
 
 fun commonType(types: List<Type>): Type {
     if (types.size == 0) {
-        return Type.Void
+        return Void
     }
     var result = types[0]
     for (i in 1 until types.size) {
@@ -37,11 +39,11 @@ fun commonType(types: List<Type>): Type {
 
 val Any?.type: Type
     get() = when (this) {
-        null -> Type.Void
+        null -> Void
         is Typed -> type
-        is Double -> Type.F64
-        is Long -> Type.I64
+        is Double -> org.kobjects.tantilla2.core.runtime.F64
+        is Long -> org.kobjects.tantilla2.core.runtime.I64
         is Type -> MetaType(this)
-        is String -> Type.Str
+        is String -> Str
         else -> throw IllegalArgumentException("Can't determine type of $this")
     }

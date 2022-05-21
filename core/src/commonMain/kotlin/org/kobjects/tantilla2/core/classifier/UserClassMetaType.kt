@@ -3,8 +3,8 @@ package org.kobjects.tantilla2.core.classifier
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Parameter
 
-class ClassMetaType(
-    val wrapped: ClassDefinition,
+class UserClassMetaType(
+    val wrapped: UserClassDefinition,
 ) : FunctionType(
     wrapped,
     List<Parameter>(wrapped.locals.size) {

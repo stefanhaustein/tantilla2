@@ -1,7 +1,7 @@
 package org.kobjects.tantilla2.core
 
 import org.kobjects.greenspun.core.Evaluable
-import org.kobjects.tantilla2.core.classifier.ClassDefinition
+import org.kobjects.tantilla2.core.classifier.UserClassDefinition
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.function.FunctionScope
@@ -69,7 +69,7 @@ abstract class Scope(
         val sb = StringBuilder()
 
         when (this) {
-            is ClassDefinition -> writer.keyword("class").append(' ').declaration(name)
+            is UserClassDefinition -> writer.keyword("class").append(' ').declaration(name)
             is TraitDefinition -> writer.keyword("trait").append(' ').declaration(name)
             is ImplDefinition -> writer.keyword("impl").append(' ').declaration(name)
             is FunctionScope -> {
@@ -117,5 +117,6 @@ abstract class Scope(
             docString = docString
         )
     }
+
 
 }

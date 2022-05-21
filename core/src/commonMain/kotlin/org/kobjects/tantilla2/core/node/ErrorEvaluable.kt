@@ -3,7 +3,7 @@ package org.kobjects.tantilla2.core.node
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.RuntimeContext
-import org.kobjects.tantilla2.core.Type
+import org.kobjects.tantilla2.core.runtime.Void
 
 class ErrorEvaluable(val errorMessage: String) : TantillaNode {
     override fun children(): List<Evaluable<RuntimeContext>> = emptyList()
@@ -19,5 +19,5 @@ class ErrorEvaluable(val errorMessage: String) : TantillaNode {
     }
 
     override val type
-        get() = Type.Void
+        get() = Void
 }

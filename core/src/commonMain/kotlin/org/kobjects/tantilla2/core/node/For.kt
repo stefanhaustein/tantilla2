@@ -3,9 +3,9 @@ package org.kobjects.tantilla2.core.node
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.RuntimeContext
-import org.kobjects.tantilla2.core.SerializableCode
 import org.kobjects.tantilla2.core.Type
 import org.kobjects.tantilla2.core.runtime.Range
+import org.kobjects.tantilla2.core.runtime.Void
 
 class For(
     val iteratorName: String,
@@ -14,7 +14,7 @@ class For(
     val bodyExpression: Evaluable<RuntimeContext>,
 ) : TantillaNode {
     override val type: Type
-        get() = Type.Void
+        get() = Void
 
     override fun children() = listOf(rangeExpression, bodyExpression)
 

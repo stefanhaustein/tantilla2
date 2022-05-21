@@ -2,6 +2,7 @@ package org.kobjects.tantilla2.core
 
 import org.kobjects.greenspun.core.*
 import org.kobjects.konsole.Ansi
+import org.kobjects.tantilla2.core.runtime.Str
 
 class CodeWriter(indent: String = "") : Appendable {
     val sb = StringBuilder()
@@ -56,8 +57,8 @@ class CodeWriter(indent: String = "") : Appendable {
     fun appendType(type: Type): CodeWriter {
         when (type) {
             is SerializableType -> type.serializeType(this)
-            Type.F64 -> append("float")
-            Type.Str -> append("str")
+            org.kobjects.tantilla2.core.runtime.F64 -> append("float")
+            Str -> append("str")
             else -> append(type.toString())
         }
         return this

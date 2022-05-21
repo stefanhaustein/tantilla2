@@ -9,6 +9,7 @@ import org.kobjects.tantilla2.core.node.For
 import org.kobjects.tantilla2.core.function.*
 import org.kobjects.tantilla2.core.node.*
 import org.kobjects.tantilla2.core.runtime.ListType
+import org.kobjects.tantilla2.core.runtime.Void
 
 
 fun String.unquote() = this.substring(1, this.length - 1)
@@ -175,7 +176,8 @@ object Parser {
         tokenizer.consume("in")
         val rangeExpression = parseExpression(tokenizer, context)
         tokenizer.consume(":")
-        val iteratorIndex = context.declareLocalVariable(iteratorName, Type.F64, false)
+        val iteratorIndex = context.declareLocalVariable(iteratorName,
+            org.kobjects.tantilla2.core.runtime.F64, false)
         val body = parse(tokenizer, context, currentDepth)
         return For(iteratorName, iteratorIndex, rangeExpression, body)
     }
@@ -216,7 +218,7 @@ object Parser {
             type = parseType(tokenizer, context)
         }
         var initializer: Evaluable<RuntimeContext>? = null
-        val asParameter = context is ClassDefinition
+        val asParameter = context is UserClassDefinition
         if (tokenizer.tryConsume("=")) {
             if (asParameter) {
                 throw tokenizer.error("Parameter initializers NYI")
@@ -241,7 +243,7 @@ object Parser {
         if (!tokenizer.tryConsume(")")) {
             if (tokenizer.tryConsume("self")) {
                 val selfType: Type = when (context) {
-                    is ClassDefinition -> context
+                    is UserClassDefinition -> context
                         is TraitDefinition -> context
                     is ImplDefinition -> context.classifier
                     else ->
@@ -258,7 +260,7 @@ object Parser {
             }
             tokenizer.consume(")", ", or ) expected here while parsing the parameter list.")
         }
-        val returnType = if (tokenizer.tryConsume("->")) parseType(tokenizer, context) else Type.Void
+        val returnType = if (tokenizer.tryConsume("->")) parseType(tokenizer, context) else Void
         return FunctionType(returnType, parameters)
     }
 
@@ -343,10 +345,10 @@ object Parser {
 
     fun parseType(tokenizer: TantillaTokenizer, context: Scope): Type {
         if (tokenizer.tryConsume("float")) {
-            return Type.F64
+            return org.kobjects.tantilla2.core.runtime.F64
         }
         if (tokenizer.tryConsume("str")) {
-            return Type.Str
+            return org.kobjects.tantilla2.core.runtime.Str
         }
         val name = tokenizer.consume(TokenType.IDENTIFIER)
         if (name.equals("List")) {

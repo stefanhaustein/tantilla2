@@ -4,14 +4,15 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import org.kobjects.greenspun.core.F64
 import org.kobjects.konsole.compose.AnsiConverter.ansiToAnnotatedString
 import org.kobjects.tantilla2.console.ConsoleLoop
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.parser.Parser
+import org.kobjects.tantilla2.core.runtime.F64
 import org.kobjects.tantilla2.core.runtime.RootScope
-import org.kobjects.tantilla2.stdlib.StdLib
+import org.kobjects.tantilla2.core.runtime.Void
+import org.kobjects.tantilla2.stdlib.PenDefinition
 
 class TantillaViewModel(
     val console: ConsoleLoop,
@@ -33,13 +34,13 @@ class TantillaViewModel(
     }
 
     fun defineNatives() {
-        console.scope.defineNative(
+        RootScope.defineNative(
             "setPixel",
             "Sets the pixel at the given x/y coordinate to the given 32bit color value in ARGB format.",
-            Type.Void,
-            Parameter("x", Type.F64),
-            Parameter("y", Type.F64),
-            Parameter("color", Type.F64)
+            Void,
+            Parameter("x", F64),
+            Parameter("y", F64),
+            Parameter("color", F64)
         ) {
             bitmap.setPixel(
                 (it.variables[0] as Double).toInt(),
@@ -47,19 +48,13 @@ class TantillaViewModel(
                 (it.variables[2] as Double).toInt())
         }
 
-        StdLib.setup(console.scope.parentContext as RootScope)
-        val penDefinition = console.scope.resolve("Pen").value() as Type
 
-        val penIndex = console.scope.declareLocalVariable(
-            "pen", penDefinition, false, true)
-        while (console.runtimeContext.variables.size < penIndex) {
-            console.runtimeContext.variables.add(null)
-        }
         val canvas = Canvas(bitmap)
         canvas.translate(bitmap.width / 2f, bitmap.height / 2f)
         canvas.scale(1f, -1f)
-
-        console.runtimeContext.variables.add(PenImpl(penDefinition, canvas))
+        val penImpl = PenImpl(PenDefinition, canvas)
+        RootScope.definitions["pen"] = Definition(
+            RootScope, "pen", Definition.Kind.STATIC_VARIABLE, explicitType = PenDefinition, explicitValue = penImpl)
     }
 
     fun scope(): MutableState<Scope> = if (mode.value == Mode.HELP) builtinScope else userScope
