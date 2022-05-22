@@ -2,7 +2,7 @@ package org.kobjects.tantilla2.core.parser
 
 import org.kobjects.greenspun.core.*
 import org.kobjects.parserlib.expressionparser.ExpressionParser
-import org.kobjects.tantilla2.core.node.SymbolReference
+import org.kobjects.tantilla2.core.node.StaticReference
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.classifier.*
 import org.kobjects.tantilla2.core.node.For
@@ -309,23 +309,39 @@ object Parser {
         }
     }
 
+    fun parseFreeIdentifier(tokenizer: TantillaTokenizer, context: Scope): Evaluable<RuntimeContext> {
+        val name = tokenizer.consume(TokenType.IDENTIFIER)
+
+        var args: List<Evaluable<RuntimeContext>>
+        if (tokenizer.tryConsume("(")) {
+            args = parseList(tokenizer, context, ")")
+            if (args.size > 0 && args[0].type is Scope) {
+                val baseType = args[0].type as Scope
+                if (baseType.definitions.containsKey(name)) {
+                    return Apply(StaticReference(baseType.definitions[name]!!), args)
+                }
+            }
+        } else {
+            args = emptyList()
+        }
+
+        val definition = context.resolve(name)
+        val base = StaticReference(definition)
+        if (base.type is FunctionType) {
+            return Apply(base, args)
+        }
+        if (args.size > 0) {
+            throw IllegalArgumentException("Not callable: ${definition.scope.title}.${definition.name}")
+        }
+        return base
+
+    }
+
     fun parsePrimary(tokenizer: TantillaTokenizer, context: Scope): Evaluable<RuntimeContext> =
         when (tokenizer.current.type) {
             TokenType.NUMBER -> F64.Const(tokenizer.next().text.toDouble())
             TokenType.STRING -> Str.Const(tokenizer.next().text.unquote())
-            TokenType.IDENTIFIER -> {
-                    val definition = consumeAndResoloveIdentifier(tokenizer, context)
-                    when (definition.kind) {
-                        Definition.Kind.LOCAL_VARIABLE -> LocalVariableReference(
-                            definition.name,
-                            definition.type(),
-                            context.locals.indexOf(definition.name),
-                            definition.mutable
-                        )
-                        Definition.Kind.UNPARSEABLE -> throw tokenizer.error("Unparseable reference.")
-                        else -> SymbolReference(definition)
-                    }
-            }
+            TokenType.IDENTIFIER -> parseFreeIdentifier(tokenizer, context)
             else -> {
                 when (tokenizer.current.text) {
                     "(" -> {
@@ -397,6 +413,8 @@ object Parser {
         }
         val baseType = base.type as Scope
         val definition = baseType.resolve(name)
+        val args = if (tokenizer.tryConsume("(")) parseList(tokenizer, context, ")")
+        else emptyList()
 
         when (definition.kind) {
             Definition.Kind.LOCAL_VARIABLE ->
@@ -408,9 +426,8 @@ object Parser {
                 definition.mutable
             )
             Definition.Kind.FUNCTION -> {
-                val fn = SymbolReference(definition)
-                val args = if (tokenizer.tryConsume("(")) parseList(tokenizer, context, ")")
-                    else emptyList()
+                val fn = StaticReference(definition)
+
                 val params = List<Evaluable<RuntimeContext>>(args.size + 1) {
                     if (it == 0) base else args[it - 1]
                 }

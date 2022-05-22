@@ -7,7 +7,7 @@ import org.kobjects.tantilla2.core.RuntimeContext
 import org.kobjects.tantilla2.core.Type
 
 
-data class SymbolReference(val definition: Definition) : TantillaNode {
+data class StaticReference(val definition: Definition) : TantillaNode {
     override fun children() = emptyList<Evaluable<RuntimeContext>>()
 
     override fun eval(ctx: RuntimeContext): Any? = definition.value()
