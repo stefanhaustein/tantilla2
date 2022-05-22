@@ -6,7 +6,7 @@ import org.kobjects.tantilla2.core.function.NativeFunction
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.runtime.RootScope
 
-open class NativeClassDefinition(var name: String, parent: Scope = RootScope) : Scope(parent), SerializableType {
+open class NativeClassDefinition(var name: String, parent: Scope = RootScope) : Scope(parent), Type {
     override val title: String
         get() = name
 
@@ -22,7 +22,7 @@ open class NativeClassDefinition(var name: String, parent: Scope = RootScope) : 
         returnType: Type,
         vararg parameter: Parameter,
         operation: (RuntimeContext) -> Any?) {
-        val type = FunctionType(returnType, listOf(Parameter("self", this)) + parameter.toList())
+        val type = FunctionType.Impl(returnType, listOf(Parameter("self", this)) + parameter.toList())
         val function = NativeFunction(type, operation)
         definitions[name] = Definition(
             this,

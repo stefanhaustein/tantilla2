@@ -261,7 +261,7 @@ object Parser {
             tokenizer.consume(")", ", or ) expected here while parsing the parameter list.")
         }
         val returnType = if (tokenizer.tryConsume("->")) parseType(tokenizer, context) else Void
-        return FunctionType(returnType, parameters)
+        return FunctionType.Impl(returnType, parameters)
     }
 
     fun parseLambda(tokenizer: TantillaTokenizer, context: Scope): Lambda {

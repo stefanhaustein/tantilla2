@@ -4,8 +4,5 @@ import org.kobjects.tantilla2.core.classifier.NativeClassDefinition
 
 object Str : NativeClassDefinition("str") {
 
-    init {
-
-    }
 
 }

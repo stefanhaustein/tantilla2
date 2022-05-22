@@ -7,7 +7,7 @@ import org.kobjects.tantilla2.core.function.Lambda
 class UserClassDefinition(
     val name: String,
     parentScope: Scope,
-) : Scope(parentScope), SerializableType, Typed, Lambda {
+) : Scope(parentScope), Type, Typed, Lambda {
     override val type: FunctionType
         get() = UserClassMetaType(this)
 

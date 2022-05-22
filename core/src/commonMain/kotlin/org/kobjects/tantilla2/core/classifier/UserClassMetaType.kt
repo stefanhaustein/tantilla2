@@ -5,7 +5,7 @@ import org.kobjects.tantilla2.core.function.Parameter
 
 class UserClassMetaType(
     val wrapped: UserClassDefinition,
-) : FunctionType(
+) : FunctionType.Impl(
     wrapped,
     List<Parameter>(wrapped.locals.size) {
         val name = wrapped.locals[it]

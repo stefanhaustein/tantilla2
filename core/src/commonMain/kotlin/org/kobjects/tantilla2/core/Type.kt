@@ -4,5 +4,9 @@ interface Type {
 
     fun isAssignableFrom(type: Type) = type == this
 
+    fun serializeType(writer: CodeWriter)
+
+    val typeName: String
+        get() = CodeWriter().appendType(this).toString()
 
 }

@@ -55,12 +55,7 @@ class CodeWriter(indent: String = "") : Appendable {
     }
 
     fun appendType(type: Type): CodeWriter {
-        when (type) {
-            is SerializableType -> type.serializeType(this)
-            org.kobjects.tantilla2.core.runtime.F64 -> append("float")
-            Str -> append("str")
-            else -> append(type.toString())
-        }
+        type.serializeType(this)
         return this
     }
 

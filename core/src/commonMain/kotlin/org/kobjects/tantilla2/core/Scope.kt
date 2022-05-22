@@ -105,7 +105,10 @@ abstract class Scope(
         returnType: Type,
         vararg parameter: Parameter,
         operation: (RuntimeContext) -> Any?) {
-        val type = FunctionType(returnType, parameter.toList())
+        val type = object : FunctionType {
+            override val returnType = returnType
+            override val parameters = parameter.toList()
+        }
         val function = NativeFunction(type, operation)
         definitions[name] = Definition(
             this,

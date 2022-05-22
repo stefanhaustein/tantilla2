@@ -3,7 +3,6 @@ package org.kobjects.tantilla2.core.runtime
 import org.kobjects.tantilla2.core.Type
 import org.kobjects.tantilla2.core.classifier.NativeClassDefinition
 import org.kobjects.tantilla2.core.function.Parameter
-import org.kobjects.tantilla2.core.typeName
 
 class ListType(
     val elementType: Type,

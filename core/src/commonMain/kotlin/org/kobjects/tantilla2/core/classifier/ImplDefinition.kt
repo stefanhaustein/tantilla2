@@ -1,9 +1,6 @@
 package org.kobjects.tantilla2.core.classifier
 
-import org.kobjects.tantilla2.core.CodeWriter
-import org.kobjects.tantilla2.core.Scope
-import org.kobjects.tantilla2.core.SerializableType
-import org.kobjects.tantilla2.core.TraitMethod
+import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.function.Lambda
 
 class ImplDefinition(
@@ -11,7 +8,7 @@ class ImplDefinition(
     parentContext: Scope?,
     val trait: TraitDefinition,
     val classifier: UserClassDefinition,
-) : Scope(parentContext), SerializableType {
+) : Scope(parentContext), Type {
     var vmt = listOf<Lambda>()
 
     override val title: String
