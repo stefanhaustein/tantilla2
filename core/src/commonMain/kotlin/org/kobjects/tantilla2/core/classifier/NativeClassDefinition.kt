@@ -28,9 +28,8 @@ open class NativeClassDefinition(var name: String, parent: Scope = RootScope) : 
             this,
             name,
             Definition.Kind.FUNCTION,
-            explicitType = type,
-            explicitValue = function,
-            builtin = true,
+            resolvedType = type,
+            resolvedValue = function,
             docString = docString
         )
     }
@@ -40,9 +39,9 @@ open class NativeClassDefinition(var name: String, parent: Scope = RootScope) : 
             parent,
             name,
             Definition.Kind.CLASS,
-            builtin = true,
-            explicitType = this,
-            explicitValue = this)
+            resolvedType = this,
+            resolvedValue = this
+        )
         parent.definitions[name] = def
     }
 

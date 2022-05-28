@@ -8,7 +8,7 @@ import org.kobjects.tantilla2.core.Type
 class PropertyReference(
     val base: Evaluable<RuntimeContext>,
     val name: String,
-    override val type: Type,
+    override val returnType: Type,
     val index: Int,
     val mutable: Boolean
 ) : Assignable {
@@ -20,7 +20,7 @@ class PropertyReference(
     }
 
     override fun reconstruct(newChildren: List<Evaluable<RuntimeContext>>): Evaluable<RuntimeContext> =
-        PropertyReference(newChildren[0], name, type, index, mutable)
+        PropertyReference(newChildren[0], name, returnType, index, mutable)
 
     override fun assign(context: RuntimeContext, value: Any?) {
         val self = base.eval(context) as RuntimeContext

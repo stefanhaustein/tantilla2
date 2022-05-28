@@ -14,18 +14,20 @@ class ImplDefinition(
     override val title: String
         get() = name
 
-    override fun resolveAll() {
-        trait.resolveAll()
-        classifier.resolveAll()
+    override fun resolveAll(): Boolean {
+        if (trait.resolveAll()
+                    && classifier.resolveAll()
+                && super.resolveAll()) {
 
-        super.resolveAll()
-
-        val vmt = MutableList<Lambda?>(trait.traitIndex) { null }
-        for (definition in trait.definitions.values) {
-            val index = (definition.value() as TraitMethod).index
-            vmt[index] = resolve(definition.name).value() as Lambda
+            val vmt = MutableList<Lambda?>(trait.traitIndex) { null }
+            for (definition in trait.definitions.values) {
+                val index = (definition.value() as TraitMethod).index
+                vmt[index] = resolveDynamic(definition.name).value() as Lambda
+            }
+            this.vmt = vmt.toList() as List<Lambda>
+            return true
         }
-        this.vmt = vmt.toList() as List<Lambda>
+        return false
     }
 
     override fun serializeType(writer: CodeWriter) {

@@ -18,6 +18,6 @@ class ErrorEvaluable(val errorMessage: String) : TantillaNode {
         writer.append(toString())
     }
 
-    override val type
+    override val returnType
         get() = Void
 }

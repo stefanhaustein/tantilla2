@@ -110,33 +110,34 @@ fun RenderScope(viewModel: TantillaViewModel) {
 @Composable
 fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
     Card(
+        backgroundColor = if (viewModel.mode.value == TantillaViewModel.Mode.HELP
+            || definition.error() == null) Color(0xffeeeeee) else Color(0xffff8888L),
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(4.dp)),
-                onClick = {
-            when (definition.kind) {
-                Definition.Kind.TRAIT,
-                Definition.Kind.CLASS,
-                Definition.Kind.IMPL -> viewModel.scope().value = definition.value() as Scope
-                else -> {
+        onClick = {
+            if (definition.error() == null && definition.value() is Scope) {
+                viewModel.scope().value = definition.value() as Scope
+            } else {
                     if (viewModel.mode.value == TantillaViewModel.Mode.HIERARCHY) {
                         viewModel.edit(definition.scope, definition)
                     } else {
-                        if (viewModel.showDocString.value == definition) {
-                            viewModel.showDocString.value = null
+                        if (viewModel.expanded.containsKey(definition)) {
+                            viewModel.expanded.remove(definition)
                         } else {
-                            viewModel.showDocString.value = definition
+                            viewModel.expanded.put(definition, Unit)
                         }
                     }
-                }
             }
         }
     ) {
+
         Column(Modifier.padding(8.dp)) {
             val writer = CodeWriter()
             definition.serializeTitle(writer)
+
             Text(ansiToAnnotatedString(writer.toString()))
-            if (viewModel.showDocString.value == definition) {
+            if (viewModel.expanded.contains(definition)) {
                 Divider(Modifier.padding(0.dp, 6.dp), color = Color.Transparent)
                 Text(ansiToAnnotatedString(definition.docString))
             }
@@ -190,11 +191,18 @@ fun RenderEditor(viewModel: TantillaViewModel) {
             )
         }
     ) {
-        TextField(
-            value = viewModel.currentText.value,
-            onValueChange = { viewModel.currentText.value = it },
-            modifier = Modifier.fillMaxSize(),
-        )
+        Column() {
+            val error = viewModel.definition.value!!.error()
+            if (error != null) {
+                Text(error.message ?: error.toString())
+            }
+            TextField(
+                value = viewModel.currentText.value,
+                onValueChange = { viewModel.currentText.value = it },
+                modifier = Modifier.fillMaxSize(),
+            )
+
+        }
     }
 }
 

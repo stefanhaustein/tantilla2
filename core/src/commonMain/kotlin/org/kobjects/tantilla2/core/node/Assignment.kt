@@ -11,7 +11,7 @@ class Assignment(
     val source: Evaluable<RuntimeContext>
 ) : TantillaNode {
 
-    override val type: Type
+    override val returnType: Type
         get() = Void
 
     override fun children() = listOf(target, source)

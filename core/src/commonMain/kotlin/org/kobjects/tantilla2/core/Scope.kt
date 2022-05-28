@@ -25,19 +25,14 @@ abstract class Scope(
 
 */
 
-    fun createLocalVariable(name: String, type: Type, mutable: Boolean, initializer: Evaluable<RuntimeContext>?, builtin: Boolean = false) =
-        Definition(
+
+    fun declareLocalVariable(name: String, type: Type, mutable: Boolean): Int {
+        val definition = Definition(
             this,
             name,
             Definition.Kind.LOCAL_VARIABLE,
-            explicitType = type,
-            builtin = builtin,
-            mutable = mutable,
-            initializer = initializer)
-
-
-    fun declareLocalVariable(name: String, type: Type, mutable: Boolean, builtin: Boolean = false): Int {
-        val definition = createLocalVariable(name, type, mutable, null, builtin)
+            resolvedType = type,
+            mutable = mutable)
         definitions[name] = definition
         locals.add(name)
         return locals.size - 1
@@ -56,13 +51,15 @@ abstract class Scope(
         } catch (e: Exception) {
             e.printStackTrace()
             val name = oldDefinition?.name ?: "[error]"
-            replacement = Definition(this, name, Definition.Kind.UNPARSEABLE, definitionText = newContent)
+            replacement = Definition(
+                this,
+                name,
+                Definition.Kind.UNPARSEABLE,
+                definitionText = newContent
+            )
         }
         definitions[replacement.name] = replacement
     }
-
-    fun createUnparsed(kind: Definition.Kind, name: String, definition: String) =
-        Definition(this, name, kind, definitionText = definition)
 
 
     override fun serializeCode(writer: CodeWriter, precedence: Int) {
@@ -85,17 +82,47 @@ abstract class Scope(
         writer.outdent()
     }
 
-    fun resolve(name: String, includeLocals: Boolean = true): Definition {
+    fun resolveDynamic(name: String, fallBackToStatic: Boolean = false): Definition {
         val result = definitions[name]
-        return if (result == null || (!includeLocals && result.kind == Definition.Kind.LOCAL_VARIABLE))
-            parentContext?.resolve(name, false) ?: throw RuntimeException("Undefined: '$name'")
-            else result
+        if (result != null) {
+            if (fallBackToStatic || result.isDyanmic()) {
+                return result
+            }
+            throw IllegalStateException("Dynamic property expected; found: $result")
+        }
+        if (fallBackToStatic) {
+            return resolveStatic(name, true)
+        }
+        throw IllegalStateException("Not found: '$name'")
     }
 
-    open fun resolveAll() {
-        for (definition in definitions.values) {
-            definition.value()
+    fun resolveStatic(name: String, fallBackToParent: Boolean = false): Definition {
+        val result = definitions[name]
+        if (result != null) {
+            if (result.isDyanmic()) {
+                throw RuntimeException("Static property expected; found: $result")
+            }
+            return result
         }
+        if (fallBackToParent && parentContext != null) {
+            return parentContext.resolveStatic(name, true)
+        }
+        throw RuntimeException("Undefined: '$name'")
+    }
+
+    open fun resolveAll(): Boolean {
+        var allOk = true
+        for (definition in definitions.values) {
+            try {
+                val value = definition.value()
+                if (value is Scope && !value.resolveAll()) {
+                    allOk = false
+                }
+            } catch (e: Exception) {
+                allOk = false
+            }
+        }
+        return allOk
     }
 
 
@@ -114,9 +141,8 @@ abstract class Scope(
             this,
             name,
             Definition.Kind.FUNCTION,
-            explicitType = type,
-            explicitValue = function,
-            builtin = true,
+            resolvedType = type,
+            resolvedValue = function,
             docString = docString
         )
     }

@@ -1,10 +1,13 @@
 package org.kobjects.tantilla2.core
 
 import org.kobjects.greenspun.core.Evaluable
+import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.core.classifier.UserClassDefinition
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
+import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Lambda
+import org.kobjects.tantilla2.core.node.TantillaNode
 import org.kobjects.tantilla2.core.parser.Parser
 import org.kobjects.tantilla2.core.parser.TantillaTokenizer
 import org.kobjects.tantilla2.core.parser.TokenType
@@ -13,17 +16,15 @@ class Definition(
     val scope: Scope,
     val name: String, // Not really necessary but should make debugging and printing easier.
     val kind: Kind,
-    val builtin: Boolean = false,
     val definitionText: String = "",
     val mutable: Boolean = false,
-    private val explicitType: Type? = null,
-    private val explicitValue: Any? = null,
-    var initializer: Evaluable<RuntimeContext>? = null,
+    private var resolvedType: Type? = null,
+    private var resolvedValue: Any? = UnresolvedValue,
     var docString: String = "",
 ) : SerializableCode {
+    var error: Exception? = null
 
-    private var cachedType = explicitType
-    private var currentValue = explicitValue
+    private var resolvedInitializer: Evaluable<RuntimeContext>? = UnresolvedEvalueable
 
     enum class Kind {
         LOCAL_VARIABLE, STATIC_VARIABLE, FUNCTION, CLASS, TRAIT, IMPL, UNPARSEABLE
@@ -32,73 +33,145 @@ class Definition(
     private fun tokenizer(): TantillaTokenizer {
         val tokenizer = TantillaTokenizer(definitionText)
         tokenizer.consume(TokenType.BOF)
+        error = null
         return tokenizer
     }
 
-    fun type(): Type {
-        if (cachedType == null) {
-            cachedType = when (kind) {
-                Kind.FUNCTION -> Parser.parseFunctionType(tokenizer(), scope)
-                Kind.LOCAL_VARIABLE -> throw RuntimeException("Local variable type must not be null")
-                else -> value().type
+    private fun exceptionInResolve(e: Exception, tokenizer: TantillaTokenizer): Exception {
+        if (e is ParsingException) {
+            error = e
+        } else {
+            error = ParsingException(tokenizer.current, e.message ?: "Parsing Error", e)
+        }
+        error!!.printStackTrace()
+        throw error!!
+    }
+
+    fun error(): Exception? {
+        if (error == null) {
+            try {
+                when (kind) {
+                    Kind.LOCAL_VARIABLE,
+                    Kind.STATIC_VARIABLE -> initializer()
+                    Kind.UNPARSEABLE -> null
+                    else -> value()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
-        return cachedType!!
+        return error;
+    }
+
+    fun type(): Type {
+        if (resolvedType == null) {
+            val tokenizer = tokenizer()
+            try {
+                when (kind) {
+                    Kind.FUNCTION -> resolvedType = Parser.parseFunctionType(tokenizer, scope)
+                    Kind.LOCAL_VARIABLE,
+                    Kind.STATIC_VARIABLE -> resolveVariable(tokenizer, typeOnly = true)
+                    else -> resolvedType = value().type
+                }
+            } catch (e: Exception) {
+                throw exceptionInResolve(e, tokenizer)
+            }
+        }
+        return resolvedType!!
     }
 
     fun value(): Any?  {
-        if (currentValue == null) {
-            currentValue = when (kind) {
-                Kind.STATIC_VARIABLE -> null
-                Kind.FUNCTION -> resolveFunction()
-                Kind.CLASS -> resolveClass()
-                Kind.TRAIT -> resolveTrait()
-                Kind.IMPL -> resolveImpl()
-                Kind.UNPARSEABLE -> throw RuntimeException("Can't obtain value for unparseable definition.")
-                Kind.LOCAL_VARIABLE -> throw RuntimeException("Can't obtain local variable value from Definition.")
+        if (resolvedValue == UnresolvedValue) {
+            val tokenizer = tokenizer()
+            try {
+                when (kind) {
+                    Kind.STATIC_VARIABLE -> resolveVariable(tokenizer)
+                    Kind.FUNCTION -> resolvedValue =  Parser.parseLambda(tokenizer, scope)
+                    Kind.CLASS -> resolvedValue = resolveClass(tokenizer)
+                    Kind.TRAIT -> resolvedValue = resolveTrait(tokenizer)
+                    Kind.IMPL -> resolvedValue = resolveImpl(tokenizer)
+                    Kind.UNPARSEABLE -> throw RuntimeException("Can't obtain value for unparseable definition.")
+                    Kind.LOCAL_VARIABLE -> throw RuntimeException("Can't obtain local variable value from Definition.")
+                }
+            } catch (e: Exception) {
+                throw exceptionInResolve(e, tokenizer)
             }
         }
-        return currentValue
+        return resolvedValue
     }
 
-    private fun resolveClass(): Scope {
-            println("Resolving class $name: $definitionText")
-            val classContext = UserClassDefinition(name, scope)
+    fun initializer(): Evaluable<RuntimeContext>? {
+        if (kind != Kind.STATIC_VARIABLE && kind != Kind.LOCAL_VARIABLE) {
+            throw IllegalStateException("Initilizer not available for $kind")
+        }
+        if (resolvedInitializer == UnresolvedEvalueable) {
             val tokenizer = tokenizer()
-            tokenizer.next()
-            Parser.parse(tokenizer, classContext)
-            println("Class successfully resolved!")
-            return classContext
+            try {
+                resolveVariable(tokenizer)
+            } catch (e: Exception) {
+                throw exceptionInResolve(e, tokenizer)
+            }
+        }
+        return resolvedInitializer
     }
 
-    private fun resolveTrait(): Scope {
-            println("Resolving trait $name: $definitionText")
-            val traitContext = TraitDefinition(name, scope)
-            val tokenizer = tokenizer()
-            tokenizer.next()
-            Parser.parse(tokenizer, traitContext)
-            println("Trait successfully resolved!")
-            return traitContext
+    private fun resolveClass(tokenizer: TantillaTokenizer): Scope {
+        println("Resolving class $name: $definitionText")
+        val classContext = UserClassDefinition(name, scope)
+        tokenizer.consume(":")
+        Parser.parse(tokenizer, classContext)
+        println("Class successfully resolved!")
+        return classContext
     }
 
-    private fun resolveImpl(): Scope {
+    private fun resolveTrait(tokenizer: TantillaTokenizer): Scope {
+        println("Resolving trait $name: $definitionText")
+        val traitContext = TraitDefinition(name, scope)
+        tokenizer.consume(":")
+        Parser.parse(tokenizer, traitContext)
+        println("Trait successfully resolved!")
+        return traitContext
+    }
+
+    private fun resolveImpl(tokenizer: TantillaTokenizer): Scope {
         println("Resolving impl $name: $definitionText")
         val traitName = name.substring(0, name.indexOf(' '))
-        val trait = scope.resolve(traitName).value() as TraitDefinition
+        val trait = scope.resolveDynamic(traitName).value() as TraitDefinition
         val className = name.substring(name.lastIndexOf(' ') + 1)
-        val implFor = scope.resolve(className).value() as UserClassDefinition
+        val implFor = scope.resolveDynamic(className).value() as UserClassDefinition
         val implContext = ImplDefinition(name, scope, trait, implFor)
-        val tokenizer = tokenizer()
         tokenizer.next()
         Parser.parse(tokenizer, implContext)
         println("Impl successfully resolved!")
         return implContext
     }
 
-    private fun resolveFunction(): Lambda {
-
-            println("Resolving function $name: $definitionText")
-            return Parser.parseLambda(tokenizer(), scope)
+    private fun resolveVariable(tokenizer: TantillaTokenizer, typeOnly: Boolean = false) {
+        if (tokenizer.tryConsume(":")) {
+            resolvedType = Parser.parseType(tokenizer, scope)
+            if (typeOnly) {
+                return
+            }
+        }
+        val asParameter = scope is UserClassDefinition && !isStatic()
+        if (tokenizer.tryConsume("=")) {
+            if (asParameter) {
+                throw tokenizer.exception("Parameter initializers NYI")
+            }
+            resolvedInitializer = Parser.parseExpression(tokenizer, scope)
+            if (resolvedType == null) {
+                resolvedType = resolvedInitializer!!.returnType
+            } else if (!resolvedType!!.isAssignableFrom(resolvedInitializer!!.returnType)) {
+                throw tokenizer.exception("Initializer type mismatch: ${resolvedInitializer!!.returnType} can't be assigned to $resolvedType")
+            }
+        } else if (resolvedType != null) {
+            resolvedInitializer = null
+        } else {
+            throw tokenizer.exception("Explicit type or initializer expression required.")
+        }
+        if (kind == Kind.STATIC_VARIABLE) {
+            resolvedValue = resolvedInitializer!!.eval(RuntimeContext(mutableListOf()))
+        }
     }
 
 
@@ -108,9 +181,9 @@ class Definition(
     fun serializeTitle(writer: CodeWriter) {
         when (kind) {
             Kind.STATIC_VARIABLE,
-            Kind.LOCAL_VARIABLE -> writer.keyword(if (mutable) "var " else "let ")
+            Kind.LOCAL_VARIABLE -> writer.keyword(if (mutable) "var " else "val ")
                 .declaration(name)
-                .append(if (explicitType != null) ": " + explicitType.typeName else "")
+                //.append(if (explicitType != null) ": " + explicitType.typeName else "")
             Kind.FUNCTION -> writer.keyword("def ").declaration(name).appendType(type())
             Kind.TRAIT,
             Kind.IMPL,
@@ -125,25 +198,32 @@ class Definition(
            Kind.STATIC_VARIABLE,
            Kind.LOCAL_VARIABLE -> {
                serializeTitle(writer)
-               if (initializer != null) {
-                   writer.append(" = ")
-                   writer.appendCode(initializer)
+               if (resolvedInitializer != UnresolvedEvalueable) {
+                   writer.append(": ")
+                   writer.appendType(type())
+                   if (resolvedInitializer != null) {
+                       writer.append(" = ")
+                       writer.appendCode(resolvedInitializer)
+                   }
+               } else {
+                   writer.append(definitionText)
                }
            }
            Kind.UNPARSEABLE -> writer.append(definitionText)
            Kind.TRAIT,
            Kind.CLASS,
            Kind.IMPL -> {
-               if (currentValue != null) {
-                   writer.appendCode(currentValue)
+               if (resolvedValue != UnresolvedValue) {
+                   writer.appendCode(resolvedValue)
                } else {
+                   serializeTitle(writer)
                    writer.append(definitionText)
                }
            }
            Kind.FUNCTION -> {
                writer.keyword("def ").declaration(name)
-               if (currentValue != null) {
-                   writer.appendCode(currentValue)
+               if (resolvedValue != UnresolvedValue) {
+                   writer.appendCode(resolvedValue)
                } else {
                     writer.append(definitionText)
                }
@@ -154,4 +234,33 @@ class Definition(
 
 
     fun index() = scope.locals.indexOf(name)
+
+    fun isDyanmic() = kind == Definition.Kind.LOCAL_VARIABLE
+            || (kind == Definition.Kind.FUNCTION && (type() as FunctionType).isMethod())
+
+    fun isStatic() = !isDyanmic()
+
+    object UnresolvedEvalueable: TantillaNode {
+        override fun children(): List<Evaluable<RuntimeContext>> {
+            TODO("Not yet implemented")
+        }
+
+        override fun eval(context: RuntimeContext): Any? {
+            TODO("Not yet implemented")
+        }
+
+        override fun reconstruct(newChildren: List<Evaluable<RuntimeContext>>): Evaluable<RuntimeContext> {
+            TODO("Not yet implemented")
+        }
+
+        override fun serializeCode(writer: CodeWriter, precedence: Int) {
+            TODO("Not yet implemented")
+        }
+
+        override val returnType: Type
+            get() = TODO("Not yet implemented")
+    }
+
+
+    object UnresolvedValue
 }

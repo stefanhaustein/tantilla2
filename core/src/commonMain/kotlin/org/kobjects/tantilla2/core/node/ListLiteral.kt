@@ -10,10 +10,10 @@ class ListLiteral(
 ) : TantillaNode {
 
     override fun eval(context: RuntimeContext): TypedList {
-        return type.create(elements.size) { elements[it].eval(context) }
+        return returnType.create(elements.size) { elements[it].eval(context) }
     }
 
-    override val type = ListType(commonType(elements.map { it.type }))
+    override val returnType = ListType(commonType(elements.map { it.returnType }))
 
     override fun children(): List<Evaluable<RuntimeContext>> = elements
 

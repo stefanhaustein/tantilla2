@@ -8,7 +8,7 @@ import org.kobjects.tantilla2.core.Type
 
 class LocalVariableReference(
     val name: String,
-    override val type: Type,
+    override val returnType: Type,
     val index: Int,
     val mutable: Boolean
 ) : Assignable, SerializableCode {

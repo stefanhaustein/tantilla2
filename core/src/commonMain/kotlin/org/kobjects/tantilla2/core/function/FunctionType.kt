@@ -8,6 +8,8 @@ interface FunctionType :Type {
     val returnType: Type
     val parameters: List<Parameter>
 
+    fun isMethod() = parameters.size > 0 && parameters[0].name == "self"
+
     override fun serializeType(writer: CodeWriter) {
         writer.append("(")
         if (parameters.size > 0) {

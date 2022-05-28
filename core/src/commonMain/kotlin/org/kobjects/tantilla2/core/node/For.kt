@@ -13,7 +13,7 @@ class For(
     val rangeExpression: Evaluable<RuntimeContext>,
     val bodyExpression: Evaluable<RuntimeContext>,
 ) : TantillaNode {
-    override val type: Type
+    override val returnType: Type
         get() = Void
 
     override fun children() = listOf(rangeExpression, bodyExpression)

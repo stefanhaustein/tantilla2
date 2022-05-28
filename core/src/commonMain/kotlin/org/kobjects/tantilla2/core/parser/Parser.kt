@@ -15,7 +15,7 @@ import org.kobjects.tantilla2.core.runtime.Void
 fun String.unquote() = this.substring(1, this.length - 1)
 
 object Parser {
-    val DECLARATION_KEYWORDS = setOf("def", "var", "let", "class", "trait", "impl")
+    val DECLARATION_KEYWORDS = setOf("def", "var", "val", "class", "trait", "impl", "static")
 
     fun getIndent(s: String): Int {
         val lastBreak = s.lastIndexOf('\n')
@@ -53,7 +53,7 @@ object Parser {
                 context.definitions[definition.name] = definition
                 if (definition.kind == Definition.Kind.LOCAL_VARIABLE) {
                     context.locals.add(definition.name)
-                    if (definition.initializer != null) {
+                    if (definition.initializer() != null) {
                         statements.add(
                             Assignment(
                                 LocalVariableReference(
@@ -62,7 +62,7 @@ object Parser {
                                     definition.index(),
                                     definition.mutable
                                 ),
-                                definition.initializer!!
+                                definition.initializer()!!
                             )
                         )
                     }
@@ -78,38 +78,53 @@ object Parser {
     }
 
     fun parseDefinition(tokenizer: TantillaTokenizer, scope: Scope, localDepth: Int) =
-        when (tokenizer.consume(TokenType.IDENTIFIER)) {
-            "var" -> parseVariableDeclaration(tokenizer, scope, true)
-            "let" -> parseVariableDeclaration(tokenizer, scope, false)
+        when (tokenizer.current.text) {
+            "static", "var", "val" -> parseVariableDeclaration(tokenizer, scope)
             "def" -> {
+                tokenizer.consume("def")
                 val name = tokenizer.consume(TokenType.IDENTIFIER, "Function name expected.")
                 println("consuming def $name")
                 val text = consumeBody(tokenizer, localDepth)
-                scope.createUnparsed(Definition.Kind.FUNCTION, name, text)
+                Definition(scope, name, Definition.Kind.FUNCTION, definitionText = text)
             }
             "class" -> {
+                tokenizer.consume("class")
                 val name = tokenizer.consume(TokenType.IDENTIFIER, "Class name expected.")
                 println("consuming class $name; return depth: $localDepth")
                 val text = consumeBody(tokenizer, localDepth)
-                scope.createUnparsed(Definition.Kind.CLASS, name, text)
+                Definition(scope, name, Definition.Kind.CLASS, definitionText = text)
             }
             "trait" -> {
+                tokenizer.consume("trait")
                 val name = tokenizer.consume(TokenType.IDENTIFIER, "Trait name expected.")
                 println("consuming trait $name; return depth: $localDepth")
                 val text = consumeBody(tokenizer, localDepth)
-                scope.createUnparsed(Definition.Kind.TRAIT, name, text)
+                Definition(scope, name, Definition.Kind.TRAIT, definitionText = text)
             }
             "impl" -> {
+                tokenizer.consume("impl")
                 val traitName = tokenizer.consume(TokenType.IDENTIFIER, "Trait name expected.")
                 tokenizer.consume("for")
                 val name = tokenizer.consume(TokenType.IDENTIFIER, "Class name expected.")
                 println("consuming impl $traitName for $name; return depth: $localDepth")
                 val text = consumeBody(tokenizer, localDepth)
-                scope.createUnparsed(Definition.Kind.IMPL, "$traitName for $name", text)
+                Definition(
+                    scope,
+                    "$traitName for $name",
+                    Definition.Kind.IMPL,
+                    definitionText = text
+                )
             }
-            else ->  throw tokenizer.error("Declaration expected.")
-    }
+            else -> throw tokenizer.exception("Declaration expected.")
+        }
 
+    fun consumeLine(tokenizer: TantillaTokenizer): String {
+        val pos = tokenizer.current.pos
+        while (tokenizer.current.type != TokenType.EOF && tokenizer.current.type != TokenType.LINE_BREAK) {
+            tokenizer.next()
+        }
+        return tokenizer.input.substring(pos, tokenizer.current.pos)
+    }
 
     fun consumeBody(
         tokenizer: TantillaTokenizer,
@@ -150,7 +165,7 @@ object Parser {
             val expr = parseExpression(tokenizer, context)
             if (tokenizer.tryConsume("=")) {
                 if (expr !is Assignable) {
-                    tokenizer.error("Target is not assignable")
+                    tokenizer.exception("Target is not assignable")
                 }
                 Assignment(expr as Assignable, parseExpression(tokenizer, context))
             } else {
@@ -210,28 +225,21 @@ object Parser {
     fun parseVariableDeclaration(
         tokenizer: TantillaTokenizer,
         context: Scope,
-        mutable: Boolean,
     ) : Definition {
+        val explicitlyStatic = tokenizer.tryConsume("static")
+        val mutable = if (tokenizer.tryConsume("var")) true
+            else if (tokenizer.tryConsume("val")) false
+            else throw tokenizer.exception("var or val expected.")
+
         val name = tokenizer.consume(TokenType.IDENTIFIER)
-        var type: Type? = null
-        if (tokenizer.tryConsume(":")) {
-            type = parseType(tokenizer, context)
-        }
-        var initializer: Evaluable<RuntimeContext>? = null
-        val asParameter = context is UserClassDefinition
-        if (tokenizer.tryConsume("=")) {
-            if (asParameter) {
-                throw tokenizer.error("Parameter initializers NYI")
-            }
-            initializer = parseExpression(tokenizer, context)
-            if (type != null && !type.isAssignableFrom(initializer.type)) {
-                throw tokenizer.error("Initializer type mismatch: ${initializer.type} can't be assigned to $type")
-            }
-            type = initializer.type
-        } else if (type == null) {
-            throw tokenizer.error("Explicit type or initializer expression required.")
-        }
-        return context.createLocalVariable(name, type, mutable, initializer)
+        val kind = if (explicitlyStatic || (context !is UserClassDefinition && context !is FunctionScope)) Definition.Kind.STATIC_VARIABLE
+            else Definition.Kind.LOCAL_VARIABLE
+        val text = consumeLine(tokenizer)
+
+        return Definition(context, name, kind, definitionText = text)
+/*
+
+ */
     }
 
     fun parseExpression(tokenizer: TantillaTokenizer, context: Scope): Evaluable<RuntimeContext> =
@@ -300,14 +308,11 @@ object Parser {
         return Apply(base, arguments)
     }
 
-    fun consumeAndResoloveIdentifier(tokenizer: TantillaTokenizer, context: Scope): Definition {
-        val name = tokenizer.consume(TokenType.IDENTIFIER)
-        try {
-            return context.resolve(name)
-        } catch (e: Exception) {
-            throw tokenizer.error(e.message ?: "Can't resolve $name")
-        }
-    }
+    fun reference(definition: Definition) = if (definition.kind == Definition.Kind.LOCAL_VARIABLE)
+        LocalVariableReference(
+            definition.name, definition.type(), definition.index(), definition.mutable)
+        else StaticReference(definition)
+
 
     fun parseFreeIdentifier(tokenizer: TantillaTokenizer, context: Scope): Evaluable<RuntimeContext> {
         val name = tokenizer.consume(TokenType.IDENTIFIER)
@@ -315,8 +320,8 @@ object Parser {
         var args: List<Evaluable<RuntimeContext>>
         if (tokenizer.tryConsume("(")) {
             args = parseList(tokenizer, context, ")")
-            if (args.size > 0 && args[0].type is Scope) {
-                val baseType = args[0].type as Scope
+            if (args.size > 0 && args[0].returnType is Scope) {
+                val baseType = args[0].returnType as Scope
                 if (baseType.definitions.containsKey(name)) {
                     return Apply(StaticReference(baseType.definitions[name]!!), args)
                 }
@@ -325,9 +330,9 @@ object Parser {
             args = emptyList()
         }
 
-        val definition = context.resolve(name)
-        val base = StaticReference(definition)
-        if (base.type is FunctionType) {
+        val definition = context.resolveDynamic(name, fallBackToStatic = true)
+        val base = reference(definition)
+        if (base.returnType is FunctionType) {
             return Apply(base, args)
         }
         if (args.size > 0) {
@@ -354,7 +359,7 @@ object Parser {
                         tokenizer.consume("[")
                         ListLiteral(parseList(tokenizer, context, "]"))
                     }
-                    else -> throw tokenizer.error("Number, identifier or opening bracket expected here.")
+                    else -> throw tokenizer.exception("Number, identifier or opening bracket expected here.")
                 }
             }
         }
@@ -373,7 +378,7 @@ object Parser {
             tokenizer.consume("]")
             return ListType(elementType)
         }
-        return context.resolve(name).value() as Type
+        return context.resolveStatic(name, true).value() as Type
     }
 
     fun parseList(
@@ -396,8 +401,8 @@ object Parser {
         base: Evaluable<RuntimeContext>,
     ): Evaluable<RuntimeContext> {
         val traitName = tokenizer.consume(TokenType.IDENTIFIER)
-        val className = base.type.typeName
-        val impl = context.resolve("$traitName for $className").value() as ImplDefinition
+        val className = base.returnType.typeName
+        val impl = context.resolveStatic("$traitName for $className").value() as ImplDefinition
         impl.resolveAll()
         return As(base, impl)
     }
@@ -408,11 +413,11 @@ object Parser {
         base: Evaluable<RuntimeContext>,
     ): Evaluable<RuntimeContext> {
         val name = tokenizer.consume(TokenType.IDENTIFIER)
-        if (base.type !is Scope) {
-            throw tokenizer.error("Base type must be parsing context; got: ${base.type} for $base.")
+        if (base.returnType !is Scope) {
+            throw tokenizer.exception("Base type must be parsing context; got: ${base.returnType} for $base.")
         }
-        val baseType = base.type as Scope
-        val definition = baseType.resolve(name)
+        val baseType = base.returnType as Scope
+        val definition = baseType.resolveDynamic(name)
         val args = if (tokenizer.tryConsume("(")) parseList(tokenizer, context, ")")
         else emptyList()
 
@@ -433,7 +438,7 @@ object Parser {
                 }
                 return Apply(fn, params)
             }
-            else -> throw tokenizer.error("Unsupported definition kind ${definition.kind} for $base.$name")
+            else -> throw tokenizer.exception("Unsupported definition kind ${definition.kind} for $base.$name")
         }
     }
 

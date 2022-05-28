@@ -4,9 +4,9 @@ import org.kobjects.greenspun.core.*
 import org.kobjects.tantilla2.core.node.TantillaNode
 import org.kobjects.tantilla2.core.runtime.Void
 
-val Evaluable<*>.type: Type
+val Evaluable<*>.returnType: Type
     get() = when(this) {
-        is TantillaNode -> type
+        is TantillaNode -> returnType
 
         is F64.Binary -> org.kobjects.tantilla2.core.runtime.F64
         is F64.Const -> org.kobjects.tantilla2.core.runtime.F64
@@ -18,7 +18,7 @@ val Evaluable<*>.type: Type
 
         is Str.Const -> org.kobjects.tantilla2.core.runtime.Str
 
-        else -> throw IllegalArgumentException("Unrecognized type: ${this}")
+        else -> throw IllegalArgumentException("Unrecognized type: $this")
     }
 
 

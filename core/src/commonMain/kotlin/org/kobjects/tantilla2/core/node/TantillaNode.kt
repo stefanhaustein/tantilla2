@@ -7,5 +7,5 @@ import org.kobjects.tantilla2.core.Type
 
 interface TantillaNode : Evaluable<RuntimeContext>, SerializableCode {
 
-    val type: Type
+    val returnType: Type
 }

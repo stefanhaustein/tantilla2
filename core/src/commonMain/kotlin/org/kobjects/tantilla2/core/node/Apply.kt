@@ -5,7 +5,7 @@ import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.RuntimeContext
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Lambda
-import org.kobjects.tantilla2.core.type
+import org.kobjects.tantilla2.core.returnType
 
 
 class Apply(
@@ -37,8 +37,8 @@ class Apply(
     override fun reconstruct(newChildren: List<Evaluable<RuntimeContext>>): Evaluable<RuntimeContext> =
         Apply(newChildren[0], newChildren.subList(1, newChildren.size))
 
-    override val type
-        get() = (callable.type as FunctionType).returnType
+    override val returnType
+        get() = (callable.returnType as FunctionType).returnType
 
     override fun serializeCode(sb: CodeWriter, parentPrcedence: Int) {
         sb.appendCode(callable)

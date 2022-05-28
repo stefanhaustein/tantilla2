@@ -11,7 +11,7 @@ class As(
     val base: Evaluable<RuntimeContext>,
     val impl: ImplDefinition,
 ) : TantillaNode {
-    override val type: Type
+    override val returnType: Type
         get() = impl.trait
 
     override fun children() = listOf(base)

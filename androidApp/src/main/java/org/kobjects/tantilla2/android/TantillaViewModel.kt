@@ -3,6 +3,7 @@ package org.kobjects.tantilla2.android
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import org.kobjects.konsole.compose.AnsiConverter.ansiToAnnotatedString
 import org.kobjects.tantilla2.console.ConsoleLoop
@@ -27,7 +28,7 @@ class TantillaViewModel(
     val definition = mutableStateOf<Definition?>(null)
     val currentText = mutableStateOf("")
     var editorParentScope: Scope = console.scope
-    val showDocString = mutableStateOf<Definition?>(null)
+    val expanded = mutableStateMapOf<Definition, Unit>()
 
     init {
         defineNatives()
@@ -54,7 +55,7 @@ class TantillaViewModel(
         canvas.scale(1f, -1f)
         val penImpl = PenImpl(PenDefinition, canvas)
         RootScope.definitions["pen"] = Definition(
-            RootScope, "pen", Definition.Kind.STATIC_VARIABLE, explicitType = PenDefinition, explicitValue = penImpl)
+            RootScope, "pen", Definition.Kind.STATIC_VARIABLE, resolvedType = PenDefinition, resolvedValue = penImpl)
     }
 
     fun scope(): MutableState<Scope> = if (mode.value == Mode.HELP) builtinScope else userScope
@@ -81,6 +82,7 @@ class TantillaViewModel(
         reset()
         this.fileName.value = name
         Parser.parse(programText, console.scope)
+        console.scope.resolveAll()
     }
 
     enum class Mode {
