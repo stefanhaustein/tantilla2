@@ -13,10 +13,10 @@ interface FunctionType :Type {
     override fun serializeType(writer: CodeWriter) {
         writer.append("(")
         if (parameters.size > 0) {
-            parameters[0].serialize(writer)
+            parameters[0].serializeCode(writer)
             for (i in 1 until parameters.size) {
                 writer.append(", ")
-                parameters[i].serialize(writer)
+                parameters[i].serializeCode(writer)
             }
         }
         writer.append(")")

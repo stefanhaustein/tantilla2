@@ -10,6 +10,7 @@ import org.kobjects.tantilla2.core.function.*
 import org.kobjects.tantilla2.core.node.*
 import org.kobjects.tantilla2.core.runtime.ListType
 import org.kobjects.tantilla2.core.runtime.Void
+import kotlin.math.min
 
 
 fun String.unquote() = this.substring(1, this.length - 1)
@@ -237,9 +238,6 @@ object Parser {
         val text = consumeLine(tokenizer)
 
         return Definition(context, name, kind, definitionText = text)
-/*
-
- */
     }
 
     fun parseExpression(tokenizer: TantillaTokenizer, context: Scope): Evaluable<RuntimeContext> =
@@ -257,7 +255,7 @@ object Parser {
                     else ->
                     throw IllegalStateException("self supported for classes, traits and implemenetations only; got: ${context}")
                 }
-                parameters.add(Parameter("self", selfType))
+                parameters.add(Parameter("self", selfType, null))
                 while (tokenizer.tryConsume(",")) {
                     parameters.add(parseParameter(tokenizer, context))
                 }
@@ -292,20 +290,20 @@ object Parser {
         val name = tokenizer.consume(TokenType.IDENTIFIER)
         tokenizer.consume(":", "Colon expected, separating the parameter type from the parameter name.")
         val type = parseType(tokenizer, context)
-        return Parameter(name, type)
+        val defaultValue: Evaluable<RuntimeContext>?
+        if (tokenizer.tryConsume("=")) {
+            defaultValue = parseExpression(tokenizer, context)
+            if (!type.isAssignableFrom(defaultValue.returnType)) {
+                throw  tokenizer.exception("Default value not assignable to $type")
+            }
+        } else {
+            defaultValue = null
+        }
+        return Parameter(name, type, defaultValue)
     }
 
     fun parseApply(tokenizer: TantillaTokenizer, context: Scope, base: Evaluable<RuntimeContext>): Evaluable<RuntimeContext> {
-        val arguments = mutableListOf<Evaluable<RuntimeContext>>()
-        if (!tokenizer.tryConsume(")")) {
-            do {
-                val argument = parseExpression(tokenizer, context)
-                println("Parsed argument: $argument")
-                arguments.add(argument)
-            } while (tokenizer.tryConsume(","))
-            tokenizer.consume(")")
-        }
-        return Apply(base, arguments)
+        return apply(base, parseParameterList(tokenizer, context))
     }
 
     fun reference(definition: Definition) = if (definition.kind == Definition.Kind.LOCAL_VARIABLE)
@@ -313,17 +311,61 @@ object Parser {
             definition.name, definition.type(), definition.index(), definition.mutable)
         else StaticReference(definition)
 
+    fun apply(
+        base: Evaluable<RuntimeContext>,
+        availableParameters: List<Pair<String, Evaluable<RuntimeContext>>>
+    ): Evaluable<RuntimeContext> {
+        val functionType = base.returnType as FunctionType
+
+        val expectedParameters = functionType.parameters
+
+        var positionalAllowed = true
+        val result = mutableListOf<Evaluable<RuntimeContext>>()
+        for (i in 0 until min(expectedParameters.size, availableParameters.size)) {
+            val expected = expectedParameters[i]
+            if ((positionalAllowed && availableParameters[i].first.isEmpty())
+                || availableParameters[i].first == expected.name) {
+                result.add(availableParameters[i].second)
+            }
+        }
+        if (result.size < functionType.parameters.size) {
+            val map = mutableMapOf<String, Evaluable<RuntimeContext>>()
+            for (i in result.size until availableParameters.size) {
+                val actual = availableParameters[i]
+                map.put(actual.first, actual.second)
+            }
+            for (i in result.size until functionType.parameters.size) {
+                val expected = expectedParameters[i]
+                val name = expected.name
+                val expr = map.remove(expected.name) ?: expected.defaultValueExpression
+                ?: throw IllegalArgumentException("Parameter not found: $name")
+                result.add(expr)
+            }
+            if (map.isNotEmpty()) {
+                throw IllegalArgumentException("Unexpected parameter(s): ${map.keys}")
+            }
+        }
+        for (i in 0 until result.size) {
+            if (!expectedParameters[i].type.isAssignableFrom(result[i].returnType)) {
+                throw IllegalArgumentException(
+                    "Can't assign ${result[i].returnType} to expected type ${expectedParameters[i].type} for paramerter ${expectedParameters[i].name}")
+            }
+
+        }
+
+        return Apply(base, result.toList())
+    }
 
     fun parseFreeIdentifier(tokenizer: TantillaTokenizer, context: Scope): Evaluable<RuntimeContext> {
         val name = tokenizer.consume(TokenType.IDENTIFIER)
 
-        var args: List<Evaluable<RuntimeContext>>
+        var args: List<Pair<String, Evaluable<RuntimeContext>>>
         if (tokenizer.tryConsume("(")) {
-            args = parseList(tokenizer, context, ")")
-            if (args.size > 0 && args[0].returnType is Scope) {
-                val baseType = args[0].returnType as Scope
+            args = parseParameterList(tokenizer, context)
+            if (args.size > 0 && args[0].first == "" && args[0].second.returnType is Scope) {
+                val baseType = args[0].second.returnType as Scope
                 if (baseType.definitions.containsKey(name)) {
-                    return Apply(StaticReference(baseType.definitions[name]!!), args)
+                    return apply(StaticReference(baseType.definitions[name]!!), args)
                 }
             }
         } else {
@@ -333,14 +375,34 @@ object Parser {
         val definition = context.resolveDynamic(name, fallBackToStatic = true)
         val base = reference(definition)
         if (base.returnType is FunctionType) {
-            return Apply(base, args)
+            return apply(base, args)
         }
         if (args.size > 0) {
             throw IllegalArgumentException("Not callable: ${definition.scope.title}.${definition.name}")
         }
         return base
-
     }
+
+    fun parseParameterList(tokenizer: TantillaTokenizer, context: Scope): List<Pair<String, Evaluable<RuntimeContext>>> {
+        if (tokenizer.tryConsume(")")) {
+            return emptyList()
+        }
+        val result = mutableListOf<Pair<String, Evaluable<RuntimeContext>>>()
+        do {
+            var name: String
+            if (tokenizer.current.type == TokenType.IDENTIFIER && tokenizer.lookAhead(1).text == "=") {
+                name = tokenizer.consume(TokenType.IDENTIFIER)
+                tokenizer.consume("=")
+            } else {
+                name = ""
+            }
+            val expression = parseExpression(tokenizer, context)
+            result.add(Pair(name, expression))
+        } while (tokenizer.tryConsume(","))
+        tokenizer.consume(")")
+        return result.toList()
+    }
+
 
     fun parsePrimary(tokenizer: TantillaTokenizer, context: Scope): Evaluable<RuntimeContext> =
         when (tokenizer.current.type) {
@@ -403,7 +465,7 @@ object Parser {
         val traitName = tokenizer.consume(TokenType.IDENTIFIER)
         val className = base.returnType.typeName
         val impl = context.resolveStatic("$traitName for $className").value() as ImplDefinition
-        impl.resolveAll()
+        impl.hasError()
         return As(base, impl)
     }
 
@@ -418,7 +480,7 @@ object Parser {
         }
         val baseType = base.returnType as Scope
         val definition = baseType.resolveDynamic(name)
-        val args = if (tokenizer.tryConsume("(")) parseList(tokenizer, context, ")")
+        val args = if (tokenizer.tryConsume("(")) parseParameterList(tokenizer, context)
         else emptyList()
 
         when (definition.kind) {
@@ -433,10 +495,10 @@ object Parser {
             Definition.Kind.FUNCTION -> {
                 val fn = StaticReference(definition)
 
-                val params = List<Evaluable<RuntimeContext>>(args.size + 1) {
-                    if (it == 0) base else args[it - 1]
+                val params = List<Pair<String, Evaluable<RuntimeContext>>>(args.size + 1) {
+                    if (it == 0) Pair("", base) else args[it - 1]
                 }
-                return Apply(fn, params)
+                return apply(fn, params)
             }
             else -> throw tokenizer.exception("Unsupported definition kind ${definition.kind} for $base.$name")
         }

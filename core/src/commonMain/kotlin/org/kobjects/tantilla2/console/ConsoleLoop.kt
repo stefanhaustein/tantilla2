@@ -39,7 +39,7 @@ class ConsoleLoop(
             try {
                 var parsed = Parser.parse(line, scope)
                 konsole.write("parsed: $parsed")
-                scope.resolveAll()
+                scope.hasError()
                 konsole.write("resolved: $parsed")
 
                 val evaluationResult = parsed.eval(runtimeContext)

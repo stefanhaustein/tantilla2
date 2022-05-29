@@ -111,12 +111,12 @@ fun RenderScope(viewModel: TantillaViewModel) {
 fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
     Card(
         backgroundColor = if (viewModel.mode.value == TantillaViewModel.Mode.HELP
-            || definition.error() == null) Color(0xffeeeeee) else Color(0xffff8888L),
+            || definition.hasError(true)) Color(0xffff8888L) else Color(0xffeeeeee),
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(4.dp)),
         onClick = {
-            if (definition.error() == null && definition.value() is Scope) {
+            if (definition.isScope()) {
                 viewModel.scope().value = definition.value() as Scope
             } else {
                     if (viewModel.mode.value == TantillaViewModel.Mode.HIERARCHY) {

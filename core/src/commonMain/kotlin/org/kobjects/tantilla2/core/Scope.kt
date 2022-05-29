@@ -1,6 +1,5 @@
 package org.kobjects.tantilla2.core
 
-import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.tantilla2.core.classifier.UserClassDefinition
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
@@ -110,19 +109,14 @@ abstract class Scope(
         throw RuntimeException("Undefined: '$name'")
     }
 
-    open fun resolveAll(): Boolean {
-        var allOk = true
+    open fun hasError(): Boolean {
+        var result = false
         for (definition in definitions.values) {
-            try {
-                val value = definition.value()
-                if (value is Scope && !value.resolveAll()) {
-                    allOk = false
-                }
-            } catch (e: Exception) {
-                allOk = false
+            if (definition.hasError(true)) {
+                result = true
             }
         }
-        return allOk
+        return result
     }
 
 

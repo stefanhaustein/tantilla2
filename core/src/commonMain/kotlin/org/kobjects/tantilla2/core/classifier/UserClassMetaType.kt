@@ -10,5 +10,5 @@ class UserClassMetaType(
     List<Parameter>(wrapped.locals.size) {
         val name = wrapped.locals[it]
         val def = wrapped.definitions[name]!!
-        Parameter(name, def.type()) }
+        Parameter(name, def.type(), def.initializer()) }
 )

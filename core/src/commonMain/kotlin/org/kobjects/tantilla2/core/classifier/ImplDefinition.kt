@@ -14,10 +14,10 @@ class ImplDefinition(
     override val title: String
         get() = name
 
-    override fun resolveAll(): Boolean {
-        if (trait.resolveAll()
-                    && classifier.resolveAll()
-                && super.resolveAll()) {
+    override fun hasError(): Boolean {
+        if (trait.hasError()
+                    && classifier.hasError()
+                && super.hasError()) {
 
             val vmt = MutableList<Lambda?>(trait.traitIndex) { null }
             for (definition in trait.definitions.values) {

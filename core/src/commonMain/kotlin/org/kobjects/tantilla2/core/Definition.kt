@@ -63,6 +63,17 @@ class Definition(
         return error;
     }
 
+    fun hasError(recursive: Boolean): Boolean {
+        if (error() != null) {
+            return true
+        }
+        if (recursive && isScope()) {
+            return (value() as Scope).hasError()
+        }
+        return false
+    }
+
+
     fun type(): Type {
         if (resolvedType == null) {
             val tokenizer = tokenizer()
@@ -153,11 +164,7 @@ class Definition(
                 return
             }
         }
-        val asParameter = scope is UserClassDefinition && !isStatic()
         if (tokenizer.tryConsume("=")) {
-            if (asParameter) {
-                throw tokenizer.exception("Parameter initializers NYI")
-            }
             resolvedInitializer = Parser.parseExpression(tokenizer, scope)
             if (resolvedType == null) {
                 resolvedType = resolvedInitializer!!.returnType
@@ -231,14 +238,15 @@ class Definition(
        }
     }
 
-
-
     fun index() = scope.locals.indexOf(name)
 
     fun isDyanmic() = kind == Definition.Kind.LOCAL_VARIABLE
             || (kind == Definition.Kind.FUNCTION && (type() as FunctionType).isMethod())
 
     fun isStatic() = !isDyanmic()
+
+    fun isScope() = error() == null &&
+            (kind == Definition.Kind.IMPL || kind == Definition.Kind.CLASS || kind == Definition.Kind.TRAIT)
 
     object UnresolvedEvalueable: TantillaNode {
         override fun children(): List<Evaluable<RuntimeContext>> {

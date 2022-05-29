@@ -82,7 +82,7 @@ class TantillaViewModel(
         reset()
         this.fileName.value = name
         Parser.parse(programText, console.scope)
-        console.scope.resolveAll()
+        console.scope.hasError()
     }
 
     enum class Mode {
