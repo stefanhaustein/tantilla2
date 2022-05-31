@@ -1,6 +1,7 @@
 package org.kobjects.tantilla2.core.classifier
 
 import org.kobjects.tantilla2.core.CodeWriter
+import org.kobjects.tantilla2.core.Definition
 import org.kobjects.tantilla2.core.Scope
 import org.kobjects.tantilla2.core.Type
 
@@ -18,4 +19,5 @@ class TraitDefinition(
         writer.append(name)
     }
 
+    override fun resolve(name: String): Definition = resolveDynamic(name, false)
 }

@@ -24,25 +24,25 @@ open class NativeClassDefinition(var name: String, parent: Scope = RootScope) : 
         operation: (RuntimeContext) -> Any?) {
         val type = FunctionType.Impl(returnType, listOf(Parameter("self", this)) + parameter.toList())
         val function = NativeFunction(type, operation)
-        definitions[name] = Definition(
+        add(Definition(
             this,
-            name,
             Definition.Kind.FUNCTION,
+            name,
             resolvedType = type,
             resolvedValue = function,
             docString = docString
-        )
+        ))
     }
 
     init {
         val def = Definition(
             parent,
-            name,
             Definition.Kind.CLASS,
+            name,
             resolvedType = this,
             resolvedValue = this
         )
-        parent.definitions[name] = def
+        parent.add(def)
     }
 
 }

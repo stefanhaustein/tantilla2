@@ -14,15 +14,19 @@ class ImplDefinition(
     override val title: String
         get() = name
 
+
+    override fun resolve(name: String): Definition = resolveDynamic(name, false)
+
+
     override fun hasError(): Boolean {
         if (trait.hasError()
                     && classifier.hasError()
                 && super.hasError()) {
 
             val vmt = MutableList<Lambda?>(trait.traitIndex) { null }
-            for (definition in trait.definitions.values) {
+            for (definition in trait) {
                 val index = (definition.value() as TraitMethod).index
-                vmt[index] = resolveDynamic(definition.name).value() as Lambda
+                vmt[index] = resolve(definition.name).value() as Lambda
             }
             this.vmt = vmt.toList() as List<Lambda>
             return true

@@ -73,7 +73,7 @@ fun RenderKonsole(viewModel: TantillaViewModel) {
 fun RenderScope(viewModel: TantillaViewModel) {
     val scope = viewModel.scope().value
 
-    val definitions = scope.definitions.values.sortedBy { it.name }
+    val definitions = scope.iterator().asSequence().toList().sortedBy { it.name }
 
     Scaffold(
         backgroundColor = Color.Transparent,
@@ -87,7 +87,7 @@ fun RenderScope(viewModel: TantillaViewModel) {
         LazyColumn(Modifier.fillMaxWidth(), contentPadding = PaddingValues(8.dp)) {
             for (kind in Definition.Kind.values()) {
                 var list = (if (kind == Definition.Kind.LOCAL_VARIABLE)
-                    scope.locals.map { scope.definitions[it]!! }
+                    scope.locals.map { scope[it]!! }
                 else
                     definitions).filter { it.kind == kind }
 
@@ -180,7 +180,7 @@ fun RenderEditor(viewModel: TantillaViewModel) {
                         }
                         if (definition != null) {
                             DropdownMenuItem(onClick = {
-                                scope.definitions.remove(definition.name)
+                                scope.remove(definition.name)
                                 viewModel.editing.value = false
                             }) {
                                 Text("Delete")

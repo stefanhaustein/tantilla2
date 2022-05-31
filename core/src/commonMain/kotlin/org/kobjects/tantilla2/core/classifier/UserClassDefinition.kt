@@ -19,4 +19,7 @@ class UserClassDefinition(
     override fun serializeType(writer: CodeWriter) {
         writer.append(name)
     }
+
+    override fun resolve(name: String): Definition = resolveDynamic(name, false)
+
 }

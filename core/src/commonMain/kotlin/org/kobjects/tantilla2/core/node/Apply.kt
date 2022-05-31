@@ -18,7 +18,7 @@ class Apply(
             throw IllegalStateException("Lambda expected; got $shouldBeLambda")
         }
         val function = shouldBeLambda as Lambda
-        val functionContext = RuntimeContext(MutableList<Any?>(function.type.parameters.size) {
+        val functionContext = RuntimeContext(MutableList<Any?>(function.scopeSize) {
 
             if (it < parameters.size) {
                 println("Evaluating ${parameters[it]}")
@@ -52,4 +52,6 @@ class Apply(
         }
         sb.append(")")
     }
+
+    override fun toString(): String = CodeWriter().appendCode(this).toString()
 }

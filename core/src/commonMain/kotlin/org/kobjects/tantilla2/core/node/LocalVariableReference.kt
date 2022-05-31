@@ -20,6 +20,9 @@ class LocalVariableReference(
         this
 
     override fun assign(context: RuntimeContext, value: Any?) {
+        if (index >= context.variables.size) {
+            throw IllegalStateException("Variable $name index $index not found!")
+        }
         context.variables[index] = value
     }
 

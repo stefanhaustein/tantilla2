@@ -12,9 +12,9 @@ import org.kobjects.tantilla2.core.parser.TantillaTokenizer
 
 abstract class Scope(
     val parentContext: Scope?
-): SerializableCode {
+): SerializableCode, Iterable<Definition> {
     var docString: String = ""
-    val definitions = mutableMapOf<String, Definition>()
+    private val definitions = mutableMapOf<String, Definition>()
     var locals = mutableListOf<String>()
     abstract val title: String
 
@@ -24,17 +24,28 @@ abstract class Scope(
 
 */
 
+    fun add(definition: Definition) {
+        definitions[definition.name] = definition
+        if (definition.kind == Definition.Kind.LOCAL_VARIABLE && definition.index == -1) {
+            definition.index = locals.size
+            locals.add(definition.name)
+        }
+    }
+
+    operator fun get(name: String): Definition? = definitions[name]
+
+    override fun iterator(): Iterator<Definition> = definitions.values.iterator()
 
     fun declareLocalVariable(name: String, type: Type, mutable: Boolean): Int {
         val definition = Definition(
             this,
-            name,
             Definition.Kind.LOCAL_VARIABLE,
-            resolvedType = type,
-            mutable = mutable)
-        definitions[name] = definition
-        locals.add(name)
-        return locals.size - 1
+            name,
+            mutable = mutable,
+            resolvedType = type
+        )
+        add(definition)
+        return definition.index
     }
 
 
@@ -52,8 +63,8 @@ abstract class Scope(
             val name = oldDefinition?.name ?: "[error]"
             replacement = Definition(
                 this,
-                name,
                 Definition.Kind.UNPARSEABLE,
+                name,
                 definitionText = newContent
             )
         }
@@ -81,7 +92,7 @@ abstract class Scope(
         writer.outdent()
     }
 
-    fun resolveDynamic(name: String, fallBackToStatic: Boolean = false): Definition {
+    fun resolveDynamic(name: String, fallBackToStatic: Boolean): Definition {
         val result = definitions[name]
         if (result != null) {
             if (fallBackToStatic || result.isDyanmic()) {
@@ -133,12 +144,24 @@ abstract class Scope(
         val function = NativeFunction(type, operation)
         definitions[name] = Definition(
             this,
-            name,
             Definition.Kind.FUNCTION,
+            name,
             resolvedType = type,
             resolvedValue = function,
             docString = docString
         )
+    }
+
+    fun remove(name: String) {
+        val removed = definitions.remove(name)
+        if (removed != null && removed.index != -1) {
+            locals.remove(name)
+            for (definition in iterator()) {
+                if (definition.index > removed.index) {
+                    definition.index--
+                }
+            }
+        }
     }
 
 

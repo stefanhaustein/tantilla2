@@ -20,4 +20,6 @@ data class StaticReference(val definition: Definition) : TantillaNode {
 
     override val returnType: Type
         get() = definition.type()
+
+    override fun toString(): String = definition.name
 }

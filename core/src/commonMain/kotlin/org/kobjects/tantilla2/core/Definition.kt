@@ -14,13 +14,14 @@ import org.kobjects.tantilla2.core.parser.TokenType
 
 class Definition(
     val scope: Scope,
-    val name: String, // Not really necessary but should make debugging and printing easier.
     val kind: Kind,
+    val name: String,
     val definitionText: String = "",
     val mutable: Boolean = false,
     private var resolvedType: Type? = null,
     private var resolvedValue: Any? = UnresolvedValue,
     var docString: String = "",
+    var index: Int = -1,
 ) : SerializableCode {
     var error: Exception? = null
 
@@ -29,6 +30,18 @@ class Definition(
     enum class Kind {
         LOCAL_VARIABLE, STATIC_VARIABLE, FUNCTION, CLASS, TRAIT, IMPL, UNPARSEABLE
     }
+
+    init {
+        if (kind == Kind.LOCAL_VARIABLE) {
+            val existingIndex = scope.locals.indexOf(name)
+            if (index != existingIndex) {
+                throw IllegalArgumentException("local variable inconsistency new index: $index; existing: $existingIndex")
+            }
+        } else if (index != -1) {
+            throw IllegalArgumentException("index must be -1 for $kind")
+        }
+    }
+
 
     private fun tokenizer(): TantillaTokenizer {
         val tokenizer = TantillaTokenizer(definitionText)
@@ -41,7 +54,7 @@ class Definition(
         if (e is ParsingException) {
             error = e
         } else {
-            error = ParsingException(tokenizer.current, e.message ?: "Parsing Error", e)
+            error = ParsingException(tokenizer.current, "Error in ${scope.title}.$name: " +  (e.message ?: "Parsing Error"), e)
         }
         error!!.printStackTrace()
         throw error!!
@@ -57,6 +70,7 @@ class Definition(
                     else -> value()
                 }
             } catch (e: Exception) {
+                println("Error in $scope.$name")
                 e.printStackTrace()
             }
         }
@@ -147,9 +161,9 @@ class Definition(
     private fun resolveImpl(tokenizer: TantillaTokenizer): Scope {
         println("Resolving impl $name: $definitionText")
         val traitName = name.substring(0, name.indexOf(' '))
-        val trait = scope.resolveDynamic(traitName).value() as TraitDefinition
+        val trait = scope.resolveDynamic(traitName, false).value() as TraitDefinition
         val className = name.substring(name.lastIndexOf(' ') + 1)
-        val implFor = scope.resolveDynamic(className).value() as UserClassDefinition
+        val implFor = scope.resolveDynamic(className, false).value() as UserClassDefinition
         val implContext = ImplDefinition(name, scope, trait, implFor)
         tokenizer.next()
         Parser.parse(tokenizer, implContext)
@@ -237,8 +251,6 @@ class Definition(
            }
        }
     }
-
-    fun index() = scope.locals.indexOf(name)
 
     fun isDyanmic() = kind == Definition.Kind.LOCAL_VARIABLE
             || (kind == Definition.Kind.FUNCTION && (type() as FunctionType).isMethod())

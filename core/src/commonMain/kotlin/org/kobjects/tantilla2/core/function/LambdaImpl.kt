@@ -8,6 +8,7 @@ import org.kobjects.tantilla2.core.serializeCode
 
 class LambdaImpl(
     override val type: FunctionType,
+    override val scopeSize: Int,
     val body: Evaluable<RuntimeContext>,
     ) : Lambda, SerializableCode {
 

@@ -9,4 +9,5 @@ interface Type {
     val typeName: String
         get() = CodeWriter().appendType(this).toString()
 
+    fun resolve(name: String): Definition = throw UnsupportedOperationException()
 }

@@ -51,16 +51,18 @@ object Parser {
                 tokenizer.next()
             } else if (DECLARATION_KEYWORDS.contains(tokenizer.current.text)) {
                 val definition = parseDefinition(tokenizer, context, localDepth)
-                context.definitions[definition.name] = definition
+                context.add(definition)
                 if (definition.kind == Definition.Kind.LOCAL_VARIABLE) {
-                    context.locals.add(definition.name)
+                    if (context !is FunctionScope && context !is UserClassDefinition) {
+                        throw IllegalStateException()
+                    }
                     if (definition.initializer() != null) {
                         statements.add(
                             Assignment(
                                 LocalVariableReference(
                                     definition.name,
                                     definition.type(),
-                                    definition.index(),
+                                    definition.index,
                                     definition.mutable
                                 ),
                                 definition.initializer()!!
@@ -86,21 +88,21 @@ object Parser {
                 val name = tokenizer.consume(TokenType.IDENTIFIER, "Function name expected.")
                 println("consuming def $name")
                 val text = consumeBody(tokenizer, localDepth)
-                Definition(scope, name, Definition.Kind.FUNCTION, definitionText = text)
+                Definition(scope, Definition.Kind.FUNCTION, name, definitionText = text)
             }
             "class" -> {
                 tokenizer.consume("class")
                 val name = tokenizer.consume(TokenType.IDENTIFIER, "Class name expected.")
                 println("consuming class $name; return depth: $localDepth")
                 val text = consumeBody(tokenizer, localDepth)
-                Definition(scope, name, Definition.Kind.CLASS, definitionText = text)
+                Definition(scope, Definition.Kind.CLASS, name, definitionText = text)
             }
             "trait" -> {
                 tokenizer.consume("trait")
                 val name = tokenizer.consume(TokenType.IDENTIFIER, "Trait name expected.")
                 println("consuming trait $name; return depth: $localDepth")
                 val text = consumeBody(tokenizer, localDepth)
-                Definition(scope, name, Definition.Kind.TRAIT, definitionText = text)
+                Definition(scope, Definition.Kind.TRAIT, name, definitionText = text)
             }
             "impl" -> {
                 tokenizer.consume("impl")
@@ -111,8 +113,8 @@ object Parser {
                 val text = consumeBody(tokenizer, localDepth)
                 Definition(
                     scope,
-                    "$traitName for $name",
                     Definition.Kind.IMPL,
+                    "$traitName for $name",
                     definitionText = text
                 )
             }
@@ -237,7 +239,7 @@ object Parser {
             else Definition.Kind.LOCAL_VARIABLE
         val text = consumeLine(tokenizer)
 
-        return Definition(context, name, kind, definitionText = text)
+        return Definition(context, kind, name, definitionText = text)
     }
 
     fun parseExpression(tokenizer: TantillaTokenizer, context: Scope): Evaluable<RuntimeContext> =
@@ -283,7 +285,7 @@ object Parser {
             functionContext.declareLocalVariable(parameter.name, parameter.type, false)
         }
         val body = parse(tokenizer, functionContext, 0)
-        return LambdaImpl(type, body)
+        return LambdaImpl(type, functionContext.iterator().asSequence().toList().size, body)
     }
 
     fun parseParameter(tokenizer: TantillaTokenizer, context: Scope): Parameter {
@@ -308,7 +310,7 @@ object Parser {
 
     fun reference(definition: Definition) = if (definition.kind == Definition.Kind.LOCAL_VARIABLE)
         LocalVariableReference(
-            definition.name, definition.type(), definition.index(), definition.mutable)
+            definition.name, definition.type(), definition.index, definition.mutable)
         else StaticReference(definition)
 
     fun apply(
@@ -319,14 +321,12 @@ object Parser {
 
         val expectedParameters = functionType.parameters
 
-        var positionalAllowed = true
         val result = mutableListOf<Evaluable<RuntimeContext>>()
         for (i in 0 until min(expectedParameters.size, availableParameters.size)) {
-            val expected = expectedParameters[i]
-            if ((positionalAllowed && availableParameters[i].first.isEmpty())
-                || availableParameters[i].first == expected.name) {
-                result.add(availableParameters[i].second)
+            if (availableParameters[i].first.isNotEmpty()) {
+                break
             }
+            result.add(availableParameters[i].second)
         }
         if (result.size < functionType.parameters.size) {
             val map = mutableMapOf<String, Evaluable<RuntimeContext>>()
@@ -338,7 +338,7 @@ object Parser {
                 val expected = expectedParameters[i]
                 val name = expected.name
                 val expr = map.remove(expected.name) ?: expected.defaultValueExpression
-                ?: throw IllegalArgumentException("Parameter not found: $name")
+                ?: throw IllegalArgumentException("Parameter not found: '$name' expected: $expectedParameters provided: $availableParameters")
                 result.add(expr)
             }
             if (map.isNotEmpty()) {
@@ -348,7 +348,7 @@ object Parser {
         for (i in 0 until result.size) {
             if (!expectedParameters[i].type.isAssignableFrom(result[i].returnType)) {
                 throw IllegalArgumentException(
-                    "Can't assign ${result[i].returnType} to expected type ${expectedParameters[i].type} for paramerter ${expectedParameters[i].name}")
+                    "Can't assign ${result[i]} with type ${result[i].returnType} to expected type ${expectedParameters[i].type} for paramerter ${expectedParameters[i].name} expected: $expectedParameters provided: $availableParameters")
             }
 
         }
@@ -360,21 +360,25 @@ object Parser {
         val name = tokenizer.consume(TokenType.IDENTIFIER)
 
         var args: List<Pair<String, Evaluable<RuntimeContext>>>
+        var hasArgs: Boolean
         if (tokenizer.tryConsume("(")) {
+            hasArgs = true
             args = parseParameterList(tokenizer, context)
             if (args.size > 0 && args[0].first == "" && args[0].second.returnType is Scope) {
                 val baseType = args[0].second.returnType as Scope
-                if (baseType.definitions.containsKey(name)) {
-                    return apply(StaticReference(baseType.definitions[name]!!), args)
+                val definition = baseType[name]
+                if (definition != null) {
+                    return apply(StaticReference(definition), args)
                 }
             }
         } else {
+            hasArgs = false
             args = emptyList()
         }
 
         val definition = context.resolveDynamic(name, fallBackToStatic = true)
         val base = reference(definition)
-        if (base.returnType is FunctionType) {
+        if (base.returnType is FunctionType && (hasArgs || base.returnType !is UserClassMetaType)) {
             return apply(base, args)
         }
         if (args.size > 0) {
@@ -475,11 +479,8 @@ object Parser {
         base: Evaluable<RuntimeContext>,
     ): Evaluable<RuntimeContext> {
         val name = tokenizer.consume(TokenType.IDENTIFIER)
-        if (base.returnType !is Scope) {
-            throw tokenizer.exception("Base type must be parsing context; got: ${base.returnType} for $base.")
-        }
-        val baseType = base.returnType as Scope
-        val definition = baseType.resolveDynamic(name)
+        val baseType = base.returnType
+        val definition = baseType.resolve(name)
         val args = if (tokenizer.tryConsume("(")) parseParameterList(tokenizer, context)
         else emptyList()
 
@@ -489,11 +490,15 @@ object Parser {
                 base,
                 name,
                 definition.type(),
-                baseType.locals.indexOf(name),
+                definition.index,
                 definition.mutable
             )
             Definition.Kind.FUNCTION -> {
                 val fn = StaticReference(definition)
+
+                if (definition.isStatic()) {
+                    return apply(fn, args)
+                }
 
                 val params = List<Pair<String, Evaluable<RuntimeContext>>>(args.size + 1) {
                     if (it == 0) Pair("", base) else args[it - 1]

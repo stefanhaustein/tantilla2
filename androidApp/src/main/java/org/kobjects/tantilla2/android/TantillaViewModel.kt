@@ -54,8 +54,13 @@ class TantillaViewModel(
         canvas.translate(bitmap.width / 2f, bitmap.height / 2f)
         canvas.scale(1f, -1f)
         val penImpl = PenImpl(PenDefinition, canvas)
-        RootScope.definitions["pen"] = Definition(
-            RootScope, "pen", Definition.Kind.STATIC_VARIABLE, resolvedType = PenDefinition, resolvedValue = penImpl)
+        RootScope.add(Definition(
+            RootScope,
+            Definition.Kind.STATIC_VARIABLE,
+            "pen",
+            resolvedType = PenDefinition,
+            resolvedValue = penImpl
+        ))
     }
 
     fun scope(): MutableState<Scope> = if (mode.value == Mode.HELP) builtinScope else userScope
