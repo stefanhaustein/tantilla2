@@ -5,14 +5,15 @@ import org.kobjects.tantilla2.core.parser.Parser
 import org.kobjects.tantilla2.core.runtime.RootScope
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class VectorTest {
     val VECTOR = """
         class Vector:
-          let x: float
-          let y: float
-          let z: float
+          val x: float
+          val y: float
+          val z: float
 
           def times(self, k: float) -> Vector:
             Vector(k * self.x, k * self.y, k * self.z)
@@ -37,17 +38,17 @@ class VectorTest {
 
     @Test
     fun testVector() {
-        val parsingContext = RootScope()
+        val parsingContext = UserScope(RootScope)
 
         val result = Parser.parse(VECTOR, parsingContext)
 
-        assertTrue(parsingContext.definitions.keys.contains("Vector"))
+        assertNotNull(parsingContext["Vector"])
 
         assertEquals("mag(Vector(1.0, 2.0, 3.0))", result.serializeCode())
     //    assertEquals("", parsingContext.serialize())
 
-        val vectorImpl = parsingContext.definitions["Vector"]!!.value() as Scope
-        assertEquals(setOf("x", "y", "z", "times", "minus", "plus", "dot", "mag", "norm"), vectorImpl.definitions.keys)
+        val vectorImpl = parsingContext["Vector"]!!.value() as Scope
+        assertEquals(setOf("x", "y", "z", "times", "minus", "plus", "dot", "mag", "norm"), vectorImpl.iterator().asSequence().map { it.name }.toSet())
 
       //  assertEquals("", parsingContext.toString())
 

@@ -19,9 +19,9 @@ class ImplDefinition(
 
 
     override fun hasError(): Boolean {
-        if (trait.hasError()
-                    && classifier.hasError()
-                && super.hasError()) {
+        if (!trait.hasError()
+                    && !classifier.hasError()
+                && !super.hasError()) {
 
             val vmt = MutableList<Lambda?>(trait.traitIndex) { null }
             for (definition in trait) {
@@ -29,9 +29,9 @@ class ImplDefinition(
                 vmt[index] = resolve(definition.name).value() as Lambda
             }
             this.vmt = vmt.toList() as List<Lambda>
-            return true
+            return false
         }
-        return false
+        return true
     }
 
     override fun serializeType(writer: CodeWriter) {

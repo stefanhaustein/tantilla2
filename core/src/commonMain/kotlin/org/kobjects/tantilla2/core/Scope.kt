@@ -164,5 +164,6 @@ abstract class Scope(
         }
     }
 
+    override fun toString() = title
 
 }

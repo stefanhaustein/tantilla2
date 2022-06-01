@@ -505,6 +505,7 @@ object Parser {
                 }
                 return apply(fn, params)
             }
+            Definition.Kind.STATIC_VARIABLE -> return StaticReference(definition)
             else -> throw tokenizer.exception("Unsupported definition kind ${definition.kind} for $base.$name")
         }
     }

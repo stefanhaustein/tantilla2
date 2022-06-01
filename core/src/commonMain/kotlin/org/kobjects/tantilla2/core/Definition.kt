@@ -28,7 +28,7 @@ class Definition(
     private var resolvedInitializer: Evaluable<RuntimeContext>? = UnresolvedEvalueable
 
     enum class Kind {
-        LOCAL_VARIABLE, STATIC_VARIABLE, FUNCTION, CLASS, TRAIT, IMPL, UNPARSEABLE
+        LOCAL_VARIABLE, STATIC_VARIABLE, FUNCTION, CLASS, TRAIT, IMPL, UNPARSEABLE, SCOPE
     }
 
     init {
@@ -161,9 +161,9 @@ class Definition(
     private fun resolveImpl(tokenizer: TantillaTokenizer): Scope {
         println("Resolving impl $name: $definitionText")
         val traitName = name.substring(0, name.indexOf(' '))
-        val trait = scope.resolveDynamic(traitName, false).value() as TraitDefinition
+        val trait = scope.resolveStatic(traitName, true).value() as TraitDefinition
         val className = name.substring(name.lastIndexOf(' ') + 1)
-        val implFor = scope.resolveDynamic(className, false).value() as UserClassDefinition
+        val implFor = scope.resolveStatic(className, true).value() as UserClassDefinition
         val implContext = ImplDefinition(name, scope, trait, implFor)
         tokenizer.next()
         Parser.parse(tokenizer, implContext)

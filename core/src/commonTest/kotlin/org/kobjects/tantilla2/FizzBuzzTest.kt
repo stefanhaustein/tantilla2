@@ -1,12 +1,12 @@
 package org.kobjects.tantilla2
 
-import org.kobjects.greenspun.core.Str
-import org.kobjects.greenspun.core.Void
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.function.Lambda
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.parser.Parser
 import org.kobjects.tantilla2.core.runtime.RootScope
+import org.kobjects.tantilla2.core.runtime.Str
+import org.kobjects.tantilla2.core.runtime.Void
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -25,7 +25,7 @@ class FizzBuzzTest {
             elif x % 5 == 0:
               print("Buzz")
             else:
-              print(x)
+              print(str(x))
               
             x = x + 1
     """.trimIndent()
@@ -35,7 +35,7 @@ class FizzBuzzTest {
     fun testFizzBuzz() {
         val output = mutableListOf<String>()
 
-        val context = RootScope()
+        val context = UserScope(RootScope)
 
         context.defineNative(
             "print", "internal",
@@ -48,7 +48,7 @@ class FizzBuzzTest {
 
         Parser.parse(FIZZ_BUZZ, context)
 
-        val impl = context.definitions["fizz_buzz"]!!
+        val impl = context["fizz_buzz"]!!
 
         assertNotNull(impl.value())
 
