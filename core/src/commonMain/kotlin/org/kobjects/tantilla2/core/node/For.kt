@@ -19,9 +19,9 @@ class For(
     override fun children() = listOf(rangeExpression, bodyExpression)
 
     override fun eval(ctx: RuntimeContext): Any? {
-        val range = rangeExpression.eval(ctx) as Range
-        for (i in range.start.toInt() until range.end.toInt()) {
-            ctx.variables[iteratorIndex] = i.toDouble()
+        val iterable = rangeExpression.eval(ctx) as Iterable<*>
+        for (i in iterable) {
+            ctx.variables[iteratorIndex] = i
             bodyExpression.eval(ctx)
         }
         return null

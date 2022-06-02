@@ -9,6 +9,7 @@ import org.kobjects.tantilla2.core.node.For
 import org.kobjects.tantilla2.core.function.*
 import org.kobjects.tantilla2.core.node.*
 import org.kobjects.tantilla2.core.runtime.ListType
+import org.kobjects.tantilla2.core.runtime.RangeType
 import org.kobjects.tantilla2.core.runtime.Void
 import kotlin.math.min
 
@@ -192,12 +193,19 @@ object Parser {
     fun parseFor(tokenizer: TantillaTokenizer, context: Scope, currentDepth: Int): For {
         val iteratorName = tokenizer.consume(TokenType.IDENTIFIER, "Loop variable name expected.")
         tokenizer.consume("in")
-        val rangeExpression = parseExpression(tokenizer, context)
+        val iterableExpression = parseExpression(tokenizer, context)
         tokenizer.consume(":")
-        val iteratorIndex = context.declareLocalVariable(iteratorName,
-            org.kobjects.tantilla2.core.runtime.F64, false)
+        val iterableType = iterableExpression.returnType
+        val iteratorType = when (iterableType) {
+            RangeType -> org.kobjects.tantilla2.core.runtime.F64
+            is ListType -> iterableType.elementType
+            else -> throw RuntimeException("Can't iterate type $iterableType")
+        }
+
+        val iteratorIndex = context.declareLocalVariable(
+            iteratorName, iteratorType, false)
         val body = parse(tokenizer, context, currentDepth)
-        return For(iteratorName, iteratorIndex, rangeExpression, body)
+        return For(iteratorName, iteratorIndex, iterableExpression, body)
     }
 
     fun parseIf(tokenizer: TantillaTokenizer, context: Scope, currentDepth: Int): Control.If<RuntimeContext> {
