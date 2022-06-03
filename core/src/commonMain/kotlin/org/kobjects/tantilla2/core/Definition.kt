@@ -182,8 +182,8 @@ class Definition(
             resolvedInitializer = Parser.parseExpression(tokenizer, scope)
             if (resolvedType == null) {
                 resolvedType = resolvedInitializer!!.returnType
-            } else if (!resolvedType!!.isAssignableFrom(resolvedInitializer!!.returnType)) {
-                throw tokenizer.exception("Initializer type mismatch: ${resolvedInitializer!!.returnType} can't be assigned to $resolvedType")
+            } else {
+                resolvedInitializer = Parser.matchType(scope, resolvedInitializer!!, resolvedType!!)
             }
         } else if (resolvedType != null) {
             resolvedInitializer = null

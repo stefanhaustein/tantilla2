@@ -26,7 +26,7 @@ object RootScope : Scope(null) {
 
         F64.defineNative(
             "range", "Creates a range from start (inclusive) to end (exclusive)",
-            F64,
+            RangeType,
             Parameter("start", F64),
             Parameter("end", F64)
         ) { Range(it.f64(0), it.f64(1)) }

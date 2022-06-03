@@ -198,7 +198,7 @@ class RayTracer:
 
   def intersections(self, r: Ray, s: Scene) -> Intersection:
     var closest = s.things[0].intersect(r)
-    for i in range(1, s.things.size):
+    for i in range(1, len(s.things)):
       val inter = s.things[i].intersect(r)
       if inter.dist < closest.dist :
         closest = inter

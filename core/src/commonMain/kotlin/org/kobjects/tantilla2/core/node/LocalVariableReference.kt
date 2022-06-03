@@ -29,4 +29,6 @@ class LocalVariableReference(
     override fun serializeCode(writer: CodeWriter, precedence: Int) {
         writer.append(name)
     }
+
+    override fun toString() = name
 }

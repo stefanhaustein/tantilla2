@@ -296,16 +296,27 @@ object Parser {
         return LambdaImpl(type, functionContext.iterator().asSequence().toList().size, body)
     }
 
+    fun matchType(context: Scope, expr: Evaluable<RuntimeContext>, expectedType: Type): Evaluable<RuntimeContext> {
+        if (expectedType.isAssignableFrom(expr.returnType)) {
+            return expr
+        }
+        val implName = expectedType.typeName + " for " + expr.returnType.typeName
+        try {
+            val impl = context.resolveStatic(implName, true).value() as ImplDefinition
+            return As(expr, impl)
+        } catch (e: Exception) {
+            throw IllegalArgumentException("Can't convert $expr with type '${expr.returnType}' to '$expectedType' -- '$implName' not available.", e)
+        }
+    }
+
+
     fun parseParameter(tokenizer: TantillaTokenizer, context: Scope): Parameter {
         val name = tokenizer.consume(TokenType.IDENTIFIER)
         tokenizer.consume(":", "Colon expected, separating the parameter type from the parameter name.")
         val type = parseType(tokenizer, context)
         val defaultValue: Evaluable<RuntimeContext>?
         if (tokenizer.tryConsume("=")) {
-            defaultValue = parseExpression(tokenizer, context)
-            if (!type.isAssignableFrom(defaultValue.returnType)) {
-                throw  tokenizer.exception("Default value not assignable to $type")
-            }
+            defaultValue = matchType(context, parseExpression(tokenizer, context), type)
         } else {
             defaultValue = null
         }
@@ -313,7 +324,7 @@ object Parser {
     }
 
     fun parseApply(tokenizer: TantillaTokenizer, context: Scope, base: Evaluable<RuntimeContext>): Evaluable<RuntimeContext> {
-        return apply(base, parseParameterList(tokenizer, context))
+        return apply(context, base, parseParameterList(tokenizer, context))
     }
 
     fun reference(definition: Definition) = if (definition.kind == Definition.Kind.LOCAL_VARIABLE)
@@ -322,6 +333,7 @@ object Parser {
         else StaticReference(definition)
 
     fun apply(
+        scope: Scope,
         base: Evaluable<RuntimeContext>,
         availableParameters: List<Pair<String, Evaluable<RuntimeContext>>>
     ): Evaluable<RuntimeContext> {
@@ -334,7 +346,7 @@ object Parser {
             if (availableParameters[i].first.isNotEmpty()) {
                 break
             }
-            result.add(availableParameters[i].second)
+            result.add(matchType(scope, availableParameters[i].second, expectedParameters[i].type))
         }
         if (result.size < functionType.parameters.size) {
             val map = mutableMapOf<String, Evaluable<RuntimeContext>>()
@@ -347,18 +359,11 @@ object Parser {
                 val name = expected.name
                 val expr = map.remove(expected.name) ?: expected.defaultValueExpression
                 ?: throw IllegalArgumentException("Parameter not found: '$name' expected: $expectedParameters provided: $availableParameters")
-                result.add(expr)
+                result.add(matchType(scope, expr, expected.type))
             }
             if (map.isNotEmpty()) {
                 throw IllegalArgumentException("Unexpected parameter(s): ${map.keys}")
             }
-        }
-        for (i in 0 until result.size) {
-            if (!expectedParameters[i].type.isAssignableFrom(result[i].returnType)) {
-                throw IllegalArgumentException(
-                    "Can't assign ${result[i]} with type ${result[i].returnType} to expected type ${expectedParameters[i].type} for paramerter ${expectedParameters[i].name} expected: $expectedParameters provided: $availableParameters")
-            }
-
         }
 
         return Apply(base, result.toList())
@@ -376,7 +381,7 @@ object Parser {
                 val baseType = args[0].second.returnType as Scope
                 val definition = baseType[name]
                 if (definition != null) {
-                    return apply(StaticReference(definition), args)
+                    return apply(context, StaticReference(definition), args)
                 }
             }
         } else {
@@ -387,7 +392,7 @@ object Parser {
         val definition = context.resolveDynamic(name, fallBackToStatic = true)
         val base = reference(definition)
         if (base.returnType is FunctionType && (hasArgs || base.returnType !is UserClassMetaType)) {
-            return apply(base, args)
+            return apply(context, base, args)
         }
         if (args.size > 0) {
             throw IllegalArgumentException("Not callable: ${definition.scope.title}.${definition.name}")
@@ -505,13 +510,13 @@ object Parser {
                 val fn = StaticReference(definition)
 
                 if (definition.isStatic()) {
-                    return apply(fn, args)
+                    return apply(context, fn, args)
                 }
 
                 val params = List<Pair<String, Evaluable<RuntimeContext>>>(args.size + 1) {
                     if (it == 0) Pair("", base) else args[it - 1]
                 }
-                return apply(fn, params)
+                return apply(context, fn, params)
             }
             Definition.Kind.STATIC_VARIABLE -> return StaticReference(definition)
             else -> throw tokenizer.exception("Unsupported definition kind ${definition.kind} for $base.$name")

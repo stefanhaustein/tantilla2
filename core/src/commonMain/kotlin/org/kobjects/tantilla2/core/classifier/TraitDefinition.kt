@@ -19,5 +19,9 @@ class TraitDefinition(
         writer.append(name)
     }
 
+    override fun isAssignableFrom(type: Type): Boolean {
+        return type == this || (type is ImplDefinition && type.trait == this)
+    }
+
     override fun resolve(name: String): Definition = resolveDynamic(name, false)
 }
