@@ -1,0 +1,52 @@
+package org.kobjects.tantilla2.core.node
+
+import org.kobjects.greenspun.core.Evaluable
+import org.kobjects.tantilla2.core.CodeWriter
+import org.kobjects.tantilla2.core.RuntimeContext
+import org.kobjects.tantilla2.core.Type
+import org.kobjects.tantilla2.core.returnType
+import org.kobjects.tantilla2.core.runtime.F64
+import org.kobjects.tantilla2.core.runtime.ListType
+import org.kobjects.tantilla2.core.runtime.TypedList
+
+class ElementAt(
+    val baseExpr: Evaluable<RuntimeContext>,
+    val indexExpr: Evaluable<RuntimeContext>) : Assignable {
+
+    init {
+        if (baseExpr.returnType !is ListType) {
+            throw IllegalArgumentException("Base expression must be of list type")
+        }
+        if (indexExpr.returnType != F64) {
+            throw IllegalArgumentException("Index expression must be number")
+        }
+    }
+
+    override fun assign(context: RuntimeContext, value: Any?) {
+        val list = baseExpr.eval(context) as TypedList
+        val index = indexExpr.evalF64(context).toInt()
+        list[index] = value
+    }
+
+
+    override val returnType: Type
+        get() = (baseExpr.returnType as ListType).elementType
+
+    override fun children(): List<Evaluable<RuntimeContext>> = listOf(baseExpr, indexExpr)
+
+    override fun eval(context: RuntimeContext): Any? {
+        val list = baseExpr.eval(context) as TypedList
+        val index = indexExpr.evalF64(context).toInt()
+       return list[index]
+    }
+
+    override fun reconstruct(newChildren: List<Evaluable<RuntimeContext>>): Evaluable<RuntimeContext> =
+        ElementAt(newChildren[0], newChildren[1])
+
+    override fun serializeCode(writer: CodeWriter, precedence: Int) {
+        writer.appendCode(baseExpr)
+        writer.append("[")
+        writer.appendCode(indexExpr)
+        writer.append("]")
+    }
+}

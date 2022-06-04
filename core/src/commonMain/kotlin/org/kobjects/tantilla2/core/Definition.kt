@@ -7,6 +7,7 @@ import org.kobjects.tantilla2.core.classifier.ImplDefinition
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.node.TantillaNode
+import org.kobjects.tantilla2.core.parser.ExpressionParser
 import org.kobjects.tantilla2.core.parser.Parser
 import org.kobjects.tantilla2.core.parser.TantillaTokenizer
 import org.kobjects.tantilla2.core.parser.TokenType
@@ -177,11 +178,11 @@ class Definition(
             }
         }
         if (tokenizer.tryConsume("=")) {
-            resolvedInitializer = Parser.parseExpression(tokenizer, scope)
+            resolvedInitializer = ExpressionParser.parseExpression(tokenizer, scope)
             if (resolvedType == null) {
                 resolvedType = resolvedInitializer!!.returnType
             } else {
-                resolvedInitializer = Parser.matchType(scope, resolvedInitializer!!, resolvedType!!)
+                resolvedInitializer = ExpressionParser.matchType(scope, resolvedInitializer!!, resolvedType!!)
             }
         } else if (resolvedType != null) {
             resolvedInitializer = null

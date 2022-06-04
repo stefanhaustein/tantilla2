@@ -10,4 +10,8 @@ class TypedList(
         get() = data.size
 
     override fun get(index: Int) = data[index]
+
+    operator fun set(index: Int, value: Any?) {
+        data[index] = value
+    }
 }
