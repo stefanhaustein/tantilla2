@@ -159,21 +159,21 @@ object Parser {
         context: Scope,
         currentDepth: Int
     ) : Evaluable<RuntimeContext> =
-        if (tokenizer.tryConsume("if")) {
-            parseIf(tokenizer, context, currentDepth)
-        } else if (tokenizer.tryConsume("while")) {
-            parseWhile(tokenizer, context, currentDepth)
-        } else if (tokenizer.tryConsume("for")) {
-            parseFor(tokenizer, context, currentDepth)
-        } else {
-            val expr = parseExpression(tokenizer, context)
-            if (tokenizer.tryConsume("=")) {
-                if (expr !is Assignable) {
-                    tokenizer.exception("Target is not assignable")
+        when (tokenizer.current.text) {
+            "if" -> parseIf(tokenizer, context, currentDepth)
+            "while" -> parseWhile(tokenizer, context, currentDepth)
+            "for" -> parseFor(tokenizer, context, currentDepth)
+            "return" -> parseReturn(tokenizer, context)
+            else -> {
+                val expr = parseExpression(tokenizer, context)
+                if (tokenizer.tryConsume("=")) {
+                    if (expr !is Assignable) {
+                        tokenizer.exception("Target is not assignable")
+                    }
+                    Assignment(expr as Assignable, parseExpression(tokenizer, context))
+                } else {
+                    expr
                 }
-                Assignment(expr as Assignable, parseExpression(tokenizer, context))
-            } else {
-                expr
             }
         }
 
@@ -184,13 +184,27 @@ object Parser {
         }
     }
 
+    fun parseReturn(tokenizer: TantillaTokenizer, scope: Scope): Evaluable<RuntimeContext> {
+        tokenizer.consume("return")
+        if (scope !is FunctionScope) {
+            throw tokenizer.exception("Function scope expected for 'return'")
+        }
+        if (scope.functionType.returnType == Void) {
+            return FlowControl(Control.FlowSignal.Kind.RETURN)
+        }
+        val expression = parseExpression(tokenizer, scope)
+        return FlowControl(Control.FlowSignal.Kind.RETURN, expression)
+    }
+
     fun parseWhile(tokenizer: TantillaTokenizer, context: Scope, currentDepth: Int): Control.While<RuntimeContext> {
+        tokenizer.consume("while")
         val condition = parseExpression(tokenizer, context)
         tokenizer.consume(":")
         return Control.While(condition, parse(tokenizer, context, currentDepth))
     }
 
     fun parseFor(tokenizer: TantillaTokenizer, context: Scope, currentDepth: Int): For {
+        tokenizer.consume("for")
         val iteratorName = tokenizer.consume(TokenType.IDENTIFIER, "Loop variable name expected.")
         tokenizer.consume("in")
         val iterableExpression = parseExpression(tokenizer, context)
@@ -209,6 +223,7 @@ object Parser {
     }
 
     fun parseIf(tokenizer: TantillaTokenizer, context: Scope, currentDepth: Int): Control.If<RuntimeContext> {
+        tokenizer.consume("if")
         val expressions = mutableListOf<Evaluable<RuntimeContext>>()
         println("parsing if at depth $currentDepth")
         do {
@@ -288,7 +303,7 @@ object Parser {
         }
 
         tokenizer.consume(":")
-        val functionContext = FunctionScope(context)
+        val functionContext = FunctionScope(context, type)
         for (parameter in type.parameters) {
             functionContext.declareLocalVariable(parameter.name, parameter.type, false)
         }

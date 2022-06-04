@@ -64,7 +64,6 @@ class Definition(
             try {
                 when (kind) {
                     Kind.LOCAL_VARIABLE  -> initializer()
-                    //                   Kind.STATIC_VARIABLE
                     Kind.UNPARSEABLE -> null
                     else -> value()
                 }
