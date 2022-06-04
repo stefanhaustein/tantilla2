@@ -45,7 +45,7 @@ fun commonType(types: List<Type>): Type {
 }
 
 
-val Any?.type: Type
+val Any?.dynamicType: Type
     get() = when (this) {
         null -> Void
         is Typed -> type

@@ -6,7 +6,6 @@ import org.kobjects.tantilla2.core.classifier.UserClassDefinition
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.function.FunctionType
-import org.kobjects.tantilla2.core.function.Lambda
 import org.kobjects.tantilla2.core.node.TantillaNode
 import org.kobjects.tantilla2.core.parser.Parser
 import org.kobjects.tantilla2.core.parser.TantillaTokenizer
@@ -64,8 +63,8 @@ class Definition(
         if (error == null) {
             try {
                 when (kind) {
-                    Kind.LOCAL_VARIABLE,
-                    Kind.STATIC_VARIABLE -> initializer()
+                    Kind.LOCAL_VARIABLE  -> initializer()
+                    //                   Kind.STATIC_VARIABLE
                     Kind.UNPARSEABLE -> null
                     else -> value()
                 }
@@ -96,7 +95,7 @@ class Definition(
                     Kind.FUNCTION -> resolvedType = Parser.parseFunctionType(tokenizer, scope)
                     Kind.LOCAL_VARIABLE,
                     Kind.STATIC_VARIABLE -> resolveVariable(tokenizer, typeOnly = true)
-                    else -> resolvedType = value().type
+                    else -> resolvedType = value().dynamicType
                 }
             } catch (e: Exception) {
                 throw exceptionInResolve(e, tokenizer)

@@ -110,8 +110,7 @@ fun RenderScope(viewModel: TantillaViewModel) {
 @Composable
 fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
     Card(
-        backgroundColor = if (viewModel.mode.value == TantillaViewModel.Mode.HELP
-            || definition.hasError(true)) Color(0xffff8888L) else Color(0xffeeeeee),
+        backgroundColor = if (definition.hasError(true)) Color(0xffff8888L) else Color(0xffeeeeee),
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(4.dp)),
