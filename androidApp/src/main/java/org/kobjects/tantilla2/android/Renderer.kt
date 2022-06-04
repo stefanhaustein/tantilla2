@@ -133,7 +133,7 @@ fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
     ) {
 
         Column(Modifier.padding(8.dp)) {
-            val writer = CodeWriter()
+            val writer = CodeWriter(highlighting = CodeWriter.defaultHighlighting)
             definition.serializeTitle(writer)
 
             Text(ansiToAnnotatedString(writer.toString()))

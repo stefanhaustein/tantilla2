@@ -4,7 +4,10 @@ import org.kobjects.greenspun.core.*
 import org.kobjects.konsole.Ansi
 import org.kobjects.tantilla2.core.runtime.Str
 
-class CodeWriter(indent: String = "") : Appendable {
+class CodeWriter(
+    indent: String = "",
+    val highlighting: Map<Kind, Pair<String, String>> = emptyMap(),
+) : Appendable {
     val sb = StringBuilder()
     val indent = StringBuilder(indent)
 
@@ -35,19 +38,27 @@ class CodeWriter(indent: String = "") : Appendable {
         return this
     }
 
-    fun keyword(name: String): CodeWriter {
-        sb.append(Ansi.BOLD)
-        sb.append(name)
-        sb.append(Ansi.NORMAL_INTENSITY)
+    fun start(kind: Kind): CodeWriter {
+        val s = highlighting[kind]
+        if (s != null) {
+            sb.append(s.first)
+        }
         return this
     }
 
-    fun declaration(name: String): CodeWriter {
-        sb.append(Ansi.BOLD).append(Ansi.FOREGROUND_CYAN)
-        sb.append(name)
-        sb.append(Ansi.NORMAL_INTENSITY).append(Ansi.FOREGROUND_DEFAULT)
+    fun wrapped(kind: Kind, s: String) = start(kind).append(s).end(kind)
+
+    fun end(kind: Kind): CodeWriter {
+        val s = highlighting[kind]
+        if (s != null) {
+            sb.append(s.second)
+        }
         return this
     }
+
+    fun keyword(name: String) = wrapped(Kind.KEYWORD, name)
+
+    fun declaration(name: String) = wrapped(Kind.DECLARATION, name)
 
     fun newline(): CodeWriter {
         sb.append('\n').append(indent)
@@ -128,5 +139,14 @@ class CodeWriter(indent: String = "") : Appendable {
         return this
     }
 
+    enum class Kind {
+        KEYWORD, DECLARATION
+    }
 
+    companion object {
+        val defaultHighlighting = mapOf(
+            Kind.KEYWORD to Pair(Ansi.BOLD, Ansi.NORMAL_INTENSITY),
+            Kind.DECLARATION to Pair(Ansi.BOLD + Ansi.FOREGROUND_CYAN, Ansi.NORMAL_INTENSITY + Ansi.FOREGROUND_DEFAULT)
+        )
+    }
 }
