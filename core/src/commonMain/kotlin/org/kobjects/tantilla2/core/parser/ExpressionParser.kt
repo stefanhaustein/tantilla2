@@ -28,7 +28,7 @@ object ExpressionParser {
         val implName = expectedType.typeName + " for " + expr.returnType.typeName
         try {
             val impl = context.resolveStatic(implName, true).value() as ImplDefinition
-            return As(expr, impl)
+            return As(expr, impl, implicit = true)
         } catch (e: Exception) {
             throw IllegalArgumentException("Can't convert $expr with type '${expr.returnType}' to '$expectedType' -- '$implName' not available.", e)
         }
@@ -54,7 +54,9 @@ object ExpressionParser {
     fun apply(
         scope: Scope,
         base: Evaluable<RuntimeContext>,
-        availableParameters: List<Pair<String, Evaluable<RuntimeContext>>>
+        availableParameters: List<Pair<String, Evaluable<RuntimeContext>>>,
+        implicit: Boolean = false,
+        asMethod: Boolean = false,
     ): Evaluable<RuntimeContext> {
         val functionType = base.returnType as FunctionType
 
@@ -85,7 +87,7 @@ object ExpressionParser {
             }
         }
 
-        return Apply(base, result.toList())
+        return Apply(base, result.toList(), implicit, asMethod)
     }
 
     fun parseFreeIdentifier(tokenizer: TantillaTokenizer, context: Scope): Evaluable<RuntimeContext> {
@@ -111,7 +113,7 @@ object ExpressionParser {
         val definition = context.resolveDynamic(name, fallBackToStatic = true)
         val base = reference(definition)
         if (base.returnType is FunctionType && (hasArgs || base.returnType !is UserClassMetaType)) {
-            return apply(context, base, args)
+            return apply(context, base, args, implicit = !hasArgs)
         }
         if (args.size > 0) {
             throw IllegalArgumentException("Not callable: ${definition.scope.title}.${definition.name}")
@@ -185,7 +187,7 @@ object ExpressionParser {
         val className = base.returnType.typeName
         val impl = context.resolveStatic("$traitName for $className").value() as ImplDefinition
         impl.hasError()
-        return As(base, impl)
+        return As(base, impl, implicit = false)
     }
 
     fun parseProperty(
@@ -196,8 +198,6 @@ object ExpressionParser {
         val name = tokenizer.consume(TokenType.IDENTIFIER)
         val baseType = base.returnType
         val definition = baseType.resolve(name)
-        val args = if (tokenizer.tryConsume("(")) parseParameterList(tokenizer, context)
-        else emptyList()
 
         when (definition.kind) {
             Definition.Kind.LOCAL_VARIABLE ->
@@ -211,14 +211,17 @@ object ExpressionParser {
             Definition.Kind.FUNCTION -> {
                 val fn = StaticReference(definition)
 
+                val hasArgs = tokenizer.tryConsume("(")
+                val args = if (hasArgs) parseParameterList(tokenizer, context) else emptyList()
+
                 if (definition.isStatic()) {
-                    return apply(context, fn, args)
+                    return apply(context, fn, args, implicit = !hasArgs, asMethod = true)
                 }
 
                 val params = List<Pair<String, Evaluable<RuntimeContext>>>(args.size + 1) {
                     if (it == 0) Pair("", base) else args[it - 1]
                 }
-                return apply(context, fn, params)
+                return apply(context, fn, params, implicit = !hasArgs, asMethod = true)
             }
             Definition.Kind.STATIC_VARIABLE -> return StaticReference(definition)
             else -> throw tokenizer.exception("Unsupported definition kind ${definition.kind} for $base.$name")

@@ -10,7 +10,9 @@ import org.kobjects.tantilla2.core.returnType
 
 class Apply(
     val callable: Evaluable<RuntimeContext>,
-    val parameters: List<Evaluable<RuntimeContext>>
+    val parameters: List<Evaluable<RuntimeContext>>,
+    val implicit: Boolean,
+    val asMethod: Boolean,
 ) : TantillaNode {
     override fun eval(context: RuntimeContext): Any? {
         val shouldBeLambda = callable.eval(context)
@@ -35,22 +37,30 @@ class Apply(
     }
 
     override fun reconstruct(newChildren: List<Evaluable<RuntimeContext>>): Evaluable<RuntimeContext> =
-        Apply(newChildren[0], newChildren.subList(1, newChildren.size))
+        Apply(newChildren[0], newChildren.subList(1, newChildren.size), implicit, asMethod)
 
     override val returnType
         get() = (callable.returnType as FunctionType).returnType
 
     override fun serializeCode(sb: CodeWriter, parentPrcedence: Int) {
-        sb.appendCode(callable)
-        sb.append("(")
-        if (parameters.size > 0) {
+        var startIndex = 0
+        if (asMethod) {
             sb.appendCode(parameters[0])
-            for (i in 1 until parameters.size) {
-                sb.append(", ")
-                sb.appendCode(parameters[i])
-            }
+            sb.append(".")
+            startIndex = 1
         }
-        sb.append(")")
+        sb.appendCode(callable)
+        if (!implicit) {
+            sb.append("(")
+            if (parameters.size > startIndex) {
+                sb.appendCode(parameters[startIndex])
+                for (i in startIndex until parameters.size) {
+                    sb.append(", ")
+                    sb.appendCode(parameters[i])
+                }
+            }
+            sb.append(")")
+        }
     }
 
     override fun toString(): String = CodeWriter().appendCode(this).toString()

@@ -10,6 +10,7 @@ import org.kobjects.tantilla2.core.classifier.ImplDefinition
 class As(
     val base: Evaluable<RuntimeContext>,
     val impl: ImplDefinition,
+    val implicit: Boolean,
 ) : TantillaNode {
     override val returnType: Type
         get() = impl.trait
@@ -20,11 +21,13 @@ class As(
         Adapter(impl.vmt, base.eval(ctx) as RuntimeContext)
 
     override fun reconstruct(newChildren: List<Evaluable<RuntimeContext>>) =
-        As(newChildren[0], impl)
+        As(newChildren[0], impl, implicit)
 
     override fun serializeCode(sb: CodeWriter, precedence: Int) {
         sb.appendCode(base)
-        sb.append(" as ")
-        sb.append(impl.trait.name)
+        if (!implicit) {
+            sb.append(" as ")
+            sb.append(impl.trait.name)
+        }
     }
 }

@@ -4,7 +4,7 @@ import org.kobjects.tantilla2.core.Type
 import org.kobjects.tantilla2.core.classifier.NativeClassDefinition
 import org.kobjects.tantilla2.core.function.Parameter
 
-class ListType(
+data class ListType(
     val elementType: Type,
 ) : NativeClassDefinition("List[${elementType.typeName}]", RootScope) {
 
