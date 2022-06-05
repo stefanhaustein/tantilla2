@@ -51,30 +51,31 @@ object Parser {
                 }
                 tokenizer.next()
             } else if (DECLARATION_KEYWORDS.contains(tokenizer.current.text)) {
-                val definition = parseDefinition(tokenizer, context, localDepth)
-                context.add(definition)
-                if (definition.kind == Definition.Kind.LOCAL_VARIABLE) {
-                    if (context !is FunctionScope && context !is UserClassDefinition) {
-                        throw IllegalStateException()
-                    }
-                    if (definition.initializer() != null) {
-                        statements.add(
-                            Assignment(
-                                LocalVariableReference(
-                                    definition.name,
-                                    definition.type(),
-                                    definition.index,
-                                    definition.mutable
-                                ),
-                                definition.initializer()!!
+                    val definition = parseDefinition(tokenizer, context, localDepth)
+                    context.add(definition)
+                    if (definition.kind == Definition.Kind.LOCAL_VARIABLE) {
+                        if (context !is FunctionScope && context !is UserClassDefinition) {
+                            throw IllegalStateException()
+                        }
+                        if (definition.initializer() != null) {
+                            statements.add(
+                                Assignment(
+                                    LocalVariableReference(
+                                        definition.name,
+                                        definition.type(),
+                                        definition.index,
+                                        definition.mutable
+                                    ),
+                                    definition.initializer()!!
+                                )
                             )
-                        )
+                        }
                     }
-                }
-            } else {
-                val statement = parseStatement(tokenizer, context, localDepth)
-                println("parsed statement: $statement")
-                statements.add(statement)
+                } else {
+                    val statement = parseStatement(tokenizer, context, localDepth)
+                    println("parsed statement: $statement")
+                    statements.add(statement)
+
             }
         }
         return if (statements.size == 1) statements[0]
@@ -165,15 +166,19 @@ object Parser {
             "for" -> parseFor(tokenizer, context, currentDepth)
             "return" -> parseReturn(tokenizer, context)
             else -> {
-                val expr = ExpressionParser.parseExpression(tokenizer, context)
+                var expr = parseExpression(tokenizer, context)
                 if (tokenizer.tryConsume("=")) {
                     if (expr !is Assignable) {
                         tokenizer.exception("Target is not assignable")
                     }
-                    Assignment(expr as Assignable, ExpressionParser.parseExpression(tokenizer, context))
-                } else {
-                    expr
+                    expr = Assignment(expr as Assignable, ExpressionParser.parseExpression(tokenizer, context))
                 }
+                if (tokenizer.current.type != TokenType.EOF
+                    && tokenizer.current.type != TokenType.LINE_BREAK
+                    && tokenizer.current.text != "<|") {
+                    throw tokenizer.exception("Unexpected token ${tokenizer.current} after end of statement.")
+                }
+                expr
             }
         }
 
@@ -285,23 +290,16 @@ object Parser {
 
 
     fun parseParameter(tokenizer: TantillaTokenizer, context: Scope): Parameter {
+        val isVararg = tokenizer.tryConsume("*")
         val name = tokenizer.consume(TokenType.IDENTIFIER)
         tokenizer.consume(":", "Colon expected, separating the parameter type from the parameter name.")
-        val type = parseType(tokenizer, context)
-        val defaultValue: Evaluable<RuntimeContext>?
-        if (tokenizer.tryConsume("=")) {
-            defaultValue = org.kobjects.tantilla2.core.parser.ExpressionParser.matchType(
-                context,
-                org.kobjects.tantilla2.core.parser.ExpressionParser.parseExpression(
-                    tokenizer,
-                    context
-                ),
-                type
-            )
-        } else {
-            defaultValue = null
-        }
-        return Parameter(name, type, defaultValue)
+        val rawType = parseType(tokenizer, context)
+        val type = if (isVararg) ListType(rawType) else rawType
+        val defaultValue: Evaluable<RuntimeContext>? = if (tokenizer.tryConsume("="))
+            ExpressionParser.matchType(context, parseExpression(tokenizer, context), type)
+            else null
+
+        return Parameter(name, type, defaultValue, isVararg)
     }
 
     fun parseFunctionType(tokenizer: TantillaTokenizer, context: Scope): FunctionType {
@@ -325,6 +323,16 @@ object Parser {
                     parameters.add(parseParameter(tokenizer, context))
                 } while (tokenizer.tryConsume(","))
             }
+            var varargCount = 0
+            for (parameter in parameters) {
+                if (parameter.isVararg) {
+                    varargCount++
+                    if (varargCount > 1) {
+                        throw IllegalArgumentException("Only one vararg parameter allowed.")
+                    }
+                }
+            }
+
             tokenizer.consume(")", ", or ) expected here while parsing the parameter list.")
         }
         val returnType = if (tokenizer.tryConsume("->")) parseType(tokenizer, context) else Void

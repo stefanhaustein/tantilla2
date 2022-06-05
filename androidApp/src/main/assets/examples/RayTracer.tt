@@ -246,7 +246,7 @@ class RayTracer:
     val specular = livec.dot(rd.norm())
     var scolor = self.defaultColor
     if specular > 0 :
-      scolor = l.color.scale(specular ^ t.surface().roughness())
+      scolor = l.color.scale(specular ** t.surface().roughness())
 
     val surf = t.surface()
     val diff = surf.diffuse(pos)

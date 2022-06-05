@@ -61,30 +61,56 @@ object ExpressionParser {
         val functionType = base.returnType as FunctionType
 
         val expectedParameters = functionType.parameters
+        val map = mutableMapOf<String, Evaluable<RuntimeContext>>()
+        val varargs = mutableListOf<Evaluable<RuntimeContext>>()
+        var expectedIndex = 0
+
+        var varArgName = ""
+        for (expected in expectedParameters) {
+            if (expected.isVararg) {
+                varArgName = expected.name
+            }
+        }
+
+        for (available in availableParameters) {
+            var name = available.first
+            val expression = available.second
+            if (name == "") {
+                if (expectedIndex >= expectedParameters.size) {
+                    throw IllegalArgumentException("Only ${expectedParameters.size} parameters expected; provided: $expectedIndex")
+                }
+               val expected = expectedParameters[expectedIndex]
+               if (!expected.isVararg) {
+                   expectedIndex++
+               }
+               name = expected.name
+            } else {
+                expectedIndex = Int.MAX_VALUE
+            }
+
+            if (name == varArgName) {
+                varargs.add(expression)
+            } else if (map.containsKey(name)) {
+                throw IllegalArgumentException("Duplicate parameter: $name")
+            } else {
+                map.put(name, expression)
+            }
+        }
+
+        if (varArgName.isNotEmpty()) {
+            map.put(varArgName, ListLiteral(varargs))
+        }
 
         val result = mutableListOf<Evaluable<RuntimeContext>>()
-        for (i in 0 until min(expectedParameters.size, availableParameters.size)) {
-            if (availableParameters[i].first.isNotEmpty()) {
-                break
-            }
-            result.add(matchType(scope, availableParameters[i].second, expectedParameters[i].type))
-        }
-        if (result.size < functionType.parameters.size) {
-            val map = mutableMapOf<String, Evaluable<RuntimeContext>>()
-            for (i in result.size until availableParameters.size) {
-                val actual = availableParameters[i]
-                map.put(actual.first, actual.second)
-            }
-            for (i in result.size until functionType.parameters.size) {
-                val expected = expectedParameters[i]
-                val name = expected.name
-                val expr = map.remove(expected.name) ?: expected.defaultValueExpression
+
+        for (expected in functionType.parameters) {
+            val name = expected.name
+            val expr = map.remove(expected.name) ?: expected.defaultValueExpression
                 ?: throw IllegalArgumentException("Parameter not found: '$name' expected: $expectedParameters provided: $availableParameters")
-                result.add(matchType(scope, expr, expected.type))
-            }
-            if (map.isNotEmpty()) {
-                throw IllegalArgumentException("Unexpected parameter(s): ${map.keys}")
-            }
+            result.add(matchType(scope, expr, expected.type))
+        }
+        if (map.isNotEmpty()) {
+            throw IllegalArgumentException("Unexpected parameter(s): ${map.keys}")
         }
 
         return Apply(base, result.toList(), implicit, asMethod)
@@ -234,15 +260,16 @@ object ExpressionParser {
 
 
     val expressionParser = GreenspunExpressionParser<TantillaTokenizer, Scope, Evaluable<RuntimeContext>>(
-        GreenspunExpressionParser.suffix(8, "as") {
-                tokenizer, context, _, base -> parseAs(tokenizer, context, base) },
-        GreenspunExpressionParser.suffix(7, ".") {
+        GreenspunExpressionParser.suffix(9, ".") {
                 tokenizer, context, _, base -> parseProperty(tokenizer, context, base) },
-        GreenspunExpressionParser.suffix(6, "[") {
+        GreenspunExpressionParser.suffix(8, "[") {
                 tokenizer, context, _, base -> parseElementAt(tokenizer, context, base)
         },
-        GreenspunExpressionParser.suffix(6, "(") {
+        GreenspunExpressionParser.suffix(8, "(") {
                 tokenizer, context, _, base -> parseApply(tokenizer, context, base) },
+        GreenspunExpressionParser.suffix(7, "as") {
+                tokenizer, context, _, base -> parseAs(tokenizer, context, base) },
+        GreenspunExpressionParser.infix(6, "**") { _, _, _, l, r -> F64.Pow(l, r)},
         GreenspunExpressionParser.infix(5, "*") { _, _, _, l, r -> F64.Mul(l, r)},
         GreenspunExpressionParser.infix(5, "/") { _, _, _, l, r -> F64.Div(l, r)},
         GreenspunExpressionParser.infix(5, "%") { _, _, _, l, r -> F64.Mod(l, r)},
