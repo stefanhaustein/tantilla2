@@ -18,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import org.kobjects.konsole.compose.AnsiConverter.ansiToAnnotatedString
 import org.kobjects.konsole.compose.ComposeKonsole
@@ -157,7 +158,7 @@ fun RenderEditor(viewModel: TantillaViewModel) {
                 title = { Text(text = definition?.name ?: "New Property") },
                 actions = {
                     IconButton(onClick = {
-                        scope.update(viewModel.currentText.value, definition)
+                        scope.update(viewModel.currentText.value.toString(), definition)
                         viewModel.editing.value = false
                     }) {
                         Icon(Icons.Default.Check, contentDescription = "Save")
