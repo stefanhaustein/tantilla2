@@ -5,6 +5,10 @@ import android.graphics.Canvas
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.input.TextFieldValue
 import org.kobjects.konsole.compose.AnsiConverter.ansiToAnnotatedString
 import org.kobjects.tantilla2.console.ConsoleLoop
 import org.kobjects.tantilla2.core.*
@@ -14,6 +18,8 @@ import org.kobjects.tantilla2.core.runtime.F64
 import org.kobjects.tantilla2.core.runtime.RootScope
 import org.kobjects.tantilla2.core.runtime.Void
 import org.kobjects.tantilla2.stdlib.PenDefinition
+import org.kobjects.parserlib.tokenizer.ParsingException
+import java.lang.Exception
 
 class TantillaViewModel(
     val console: ConsoleLoop,
@@ -26,7 +32,7 @@ class TantillaViewModel(
     val userScope = mutableStateOf<Scope>(console.scope)
     val builtinScope = mutableStateOf<Scope>(console.scope.parentContext!!)
     val definition = mutableStateOf<Definition?>(null)
-    val currentText = mutableStateOf("")
+    val currentText = mutableStateOf(TextFieldValue())
     var editorParentScope: Scope = console.scope
     val expanded = mutableStateMapOf<Definition, Unit>()
 
@@ -65,12 +71,40 @@ class TantillaViewModel(
 
     fun scope(): MutableState<Scope> = if (mode.value == Mode.HELP) builtinScope else userScope
 
+    fun findLineRange(s: AnnotatedString, lineNumber: Int): IntRange {
+        var pos = 0
+        var i = 0
+        while (pos < s.length && i < lineNumber) {
+            val newPos = s.indexOf('\n', pos)
+            if (newPos == -1) {
+                break
+            }
+            pos = newPos + 1
+            i++
+        }
+        var end = s.indexOf('\n', pos)
+        if (end == -1) {
+            end = s.length
+        }
+        return IntRange(pos, end)
+    }
+
+    fun AnnotatedString.withError(exception: Exception?): AnnotatedString {
+        if (exception is ParsingException) {
+            val range = findLineRange(this, exception.token.line)
+            val builder = AnnotatedString.Builder(this)
+            builder.addStyle(SpanStyle(background = Color.Yellow), range.start, range.endInclusive)
+            return builder.toAnnotatedString()
+        }
+        return this
+    }
+
     fun edit(parent: Scope, definition: Definition?) {
         editorParentScope = parent
         this.definition.value = definition
         val writer = CodeWriter()
         definition?.serializeCode(writer)
-        currentText.value = ansiToAnnotatedString(writer.toString()).toString()
+        currentText.value = currentText.value.copy(annotatedString = ansiToAnnotatedString(writer.toString()).withError(definition?.error()))
         editing.value = true
     }
 
