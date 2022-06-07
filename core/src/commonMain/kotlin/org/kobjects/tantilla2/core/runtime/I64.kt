@@ -23,12 +23,12 @@ object I64 : NativeClassDefinition("int") {
             Str
         ) { it.i64(0).toString(2) }
 
-        defineNative(
+        defineNativeFunction(
             "max", "Returns the maximum of two values.",
             I64, Parameter("other", I64)
         ) { max(it.i64(0), it.i64(1)) }
 
-        defineNative(
+        defineNativeFunction(
             "min", "Returns the minimum of two values.",
             I64,
             Parameter("other", I64)

@@ -26,7 +26,7 @@ class ConsoleLoop(
     }
 
     fun declareNatives() {
-        RootScope.defineNative("print",
+        RootScope.defineNativeFunction("print",
             "Print the value of the text parameter to the console.",
             Void, Parameter("text", Str)) {
             konsole.write(it[0].toString())

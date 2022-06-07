@@ -41,14 +41,14 @@ object F64 : NativeClassDefinition("float"), Type {
         ) { it.f64(0).toString() }
 
 
-        defineNative(
+        defineNativeFunction(
             "round", "Return the argument, rounded to the next integer.",
             F64, Parameter("x",
                 F64
             ), Parameter("exp", F64)
         ) { round(it.f64(0)) }
 
-        defineNative(
+        defineNativeFunction(
             "sqrt", "Calculates the square root of the argument",
             F64, Parameter("x",
                 F64

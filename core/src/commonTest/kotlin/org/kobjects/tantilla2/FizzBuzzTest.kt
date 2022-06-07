@@ -37,7 +37,7 @@ class FizzBuzzTest {
 
         val context = UserScope(RootScope)
 
-        context.defineNative(
+        context.defineNativeFunction(
             "print", "internal",
             Void,
             Parameter("text", Str)) { try {

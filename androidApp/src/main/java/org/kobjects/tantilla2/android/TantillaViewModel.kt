@@ -35,7 +35,7 @@ class TantillaViewModel(
     }
 
     fun defineNatives() {
-        RootScope.defineNative(
+        RootScope.defineNativeFunction(
             "setPixel",
             "Sets the pixel at the given x/y coordinate to the given 32bit color value in ARGB format.",
             Void,

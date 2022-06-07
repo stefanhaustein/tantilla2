@@ -9,7 +9,7 @@ import org.kobjects.tantilla2.core.runtime.Void
 object PenDefinition : NativeClassDefinition("Pen"), Type {
 
     init {
-        defineNative(
+        defineNativeFunction(
             "line",
             "Draws a line between the given coordinates",
             Void,
@@ -22,6 +22,26 @@ object PenDefinition : NativeClassDefinition("Pen"), Type {
             val pen = it[0] as Pen
             pen.drawLine(it.f64(1), it.f64(2), it.f64(3), it.f64(4))
         }
+
+        defineNativeProperty(
+            "fill_color",
+        "Color value used for filling shapes",
+            ColorDefinition,
+            { (it[0] as Pen).fillColor },
+            {
+                (it[0] as Pen).fillColor = it[1] as Color
+                null }
+        )
+
+        defineNativeProperty(
+            "stroke_color",
+            "Color value used for drawing lines shapes",
+            ColorDefinition,
+            { (it[0] as Pen).strokeColor },
+            {
+                (it[0] as Pen).strokeColor = it[1] as Color
+                null }
+        )
     }
 
 }

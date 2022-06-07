@@ -13,7 +13,7 @@ data class ListType(
     fun create(size: Int, init: (Int) -> Any?) = TypedList(this, MutableList(size, init))
 
     init {
-        defineNative("len", "Returns the length of the list",
+        defineNativeFunction("len", "Returns the length of the list",
             org.kobjects.tantilla2.core.runtime.F64, Parameter("self", this)) {
             (it[0] as TypedList).size
         }

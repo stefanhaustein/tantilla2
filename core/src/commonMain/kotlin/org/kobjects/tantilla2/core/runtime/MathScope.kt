@@ -10,14 +10,14 @@ object MathScope : Scope(RootScope), Typed {
         get() = "math"
 
     init {
-        defineNative(
+        defineNativeFunction(
             "floor",
             "Rounds the argument down to the nearest integer.",
             F64,
             Parameter("x", F64)) {
                 floor(it.f64(0))
             }
-        defineNative(
+        defineNativeFunction(
             "ceil",
             "Rounds the argument up to the nearest integer.",
             F64,

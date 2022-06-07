@@ -1,10 +1,8 @@
 package org.kobjects.tantilla2.core.runtime
 
 import org.kobjects.tantilla2.core.Definition
-import org.kobjects.tantilla2.core.MetaType
 import org.kobjects.tantilla2.core.Scope
 import org.kobjects.tantilla2.core.function.Parameter
-import kotlin.math.*
 
 object RootScope : Scope(null) {
 
@@ -14,7 +12,7 @@ object RootScope : Scope(null) {
 
     init {
 
-        defineNative(
+        defineNativeFunction(
             "hsl",
             "Converts the given hue (degree), saturation (0..1) and light (0..1) values to a 32 bit ARGB value (as used in setPixel).",
             org.kobjects.tantilla2.core.runtime.F64, Parameter("h",
@@ -24,7 +22,7 @@ object RootScope : Scope(null) {
             )
         ) { hsl(it.f64(0), it.f64(1) , it.f64(2) ) }
 
-        F64.defineNative(
+        F64.defineNativeFunction(
             "range", "Creates a range from start (inclusive) to end (exclusive)",
             RangeType,
             Parameter("start", F64),
