@@ -6,5 +6,5 @@ interface Pen : Typed {
     var fillColor: Color
     var strokeColor: Color
 
-    fun drawLine(startX: Double, startY: Double, endX: Double, endY: Double)
+    fun line(startX: Double, startY: Double, endX: Double, endY: Double)
 }

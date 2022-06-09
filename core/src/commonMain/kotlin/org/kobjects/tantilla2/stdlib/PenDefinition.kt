@@ -20,7 +20,7 @@ object PenDefinition : NativeClassDefinition("Pen"), Type {
             Parameter("y2", F64)
         ) {
             val pen = it[0] as Pen
-            pen.drawLine(it.f64(1), it.f64(2), it.f64(3), it.f64(4))
+            pen.line(it.f64(1), it.f64(2), it.f64(3), it.f64(4))
         }
 
         defineNativeProperty(
