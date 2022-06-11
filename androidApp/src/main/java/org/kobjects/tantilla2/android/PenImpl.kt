@@ -8,16 +8,38 @@ import org.kobjects.tantilla2.stdlib.Pen
 
 class PenImpl(override val type: Type, val canvas: Canvas): Pen {
     val strokePaint = Paint()
+    val fillPaint = Paint()
 
     init {
         strokePaint.color = Color.GRAY
+        strokePaint.style = Paint.Style.STROKE
+
+        fillPaint.color = Color.TRANSPARENT
+        fillPaint.style = Paint.Style.FILL
     }
 
     override var fillColor = org.kobjects.tantilla2.stdlib.Color(0.0, 0.0, 0.0, 0.0)
+        set(value) {
+            field = value
+            fillPaint.color = value.argb
+        }
 
     override var strokeColor = org.kobjects.tantilla2.stdlib.Color(0.5, 0.5, 0.5, 1.0)
+        set(value) {
+            field = value
+            strokePaint.color = value.argb
+        }
 
-    override fun drawLine(startX: Double, startY: Double, endX: Double, endY: Double) {
+    override fun line(startX: Double, startY: Double, endX: Double, endY: Double) {
         canvas.drawLine(startX.toFloat(), startY.toFloat(), endX.toFloat(), endY.toFloat(), strokePaint)
+    }
+
+    override fun rect(x: Double, y: Double, width: Double, height: Double) {
+        if (fillPaint.color shr 24 != 0) {
+            canvas.drawRect(x as Float, y as Float, (x+width) as Float, (y+height) as Float, fillPaint)
+        }
+        if (strokePaint.color shr 24 != 0) {
+            canvas.drawRect(x as Float, y as Float, (x+width) as Float, (y+height) as Float, strokePaint)
+        }
     }
 }

@@ -20,7 +20,21 @@ object PenDefinition : NativeClassDefinition("Pen"), Type {
             Parameter("y2", F64)
         ) {
             val pen = it[0] as Pen
-            pen.drawLine(it.f64(1), it.f64(2), it.f64(3), it.f64(4))
+            pen.line(it.f64(1), it.f64(2), it.f64(3), it.f64(4))
+        }
+
+        defineNativeFunction(
+            "rect",
+            "Draws a rectangle starting at x,y with the given size.",
+            Void,
+            Parameter("self", this),
+            Parameter("x", F64),
+            Parameter("y", F64),
+            Parameter("width", F64),
+            Parameter("height", F64)
+        ) {
+            val pen = it[0] as Pen
+            pen.line(it.f64(1), it.f64(2), it.f64(3), it.f64(4))
         }
 
         defineNativeProperty(
