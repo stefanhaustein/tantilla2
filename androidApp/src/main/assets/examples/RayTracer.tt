@@ -33,30 +33,6 @@ def toByte(n: float) -> float:
    int(n * 255)
 
 
-
-class Color:
-  static val BLACK = Color(0,0,0)
-  static val WHITE = Color(1,1,1)
-  static val GREY = Color(0.5, 0.5, 0.5)
-
-  val r: float
-  val g: float
-  val b: float
-
-  def scale(self, k: float) -> Color:
-    Color(k * self.r, k * self.g, k * self.b)
-
-  def plus(self, c2: Color) -> Color:
-    Color(self.r + c2.r, self.g + c2.g, self.b + c2.b)
-
-  def times(self, c2: Color) -> Color:
-    Color(self.r * c2.r, self.g * c2.g, self.b * c2.b)
-
-  def toDrawingColor(self) -> float:
-    255*256*65536 + toByte(self.r) * 65536 + toByte(self.g) * 256 + toByte(self.b)
-
-
-
 class Camera:
   val pos: Vector
   val forward: Vector
@@ -165,7 +141,7 @@ impl Surface for Shiny:
     Color.WHITE
 
   def specular(self, pos: Vector) -> Color:
-    Color.GREY
+    Color.GRAY
 
   def reflect(self, pos: Vector) -> float:
     0.7
@@ -221,7 +197,7 @@ class RayTracer:
     val normal = isect.thing.normal(pos)
     val reflectDir = d.minus(normal.times(2 * normal.dot(d)))
     val naturalColor = s.background.plus(self.getNaturalColor(isect.thing, pos, normal, reflectDir, s))
-    var reflectedColor = Color.GREY
+    var reflectedColor = Color.GRAY
     if depth < self.maxDepth :
       reflectedColor = self.getReflectionColor(isect.thing, pos, normal, reflectDir, s, depth)
 
@@ -263,15 +239,14 @@ class RayTracer:
     cam.forward.plus(cam.right.times(x / 200)).plus(cam.up.times(y / 200)).norm()
 
   def render(self, s: Scene, p: Pen, screenWidth: float, screenHeight: float):
-    p.strokeColor = 0
-    for y in range(screenHeight):
+    p.set_stroke_color(Color.TRANSPARENT)
+    for y in range(0, screenHeight):
       for x in range(-screenWidth / 2, screenWidth / 2):
         var yy = math.floor(y / 2)
         if y % 2 == 0:
           yy = -yy
 
-        val color = self.traceRay(Ray(s.camera.pos, self.getPoint(x, yy, s.camera)), s, 0)
-        p.fillColor = color.toDrawingColor()
+        p.set_fill_color(self.traceRay(Ray(s.camera.pos, self.getPoint(x, yy, s.camera)), s, 0))
         p.rect(x, yy, 1.5, 1.5)
 
 

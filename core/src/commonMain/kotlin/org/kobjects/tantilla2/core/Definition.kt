@@ -171,6 +171,11 @@ class Definition(
     }
 
     private fun resolveVariable(tokenizer: TantillaTokenizer, typeOnly: Boolean = false) {
+        if (definitionText.isEmpty()) {
+            resolvedType = resolvedValue.dynamicType
+            return
+        }
+
         if (tokenizer.tryConsume(":")) {
             resolvedType = Parser.parseType(tokenizer, scope)
             if (typeOnly) {
@@ -187,7 +192,7 @@ class Definition(
         } else if (resolvedType != null) {
             resolvedInitializer = null
         } else {
-            throw tokenizer.exception("Explicit type or initializer expression required.")
+            throw tokenizer.exception("Explicit type or initializer expression required (resolving: $name).")
         }
         if (kind == Kind.STATIC_VARIABLE) {
             resolvedValue = resolvedInitializer!!.eval(RuntimeContext(mutableListOf()))

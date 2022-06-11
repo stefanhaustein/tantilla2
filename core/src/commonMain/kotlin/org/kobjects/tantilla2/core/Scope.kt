@@ -153,41 +153,6 @@ abstract class Scope(
         )
     }
 
-    fun defineNativeProperty(
-        name: String,
-        docString: String,
-        type: Type,
-        getter: (RuntimeContext) -> Any?,
-        setter: ((RuntimeContext) -> Any?)? = null
-    ) {
-        val getterType = object : FunctionType {
-            override val returnType = type
-            override val parameters = listOf(Parameter("self", this))
-        }
-        definitions[name] = Definition(
-            this,
-            Definition.Kind.FUNCTION,
-            name,
-            resolvedType = type,
-            resolvedValue = NativeFunction(getterType, getter),
-            docString = docString
-        )
-        if (setter != null) {
-            val setterType = object : FunctionType {
-                override val returnType = Void
-                override val parameters = listOf(Parameter("self", this), Parameter("value", type))
-            }
-            definitions[name] = Definition(
-                this,
-                Definition.Kind.FUNCTION,
-                name,
-                resolvedType = type,
-                resolvedValue = NativeFunction(setterType, setter),
-                docString = docString
-            )
-        }
-    }
-
     fun remove(name: String) {
         val removed = definitions.remove(name)
         if (removed != null && removed.index != -1) {

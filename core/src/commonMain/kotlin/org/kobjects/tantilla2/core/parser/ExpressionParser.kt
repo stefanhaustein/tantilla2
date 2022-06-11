@@ -6,6 +6,7 @@ import org.kobjects.greenspun.core.Str
 import org.kobjects.tantilla2.core.*
 import org.kobjects.parserlib.expressionparser.ExpressionParser as GreenspunExpressionParser
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
+import org.kobjects.tantilla2.core.classifier.NativeClassMetaType
 import org.kobjects.tantilla2.core.classifier.UserClassMetaType
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Parameter
@@ -138,11 +139,11 @@ object ExpressionParser {
 
         val definition = context.resolveDynamic(name, fallBackToStatic = true)
         val base = reference(definition)
-        if (base.returnType is FunctionType && (hasArgs || base.returnType !is UserClassMetaType)) {
+        if (base.returnType is FunctionType && (hasArgs || (base.returnType !is UserClassMetaType && base.returnType !is NativeClassMetaType))) {
             return apply(context, base, args, implicit = !hasArgs)
         }
         if (args.size > 0) {
-            throw IllegalArgumentException("Not callable: ${definition.scope.title}.${definition.name}")
+            throw IllegalArgumentException("Not callable: ${definition.scope.title}.${definition.name}; base.returnType: ${base.returnType::class}")
         }
         return base
     }
