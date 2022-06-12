@@ -14,7 +14,12 @@ class LocalVariableReference(
 ) : Assignable, SerializableCode {
     override fun children(): List<Evaluable<RuntimeContext>> = emptyList()
 
-    override fun eval(ctx: RuntimeContext): Any? = ctx.variables[index]
+    override fun eval(ctx: RuntimeContext): Any? {
+        //        println("Evaluating $name")
+        val result = ctx.variables[index]
+        // println("Eval result for $name = $result")
+        return result
+    }
 
     override fun reconstruct(newChildren: List<Evaluable<RuntimeContext>>): Evaluable<RuntimeContext> =
         this

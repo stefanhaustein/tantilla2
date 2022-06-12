@@ -1,5 +1,6 @@
 package org.kobjects.tantilla2.core.node
 
+import org.kobjects.greenspun.core.Control
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.RuntimeContext
@@ -22,7 +23,14 @@ class For(
         val iterable = rangeExpression.eval(ctx) as Iterable<*>
         for (i in iterable) {
             ctx.variables[iteratorIndex] = i
-            bodyExpression.eval(ctx)
+            val value = bodyExpression.eval(ctx)
+            if (value is Control.FlowSignal) {
+                when (value.kind) {
+                    Control.FlowSignal.Kind.BREAK -> break
+                    Control.FlowSignal.Kind.CONTINUE -> continue
+                    Control.FlowSignal.Kind.RETURN -> return value.value
+                }
+            }
         }
         return null
     }

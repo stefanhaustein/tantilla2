@@ -23,9 +23,8 @@ class Apply(
         val functionContext = RuntimeContext(MutableList<Any?>(function.scopeSize) {
 
             if (it < parameters.size) {
-                println("Evaluating ${parameters[it]}")
                 val result = parameters[it].eval(context)
-                println("Result $result")
+                // println("Result $result")
                 result
             } else null
         })

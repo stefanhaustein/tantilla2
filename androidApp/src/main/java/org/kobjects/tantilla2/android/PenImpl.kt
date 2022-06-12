@@ -36,10 +36,11 @@ class PenImpl(override val type: Type, val canvas: Canvas): Pen {
 
     override fun rect(x: Double, y: Double, width: Double, height: Double) {
         if (fillPaint.color shr 24 != 0) {
-            canvas.drawRect(x as Float, y as Float, (x+width) as Float, (y+height) as Float, fillPaint)
+            canvas.drawRect(x.toFloat(), y.toFloat(), (x+width).toFloat(), (y+height).toFloat(), fillPaint)
         }
+
         if (strokePaint.color shr 24 != 0) {
-            canvas.drawRect(x as Float, y as Float, (x+width) as Float, (y+height) as Float, strokePaint)
+            canvas.drawRect(x.toFloat(), y.toFloat(), (x+width).toFloat(), (y+height).toFloat(), strokePaint)
         }
     }
 }

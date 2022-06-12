@@ -32,4 +32,6 @@ class PropertyReference(
         writer.append('.').append(name)
     }
 
+    override fun toString() = CodeWriter().appendCode(this).toString()
+
 }

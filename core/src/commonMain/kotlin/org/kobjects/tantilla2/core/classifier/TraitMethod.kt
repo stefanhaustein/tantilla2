@@ -7,8 +7,14 @@ import org.kobjects.tantilla2.core.function.FunctionType
 class TraitMethod(override val type: FunctionType, val index: Int): Lambda {
     override fun eval(context: RuntimeContext): Any? {
       val self = context.variables[0] as Adapter
+      val methodImpl = self.vmt[index]
+
       val methodContext = RuntimeContext(
-          MutableList(context.variables.size) { if (it == 0) self.instance else context.variables[it] })
+          MutableList(methodImpl.scopeSize) {
+              if (it == 0) self.instance
+              else if (it < context.variables.size) context.variables[it]
+              else null
+          })
       return self.vmt[index].eval(methodContext)
     }
 }

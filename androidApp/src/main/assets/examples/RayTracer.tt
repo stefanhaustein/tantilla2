@@ -24,14 +24,6 @@ class Vector:
   def cross(self, v2: Vector) -> Vector:
     Vector(self.y * v2.z - self.z * v2.y, self.z * v2.x - self.x * v2.z, self.x * v2.y - self.y * v2.x)
 
-def toByte(n: float) -> float:
- if n <= 0:
-   0
- elif n >= 1:
-   255
- else:
-   int(n * 255)
-
 
 class Camera:
   val pos: Vector
