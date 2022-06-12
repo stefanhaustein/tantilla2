@@ -111,7 +111,7 @@ fun RenderScope(viewModel: TantillaViewModel) {
 @Composable
 fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
     Card(
-        backgroundColor = if (definition.hasError(true)) Color(0xffff8888L) else Color(0xffeeeeee),
+        backgroundColor = if (definition.hasError(true) || viewModel.withRuntimeException.containsKey(definition)) Color(0xffff8888L) else Color(0xffeeeeee),
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(4.dp)),
@@ -158,7 +158,7 @@ fun RenderEditor(viewModel: TantillaViewModel) {
                 title = { Text(text = definition?.name ?: "New Property") },
                 actions = {
                     IconButton(onClick = {
-                        scope.update(viewModel.currentText.value.toString(), definition)
+                        scope.update(viewModel.currentText.value.text, definition)
                         viewModel.editing.value = false
                     }) {
                         Icon(Icons.Default.Check, contentDescription = "Save")
@@ -198,7 +198,17 @@ fun RenderEditor(viewModel: TantillaViewModel) {
             }
             TextField(
                 value = viewModel.currentText.value,
-                onValueChange = { viewModel.currentText.value = it },
+                onValueChange = {
+                    viewModel.currentText.value = it
+                    /*
+                    viewModel.definition.value = scope.update(viewModel.currentText.value.text, viewModel.definition.value)
+                    if (viewModel.definition.value.toString() == viewModel.currentText.value.text) {
+                        val writer = CodeWriter(highlighting = CodeWriter.defaultHighlighting)
+                        definition?.serializeCode(writer)
+                    viewModel.currentText.value = viewModel.currentText.value.copy(annotatedString = ansiToAnnotatedString(writer.toString())) //.withError(definition?.error()))
+                    }
+*/
+                                },
                 modifier = Modifier.fillMaxSize(),
             )
 

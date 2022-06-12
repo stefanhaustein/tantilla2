@@ -9,6 +9,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.input.TextFieldValue
+import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.konsole.compose.AnsiConverter.ansiToAnnotatedString
 import org.kobjects.tantilla2.console.ConsoleLoop
 import org.kobjects.tantilla2.core.*
@@ -35,9 +36,11 @@ class TantillaViewModel(
     val currentText = mutableStateOf(TextFieldValue())
     var editorParentScope: Scope = console.scope
     val expanded = mutableStateMapOf<Definition, Unit>()
+    var withRuntimeException = mutableStateMapOf<Definition, TantillaRuntimeException>()
 
     init {
         defineNatives()
+        console.errorListener = ::highlightRuntimeException
     }
 
     fun defineNatives() {
@@ -102,7 +105,7 @@ class TantillaViewModel(
     fun edit(parent: Scope, definition: Definition?) {
         editorParentScope = parent
         this.definition.value = definition
-        val writer = CodeWriter()
+        val writer = CodeWriter(highlighting = CodeWriter.defaultHighlighting)
         definition?.serializeCode(writer)
         currentText.value = currentText.value.copy(annotatedString = ansiToAnnotatedString(writer.toString()).withError(definition?.error()))
         editing.value = true
@@ -123,6 +126,19 @@ class TantillaViewModel(
         Parser.parse(programText, console.scope)
         console.scope.hasError()
     }
+
+    fun highlightRuntimeException(e: TantillaRuntimeException?) {
+        withRuntimeException.values.clear()
+        if (e == null) {
+            return
+        }
+        var definition = userScope.value.findNode(e.node)
+        while (definition != null) {
+            withRuntimeException.put(definition, e)
+            definition = definition
+        }
+    }
+
 
     enum class Mode {
         HELP, HIERARCHY, SHELL

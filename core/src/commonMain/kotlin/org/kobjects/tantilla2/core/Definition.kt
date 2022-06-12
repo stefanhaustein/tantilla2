@@ -6,7 +6,9 @@ import org.kobjects.tantilla2.core.classifier.UserClassDefinition
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.function.FunctionType
+import org.kobjects.tantilla2.core.function.LambdaImpl
 import org.kobjects.tantilla2.core.node.TantillaNode
+import org.kobjects.tantilla2.core.node.containsNode
 import org.kobjects.tantilla2.core.parser.ExpressionParser
 import org.kobjects.tantilla2.core.parser.Parser
 import org.kobjects.tantilla2.core.parser.TantillaTokenizer
@@ -264,10 +266,20 @@ class Definition(
     fun isScope() = error() == null &&
             (kind == Definition.Kind.IMPL || kind == Definition.Kind.CLASS || kind == Definition.Kind.TRAIT)
 
-    object UnresolvedEvalueable: TantillaNode {
-        override fun children(): List<Evaluable<RuntimeContext>> {
-            TODO("Not yet implemented")
+    fun findNode(node: Evaluable<RuntimeContext>): Definition? {
+        val rid = resolvedInitializer
+        if (rid != UnresolvedEvalueable && rid != null && rid.containsNode(node)) {
+            return this
         }
+        return when (val value = resolvedValue) {
+            is LambdaImpl -> if (value.body.containsNode(node)) this else null
+            is Scope -> value.findNode(node)
+            else -> null
+        }
+    }
+
+    object UnresolvedEvalueable: TantillaNode {
+        override fun children() = emptyList<Evaluable<RuntimeContext>>()
 
         override fun eval(context: RuntimeContext): Any? {
             TODO("Not yet implemented")
