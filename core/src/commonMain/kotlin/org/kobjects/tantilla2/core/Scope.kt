@@ -1,5 +1,6 @@
 package org.kobjects.tantilla2.core
 
+import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.tantilla2.core.classifier.UserClassDefinition
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
@@ -33,6 +34,17 @@ abstract class Scope(
         }
     }
 
+    fun findNode(node: Evaluable<RuntimeContext>): Definition? {
+        for (definition in definitions.values) {
+            val result = definition.findNode(node)
+            if (result != null) {
+                return result
+            }
+        }
+        return null
+    }
+
+
     operator fun get(name: String): Definition? = definitions[name]
 
     override fun iterator(): Iterator<Definition> = definitions.values.iterator()
@@ -50,7 +62,7 @@ abstract class Scope(
     }
 
 
-    fun update(newContent: String, oldDefinition: Definition? = null) {
+    fun update(newContent: String, oldDefinition: Definition? = null): Definition {
         if (oldDefinition != null) {
             definitions.remove(oldDefinition.name)
         }
@@ -70,6 +82,7 @@ abstract class Scope(
             )
         }
         definitions[replacement.name] = replacement
+        return replacement
     }
 
 

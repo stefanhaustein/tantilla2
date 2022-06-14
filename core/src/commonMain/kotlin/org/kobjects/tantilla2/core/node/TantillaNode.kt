@@ -5,6 +5,19 @@ import org.kobjects.tantilla2.core.RuntimeContext
 import org.kobjects.tantilla2.core.SerializableCode
 import org.kobjects.tantilla2.core.Type
 
+fun Evaluable<RuntimeContext>.containsNode(node: Evaluable<RuntimeContext>): Boolean {
+    if (this == node) {
+        return true
+    }
+    for (child in children()) {
+        if (child == node) {
+            return true
+        }
+    }
+    return false
+}
+
+
 interface TantillaNode : Evaluable<RuntimeContext>, SerializableCode {
 
     val returnType: Type

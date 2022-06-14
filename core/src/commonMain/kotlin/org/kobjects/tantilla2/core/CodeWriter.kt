@@ -7,6 +7,7 @@ import org.kobjects.tantilla2.core.runtime.Str
 class CodeWriter(
     indent: String = "",
     val highlighting: Map<Kind, Pair<String, String>> = emptyMap(),
+    val errorMap: Map<Evaluable<RuntimeContext>, TantillaRuntimeException> = emptyMap()
 ) : Appendable {
     val sb = StringBuilder()
     val indent = StringBuilder(indent)
@@ -71,6 +72,10 @@ class CodeWriter(
     }
 
     fun appendCode(code: Any?, parentPrecedence: Int = 0): CodeWriter {
+        val error = code is Evaluable<*> && errorMap.containsKey(code)
+        if (error) {
+            start(Kind.ERROR)
+        }
         when (code) {
             is SerializableCode -> code.serializeCode(this, parentPrecedence)
             is F64.Add<*> -> appendInfix(code, parentPrecedence,  "+", 1)
@@ -81,6 +86,9 @@ class CodeWriter(
             is Control.Block<*> -> appendBlock(code as Control.Block<RuntimeContext>)
             is Control.While<*> -> appendWhile(code as Control.While<RuntimeContext>)
             else -> append(code.toString())
+        }
+        if (error) {
+            end(Kind.ERROR)
         }
         return this
     }
@@ -140,13 +148,14 @@ class CodeWriter(
     }
 
     enum class Kind {
-        KEYWORD, DECLARATION
+        KEYWORD, DECLARATION, ERROR
     }
 
     companion object {
         val defaultHighlighting = mapOf(
             Kind.KEYWORD to Pair(Ansi.BOLD, Ansi.NORMAL_INTENSITY),
-            Kind.DECLARATION to Pair(Ansi.BOLD + Ansi.FOREGROUND_CYAN, Ansi.NORMAL_INTENSITY + Ansi.FOREGROUND_DEFAULT)
+            Kind.DECLARATION to Pair(Ansi.BOLD + Ansi.FOREGROUND_CYAN, Ansi.NORMAL_INTENSITY + Ansi.FOREGROUND_DEFAULT),
+            Kind.ERROR to Pair(Ansi.BACKGROUND_YELLOW, Ansi.BACKGROUND_DEFAULT)
         )
     }
 }

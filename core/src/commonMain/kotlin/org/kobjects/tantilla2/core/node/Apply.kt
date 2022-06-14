@@ -53,7 +53,7 @@ class Apply(
             sb.append("(")
             if (parameters.size > startIndex) {
                 sb.appendCode(parameters[startIndex])
-                for (i in startIndex until parameters.size) {
+                for (i in startIndex + 1 until parameters.size) {
                     sb.append(", ")
                     sb.appendCode(parameters[i])
                 }
