@@ -77,7 +77,7 @@ abstract class Scope(
         val sb = StringBuilder()
 
         when (this) {
-            is UserClassDefinition -> writer.keyword("class").append(' ').declaration(name)
+            is UserClassDefinition -> writer.keyword("struct").append(' ').declaration(name)
             is TraitDefinition -> writer.keyword("trait").append(' ').declaration(name)
             is ImplDefinition -> writer.keyword("impl").append(' ').declaration(name)
             is FunctionScope -> {

@@ -28,7 +28,7 @@ class Definition(
     private var resolvedInitializer: Evaluable<RuntimeContext>? = UnresolvedEvalueable
 
     enum class Kind {
-        LOCAL_VARIABLE, STATIC_VARIABLE, FUNCTION, CLASS, TRAIT, IMPL, UNPARSEABLE, SCOPE
+        LOCAL_VARIABLE, STATIC_VARIABLE, FUNCTION, STRUCT, TRAIT, IMPL, UNPARSEABLE, SCOPE
     }
 
     init {
@@ -111,7 +111,7 @@ class Definition(
                 when (kind) {
                     Kind.STATIC_VARIABLE -> resolveVariable(tokenizer)
                     Kind.FUNCTION -> resolvedValue =  Parser.parseLambda(tokenizer, scope)
-                    Kind.CLASS -> resolvedValue = resolveClass(tokenizer)
+                    Kind.STRUCT -> resolvedValue = resolveClass(tokenizer)
                     Kind.TRAIT -> resolvedValue = resolveTrait(tokenizer)
                     Kind.IMPL -> resolvedValue = resolveImpl(tokenizer)
                     Kind.UNPARSEABLE -> throw RuntimeException("Can't obtain value for unparseable definition.")
@@ -212,7 +212,7 @@ class Definition(
             Kind.FUNCTION -> writer.keyword("def ").declaration(name).appendType(type())
             Kind.TRAIT,
             Kind.IMPL,
-            Kind.CLASS -> writer.keyword(kind.name.lowercase()).append(' ').declaration(name)
+            Kind.STRUCT -> writer.keyword(kind.name.lowercase()).append(' ').declaration(name)
             Kind.UNPARSEABLE -> writer.append("(unparseable: $name)")
         }
     }
@@ -236,7 +236,7 @@ class Definition(
            }
            Kind.UNPARSEABLE -> writer.append(definitionText)
            Kind.TRAIT,
-           Kind.CLASS,
+           Kind.STRUCT,
            Kind.IMPL -> {
                if (resolvedValue != UnresolvedValue) {
                    writer.appendCode(resolvedValue)
@@ -262,7 +262,7 @@ class Definition(
     fun isStatic() = !isDyanmic()
 
     fun isScope() = error() == null &&
-            (kind == Definition.Kind.IMPL || kind == Definition.Kind.CLASS || kind == Definition.Kind.TRAIT)
+            (kind == Definition.Kind.IMPL || kind == Definition.Kind.STRUCT || kind == Definition.Kind.TRAIT)
 
     object UnresolvedEvalueable: TantillaNode {
         override fun children(): List<Evaluable<RuntimeContext>> {

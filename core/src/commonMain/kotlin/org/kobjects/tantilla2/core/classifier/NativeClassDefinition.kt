@@ -50,7 +50,7 @@ open class NativeClassDefinition(
     init {
         val def = Definition(
             parent,
-            Definition.Kind.CLASS,
+            Definition.Kind.STRUCT,
             name,
             resolvedValue = this
         )

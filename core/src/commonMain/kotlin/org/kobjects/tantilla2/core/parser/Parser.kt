@@ -1,7 +1,6 @@
 package org.kobjects.tantilla2.core.parser
 
 import org.kobjects.greenspun.core.*
-import org.kobjects.tantilla2.core.node.StaticReference
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.classifier.*
 import org.kobjects.tantilla2.core.node.For
@@ -11,13 +10,12 @@ import org.kobjects.tantilla2.core.parser.ExpressionParser.parseExpression
 import org.kobjects.tantilla2.core.runtime.ListType
 import org.kobjects.tantilla2.core.runtime.RangeType
 import org.kobjects.tantilla2.core.runtime.Void
-import kotlin.math.min
 
 
 fun String.unquote() = this.substring(1, this.length - 1)
 
 object Parser {
-    val DECLARATION_KEYWORDS = setOf("def", "var", "val", "class", "trait", "impl", "static")
+    val DECLARATION_KEYWORDS = setOf("def", "var", "val", "struct", "trait", "impl", "static")
 
     fun getIndent(s: String): Int {
         val lastBreak = s.lastIndexOf('\n')
@@ -92,12 +90,12 @@ object Parser {
                 val text = consumeBody(tokenizer, localDepth)
                 Definition(scope, Definition.Kind.FUNCTION, name, definitionText = text)
             }
-            "class" -> {
-                tokenizer.consume("class")
-                val name = tokenizer.consume(TokenType.IDENTIFIER, "Class name expected.")
-                println("consuming class $name; return depth: $localDepth")
+            "struct" -> {
+                tokenizer.consume("struct")
+                val name = tokenizer.consume(TokenType.IDENTIFIER, "Struct name expected.")
+                println("consuming struct $name; return depth: $localDepth")
                 val text = consumeBody(tokenizer, localDepth)
-                Definition(scope, Definition.Kind.CLASS, name, definitionText = text)
+                Definition(scope, Definition.Kind.STRUCT, name, definitionText = text)
             }
             "trait" -> {
                 tokenizer.consume("trait")
@@ -143,7 +141,7 @@ object Parser {
                 println("- new local depth: $localDepth")
             } else {
                 when (tokenizer.current.text) {
-                    "def", "if", "while", "class" -> localDepth++
+                    "def", "if", "while", "struct", "impl", "trait" -> localDepth++
                     "<|" -> localDepth--
                 }
             }

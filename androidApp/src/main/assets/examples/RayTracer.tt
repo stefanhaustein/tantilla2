@@ -1,4 +1,4 @@
-class Vector:
+struct Vector:
   val x: float
   val y: float
   val z: float
@@ -25,7 +25,7 @@ class Vector:
     Vector(self.y * v2.z - self.z * v2.y, self.z * v2.x - self.x * v2.z, self.x * v2.y - self.y * v2.x)
 
 
-class Camera:
+struct Camera:
   val pos: Vector
   val forward: Vector
   val right: Vector
@@ -39,12 +39,12 @@ class Camera:
     Camera(pos, forward, right, up)
 
 
-class Ray:
+struct Ray:
   val start: Vector
   val dir: Vector
 
 
-class Intersection:
+struct Intersection:
   val thing: Thing
   val ray: Ray
   val dist: float
@@ -62,17 +62,17 @@ trait Thing:
   def normal(self, pos: Vector) -> Vector
   def intersect(self, ray: Ray) -> Intersection
 
-class Light:
+struct Light:
   val pos: Vector
   val color: Color
 
-class Scene:
+struct Scene:
   val things: List[Thing]
   val lights: List[Light]
   val camera: Camera
   val background: Color
 
-class Sphere:
+struct Sphere:
   val center: Vector
   val radius2: float
   val surface: Surface
@@ -101,7 +101,7 @@ impl Thing for Sphere:
   Intersection(self, r, dist)
 
 
-class Plane:
+struct Plane:
   val norm: Vector
   val offset: float
   val surface: Surface
@@ -123,7 +123,7 @@ impl Thing for Plane:
     Intersection(self, r, dist)
 
 
-class Shiny:
+struct Shiny:
 
 impl Surface for Shiny:
   def roughness(self) -> float:
@@ -138,7 +138,7 @@ impl Surface for Shiny:
   def reflect(self, pos: Vector) -> float:
     0.7
 
-class Checkerboard:
+struct Checkerboard:
 
 impl Surface for Checkerboard:
   def roughness(self) -> float:
@@ -160,7 +160,7 @@ impl Surface for Checkerboard:
      0.7
 
 
-class RayTracer:
+struct RayTracer:
   val maxDepth = 5
   val defaultColor = Color.BLACK
 
