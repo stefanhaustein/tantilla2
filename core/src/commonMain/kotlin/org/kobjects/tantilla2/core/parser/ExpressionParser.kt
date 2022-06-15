@@ -38,7 +38,7 @@ object ExpressionParser {
 
 
     fun parseApply(tokenizer: TantillaTokenizer, context: Scope, base: Evaluable<RuntimeContext>): Evaluable<RuntimeContext> {
-        return apply(context, base, parseParameterList(tokenizer, context))
+        return apply(tokenizer, context, base, parseParameterList(tokenizer, context))
     }
 
     fun parseElementAt(tokenizer: TantillaTokenizer, scope: Scope, base: Evaluable<RuntimeContext>): Evaluable<RuntimeContext> {
@@ -53,6 +53,7 @@ object ExpressionParser {
     else StaticReference(definition)
 
     fun apply(
+        tokenizer: TantillaTokenizer,
         scope: Scope,
         base: Evaluable<RuntimeContext>,
         availableParameters: List<Pair<String, Evaluable<RuntimeContext>>>,
@@ -103,19 +104,40 @@ object ExpressionParser {
         }
 
         val result = mutableListOf<Evaluable<RuntimeContext>>()
+        val missingLambdaParams = mutableMapOf<String, Parameter>()
+        val missingLambdaIndices = mutableMapOf<String, Int>()
 
-        for (expected in functionType.parameters) {
+        for (i in functionType.parameters.indices) {
+            val expected = functionType.parameters[i]
             val name = expected.name
-            val expr = map.remove(expected.name) ?: expected.defaultValueExpression
-                ?: throw IllegalArgumentException("Parameter not found: '$name' expected: $expectedParameters provided: $availableParameters")
-            result.add(matchType(scope, expr, expected.type))
+            val expr = map.remove(expected.name)
+            if (expr == null && expected.type is FunctionType) {
+                missingLambdaParams.put (name, expected)
+                missingLambdaIndices.put(name, i)
+                if (expected.defaultValueExpression != null) {
+                    result.add(matchType(scope, expected.defaultValueExpression, expected.type))
+                } else {
+                    result.add(Definition.UnresolvedEvalueable)
+                }
+            } else {
+                val resolved = expr ?: expected.defaultValueExpression ?:
+                    throw IllegalArgumentException(
+                        "Parameter not found: '$name' expected: $expectedParameters provided: $availableParameters")
+
+                result.add(matchType(scope, resolved , expected.type))
+            }
         }
         if (map.isNotEmpty()) {
             throw IllegalArgumentException("Unexpected parameter(s): ${map.keys}")
         }
+        if (missingLambdaParams.isNotEmpty()) {
+            throw UnsupportedOperationException("Trailing lambda NYI")
+        }
 
         return Apply(base, result.toList(), implicit, asMethod)
     }
+
+
 
     fun parseFreeIdentifier(tokenizer: TantillaTokenizer, context: Scope): Evaluable<RuntimeContext> {
         val name = tokenizer.consume(TokenType.IDENTIFIER)
@@ -129,7 +151,7 @@ object ExpressionParser {
                 val baseType = args[0].second.returnType as Scope
                 val definition = baseType[name]
                 if (definition != null) {
-                    return apply(context, StaticReference(definition), args)
+                    return apply(tokenizer, context, StaticReference(definition), args)
                 }
             }
         } else {
@@ -140,7 +162,7 @@ object ExpressionParser {
         val definition = context.resolveDynamic(name, fallBackToStatic = true)
         val base = reference(definition)
         if (base.returnType is FunctionType && (hasArgs || (base.returnType !is UserClassMetaType && base.returnType !is NativeClassMetaType))) {
-            return apply(context, base, args, implicit = !hasArgs)
+            return apply(tokenizer, context, base, args, implicit = !hasArgs)
         }
         if (args.size > 0) {
             throw IllegalArgumentException("Not callable: ${definition.scope.title}.${definition.name}; base.returnType: ${base.returnType::class}")
@@ -242,22 +264,18 @@ object ExpressionParser {
                 val args = if (hasArgs) parseParameterList(tokenizer, context) else emptyList()
 
                 if (definition.isStatic()) {
-                    return apply(context, fn, args, implicit = !hasArgs, asMethod = true)
+                    return apply(tokenizer, context, fn, args, implicit = !hasArgs, asMethod = true)
                 }
 
                 val params = List<Pair<String, Evaluable<RuntimeContext>>>(args.size + 1) {
                     if (it == 0) Pair("", base) else args[it - 1]
                 }
-                return apply(context, fn, params, implicit = !hasArgs, asMethod = true)
+                return apply(tokenizer, context, fn, params, implicit = !hasArgs, asMethod = true)
             }
             Definition.Kind.STATIC_VARIABLE -> return StaticReference(definition)
             else -> throw tokenizer.exception("Unsupported definition kind ${definition.kind} for $base.$name")
         }
     }
-
-
-
-
 
 
     val expressionParser = GreenspunExpressionParser<TantillaTokenizer, Scope, Evaluable<RuntimeContext>>(
