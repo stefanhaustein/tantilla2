@@ -91,7 +91,7 @@ class Definition(
             val tokenizer = tokenizer()
             try {
                 when (kind) {
-                    Kind.FUNCTION -> resolvedType = Parser.parseFunctionType(tokenizer, ParsingContext(scope, 0))
+                    Kind.FUNCTION -> resolvedType = TypeParser.parseFunctionType(tokenizer, ParsingContext(scope, 0))
                     Kind.LOCAL_VARIABLE,
                     Kind.STATIC_VARIABLE -> resolveVariable(tokenizer, typeOnly = true)
                     else -> resolvedType = value().dynamicType
@@ -109,7 +109,7 @@ class Definition(
             try {
                 when (kind) {
                     Kind.STATIC_VARIABLE -> resolveVariable(tokenizer)
-                    Kind.FUNCTION -> resolvedValue =  Parser.parseLambda(tokenizer, ParsingContext(scope, 0))
+                    Kind.FUNCTION -> resolvedValue =  Parser.parseDef(tokenizer, ParsingContext(scope, 0))
                     Kind.STRUCT -> resolvedValue = resolveClass(tokenizer)
                     Kind.TRAIT -> resolvedValue = resolveTrait(tokenizer)
                     Kind.IMPL -> resolvedValue = resolveImpl(tokenizer)
@@ -177,7 +177,7 @@ class Definition(
         }
 
         if (tokenizer.tryConsume(":")) {
-            resolvedType = Parser.parseType(tokenizer, ParsingContext(scope, 0))
+            resolvedType = TypeParser.parseType(tokenizer, ParsingContext(scope, 0))
             if (typeOnly) {
                 return
             }
@@ -214,7 +214,7 @@ class Definition(
             Kind.IMPL,
             Kind.STRUCT -> writer.keyword(kind.name.lowercase()).append(' ').declaration(name)
             Kind.UNPARSEABLE -> writer.append("(unparseable: $name)")
-            Kind.SCOPE -> throw UnsupportedOperationException()
+            Kind.SCOPE -> writer.append("(scope $name)")
         }
     }
 

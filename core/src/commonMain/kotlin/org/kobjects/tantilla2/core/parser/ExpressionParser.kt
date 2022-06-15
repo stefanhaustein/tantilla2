@@ -38,7 +38,7 @@ object ExpressionParser {
 
 
     fun parseApply(tokenizer: TantillaTokenizer, context: ParsingContext, base: Evaluable<RuntimeContext>): Evaluable<RuntimeContext> {
-        return apply(tokenizer, context.scope, base, parseParameterList(tokenizer, context))
+        return apply(tokenizer, context, base, parseParameterList(tokenizer, context))
     }
 
     fun parseElementAt(tokenizer: TantillaTokenizer, context: ParsingContext, base: Evaluable<RuntimeContext>): Evaluable<RuntimeContext> {
@@ -151,7 +151,7 @@ object ExpressionParser {
                 val baseType = args[0].second.returnType as Scope
                 val definition = baseType[name]
                 if (definition != null) {
-                    return apply(tokenizer, context.scope, StaticReference(definition), args)
+                    return apply(tokenizer, context, StaticReference(definition), args)
                 }
             }
         } else {
@@ -162,7 +162,7 @@ object ExpressionParser {
         val definition = context.scope.resolveDynamic(name, fallBackToStatic = true)
         val base = reference(definition)
         if (base.returnType is FunctionType && (hasArgs || (base.returnType !is UserClassMetaType && base.returnType !is NativeClassMetaType))) {
-            return apply(tokenizer, context.scope, base, args, implicit = !hasArgs)
+            return apply(tokenizer, context, base, args, implicit = !hasArgs)
         }
         if (args.size > 0) {
             throw IllegalArgumentException("Not callable: ${definition.scope.title}.${definition.name}; base.returnType: ${base.returnType::class}")
@@ -264,13 +264,13 @@ object ExpressionParser {
                 val args = if (hasArgs) parseParameterList(tokenizer, context) else emptyList()
 
                 if (definition.isStatic()) {
-                    return apply(tokenizer, context.scope, fn, args, implicit = !hasArgs, asMethod = true)
+                    return apply(tokenizer, context, fn, args, implicit = !hasArgs, asMethod = true)
                 }
 
                 val params = List<Pair<String, Evaluable<RuntimeContext>>>(args.size + 1) {
                     if (it == 0) Pair("", base) else args[it - 1]
                 }
-                return apply(tokenizer, context.scope, fn, params, implicit = !hasArgs, asMethod = true)
+                return apply(tokenizer, context, fn, params, implicit = !hasArgs, asMethod = true)
             }
             Definition.Kind.STATIC_VARIABLE -> return StaticReference(definition)
             else -> throw tokenizer.exception("Unsupported definition kind ${definition.kind} for $base.$name")
@@ -278,30 +278,31 @@ object ExpressionParser {
     }
 
 
-    val expressionParser = GreenspunExpressionParser<TantillaTokenizer, ParsingContext, Evaluable<RuntimeContext>>(
-        GreenspunExpressionParser.suffix(9, ".") {
+    val expressionParser =
+        GreenspunExpressionParser<TantillaTokenizer, ParsingContext, Evaluable<RuntimeContext>>(
+            GreenspunExpressionParser.suffix(9, ".") {
                 tokenizer, context, _, base -> parseProperty(tokenizer, context, base) },
-        GreenspunExpressionParser.suffix(8, "[") {
+            GreenspunExpressionParser.suffix(8, "[") {
                 tokenizer, context, _, base -> parseElementAt(tokenizer, context, base)
-        },
-        GreenspunExpressionParser.suffix(8, "(") {
+            },
+            GreenspunExpressionParser.suffix(8, "(") {
                 tokenizer, context, _, base -> parseApply(tokenizer, context, base) },
-        GreenspunExpressionParser.suffix(7, "as") {
+            GreenspunExpressionParser.suffix(7, "as") {
                 tokenizer, context, _, base -> parseAs(tokenizer, context, base) },
-        GreenspunExpressionParser.infix(6, "**") { _, _, _, l, r -> F64.Pow(l, r)},
-        GreenspunExpressionParser.infix(5, "*") { _, _, _, l, r -> F64.Mul(l, r)},
-        GreenspunExpressionParser.infix(5, "/") { _, _, _, l, r -> F64.Div(l, r)},
-        GreenspunExpressionParser.infix(5, "%") { _, _, _, l, r -> F64.Mod(l, r)},
-        GreenspunExpressionParser.prefix(4, "-") { _, _, _, expr -> F64.Sub(F64.Const<RuntimeContext>(0.0), expr)},
-        GreenspunExpressionParser.infix(3, "+") { _, _, _, l, r -> F64.Add(l, r)},
-        GreenspunExpressionParser.infix(3, "-") { _, _, _, l, r -> F64.Sub(l, r)},
-        GreenspunExpressionParser.infix(2, "==") { _, _, _, l, r -> F64.Eq(l, r)},
-        GreenspunExpressionParser.infix(2, "!=") { _, _, _, l, r -> F64.Ne(l, r)},
-        GreenspunExpressionParser.infix(1, "<") { _, _, _, l, r -> F64.Lt(l, r)},
-        GreenspunExpressionParser.infix(1, ">") { _, _, _, l, r -> F64.Gt(l, r)},
-        GreenspunExpressionParser.infix(1, "<=") { _, _, _, l, r -> F64.Le(l, r)},
-        GreenspunExpressionParser.infix(1, ">=") { _, _, _, l, r -> F64.Ge(l, r)},
-
-        ) { t, c -> parsePrimary(t, c)
-    }
+            GreenspunExpressionParser.infix(6, "**") { _, _, _, l, r -> F64.Pow(l, r)},
+            GreenspunExpressionParser.infix(5, "*") { _, _, _, l, r -> F64.Mul(l, r)},
+            GreenspunExpressionParser.infix(5, "/") { _, _, _, l, r -> F64.Div(l, r)},
+            GreenspunExpressionParser.infix(5, "%") { _, _, _, l, r -> F64.Mod(l, r)},
+            GreenspunExpressionParser.prefix(4, "-") { _, _, _, expr -> F64.Sub(F64.Const<RuntimeContext>(0.0), expr)},
+            GreenspunExpressionParser.infix(3, "+") { _, _, _, l, r -> F64.Add(l, r)},
+            GreenspunExpressionParser.infix(3, "-") { _, _, _, l, r -> F64.Sub(l, r)},
+            GreenspunExpressionParser.infix(2, "==") { _, _, _, l, r -> F64.Eq(l, r)},
+            GreenspunExpressionParser.infix(2, "!=") { _, _, _, l, r -> F64.Ne(l, r)},
+            GreenspunExpressionParser.infix(1, "<") { _, _, _, l, r -> F64.Lt(l, r)},
+            GreenspunExpressionParser.infix(1, ">") { _, _, _, l, r -> F64.Gt(l, r)},
+            GreenspunExpressionParser.infix(1, "<=") { _, _, _, l, r -> F64.Le(l, r)},
+            GreenspunExpressionParser.infix(1, ">=") { _, _, _, l, r -> F64.Ge(l, r)},
+        ) {
+                t, c -> parsePrimary(t, c)
+        }
 }
