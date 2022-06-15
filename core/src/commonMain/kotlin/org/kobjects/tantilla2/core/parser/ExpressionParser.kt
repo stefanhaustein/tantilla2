@@ -190,12 +190,24 @@ object ExpressionParser {
         return result.toList()
     }
 
+    // Add support for known signature later
+    fun parseLambda(
+        tokenizer: TantillaTokenizer,
+        context: ParsingContext
+    ): Evaluable<RuntimeContext> {
+        tokenizer.consume("lambda")
+        val type = TypeParser.parseFunctionType(tokenizer, context)
+
+        throw RuntimeException("NYI")
+    }
+
 
     fun parsePrimary(tokenizer: TantillaTokenizer, context: ParsingContext): Evaluable<RuntimeContext> =
         when (tokenizer.current.type) {
             TokenType.NUMBER -> F64.Const(tokenizer.next().text.toDouble())
             TokenType.STRING -> Str.Const(tokenizer.next().text.unquote())
-            TokenType.IDENTIFIER -> parseFreeIdentifier(tokenizer, context)
+            TokenType.IDENTIFIER ->  if (tokenizer.current.text == "lambda")
+                parseLambda(tokenizer, context) else parseFreeIdentifier(tokenizer, context)
             else -> {
                 when (tokenizer.current.text) {
                     "(" -> {
