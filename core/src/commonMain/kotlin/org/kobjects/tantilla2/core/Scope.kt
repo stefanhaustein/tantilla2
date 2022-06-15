@@ -9,6 +9,7 @@ import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.NativeFunction
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.parser.Parser
+import org.kobjects.tantilla2.core.parser.ParsingContext
 import org.kobjects.tantilla2.core.parser.TantillaTokenizer
 import org.kobjects.tantilla2.core.runtime.Void
 
@@ -70,7 +71,7 @@ abstract class Scope(
         tokenizer.next()
         var replacement: Definition
         try {
-            replacement = Parser.parseDefinition(tokenizer, this, 0)
+            replacement = Parser.parseDefinition(tokenizer, ParsingContext(this, 0))
         } catch (e: Exception) {
             e.printStackTrace()
             val name = oldDefinition?.name ?: "[error]"

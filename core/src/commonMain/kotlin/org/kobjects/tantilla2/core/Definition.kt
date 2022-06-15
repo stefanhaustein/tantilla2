@@ -9,10 +9,7 @@ import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.LambdaImpl
 import org.kobjects.tantilla2.core.node.TantillaNode
 import org.kobjects.tantilla2.core.node.containsNode
-import org.kobjects.tantilla2.core.parser.ExpressionParser
-import org.kobjects.tantilla2.core.parser.Parser
-import org.kobjects.tantilla2.core.parser.TantillaTokenizer
-import org.kobjects.tantilla2.core.parser.TokenType
+import org.kobjects.tantilla2.core.parser.*
 
 class Definition(
     val scope: Scope,
@@ -94,7 +91,7 @@ class Definition(
             val tokenizer = tokenizer()
             try {
                 when (kind) {
-                    Kind.FUNCTION -> resolvedType = Parser.parseFunctionType(tokenizer, scope)
+                    Kind.FUNCTION -> resolvedType = Parser.parseFunctionType(tokenizer, ParsingContext(scope, 0))
                     Kind.LOCAL_VARIABLE,
                     Kind.STATIC_VARIABLE -> resolveVariable(tokenizer, typeOnly = true)
                     else -> resolvedType = value().dynamicType
@@ -112,12 +109,13 @@ class Definition(
             try {
                 when (kind) {
                     Kind.STATIC_VARIABLE -> resolveVariable(tokenizer)
-                    Kind.FUNCTION -> resolvedValue =  Parser.parseLambda(tokenizer, scope)
+                    Kind.FUNCTION -> resolvedValue =  Parser.parseLambda(tokenizer, ParsingContext(scope, 0))
                     Kind.STRUCT -> resolvedValue = resolveClass(tokenizer)
                     Kind.TRAIT -> resolvedValue = resolveTrait(tokenizer)
                     Kind.IMPL -> resolvedValue = resolveImpl(tokenizer)
                     Kind.UNPARSEABLE -> throw RuntimeException("Can't obtain value for unparseable definition.")
                     Kind.LOCAL_VARIABLE -> throw RuntimeException("Can't obtain local variable value from Definition.")
+                    Kind.SCOPE -> throw UnsupportedOperationException()
                 }
             } catch (e: Exception) {
                 throw exceptionInResolve(e, tokenizer)
@@ -145,7 +143,7 @@ class Definition(
         println("Resolving class $name: $definitionText")
         val classContext = UserClassDefinition(name, scope)
         tokenizer.consume(":")
-        Parser.parse(tokenizer, classContext)
+        Parser.parse(tokenizer, ParsingContext(classContext, 1))
         println("Class successfully resolved!")
         return classContext
     }
@@ -154,7 +152,7 @@ class Definition(
         println("Resolving trait $name: $definitionText")
         val traitContext = TraitDefinition(name, scope)
         tokenizer.consume(":")
-        Parser.parse(tokenizer, traitContext)
+        Parser.parse(tokenizer, ParsingContext(traitContext, 1))
         println("Trait successfully resolved!")
         return traitContext
     }
@@ -167,7 +165,7 @@ class Definition(
         val implFor = scope.resolveStatic(className, true).value() as UserClassDefinition
         val implContext = ImplDefinition(name, scope, trait, implFor)
         tokenizer.next()
-        Parser.parse(tokenizer, implContext)
+        Parser.parse(tokenizer, ParsingContext(implContext, 0))
         println("Impl successfully resolved!")
         return implContext
     }
@@ -179,13 +177,13 @@ class Definition(
         }
 
         if (tokenizer.tryConsume(":")) {
-            resolvedType = Parser.parseType(tokenizer, scope)
+            resolvedType = Parser.parseType(tokenizer, ParsingContext(scope, 0))
             if (typeOnly) {
                 return
             }
         }
         if (tokenizer.tryConsume("=")) {
-            resolvedInitializer = ExpressionParser.parseExpression(tokenizer, scope)
+            resolvedInitializer = ExpressionParser.parseExpression(tokenizer, ParsingContext(scope, 0))
             if (resolvedType == null) {
                 resolvedType = resolvedInitializer!!.returnType
             } else {
@@ -216,6 +214,7 @@ class Definition(
             Kind.IMPL,
             Kind.STRUCT -> writer.keyword(kind.name.lowercase()).append(' ').declaration(name)
             Kind.UNPARSEABLE -> writer.append("(unparseable: $name)")
+            Kind.SCOPE -> throw UnsupportedOperationException()
         }
     }
 
