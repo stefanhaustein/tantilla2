@@ -11,8 +11,6 @@ import org.kobjects.tantilla2.core.classifier.UserClassMetaType
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.node.*
-import org.kobjects.tantilla2.core.runtime.ListType
-import kotlin.math.min
 
 object ExpressionParser {
 
@@ -260,9 +258,10 @@ object ExpressionParser {
         val baseType = base.returnType
         val definition = baseType.resolve(name)
 
-        when (definition.kind) {
+        var self: Evaluable<RuntimeContext>? = null
+        val value = when (definition.kind) {
             Definition.Kind.LOCAL_VARIABLE ->
-                return PropertyReference(
+                PropertyReference(
                     base,
                     name,
                     definition.type(),
@@ -270,23 +269,36 @@ object ExpressionParser {
                     definition.mutable
                 )
             Definition.Kind.FUNCTION -> {
-                val fn = StaticReference(definition)
-
-                val hasArgs = tokenizer.tryConsume("(")
-                val args = if (hasArgs) parseParameterList(tokenizer, context) else emptyList()
-
-                if (definition.isStatic()) {
-                    return apply(tokenizer, context, fn, args, implicit = !hasArgs, asMethod = true)
+                if (definition.isDyanmic()) {
+                    self = base
                 }
-
-                val params = List<Pair<String, Evaluable<RuntimeContext>>>(args.size + 1) {
-                    if (it == 0) Pair("", base) else args[it - 1]
-                }
-                return apply(tokenizer, context, fn, params, implicit = !hasArgs, asMethod = true)
+                StaticReference(definition)
             }
-            Definition.Kind.STATIC_VARIABLE -> return StaticReference(definition)
+            Definition.Kind.STATIC_VARIABLE -> StaticReference(definition)
             else -> throw tokenizer.exception("Unsupported definition kind ${definition.kind} for $base.$name")
         }
+        return parseMaybeApply(tokenizer, context, value, self)
+    }
+
+    fun parseMaybeApply(
+        tokenizer: TantillaTokenizer,
+        context: ParsingContext,
+        value: Evaluable<RuntimeContext>,
+        self: Evaluable<RuntimeContext>?,
+    ): Evaluable<RuntimeContext> {
+        val type = value.returnType
+
+        if (type is FunctionType) {
+            val hasArgs = tokenizer.tryConsume("(")
+            val args = (if (self != null) listOf(Pair("", self)) else emptyList()) +
+                    (if (hasArgs) parseParameterList(tokenizer, context) else emptyList())
+
+            return apply(tokenizer, context, value, args, implicit = !hasArgs, asMethod = self != null)
+        }
+        if (tokenizer.tryConsume("(")) {
+            tokenizer.consume(")", "Empty parameter list expected.")
+        }
+        return value
     }
 
 
