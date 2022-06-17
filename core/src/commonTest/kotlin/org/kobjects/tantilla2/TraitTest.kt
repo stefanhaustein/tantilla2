@@ -13,7 +13,7 @@ class TraitTest {
         trait Animal:
            def noise(self) -> str
            
-        class Dog:
+        struct Dog:
         
         impl Animal for Dog:
             def noise(self) -> str:

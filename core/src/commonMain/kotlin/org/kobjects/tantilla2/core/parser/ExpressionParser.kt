@@ -14,14 +14,14 @@ import org.kobjects.tantilla2.core.node.*
 
 object ExpressionParser {
 
-    fun parseExpression(tokenizer: TantillaTokenizer, context: ParsingContext): Evaluable<RuntimeContext> =
-        expressionParser.parse(tokenizer, context)
+    fun parseExpression(tokenizer: TantillaTokenizer, context: ParsingContext, expectedType: Type? = null): Evaluable<RuntimeContext> {
+        val result = expressionParser.parse(tokenizer, context)
+        return matchType(context.scope, result, expectedType)
+    }
 
 
-
-
-    fun matchType(context: Scope, expr: Evaluable<RuntimeContext>, expectedType: Type): Evaluable<RuntimeContext> {
-        if (expectedType.isAssignableFrom(expr.returnType)) {
+    fun matchType(context: Scope, expr: Evaluable<RuntimeContext>, expectedType: Type?): Evaluable<RuntimeContext> {
+        if (expectedType == null || expectedType.isAssignableFrom(expr.returnType)) {
             return expr
         }
         val implName = expectedType.typeName + " for " + expr.returnType.typeName
@@ -43,92 +43,6 @@ object ExpressionParser {
         LocalVariableReference(
             definition.name, definition.type(), definition.index, definition.mutable)
     else StaticReference(definition)
-
-    fun apply(
-        tokenizer: TantillaTokenizer,
-        context: ParsingContext,
-        base: Evaluable<RuntimeContext>,
-        availableParameters: List<Pair<String, Evaluable<RuntimeContext>>>,
-        implicit: Boolean = false,
-        asMethod: Boolean = false,
-    ): Evaluable<RuntimeContext> {
-        val functionType = base.returnType as FunctionType
-
-        val expectedParameters = functionType.parameters
-        val map = mutableMapOf<String, Evaluable<RuntimeContext>>()
-        val varargs = mutableListOf<Evaluable<RuntimeContext>>()
-        var expectedIndex = 0
-
-        var varArgName = ""
-        for (expected in expectedParameters) {
-            if (expected.isVararg) {
-                varArgName = expected.name
-            }
-        }
-
-        for (available in availableParameters) {
-            var name = available.first
-            val expression = available.second
-            if (name == "") {
-                if (expectedIndex >= expectedParameters.size) {
-                    throw IllegalArgumentException("Only ${expectedParameters.size} parameters expected; provided: $expectedIndex")
-                }
-               val expected = expectedParameters[expectedIndex]
-               if (!expected.isVararg) {
-                   expectedIndex++
-               }
-               name = expected.name
-            } else {
-                expectedIndex = Int.MAX_VALUE
-            }
-
-            if (name == varArgName) {
-                varargs.add(expression)
-            } else if (map.containsKey(name)) {
-                throw IllegalArgumentException("Duplicate parameter: $name")
-            } else {
-                map.put(name, expression)
-            }
-        }
-
-        if (varArgName.isNotEmpty()) {
-            map.put(varArgName, ListLiteral(varargs))
-        }
-
-        val result = mutableListOf<Evaluable<RuntimeContext>>()
-        val missingLambdaParams = mutableMapOf<String, Parameter>()
-        val missingLambdaIndices = mutableMapOf<String, Int>()
-
-        for (i in functionType.parameters.indices) {
-            val expected = functionType.parameters[i]
-            val name = expected.name
-            val expr = map.remove(expected.name)
-            if (expr == null && expected.type is FunctionType) {
-                missingLambdaParams.put (name, expected)
-                missingLambdaIndices.put(name, i)
-                if (expected.defaultValueExpression != null) {
-                    result.add(matchType(context.scope, expected.defaultValueExpression, expected.type))
-                } else {
-                    result.add(Definition.UnresolvedEvalueable)
-                }
-            } else {
-                val resolved = expr ?: expected.defaultValueExpression ?:
-                    throw IllegalArgumentException(
-                        "Parameter not found: '$name' expected: $expectedParameters provided: $availableParameters")
-
-                result.add(matchType(context.scope, resolved , expected.type))
-            }
-        }
-        if (map.isNotEmpty()) {
-            throw IllegalArgumentException("Unexpected parameter(s): ${map.keys}")
-        }
-        if (missingLambdaParams.isNotEmpty()) {
-            throw UnsupportedOperationException("Trailing lambda NYI")
-        }
-
-        return Apply(base, result.toList(), implicit, asMethod)
-    }
-
 
 
     fun parseFreeIdentifier(tokenizer: TantillaTokenizer, context: ParsingContext): Evaluable<RuntimeContext> {
@@ -166,57 +80,6 @@ object ExpressionParser {
         }
 
         throw tokenizer.exception("Symbol not found: '$name'.")
-
-        /*
-
-            var args: List<Pair<String, Evaluable<RuntimeContext>>>
-        var hasArgs: Boolean
-        if (tokenizer.tryConsume("(")) {
-            hasArgs = true
-            args = parseParameterList(tokenizer, context)
-            if (args.size > 0 && args[0].first == "" && args[0].second.returnType is Scope) {
-                val baseType = args[0].second.returnType as Scope
-                val definition = baseType[name]
-                if (definition != null) {
-                    return apply(tokenizer, context, StaticReference(definition), args)
-                }
-            }
-        } else {
-            hasArgs = false
-            args = emptyList()
-        }
-
-        val definition = context.scope.resolveDynamic(name, fallBackToStatic = true)!!
-        val base = reference(definition)
-        if (base.returnType is FunctionType && (hasArgs || (base.returnType !is UserClassMetaType && base.returnType !is NativeClassMetaType))) {
-            return apply(tokenizer, context, base, args, implicit = !hasArgs)
-        }
-        if (args.size > 0) {
-            throw IllegalArgumentException("Not callable: ${definition.scope.title}.${definition.name}; base.returnType: ${base.returnType::class}")
-        }
-        return base
-
-         */
-    }
-
-    fun parseParameterList(tokenizer: TantillaTokenizer, context: ParsingContext): List<Pair<String, Evaluable<RuntimeContext>>> {
-        if (tokenizer.tryConsume(")")) {
-            return emptyList()
-        }
-        val result = mutableListOf<Pair<String, Evaluable<RuntimeContext>>>()
-        do {
-            var name: String
-            if (tokenizer.current.type == TokenType.IDENTIFIER && tokenizer.lookAhead(1).text == "=") {
-                name = tokenizer.consume(TokenType.IDENTIFIER)
-                tokenizer.consume("=")
-            } else {
-                name = ""
-            }
-            val expression = parseExpression(tokenizer, context)
-            result.add(Pair(name, expression))
-        } while (tokenizer.tryConsume(","))
-        tokenizer.consume(")")
-        return result.toList()
     }
 
     // Add support for known signature later
@@ -330,23 +193,79 @@ object ExpressionParser {
     ): Evaluable<RuntimeContext> {
         val type = value.returnType
 
-        if (type is FunctionType) {
-            val hasArgs = openingParenConsumed || tokenizer.tryConsume("(")
-            if (!hasArgs && (type is UserClassMetaType || type is NativeClassMetaType)) {
-                return value
+        if (type !is FunctionType) {
+            // Not a function, just skip () and error otherwise
+
+            if (openingParenConsumed || tokenizer.tryConsume("(")) {
+                tokenizer.consume(")", "Empty parameter list expected.")
             }
-
-            val args = (if (self != null) listOf(Pair("", self)) else emptyList()) +
-                    (if (hasArgs) parseParameterList(tokenizer, context) else emptyList())
-
-            return apply(tokenizer, context, value, args, implicit = !hasArgs, asMethod = self != null)
+            return value
         }
 
-        // Not a function, just skip () and error otherwise
-        if (openingParenConsumed || tokenizer.tryConsume("(")) {
-            tokenizer.consume(")", "Empty parameter list expected.")
+        val hasArgs = openingParenConsumed || tokenizer.tryConsume("(")
+        if (!hasArgs && (type is UserClassMetaType || type is NativeClassMetaType)) {
+            return value
         }
-        return value
+
+        val expectedParameters = type.parameters
+        val parameterExpressions = MutableList<Evaluable<RuntimeContext>?>(expectedParameters.size) { null }
+        var index = 0
+        if (self != null) {
+            parameterExpressions[index++] = self
+        }
+
+        val indexMap = mutableMapOf<String, Int>()
+        for (i in expectedParameters.indices) {
+            indexMap[expectedParameters[i].name] = i
+        }
+
+        val varargs = mutableListOf<Evaluable<RuntimeContext>>()
+        var varargIndex = -1
+        var nameRequired = false
+        if (hasArgs && !tokenizer.tryConsume(")")) {
+            do {
+                if (tokenizer.current.type == TokenType.IDENTIFIER && tokenizer.lookAhead(1).text == "=") {
+                    val name = tokenizer.consume(TokenType.IDENTIFIER)
+                    tokenizer.consume("=")
+                    nameRequired = true
+                    index = indexMap[name] ?: throw tokenizer.exception("Parameter name '$name' not found.")
+                } else if (nameRequired) {
+                    throw tokenizer.exception("Named parameter required here.")
+                } else if (index >= expectedParameters.size) {
+                    throw tokenizer.exception("Too many parameters.")
+                }
+                val expectedParameter = expectedParameters[index]
+                val expression = parseExpression(tokenizer, context, expectedParameter.type)
+                if (expectedParameter.isVararg) {
+                    varargs.add(expression)
+                    varargIndex = index
+                } else {
+                    parameterExpressions[index++] = expression
+                }
+            } while (tokenizer.tryConsume(","))
+            tokenizer.consume(")")
+        }
+
+        if (varargIndex != -1) {
+            parameterExpressions[varargIndex] = ListLiteral(varargs)
+        }
+
+        for (i in expectedParameters.indices) {
+            val expectedParameter = expectedParameters[i]
+            if (parameterExpressions[i] == null) {
+                if (expectedParameter.defaultValueExpression == null) {
+                    throw tokenizer.exception("Parameter ${expectedParameter.name} is missing.")
+                }
+                parameterExpressions[i] = expectedParameter.defaultValueExpression
+            }
+        }
+
+        return Apply(
+            value,
+            List(parameterExpressions.size) { parameterExpressions[it]!!},
+            !hasArgs,
+            self != null
+        )
     }
 
 

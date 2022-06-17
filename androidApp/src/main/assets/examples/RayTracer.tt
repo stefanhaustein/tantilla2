@@ -13,7 +13,7 @@ struct Vector:
     Vector(x + v2.x, y + v2.y, z + v2.z)
 
   def dot(self, v2: Vector) -> float:
-    x * v2.x + y * y + z * v2.z
+    x * v2.x + y * v2.y + z * v2.z
 
   def mag(self) -> float:
     sqrt(x * x + y * y + z * z)
