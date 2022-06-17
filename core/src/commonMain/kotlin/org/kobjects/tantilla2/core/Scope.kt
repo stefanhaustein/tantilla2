@@ -107,7 +107,7 @@ abstract class Scope(
         writer.outdent()
     }
 
-    fun resolveDynamic(name: String, fallBackToStatic: Boolean): Definition {
+    fun resolveDynamic(name: String, fallBackToStatic: Boolean): Definition? {
         val result = definitions[name]
         if (result != null) {
             if (fallBackToStatic || result.isDyanmic()) {
@@ -118,10 +118,10 @@ abstract class Scope(
         if (fallBackToStatic) {
             return resolveStatic(name, true)
         }
-        throw IllegalStateException("Not found: '$name'")
+        return null
     }
 
-    fun resolveStatic(name: String, fallBackToParent: Boolean = false): Definition {
+    fun resolveStatic(name: String, fallBackToParent: Boolean = false): Definition? {
         val result = definitions[name]
         if (result != null) {
             if (result.isDyanmic()) {
@@ -132,7 +132,7 @@ abstract class Scope(
         if (fallBackToParent && parentContext != null) {
             return parentContext.resolveStatic(name, true)
         }
-        throw RuntimeException("Undefined: '$name'")
+        return null
     }
 
     open fun hasError(): Boolean {

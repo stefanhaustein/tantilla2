@@ -5,6 +5,6 @@ class ScopeType(val scope: Scope) : Type {
         writer.append(scope.title)
     }
 
-    override fun resolve(name: String): Definition = scope.resolveStatic(name, false)
+    override fun resolve(name: String): Definition? = scope.resolveStatic(name, false)
 
 }

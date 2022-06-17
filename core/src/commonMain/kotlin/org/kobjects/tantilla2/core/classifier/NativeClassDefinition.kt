@@ -26,7 +26,7 @@ open class NativeClassDefinition(
         writer.append(name)
     }
 
-    override fun resolve(name: String): Definition = resolveDynamic(name, false)
+    override fun resolve(name: String): Definition? = resolveDynamic(name, false)
 
 
     fun defineMethod(

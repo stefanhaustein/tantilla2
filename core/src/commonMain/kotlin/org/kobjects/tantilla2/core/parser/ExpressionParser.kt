@@ -26,17 +26,11 @@ object ExpressionParser {
         }
         val implName = expectedType.typeName + " for " + expr.returnType.typeName
         try {
-            val impl = context.resolveStatic(implName, true).value() as ImplDefinition
+            val impl = context.resolveStatic(implName, true)!!.value() as ImplDefinition
             return As(expr, impl, implicit = true)
         } catch (e: Exception) {
             throw IllegalArgumentException("Can't convert $expr with type '${expr.returnType}' to '$expectedType' -- '$implName' not available.", e)
         }
-    }
-
-
-
-    fun parseApply(tokenizer: TantillaTokenizer, context: ParsingContext, base: Evaluable<RuntimeContext>): Evaluable<RuntimeContext> {
-        return apply(tokenizer, context, base, parseParameterList(tokenizer, context))
     }
 
     fun parseElementAt(tokenizer: TantillaTokenizer, context: ParsingContext, base: Evaluable<RuntimeContext>): Evaluable<RuntimeContext> {
@@ -157,7 +151,7 @@ object ExpressionParser {
             args = emptyList()
         }
 
-        val definition = context.scope.resolveDynamic(name, fallBackToStatic = true)
+        val definition = context.scope.resolveDynamic(name, fallBackToStatic = true)!!
         val base = reference(definition)
         if (base.returnType is FunctionType && (hasArgs || (base.returnType !is UserClassMetaType && base.returnType !is NativeClassMetaType))) {
             return apply(tokenizer, context, base, args, implicit = !hasArgs)
@@ -244,7 +238,7 @@ object ExpressionParser {
     ): Evaluable<RuntimeContext> {
         val traitName = tokenizer.consume(TokenType.IDENTIFIER)
         val className = base.returnType.typeName
-        val impl = context.scope.resolveStatic("$traitName for $className").value() as ImplDefinition
+        val impl = context.scope.resolveStatic("$traitName for $className")!!.value() as ImplDefinition
         impl.hasError()
         return As(base, impl, implicit = false)
     }
@@ -257,6 +251,7 @@ object ExpressionParser {
         val name = tokenizer.consume(TokenType.IDENTIFIER)
         val baseType = base.returnType
         val definition = baseType.resolve(name)
+            ?: throw tokenizer.exception("Property '$name' not found.")
 
         var self: Evaluable<RuntimeContext>? = null
         val value = when (definition.kind) {
@@ -284,18 +279,25 @@ object ExpressionParser {
         tokenizer: TantillaTokenizer,
         context: ParsingContext,
         value: Evaluable<RuntimeContext>,
-        self: Evaluable<RuntimeContext>?,
+        self: Evaluable<RuntimeContext>? = null,
+        openingParenConsumed: Boolean = false,
     ): Evaluable<RuntimeContext> {
         val type = value.returnType
 
         if (type is FunctionType) {
-            val hasArgs = tokenizer.tryConsume("(")
+            val hasArgs = openingParenConsumed || tokenizer.tryConsume("(")
+            if (!hasArgs && (type is UserClassMetaType || type is NativeClassMetaType)) {
+                return value
+            }
+
             val args = (if (self != null) listOf(Pair("", self)) else emptyList()) +
                     (if (hasArgs) parseParameterList(tokenizer, context) else emptyList())
 
             return apply(tokenizer, context, value, args, implicit = !hasArgs, asMethod = self != null)
         }
-        if (tokenizer.tryConsume("(")) {
+
+        // Not a function, just skip () and error otherwise
+        if (openingParenConsumed || tokenizer.tryConsume("(")) {
             tokenizer.consume(")", "Empty parameter list expected.")
         }
         return value
@@ -310,7 +312,7 @@ object ExpressionParser {
                 tokenizer, context, _, base -> parseElementAt(tokenizer, context, base)
             },
             GreenspunExpressionParser.suffix(8, "(") {
-                tokenizer, context, _, base -> parseApply(tokenizer, context, base) },
+                tokenizer, context, _, base -> parseMaybeApply(tokenizer, context, base, openingParenConsumed = true) },
             GreenspunExpressionParser.suffix(7, "as") {
                 tokenizer, context, _, base -> parseAs(tokenizer, context, base) },
             GreenspunExpressionParser.infix(6, "**") { _, _, _, l, r -> F64.Pow(l, r)},

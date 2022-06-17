@@ -9,5 +9,5 @@ interface Type {
     val typeName: String
         get() = CodeWriter().appendType(this).toString()
 
-    fun resolve(name: String): Definition = throw UnsupportedOperationException("Can't resolve '$name' for '$typeName'")
+    fun resolve(name: String): Definition? = throw UnsupportedOperationException("Can't resolve '$name' for '$typeName'")
 }

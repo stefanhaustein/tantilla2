@@ -13,7 +13,7 @@ class UserClassMetaType(
         val def = wrapped[name]!!
         Parameter(name, def.type(), def.initializer()) }
 ) {
-    override fun resolve(name: String): Definition = wrapped.resolveStatic(name, false)
+    override fun resolve(name: String) = wrapped.resolveStatic(name, false)
 
 
 }

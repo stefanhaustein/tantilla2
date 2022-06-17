@@ -23,5 +23,5 @@ class TraitDefinition(
         return type == this || (type is ImplDefinition && type.trait == this)
     }
 
-    override fun resolve(name: String): Definition = resolveDynamic(name, false)
+    override fun resolve(name: String) = resolveDynamic(name, false)
 }

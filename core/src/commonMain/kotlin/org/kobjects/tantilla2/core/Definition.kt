@@ -160,9 +160,9 @@ class Definition(
     private fun resolveImpl(tokenizer: TantillaTokenizer): Scope {
         println("Resolving impl $name: $definitionText")
         val traitName = name.substring(0, name.indexOf(' '))
-        val trait = scope.resolveStatic(traitName, true).value() as TraitDefinition
+        val trait = scope.resolveStatic(traitName, true)!!.value() as TraitDefinition
         val className = name.substring(name.lastIndexOf(' ') + 1)
-        val implFor = scope.resolveStatic(className, true).value() as UserClassDefinition
+        val implFor = scope.resolveStatic(className, true)!!.value() as UserClassDefinition
         val implContext = ImplDefinition(name, scope, trait, implFor)
         tokenizer.next()
         Parser.parse(tokenizer, ParsingContext(implContext, 0))
