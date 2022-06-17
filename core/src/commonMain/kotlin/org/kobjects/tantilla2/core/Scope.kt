@@ -113,7 +113,8 @@ abstract class Scope(
             if (fallBackToStatic || result.isDyanmic()) {
                 return result
             }
-            throw IllegalStateException("Dynamic property expected; found: $result")
+            return null
+            // throw IllegalStateException("Dynamic property expected; found: $result")
         }
         if (fallBackToStatic) {
             return resolveStatic(name, true)

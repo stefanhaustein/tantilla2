@@ -4,25 +4,25 @@ struct Vector:
   val z: float
 
   def times(self, k: float) -> Vector:
-    Vector(k * self.x, k * self.y, k * self.z)
+    Vector(k * x, k * y, k * z)
 
   def minus(self, v2: Vector) -> Vector:
-    Vector(self.x - v2.x, self.y - v2.y, self.z - v2.z)
+    Vector(x - v2.x, y - v2.y, z - v2.z)
 
   def plus(self, v2: Vector) -> Vector:
-    Vector(self.x + v2.x, self.y + v2.y, self.z + v2.z)
+    Vector(x + v2.x, y + v2.y, z + v2.z)
 
   def dot(self, v2: Vector) -> float:
-    self.x * v2.x + self.y * v2.y + self.z * v2.z
+    x * v2.x + y * y + z * v2.z
 
   def mag(self) -> float:
-    sqrt(self.x * self.x + self.y * self.y + self.z * self.z)
+    sqrt(x * x + y * y + z * z)
 
   def norm(self) -> Vector:
-    self.times(1/self.mag())
+    self.times(1 / self.mag())
 
   def cross(self, v2: Vector) -> Vector:
-    Vector(self.y * v2.z - self.z * v2.y, self.z * v2.x - self.x * v2.z, self.x * v2.y - self.y * v2.x)
+    Vector(y * v2.z - z * v2.y, z * v2.x - x * v2.z, x * v2.y - y * v2.x)
 
 
 struct Camera:

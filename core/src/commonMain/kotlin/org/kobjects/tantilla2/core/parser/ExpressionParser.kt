@@ -134,7 +134,42 @@ object ExpressionParser {
     fun parseFreeIdentifier(tokenizer: TantillaTokenizer, context: ParsingContext): Evaluable<RuntimeContext> {
         val name = tokenizer.consume(TokenType.IDENTIFIER)
 
-        var args: List<Pair<String, Evaluable<RuntimeContext>>>
+        val dynamicDefinition = context.scope.resolveDynamic(name, fallBackToStatic = false)
+        if (dynamicDefinition != null && dynamicDefinition.isDyanmic()) {
+            return parseMaybeApply(tokenizer, context, reference(dynamicDefinition))
+        }
+
+        val self = context.scope.resolveDynamic("self", fallBackToStatic = false)
+        val selfType = self?.type()
+        if (selfType is Scope) {
+            val definition = selfType.resolveDynamic(name, fallBackToStatic = false)
+            if (definition != null) {
+                return property(tokenizer, context, reference(self), definition)
+            }
+        }
+
+        val staticDefinition = context.scope.resolveStatic(name, fallBackToParent = true)
+        if (staticDefinition != null) {
+            return parseMaybeApply(tokenizer, context, reference(staticDefinition))
+        }
+
+        if (tokenizer.tryConsume("(")) {
+            val firstParameter = parseExpression(tokenizer, context)
+            val baseType = firstParameter.returnType as Scope
+            val definition = baseType[name]
+            if (!tokenizer.tryConsume(",") && tokenizer.current.text != ")") {
+                throw tokenizer.exception("Comma or closing paren expected after first parameter.")
+            }
+            if (definition != null) {
+                return parseMaybeApply(tokenizer, context, reference(definition), firstParameter, openingParenConsumed = true)
+            }
+        }
+
+        throw tokenizer.exception("Symbol not found: '$name'.")
+
+        /*
+
+            var args: List<Pair<String, Evaluable<RuntimeContext>>>
         var hasArgs: Boolean
         if (tokenizer.tryConsume("(")) {
             hasArgs = true
@@ -160,6 +195,8 @@ object ExpressionParser {
             throw IllegalArgumentException("Not callable: ${definition.scope.title}.${definition.name}; base.returnType: ${base.returnType::class}")
         }
         return base
+
+         */
     }
 
     fun parseParameterList(tokenizer: TantillaTokenizer, context: ParsingContext): List<Pair<String, Evaluable<RuntimeContext>>> {
@@ -252,8 +289,17 @@ object ExpressionParser {
         val baseType = base.returnType
         val definition = baseType.resolve(name)
             ?: throw tokenizer.exception("Property '$name' not found.")
+        return property(tokenizer, context, base, definition)
+    }
 
+    fun property(
+        tokenizer: TantillaTokenizer,
+        context: ParsingContext,
+        base: Evaluable<RuntimeContext>,
+        definition: Definition
+    ): Evaluable<RuntimeContext> {
         var self: Evaluable<RuntimeContext>? = null
+        val name = definition.name
         val value = when (definition.kind) {
             Definition.Kind.LOCAL_VARIABLE ->
                 PropertyReference(
