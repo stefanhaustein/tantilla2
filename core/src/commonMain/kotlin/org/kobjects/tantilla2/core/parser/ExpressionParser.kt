@@ -7,8 +7,11 @@ import org.kobjects.tantilla2.core.*
 import org.kobjects.parserlib.expressionparser.ExpressionParser as GreenspunExpressionParser
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
 import org.kobjects.tantilla2.core.classifier.NativeClassMetaType
+import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.classifier.UserClassMetaType
+import org.kobjects.tantilla2.core.function.FunctionScope
 import org.kobjects.tantilla2.core.function.FunctionType
+import org.kobjects.tantilla2.core.function.LambdaImpl
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.node.*
 
@@ -90,7 +93,24 @@ object ExpressionParser {
         tokenizer.consume("lambda")
         val type = TypeParser.parseFunctionType(tokenizer, context)
 
-        throw RuntimeException("NYI")
+        tokenizer.consume(":")
+        val functionScope = FunctionScope(context.scope, type)
+        for (parameter in type.parameters) {
+            functionScope.declareLocalVariable(parameter.name, parameter.type, false)
+        }
+        /*
+        val parameterNames = type.parameters.map { it.name }.toSet()
+        val closureMap = mutableMapOf<Int, Int>()
+        for (definition in context.scope) {
+            if (definition.kind == Definition.Kind.LOCAL_VARIABLE && !parameterNames.contains(definition.name)) {
+                closureMap[functionScope.declareLocalVariable(definition.name, definition.type(), definition.mutable)] = definition.index
+            }
+        }
+         */
+        val body = Parser.parse(tokenizer, ParsingContext(functionScope, context.depth + 1))
+        val lambda = LambdaImpl(type, functionScope.iterator().asSequence().toList().size, body)
+
+        return LambdaReference(lambda)
     }
 
 
