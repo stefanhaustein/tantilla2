@@ -18,6 +18,9 @@ import org.kobjects.tantilla2.core.node.*
 object ExpressionParser {
 
     fun parseExpression(tokenizer: TantillaTokenizer, context: ParsingContext, expectedType: Type? = null): Evaluable<RuntimeContext> {
+        if (expectedType is FunctionType && tokenizer.current.text == "lambda") {
+            return parseLambda(tokenizer, context, expectedType)
+        }
         val result = expressionParser.parse(tokenizer, context)
         return matchType(context.scope, result, expectedType)
     }
@@ -88,18 +91,46 @@ object ExpressionParser {
     // Add support for known signature later
     fun parseLambda(
         tokenizer: TantillaTokenizer,
-        context: ParsingContext
+        context: ParsingContext,
+        expectedType: FunctionType? = null
     ): Evaluable<RuntimeContext> {
         tokenizer.consume("lambda")
-        val type = TypeParser.parseFunctionType(tokenizer, context)
+
+        val type: FunctionType
+        val parameterNames: List<String>
+        if (tokenizer.current.text == "(") {
+            type = TypeParser.parseFunctionType(tokenizer, context)
+            if (expectedType != null && !expectedType.isAssignableFrom(type)) {
+                throw tokenizer.exception("Function type $type does not match expected type $expectedType")
+            }
+            parameterNames = type.parameters.map { it.name }
+        } else {
+            if (expectedType == null) {
+                throw tokenizer.exception("For lambdas with unknown type, a full parameter list starting with '(' is expected.")
+            }
+            type = expectedType
+            val names = mutableListOf<String>()
+            if (tokenizer.current.text != ":") {
+              do {
+                  names.add(tokenizer.consume(TokenType.IDENTIFIER))
+              } while (tokenizer.tryConsume(","))
+            }
+            if (names.size > type.parameters.size) {
+                throw tokenizer.exception("${names.size} parameters provided, but only ${type.parameters.size} parameters expected (type: $type).")
+            }
+            while (names.size < type.parameters.size) {
+                names.add("$${names.size}")
+            }
+            parameterNames = names.toList()
+        }
 
         tokenizer.consume(":")
         val functionScope = FunctionScope(context.scope, type)
-        for (parameter in type.parameters) {
-            functionScope.declareLocalVariable(parameter.name, parameter.type, false)
+        for (i in type.parameters.indices) {
+            val parameter = type.parameters[i]
+            functionScope.declareLocalVariable(parameterNames[i], parameter.type, false)
         }
 
-        val parameterNames = type.parameters.map { it.name }.toSet()
         val closureIndices = mutableListOf<Int>()
         for (definition in context.scope) {
             if (definition.kind == Definition.Kind.LOCAL_VARIABLE && !parameterNames.contains(definition.name)) {
