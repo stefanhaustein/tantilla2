@@ -98,19 +98,18 @@ object ExpressionParser {
         for (parameter in type.parameters) {
             functionScope.declareLocalVariable(parameter.name, parameter.type, false)
         }
-        /*
+
         val parameterNames = type.parameters.map { it.name }.toSet()
-        val closureMap = mutableMapOf<Int, Int>()
+        val closureIndices = mutableListOf<Int>()
         for (definition in context.scope) {
             if (definition.kind == Definition.Kind.LOCAL_VARIABLE && !parameterNames.contains(definition.name)) {
-                closureMap[functionScope.declareLocalVariable(definition.name, definition.type(), definition.mutable)] = definition.index
+                functionScope.declareLocalVariable(definition.name, definition.type(), definition.mutable)
+                closureIndices.add(definition.index)
             }
         }
-         */
         val body = Parser.parse(tokenizer, ParsingContext(functionScope, context.depth + 1))
-        val lambda = LambdaImpl(type, functionScope.iterator().asSequence().toList().size, body)
 
-        return LambdaReference(lambda)
+        return LambdaReference(type, functionScope.locals.size, body, closureIndices)
     }
 
 

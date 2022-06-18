@@ -273,7 +273,7 @@ object Parser {
             functionScope.declareLocalVariable(parameter.name, parameter.type, false)
         }
         val body = parse(tokenizer, ParsingContext(functionScope, context.depth + 1))
-        return LambdaImpl(type, functionScope.iterator().asSequence().toList().size, body)
+        return LambdaImpl(type, functionScope.locals.size, body)
     }
 
 
