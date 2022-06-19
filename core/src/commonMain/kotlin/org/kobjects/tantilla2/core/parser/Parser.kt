@@ -17,6 +17,8 @@ fun String.unquote() = this.substring(1, this.length - 1)
 object Parser {
     val DECLARATION_KEYWORDS = setOf("def", "var", "val", "struct", "trait", "impl", "static")
 
+    val VALID_AFTER_STATEMENT = setOf(")", ",", "]", "}", "<|")
+
     fun getIndent(s: String): Int {
         val lastBreak = s.lastIndexOf('\n')
         if (lastBreak == -1) {
@@ -40,7 +42,9 @@ object Parser {
         val statements = mutableListOf<Evaluable<RuntimeContext>>()
         val scope = context.scope
         var localDepth = context.depth
-        while (tokenizer.current.type != TokenType.EOF && tokenizer.current.text != "<|") {
+        while (tokenizer.current.type != TokenType.EOF
+            && !VALID_AFTER_STATEMENT.contains(tokenizer.current.text)
+        ) {
             if (tokenizer.current.type == TokenType.LINE_BREAK) {
                 localDepth = getIndent(tokenizer.current.text)
                 println("line break with depth $localDepth")
@@ -169,7 +173,7 @@ object Parser {
                 }
                 if (tokenizer.current.type != TokenType.EOF
                     && tokenizer.current.type != TokenType.LINE_BREAK
-                    && tokenizer.current.text != "<|") {
+                    && !VALID_AFTER_STATEMENT.contains(tokenizer.current.text)) {
                     throw tokenizer.exception("Unexpected token ${tokenizer.current} after end of statement.")
                 }
                 expr

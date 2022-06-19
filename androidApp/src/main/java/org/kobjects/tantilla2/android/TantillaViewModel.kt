@@ -2,6 +2,7 @@ package org.kobjects.tantilla2.android
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.view.Choreographer
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -20,6 +21,8 @@ import org.kobjects.tantilla2.core.runtime.RootScope
 import org.kobjects.tantilla2.core.runtime.Void
 import org.kobjects.tantilla2.stdlib.PenDefinition
 import org.kobjects.parserlib.tokenizer.ParsingException
+import org.kobjects.tantilla2.core.function.FunctionType
+import org.kobjects.tantilla2.core.function.Lambda
 import java.lang.Exception
 
 class TantillaViewModel(
@@ -70,6 +73,20 @@ class TantillaViewModel(
             resolvedType = PenDefinition,
             resolvedValue = penImpl
         ))
+
+        RootScope.defineNativeFunction(
+            "requestAnimationFrame",
+            "Calls the given function before refreshing the screen.",
+            Void,
+            Parameter("callback", FunctionType.Impl(Void, emptyList()))
+        ) { context ->
+            Choreographer.getInstance().postFrameCallback {
+                val fn = context[0] as Lambda
+                val functionContext = RuntimeContext(MutableList(fn.scopeSize) { null })
+                fn.eval(functionContext)
+            }
+        }
+
     }
 
     fun scope(): MutableState<Scope> = if (mode.value == Mode.HELP) builtinScope else userScope
