@@ -113,9 +113,11 @@ abstract class Scope(
             if (fallBackToStatic || result.isDyanmic()) {
                 return result
             }
-            return null
-            // throw IllegalStateException("Dynamic property expected; found: $result")
         }
+        if (this is FunctionScope && parentContext is FunctionScope) {
+            return parentContext.resolveDynamic(name, fallBackToStatic)
+        }
+        
         if (fallBackToStatic) {
             return resolveStatic(name, true)
         }

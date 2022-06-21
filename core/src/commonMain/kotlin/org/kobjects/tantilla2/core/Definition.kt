@@ -277,6 +277,16 @@ class Definition(
         }
     }
 
+    fun depth(scope: Scope): Int {
+        if (scope == this.scope) {
+            return 0
+        }
+        if (scope.parentContext == null) {
+            throw IllegalStateException("Definition $this not found in scope.")
+        }
+        return 1 + depth(scope.parentContext!!)
+    }
+
     object UnresolvedEvalueable: TantillaNode {
         override fun children() = emptyList<Evaluable<RuntimeContext>>()
 

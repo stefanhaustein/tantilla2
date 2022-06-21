@@ -14,7 +14,7 @@ class TraitMethod(override val type: FunctionType, val index: Int): Lambda {
               if (it == 0) self.instance
               else if (it < context.variables.size) context.variables[it]
               else null
-          })
+          }, methodImpl.closure)
       return self.vmt[index].eval(methodContext)
     }
 }

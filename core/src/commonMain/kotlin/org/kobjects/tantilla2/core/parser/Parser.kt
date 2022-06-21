@@ -65,6 +65,7 @@ object Parser {
                                     LocalVariableReference(
                                         definition.name,
                                         definition.type(),
+                                        0,
                                         definition.index,
                                         definition.mutable
                                     ),
