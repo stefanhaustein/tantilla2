@@ -232,14 +232,19 @@ struct RayTracer:
 
   def render(self, s: Scene, p: Pen, screenWidth: float, screenHeight: float):
     p.set_stroke_color(Color.TRANSPARENT)
-    for y in range(0, screenHeight):
-      for x in range(-screenWidth / 2, screenWidth / 2):
-        var yy = math.floor(y / 2)
-        if y % 2 == 0:
-          yy = -yy
+    renderRow(s, p, screenWidth, screenHeight, 0)
 
-        p.set_fill_color(self.traceRay(Ray(s.camera.pos, self.getPoint(x, yy, s.camera)), s, 0))
-        p.rect(x, yy, 1.5, 1.5)
+  def renderRow(self, s: Scene, p: Pen, screenWidth: float, screenHeight: float, y: float):
+    for x in range(-screenWidth / 2, screenWidth / 2):
+      var yy = math.floor(y / 2)
+      if y % 2 == 0:
+        yy = -yy-1
+
+      p.set_fill_color(self.traceRay(Ray(s.camera.pos, self.getPoint(x, yy, s.camera)), s, 0))
+      p.rect(x, yy, 1, 1)
+
+    if (y < screenHeight):
+      requestAnimationFrame(lambda: renderRow(s, p, screenWidth, screenHeight, y + 1))
 
 
 val defaultThings = [Plane(Vector(0,1,0), 0, Checkerboard()) as Thing, Sphere(Vector(0,1,-0.25), 1, Shiny()) as Thing, Sphere(Vector(-1,0.5,1.5),0.5, Shiny()) as Thing]
