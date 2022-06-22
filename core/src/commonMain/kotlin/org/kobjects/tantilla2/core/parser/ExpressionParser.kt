@@ -103,7 +103,7 @@ object ExpressionParser {
         val type: FunctionType
         val parameterNames: List<String>
         if (tokenizer.current.text == "(") {
-            type = TypeParser.parseFunctionType(tokenizer, context)
+            type = TypeParser.parseFunctionType(tokenizer, context, isMethod = false)
             if (expectedType != null && !expectedType.isAssignableFrom(type)) {
                 throw tokenizer.exception("Function type $type does not match expected type $expectedType")
             }
@@ -226,12 +226,11 @@ object ExpressionParser {
                     definition.index,
                     definition.mutable
                 )
-            Definition.Kind.FUNCTION -> {
-                if (definition.isDyanmic()) {
-                    self = base
-                }
+            Definition.Kind.METHOD -> {
+                self = base
                 StaticReference(definition)
             }
+            Definition.Kind.FUNCTION -> StaticReference(definition)
             Definition.Kind.STATIC_VARIABLE -> StaticReference(definition)
             else -> throw tokenizer.exception("Unsupported definition kind ${definition.kind} for $base.$name")
         }

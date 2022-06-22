@@ -11,10 +11,11 @@ interface FunctionType :Type {
     fun isMethod() = parameters.size > 0 && parameters[0].name == "self"
 
     override fun serializeType(writer: CodeWriter) {
+        val startIndex = if (isMethod()) 1 else 0
         writer.append("(")
-        if (parameters.size > 0) {
-            parameters[0].serializeCode(writer)
-            for (i in 1 until parameters.size) {
+        if (parameters.size > startIndex) {
+            parameters[startIndex].serializeCode(writer)
+            for (i in startIndex + 1 until parameters.size) {
                 writer.append(", ")
                 parameters[i].serializeCode(writer)
             }

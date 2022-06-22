@@ -162,7 +162,7 @@ abstract class Scope(
         val function = NativeFunction(type, operation)
         definitions[name] = Definition(
             this,
-            Definition.Kind.FUNCTION,
+            if (parameter.isNotEmpty() && parameter[0].name == "self") Definition.Kind.METHOD else Definition.Kind.FUNCTION,
             name,
             resolvedType = type,
             resolvedValue = function,

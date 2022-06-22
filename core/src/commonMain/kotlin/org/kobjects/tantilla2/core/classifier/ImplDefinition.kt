@@ -26,7 +26,11 @@ class ImplDefinition(
             val vmt = MutableList<Lambda?>(trait.traitIndex) { null }
             for (definition in trait) {
                 val index = (definition.value() as TraitMethod).index
-                vmt[index] = resolve(definition.name)!!.value() as Lambda
+                val resolved = resolve(definition.name)
+                if (resolved == null) {
+                    throw RuntimeException("Can't resolve '${definition.name}' for '$name'")
+                }
+                vmt[index] = resolved.value() as Lambda
             }
             this.vmt = vmt.toList() as List<Lambda>
             return false

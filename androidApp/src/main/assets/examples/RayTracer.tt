@@ -3,25 +3,25 @@ struct Vector:
   val y: float
   val z: float
 
-  def times(self, k: float) -> Vector:
+  def times(k: float) -> Vector:
     Vector(k * x, k * y, k * z)
 
-  def minus(self, v2: Vector) -> Vector:
+  def minus(v2: Vector) -> Vector:
     Vector(x - v2.x, y - v2.y, z - v2.z)
 
-  def plus(self, v2: Vector) -> Vector:
+  def plus(v2: Vector) -> Vector:
     Vector(x + v2.x, y + v2.y, z + v2.z)
 
-  def dot(self, v2: Vector) -> float:
+  def dot(v2: Vector) -> float:
     x * v2.x + y * v2.y + z * v2.z
 
-  def mag(self) -> float:
+  def mag() -> float:
     sqrt(x * x + y * y + z * z)
 
-  def norm(self) -> Vector:
+  def norm() -> Vector:
     self.times(1 / self.mag())
 
-  def cross(self, v2: Vector) -> Vector:
+  def cross(v2: Vector) -> Vector:
     Vector(y * v2.z - z * v2.y, z * v2.x - x * v2.z, x * v2.y - y * v2.x)
 
 
@@ -31,7 +31,7 @@ struct Camera:
   val right: Vector
   val up: Vector
 
-  def lookingAt(pos: Vector, lookAt: Vector) -> Camera:
+  static def lookingAt(pos: Vector, lookAt: Vector) -> Camera:
     val down = Vector(0, -1, 0)
     val forward = lookAt.minus(pos).norm()
     val right = forward.cross(down).norm().times(1.5)
@@ -51,16 +51,16 @@ struct Intersection:
 
 
 trait Surface:
-  def roughness(self) -> float
-  def diffuse(self, pos: Vector) -> Color
-  def specular(self, pos: Vector) ->  Color
-  def reflect(self, pos: Vector) -> float
+  def roughness() -> float
+  def diffuse(pos: Vector) -> Color
+  def specular(pos: Vector) ->  Color
+  def reflect(pos: Vector) -> float
 
 
 trait Thing:
-  def surface(self) -> Surface
-  def normal(self, pos: Vector) -> Vector
-  def intersect(self, ray: Ray) -> Intersection
+  def surface() -> Surface
+  def normal(pos: Vector) -> Vector
+  def intersect(ray: Ray) -> Intersection
 
 struct Light:
   val pos: Vector
@@ -77,29 +77,28 @@ struct Sphere:
   val radius2: float
   val surface: Surface
 
-  def create(center: Vector, radius: float, surface: Surface) -> Sphere:
+  static def create(center: Vector, radius: float, surface: Surface) -> Sphere:
     Sphere(center, radius * radius, surface)
 
 
 impl Thing for Sphere:
 
- def surface(self) -> Surface:
-   self.surface
+  def surface() -> Surface:
+    self.surface
 
- def normal(self, pos: Vector) -> Vector:
-   pos.minus(self.center).norm()
+  def normal(pos: Vector) -> Vector:
+    pos.minus(self.center).norm()
 
- def intersect(self, r: Ray) -> Intersection:
-   val eo = self.center.minus(r.start)
-   val v = eo.dot(r.dir)
-   var dist = 1/0
-   if v >= 0 :
-     val disc = self.radius2 - (eo.dot(eo) - v * v)
-     if disc >= 0 :
-       dist = v - sqrt(disc)
+  def intersect(r: Ray) -> Intersection:
+    val eo = self.center.minus(r.start)
+    val v = eo.dot(r.dir)
+     var dist = 1/0
+    if v >= 0 :
+      val disc = self.radius2 - (eo.dot(eo) - v * v)
+      if disc >= 0 :
+        dist = v - sqrt(disc)
 
-  Intersection(self, r, dist)
-
+    Intersection(self, r, dist)
 
 struct Plane:
   val norm: Vector
@@ -108,13 +107,13 @@ struct Plane:
 
 
 impl Thing for Plane:
-  def surface(self) -> Surface:
+  def surface() -> Surface:
     self.surface
 
-  def normal(self, pos: Vector) -> Vector:
+  def normal(pos: Vector) -> Vector:
     self.norm
 
-  def intersect(self, r: Ray) -> Intersection:
+  def intersect(r: Ray) -> Intersection:
     val denom = self.norm.dot(r.dir)
     var dist = 1/0
     if denom <= 0:
@@ -126,34 +125,34 @@ impl Thing for Plane:
 struct Shiny:
 
 impl Surface for Shiny:
-  def roughness(self) -> float:
+  def roughness() -> float:
     250
 
-  def diffuse(self, pos: Vector) -> Color:
+  def diffuse(pos: Vector) -> Color:
     Color.WHITE
 
-  def specular(self, pos: Vector) -> Color:
+  def specular(pos: Vector) -> Color:
     Color.GRAY
 
-  def reflect(self, pos: Vector) -> float:
+  def reflect(pos: Vector) -> float:
     0.7
 
 struct Checkerboard:
 
 impl Surface for Checkerboard:
-  def roughness(self) -> float:
+  def roughness() -> float:
     150
 
-  def diffuse(self, pos: Vector) -> Color:
+  def diffuse(pos: Vector) -> Color:
     if (100000 + math.floor(pos.z) + math.floor(pos.x)) % 2 != 0 :
       Color.WHITE
     else:
       Color.BLACK
 
- def specular(self, pos: Vector) -> Color:
+ def specular(pos: Vector) -> Color:
    Color.WHITE
 
- def reflect(self, pos: Vector) -> float:
+ def reflect(pos: Vector) -> float:
    if (1000 + int(pos.z) + int(pos.x)) % 2 != 0 :
      0.1
    else:
@@ -164,7 +163,7 @@ struct RayTracer:
   val maxDepth = 5
   val defaultColor = Color.BLACK
 
-  def intersections(self, r: Ray, s: Scene) -> Intersection:
+  def intersections(r: Ray, s: Scene) -> Intersection:
     var closest = s.things[0].intersect(r)
     for i in range(1, len(s.things)):
       val inter = s.things[i].intersect(r)
@@ -173,17 +172,17 @@ struct RayTracer:
 
     closest
 
-  def testRay(self, r: Ray, s: Scene) -> float:
+  def testRay(r: Ray, s: Scene) -> float:
     self.intersections(r, s).dist
 
-  def traceRay(self, r: Ray, s: Scene, depth: float) -> Color:
+  def traceRay(r: Ray, s: Scene, depth: float) -> Color:
     val isect = self.intersections(r, s)
     if isect.dist == 1/0 :
       s.background
     else:
       self.shade(isect, s, depth)
 
-  def shade(self, isect: Intersection, s: Scene, depth: float) -> Color:
+  def shade(isect: Intersection, s: Scene, depth: float) -> Color:
     val d = isect.ray.dir
     val pos = d.times(isect.dist).plus(isect.ray.start)
     val normal = isect.thing.normal(pos)
@@ -195,10 +194,10 @@ struct RayTracer:
 
     naturalColor.plus(reflectedColor)
 
-  def getReflectionColor(self, t: Thing, pos: Vector, normal: Vector, rd: Vector, s: Scene, depth: float) -> Color:
+  def getReflectionColor(t: Thing, pos: Vector, normal: Vector, rd: Vector, s: Scene, depth: float) -> Color:
     self.traceRay(Ray(pos, rd), s, depth + 1).scale(t.surface().reflect(pos))
 
-  def addLight(self, t: Thing, pos: Vector, norm: Vector, rd: Vector, s: Scene, col: Color, l: Light) -> Color:
+  def addLight(t: Thing, pos: Vector, norm: Vector, rd: Vector, s: Scene, col: Color, l: Light) -> Color:
     val ldis = l.pos.minus(pos)
     val livec = ldis.norm()
     val nearIsect = self.testRay(Ray(pos, livec), s)
@@ -220,21 +219,21 @@ struct RayTracer:
     val diff = surf.diffuse(pos)
     col.plus(lcolor.times(diff)).plus(scolor.times(t.surface().specular(pos)))
 
-  def getNaturalColor(self, t: Thing, pos: Vector, norm: Vector, rd: Vector, s: Scene) -> Color:
+  def getNaturalColor(t: Thing, pos: Vector, norm: Vector, rd: Vector, s: Scene) -> Color:
     var col = self.defaultColor
     for l in s.lights:
       col = self.addLight(t, pos, norm, rd, s, col, l)
 
     col
 
-  def getPoint(self, x: float, y: float, cam: Camera) -> Vector:
+  def getPoint(x: float, y: float, cam: Camera) -> Vector:
     cam.forward.plus(cam.right.times(x / 200)).plus(cam.up.times(y / 200)).norm()
 
-  def render(self, s: Scene, p: Pen, screenWidth: float, screenHeight: float):
+  def render(s: Scene, p: Pen, screenWidth: float, screenHeight: float):
     p.set_stroke_color(Color.TRANSPARENT)
     renderRow(s, p, screenWidth, screenHeight, 0)
 
-  def renderRow(self, s: Scene, p: Pen, screenWidth: float, screenHeight: float, y: float):
+  def renderRow(s: Scene, p: Pen, screenWidth: float, screenHeight: float, y: float):
     for x in range(-screenWidth / 2, screenWidth / 2):
       var yy = math.floor(y / 2)
       if y % 2 == 0:
