@@ -27,7 +27,7 @@ class Definition(
     private var resolvedInitializer: Evaluable<RuntimeContext>? = UnresolvedEvalueable
 
     enum class Kind {
-        LOCAL_VARIABLE, STATIC_VARIABLE, FUNCTION, STRUCT, TRAIT, IMPL, UNPARSEABLE, SCOPE
+        LOCAL_VARIABLE, STATIC_VARIABLE, FUNCTION, METHOD, STRUCT, TRAIT, IMPL, UNPARSEABLE, SCOPE
     }
 
     init {
@@ -91,7 +91,8 @@ class Definition(
             val tokenizer = tokenizer()
             try {
                 when (kind) {
-                    Kind.FUNCTION -> resolvedType = TypeParser.parseFunctionType(tokenizer, ParsingContext(scope, 0))
+                    Kind.FUNCTION -> resolvedType = TypeParser.parseFunctionType(tokenizer, ParsingContext(scope, 0), isMethod = false)
+                    Kind.METHOD -> resolvedType = TypeParser.parseFunctionType(tokenizer, ParsingContext(scope, 0), isMethod = true)
                     Kind.LOCAL_VARIABLE,
                     Kind.STATIC_VARIABLE -> resolveVariable(tokenizer, typeOnly = true)
                     else -> resolvedType = value().dynamicType
@@ -109,7 +110,8 @@ class Definition(
             try {
                 when (kind) {
                     Kind.STATIC_VARIABLE -> resolveVariable(tokenizer)
-                    Kind.FUNCTION -> resolvedValue =  Parser.parseDef(tokenizer, ParsingContext(scope, 0))
+                    Kind.FUNCTION -> resolvedValue =  Parser.parseDef(tokenizer, ParsingContext(scope, 0), isMethod = false)
+                    Kind.METHOD -> resolvedValue =  Parser.parseDef(tokenizer, ParsingContext(scope, 0), isMethod = true)
                     Kind.STRUCT -> resolvedValue = resolveClass(tokenizer)
                     Kind.TRAIT -> resolvedValue = resolveTrait(tokenizer)
                     Kind.IMPL -> resolvedValue = resolveImpl(tokenizer)
@@ -209,6 +211,7 @@ class Definition(
             Kind.LOCAL_VARIABLE -> writer.keyword(if (mutable) "var " else "val ")
                 .declaration(name)
                 //.append(if (explicitType != null) ": " + explicitType.typeName else "")
+            Kind.METHOD,
             Kind.FUNCTION -> writer.keyword("def ").declaration(name).appendType(type())
             Kind.TRAIT,
             Kind.IMPL,
@@ -246,6 +249,7 @@ class Definition(
                    writer.append(definitionText)
                }
            }
+           Kind.METHOD,
            Kind.FUNCTION -> {
                writer.keyword("def ").declaration(name)
                if (resolvedValue != UnresolvedValue) {
@@ -257,8 +261,7 @@ class Definition(
        }
     }
 
-    fun isDyanmic() = kind == Definition.Kind.LOCAL_VARIABLE
-            || (kind == Definition.Kind.FUNCTION && (type() as FunctionType).isMethod())
+    fun isDyanmic() = kind == Definition.Kind.LOCAL_VARIABLE || kind == Definition.Kind.METHOD
 
     fun isStatic() = !isDyanmic()
 
@@ -275,6 +278,16 @@ class Definition(
             is Scope -> value.findNode(node)
             else -> null
         }
+    }
+
+    fun depth(scope: Scope): Int {
+        if (scope == this.scope) {
+            return 0
+        }
+        if (scope.parentContext == null) {
+            throw IllegalStateException("Definition $this not found in scope.")
+        }
+        return 1 + depth(scope.parentContext!!)
     }
 
     object UnresolvedEvalueable: TantillaNode {

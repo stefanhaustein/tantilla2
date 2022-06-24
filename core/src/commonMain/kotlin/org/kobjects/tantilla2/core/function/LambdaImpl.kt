@@ -11,16 +11,18 @@ class LambdaImpl(
     override val type: FunctionType,
     override val scopeSize: Int,
     val body: Evaluable<RuntimeContext>,
-    val closure: List<Any?> = emptyList()
+    override val closure: RuntimeContext? = null
     ) : Lambda, SerializableCode {
 
 
     // get() = "(${type.parameters}) -> ${type.returnType}"
 
     override fun eval(context: RuntimeContext): Any? {
-        for (i in 0 until closure.size ) {
-            context.variables[i + type.parameters.size] = closure[i]
+
+        if (closure != context.closure) {
+            throw RuntimeException("closure mismatch")
         }
+
         val result = body.eval(context)
         if (result is Control.FlowSignal) {
             if (result.kind == Control.FlowSignal.Kind.RETURN) {

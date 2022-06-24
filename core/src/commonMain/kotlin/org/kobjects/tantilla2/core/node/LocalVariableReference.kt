@@ -9,14 +9,21 @@ import org.kobjects.tantilla2.core.Type
 class LocalVariableReference(
     val name: String,
     override val returnType: Type,
+    val depth: Int,
     val index: Int,
-    val mutable: Boolean
+    val mutable: Boolean,
 ) : Assignable, SerializableCode {
     override fun children(): List<Evaluable<RuntimeContext>> = emptyList()
 
     override fun eval(ctx: RuntimeContext): Any? {
         //        println("Evaluating $name")
-        val result = ctx.variables[index]
+
+        var varCtx = ctx
+        for (i in 0 until depth) {
+            varCtx = varCtx.closure!!
+        }
+
+        val result = varCtx[index]
         // println("Eval result for $name = $result")
         return result
     }

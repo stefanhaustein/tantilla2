@@ -82,7 +82,7 @@ class TantillaViewModel(
         ) { context ->
             Choreographer.getInstance().postFrameCallback {
                 val fn = context[0] as Lambda
-                val functionContext = RuntimeContext(MutableList(fn.scopeSize) { null })
+                val functionContext = RuntimeContext(MutableList(fn.scopeSize) { null }, fn.closure)
                 fn.eval(functionContext)
             }
         }

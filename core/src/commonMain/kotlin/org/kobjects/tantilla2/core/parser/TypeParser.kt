@@ -47,27 +47,23 @@ object TypeParser {
         return Parameter(name, type, defaultValue, isVararg)
     }
 
-    fun parseFunctionType(tokenizer: TantillaTokenizer, context: ParsingContext): FunctionType {
+    fun parseFunctionType(tokenizer: TantillaTokenizer, context: ParsingContext, isMethod: Boolean): FunctionType {
         tokenizer.consume("(")
         val parameters = mutableListOf<Parameter>()
-        if (!tokenizer.tryConsume(")")) {
-            if (tokenizer.tryConsume("self")) {
-                val selfType: Type = when (context.scope) {
-                    is UserClassDefinition -> context.scope
-                    is TraitDefinition -> context.scope
-                    is ImplDefinition -> context.scope.classifier
-                    else ->
-                        throw IllegalStateException("self supported for classes, traits and implemenetations only; got: ${context}")
-                }
-                parameters.add(Parameter("self", selfType, null))
-                while (tokenizer.tryConsume(",")) {
-                    parameters.add(parseParameter(tokenizer, context))
-                }
-            } else {
-                do {
-                    parameters.add(parseParameter(tokenizer, context))
-                } while (tokenizer.tryConsume(","))
+        if (isMethod) {
+            val selfType: Type = when (context.scope) {
+                is UserClassDefinition -> context.scope
+                is TraitDefinition -> context.scope
+                is ImplDefinition -> context.scope.classifier
+                else ->
+                    throw IllegalStateException("self supported for classes, traits and implemenetations only; got: ${context}")
             }
+            parameters.add(Parameter("self", selfType, null))
+        }
+        if (!tokenizer.tryConsume(")")) {
+            do {
+                parameters.add(parseParameter(tokenizer, context))
+            } while (tokenizer.tryConsume(","))
             var varargCount = 0
             for (parameter in parameters) {
                 if (parameter.isVararg) {

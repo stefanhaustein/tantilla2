@@ -21,13 +21,12 @@ class Apply(
         }
         val function = shouldBeLambda as Lambda
         val functionContext = RuntimeContext(MutableList<Any?>(function.scopeSize) {
-
             if (it < parameters.size) {
                 val result = parameters[it].eval(context)
                 // println("Result $result")
                 result
             } else null
-        })
+        }, function.closure)
         return function.eval(functionContext)
     }
 

@@ -39,7 +39,7 @@ open class NativeClassDefinition(
         val function = NativeFunction(type, operation)
         add(Definition(
             this,
-            Definition.Kind.FUNCTION,
+            Definition.Kind.METHOD,
             name,
             resolvedType = type,
             resolvedValue = function,
@@ -71,7 +71,7 @@ open class NativeClassDefinition(
         }
         add(Definition(
             this,
-            Definition.Kind.FUNCTION,
+            Definition.Kind.METHOD,
             name,
             resolvedType = getterType,
             resolvedValue = NativeFunction(getterType, getter),
@@ -84,7 +84,7 @@ open class NativeClassDefinition(
             }
             add(Definition(
                 this,
-                Definition.Kind.FUNCTION,
+                Definition.Kind.METHOD,
                 "set_$name",
                 resolvedType = setterType,
                 resolvedValue = NativeFunction(setterType, setter),

@@ -11,8 +11,7 @@ import org.kobjects.tantilla2.core.function.LambdaImpl
 class LambdaReference(
     val type: FunctionType,
     val scopeSize: Int,
-    val body: Evaluable<RuntimeContext>,
-    val closureIndices: List<Int>,
+    val body: Evaluable<RuntimeContext>
 ) : TantillaNode {
     override val returnType: Type
         get() = type
@@ -20,8 +19,7 @@ class LambdaReference(
     override fun children(): List<Evaluable<RuntimeContext>> = emptyList()
 
     override fun eval(context: RuntimeContext): Lambda {
-        val closure = List<Any?>(closureIndices.size) { context[closureIndices[it]] }
-        return LambdaImpl(type, scopeSize, body, closure)
+        return LambdaImpl(type, scopeSize, body, context)
     }
 
     override fun reconstruct(newChildren: List<Evaluable<RuntimeContext>>) = this

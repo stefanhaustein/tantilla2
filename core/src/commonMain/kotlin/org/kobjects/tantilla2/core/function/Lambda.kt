@@ -8,4 +8,6 @@ interface Lambda : Typed {
     fun eval(context: RuntimeContext): Any?
     val scopeSize: Int
         get() = type.parameters.size
+    val closure: RuntimeContext?
+        get() = null
 }
