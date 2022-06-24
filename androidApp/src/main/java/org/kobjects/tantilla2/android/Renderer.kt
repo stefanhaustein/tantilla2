@@ -207,8 +207,8 @@ fun RenderEditor(viewModel: TantillaViewModel) {
                         definition?.serializeCode(writer)
                     viewModel.currentText.value = viewModel.currentText.value.copy(annotatedString = ansiToAnnotatedString(writer.toString())) //.withError(definition?.error()))
                     }
-*/
-                                },
+                    */
+                },
                 modifier = Modifier.fillMaxSize(),
             )
 
@@ -275,8 +275,9 @@ fun RenderAppBar(
             ) {
                 Icon(Icons.Default.MoreVert, contentDescription = "More")
                 var menuItems = arrayOf(
-                    "Full Reset" to { viewModel.reset()},
-                    "Examples \u25B6" to { showExamplesMenu.value = true }
+                    "Full Reset" to { viewModel.reset() },
+                    "Run main()" to { viewModel.runMain() },
+                    "Examples \u25B6" to { showExamplesMenu.value = true },
                 )
 
                 if (!extraMenuItems.isEmpty()) {

@@ -136,6 +136,26 @@ class TantillaViewModel(
         fileName.value = ""
     }
 
+    fun runMain() {
+        mode.value = Mode.SHELL
+        try {
+            val definition = userScope.value["main"]
+            if (definition == null) {
+                console.konsole.write("main() undefined.")
+                return
+            }
+            if (definition.type() !is FunctionType) {
+                console.konsole.write("main is not a function.")
+                return
+            }
+            val function = definition.value() as Lambda
+            function.eval(RuntimeContext(MutableList(function.scopeSize) { null }))
+        } catch (e: Exception) {
+            e.printStackTrace()
+            console.konsole.write(e.message ?: e.toString())
+        }
+    }
+
     fun loadExample(name: String) {
         val programText = exampleLoader(name)
         reset()

@@ -2,7 +2,6 @@ package org.kobjects.tantilla2.core
 
 import org.kobjects.greenspun.core.*
 import org.kobjects.konsole.Ansi
-import org.kobjects.tantilla2.core.runtime.Str
 
 class CodeWriter(
     indent: String = "",
@@ -61,6 +60,8 @@ class CodeWriter(
 
     fun declaration(name: String) = wrapped(Kind.DECLARATION, name)
 
+    fun stringLiteral(text: String) = wrapped(Kind.STRING, text)
+
     fun newline(): CodeWriter {
         sb.append('\n').append(indent)
         return this
@@ -85,6 +86,7 @@ class CodeWriter(
             is Control.If<*> -> appendIf(code as Control.If<RuntimeContext>)
             is Control.Block<*> -> appendBlock(code as Control.Block<RuntimeContext>)
             is Control.While<*> -> appendWhile(code as Control.While<RuntimeContext>)
+            is Str.Const<*> -> wrapped(Kind.STRING, code.toString())
             else -> append(code.toString())
         }
         if (error) {
@@ -148,14 +150,21 @@ class CodeWriter(
     }
 
     enum class Kind {
-        KEYWORD, DECLARATION, ERROR
+        KEYWORD, DECLARATION, ERROR, STRING
     }
 
     companion object {
         val defaultHighlighting = mapOf(
-            Kind.KEYWORD to Pair(Ansi.BOLD, Ansi.NORMAL_INTENSITY),
-            Kind.DECLARATION to Pair(Ansi.BOLD + Ansi.FOREGROUND_CYAN, Ansi.NORMAL_INTENSITY + Ansi.FOREGROUND_DEFAULT),
-            Kind.ERROR to Pair(Ansi.BACKGROUND_YELLOW, Ansi.BACKGROUND_DEFAULT)
+            Kind.KEYWORD to Pair(Ansi.rgbForeground(0xdc7900), Ansi.FOREGROUND_DEFAULT),
+            Kind.DECLARATION to Pair(Ansi.rgbForeground(0x3889c4), Ansi.FOREGROUND_DEFAULT),
+            Kind.ERROR to Pair(Ansi.rgbBackground(0xeb586e), Ansi.BACKGROUND_DEFAULT),
+            Kind.STRING to Pair(Ansi.rgbForeground(0x5c9238), Ansi.FOREGROUND_DEFAULT)
+        )
+        val darkThemeHighlighting = mapOf(
+            Kind.KEYWORD to Pair(Ansi.rgbForeground(0xffae30), Ansi.FOREGROUND_DEFAULT),
+            Kind.DECLARATION to Pair(Ansi.rgbForeground(0x3889c4), Ansi.FOREGROUND_DEFAULT),
+            Kind.ERROR to Pair(Ansi.rgbBackground(0xeb586e), Ansi.BACKGROUND_DEFAULT),
+            Kind.STRING to Pair(Ansi.rgbForeground(0xa7d489), Ansi.FOREGROUND_DEFAULT)
         )
     }
 }
