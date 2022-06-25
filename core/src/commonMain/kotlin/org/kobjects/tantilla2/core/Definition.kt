@@ -2,7 +2,6 @@ package org.kobjects.tantilla2.core
 
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.parserlib.tokenizer.ParsingException
-import org.kobjects.parserlib.tokenizer.Token
 import org.kobjects.tantilla2.core.classifier.UserClassDefinition
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
@@ -28,7 +27,7 @@ class Definition(
     private var resolvedInitializer: Evaluable<RuntimeContext>? = UnresolvedEvalueable
 
     enum class Kind {
-        LOCAL_VARIABLE, STATIC_VARIABLE, FUNCTION, METHOD, STRUCT, TRAIT, IMPL, UNPARSEABLE, SCOPE
+        LOCAL_VARIABLE, STATIC_VARIABLE, FUNCTION, METHOD, STRUCT, TRAIT, IMPL, UNPARSEABLE, UNIT
     }
 
     init {
@@ -126,7 +125,7 @@ class Definition(
                     Kind.IMPL -> resolvedValue = resolveImpl(tokenizer)
                     Kind.UNPARSEABLE -> throw RuntimeException("Can't obtain value for unparseable definition.")
                     Kind.LOCAL_VARIABLE -> throw RuntimeException("Can't obtain local variable value from Definition.")
-                    Kind.SCOPE -> throw UnsupportedOperationException()
+                    Kind.UNIT -> throw UnsupportedOperationException()
                 }
             } catch (e: Exception) {
                 throw exceptionInResolve(e, tokenizer)
@@ -245,7 +244,7 @@ class Definition(
             Kind.IMPL,
             Kind.STRUCT -> writer.keyword(kind.name.lowercase()).append(' ').declaration(name)
             Kind.UNPARSEABLE -> writer.append("(unparseable: $name)")
-            Kind.SCOPE -> writer.append("(scope $name)")
+            Kind.UNIT -> writer.append("(scope $name)")
         }
     }
 
@@ -315,7 +314,7 @@ class Definition(
     fun isScope() = error() == null && (
             kind == Definition.Kind.IMPL
             || kind == Definition.Kind.STRUCT
-            || kind == Definition.Kind.TRAIT || kind == Definition.Kind.SCOPE)
+            || kind == Definition.Kind.TRAIT || kind == Definition.Kind.UNIT)
 
     fun findNode(node: Evaluable<RuntimeContext>): Definition? {
         val rid = resolvedInitializer

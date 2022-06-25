@@ -21,7 +21,7 @@ object RootScope : Scope(null) {
         ) { Range(it.f64(0), it.f64(1)) }
 
 
-        add(Definition(this, Definition.Kind.SCOPE,"math", resolvedValue = MathScope))
+        add(Definition(this, Definition.Kind.UNIT,"math", resolvedValue = MathScope))
 
     }
 
