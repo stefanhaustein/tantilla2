@@ -12,15 +12,6 @@ object RootScope : Scope(null) {
 
     init {
 
-        defineNativeFunction(
-            "hsl",
-            "Converts the given hue (degree), saturation (0..1) and light (0..1) values to a 32 bit ARGB value (as used in setPixel).",
-            org.kobjects.tantilla2.core.runtime.F64, Parameter("h",
-                org.kobjects.tantilla2.core.runtime.F64
-            ), Parameter("s", org.kobjects.tantilla2.core.runtime.F64), Parameter("l",
-                org.kobjects.tantilla2.core.runtime.F64
-            )
-        ) { hsl(it.f64(0), it.f64(1) , it.f64(2) ) }
 
         F64.defineNativeFunction(
             "range", "Creates a range from start (inclusive) to end (exclusive)",

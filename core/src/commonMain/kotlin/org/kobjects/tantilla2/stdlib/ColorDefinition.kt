@@ -1,10 +1,7 @@
 package org.kobjects.tantilla2.stdlib
 
 import org.kobjects.tantilla2.core.Definition
-import org.kobjects.tantilla2.core.Type
 import org.kobjects.tantilla2.core.classifier.NativeClassDefinition
-import org.kobjects.tantilla2.core.function.FunctionType
-import org.kobjects.tantilla2.core.function.NativeFunction
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.runtime.F64
 
@@ -23,7 +20,7 @@ object ColorDefinition : NativeClassDefinition(
     init {
         defineNativeFunction(
             "rgb",
-            "Create a Color instance from the given r, g, b and alpha values",
+            "Create a Color instance from the given r, g, b and (optional) alpha values in the range from 0 to 1",
             ColorDefinition,
             Parameter("r", F64),
             Parameter("g", F64),
@@ -32,6 +29,16 @@ object ColorDefinition : NativeClassDefinition(
         ) {
             Color(it.f64(0), it.f64(1), it.f64(2), it.f64(3))
         }
+
+        defineNativeFunction(
+            "hsl",
+            "Converts the given hue (degree), saturation (0..1) and light (0..1) and otptional alpha values to a 32 bit ARGB value (as used in setPixel).",
+            F64,
+            Parameter("h", F64),
+            Parameter("s", F64),
+            Parameter("l", F64),
+            Parameter("a", F64, org.kobjects.greenspun.core.F64.Const(1.0)),
+        ) { Color.hsl(it.f64(0), it.f64(1) , it.f64(2) ) }
 
         add(Definition(this, Definition.Kind.STATIC_VARIABLE, "BLACK", mutable = false, docString = "Black", resolvedValue = Color(0.0, 0.0, 0.0, 1.0)))
         add(Definition(this, Definition.Kind.STATIC_VARIABLE, "TRANSPARENT", mutable = false, docString = "Black", resolvedValue = Color(0.0, 0.0, 0.0, 0.0)))
