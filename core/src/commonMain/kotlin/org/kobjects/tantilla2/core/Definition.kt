@@ -312,8 +312,10 @@ class Definition(
 
     fun isStatic() = !isDyanmic()
 
-    fun isScope() = error() == null &&
-            (kind == Definition.Kind.IMPL || kind == Definition.Kind.STRUCT || kind == Definition.Kind.TRAIT)
+    fun isScope() = error() == null && (
+            kind == Definition.Kind.IMPL
+            || kind == Definition.Kind.STRUCT
+            || kind == Definition.Kind.TRAIT || kind == Definition.Kind.SCOPE)
 
     fun findNode(node: Evaluable<RuntimeContext>): Definition? {
         val rid = resolvedInitializer
