@@ -2,6 +2,7 @@ package org.kobjects.tantilla2.core
 
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.parserlib.tokenizer.ParsingException
+import org.kobjects.parserlib.tokenizer.Token
 import org.kobjects.tantilla2.core.classifier.UserClassDefinition
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
@@ -91,8 +92,8 @@ class Definition(
             val tokenizer = tokenizer()
             try {
                 when (kind) {
-                    Kind.FUNCTION -> resolvedType = TypeParser.parseFunctionType(tokenizer, ParsingContext(scope, 0), isMethod = false)
-                    Kind.METHOD -> resolvedType = TypeParser.parseFunctionType(tokenizer, ParsingContext(scope, 0), isMethod = true)
+                    Kind.FUNCTION -> resolvedType = resolveFunctionType(tokenizer, isMethod = false)
+                    Kind.METHOD -> resolvedType = resolveFunctionType(tokenizer, isMethod = true)
                     Kind.LOCAL_VARIABLE,
                     Kind.STATIC_VARIABLE -> resolveVariable(tokenizer, typeOnly = true)
                     else -> resolvedType = value().dynamicType
@@ -104,9 +105,17 @@ class Definition(
         return resolvedType!!
     }
 
+    fun resolveFunctionType(tokenizer: TantillaTokenizer, isMethod: Boolean): FunctionType {
+        tokenizer.tryConsume("static")
+        tokenizer.consume("def")
+        tokenizer.consume(name)
+        return TypeParser.parseFunctionType(tokenizer, ParsingContext(scope, 0), isMethod)
+    }
+
     fun value(): Any?  {
         if (resolvedValue == UnresolvedValue) {
             val tokenizer = tokenizer()
+            println("Resolving: $definitionText")
             try {
                 when (kind) {
                     Kind.STATIC_VARIABLE -> resolveVariable(tokenizer)
@@ -142,8 +151,9 @@ class Definition(
     }
 
     private fun resolveClass(tokenizer: TantillaTokenizer): Scope {
-        println("Resolving class $name: $definitionText")
         val classContext = UserClassDefinition(name, scope)
+        tokenizer.consume("struct")
+        tokenizer.consume(name)
         tokenizer.consume(":")
         Parser.parse(tokenizer, ParsingContext(classContext, 1))
         println("Class successfully resolved!")
@@ -151,8 +161,9 @@ class Definition(
     }
 
     private fun resolveTrait(tokenizer: TantillaTokenizer): Scope {
-        println("Resolving trait $name: $definitionText")
         val traitContext = TraitDefinition(name, scope)
+        tokenizer.consume("trait")
+        tokenizer.consume(name)
         tokenizer.consume(":")
         Parser.parse(tokenizer, ParsingContext(traitContext, 1))
         println("Trait successfully resolved!")
@@ -160,13 +171,16 @@ class Definition(
     }
 
     private fun resolveImpl(tokenizer: TantillaTokenizer): Scope {
-        println("Resolving impl $name: $definitionText")
         val traitName = name.substring(0, name.indexOf(' '))
         val trait = scope.resolveStatic(traitName, true)!!.value() as TraitDefinition
         val className = name.substring(name.lastIndexOf(' ') + 1)
         val implFor = scope.resolveStatic(className, true)!!.value() as UserClassDefinition
         val implContext = ImplDefinition(name, scope, trait, implFor)
-        tokenizer.next()
+        tokenizer.consume("impl")
+        tokenizer.consume(traitName)
+        tokenizer.consume("for")
+        tokenizer.consume(className)
+        tokenizer.consume(":")
         Parser.parse(tokenizer, ParsingContext(implContext, 0))
         println("Impl successfully resolved!")
         return implContext
@@ -177,6 +191,10 @@ class Definition(
             resolvedType = resolvedValue.dynamicType
             return
         }
+
+        tokenizer.tryConsume("static")
+        tokenizer.consume(TokenType.IDENTIFIER) // var/val
+        tokenizer.consume(name)
 
         if (tokenizer.tryConsume(":")) {
             resolvedType = TypeParser.parseType(tokenizer, ParsingContext(scope, 0))
@@ -226,8 +244,8 @@ class Definition(
        when (kind) {
            Kind.STATIC_VARIABLE,
            Kind.LOCAL_VARIABLE -> {
-               serializeTitle(writer)
                if (resolvedInitializer != UnresolvedEvalueable) {
+                   serializeTitle(writer)
                    writer.append(": ")
                    writer.appendType(type())
                    if (resolvedInitializer != null) {
@@ -245,14 +263,13 @@ class Definition(
                if (resolvedValue != UnresolvedValue) {
                    writer.appendCode(resolvedValue)
                } else {
-                   serializeTitle(writer)
                    writer.append(definitionText)
                }
            }
            Kind.METHOD,
            Kind.FUNCTION -> {
-               writer.keyword("def ").declaration(name)
                if (resolvedValue != UnresolvedValue) {
+                   writer.keyword("def ").declaration(name)
                    writer.appendCode(resolvedValue)
                } else {
                     writer.append(definitionText)

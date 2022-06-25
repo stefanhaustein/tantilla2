@@ -86,12 +86,13 @@ object Parser {
     }
 
     fun parseDefinition(tokenizer: TantillaTokenizer, context: ParsingContext): Definition {
+        val startPos = tokenizer.current.pos
         val explicitlyStatic = tokenizer.tryConsume("static")
         val scope = context.scope
         return when (tokenizer.current.text) {
             "var", "val" -> {
                 val local = !explicitlyStatic && (scope is UserClassDefinition || scope is FunctionScope)
-                parseVariableDeclaration(tokenizer, context, local)
+                parseVariableDeclaration(tokenizer, context, startPos, local)
             }
             "def" -> {
                 val isMethod = !explicitlyStatic && (scope is UserClassDefinition || scope is TraitDefinition ||
@@ -99,19 +100,19 @@ object Parser {
                 tokenizer.consume("def")
                 val name = tokenizer.consume(TokenType.IDENTIFIER, "Function name expected.")
                 println("consuming def $name")
-                val text = consumeBody(tokenizer, context.depth)
+                val text = consumeBody(tokenizer, startPos, context.depth)
                 Definition(context.scope, if (isMethod) Definition.Kind.METHOD else Definition.Kind.FUNCTION, name, definitionText = text)
             }
             "struct" -> {
                 tokenizer.consume("struct")
                 val name = tokenizer.consume(TokenType.IDENTIFIER, "Struct name expected.")
-                val text = consumeBody(tokenizer, context.depth)
+                val text = consumeBody(tokenizer, startPos, context.depth)
                 Definition(context.scope, Definition.Kind.STRUCT, name, definitionText = text)
             }
             "trait" -> {
                 tokenizer.consume("trait")
                 val name = tokenizer.consume(TokenType.IDENTIFIER, "Trait name expected.")
-                val text = consumeBody(tokenizer, context.depth)
+                val text = consumeBody(tokenizer, startPos, context.depth)
                 Definition(context.scope, Definition.Kind.TRAIT, name, definitionText = text)
             }
             "impl" -> {
@@ -119,7 +120,7 @@ object Parser {
                 val traitName = tokenizer.consume(TokenType.IDENTIFIER, "Trait name expected.")
                 tokenizer.consume("for")
                 val name = tokenizer.consume(TokenType.IDENTIFIER, "Class name expected.")
-                val text = consumeBody(tokenizer, context.depth)
+                val text = consumeBody(tokenizer, startPos, context.depth)
                 Definition(
                     context.scope,
                     Definition.Kind.IMPL,
@@ -131,17 +132,17 @@ object Parser {
         }
     }
 
-    fun consumeLine(tokenizer: TantillaTokenizer): String {
-        val pos = tokenizer.current.pos
+    fun consumeLine(tokenizer: TantillaTokenizer, startPos: Int): String {
         while (tokenizer.current.type != TokenType.EOF && tokenizer.current.type != TokenType.LINE_BREAK) {
             tokenizer.next()
         }
-        return tokenizer.input.substring(pos, tokenizer.current.pos)
+        return tokenizer.input.substring(startPos, tokenizer.current.pos)
     }
 
     fun consumeBody(
         tokenizer: TantillaTokenizer,
-        returnDepth: Int = -1
+        startPos: Int,
+        returnDepth: Int
     ): String {
         var localDepth = returnDepth + 1
         val pos = tokenizer.current.pos
@@ -156,11 +157,11 @@ object Parser {
                 }
             }
             if (localDepth <= returnDepth) {
-                return tokenizer.input.substring(pos, tokenizer.current.pos)
+                return tokenizer.input.substring(startPos, tokenizer.current.pos)
             }
             tokenizer.next()
         }
-        return tokenizer.input.substring(pos)
+        return tokenizer.input.substring(startPos)
     }
 
     fun parseStatement(
@@ -258,6 +259,7 @@ object Parser {
     fun parseVariableDeclaration(
         tokenizer: TantillaTokenizer,
         context: ParsingContext,
+        startPos: Int,
         local: Boolean,
     ) : Definition {
         val mutable = if (tokenizer.tryConsume("var")) true
@@ -267,13 +269,16 @@ object Parser {
         val name = tokenizer.consume(TokenType.IDENTIFIER)
         val kind = if (local) Definition.Kind.LOCAL_VARIABLE
             else Definition.Kind.STATIC_VARIABLE
-        val text = consumeLine(tokenizer)
+        val text = consumeLine(tokenizer, startPos)
 
         return Definition(context.scope, kind, name, definitionText = text)
     }
 
 
     fun parseDef(tokenizer: TantillaTokenizer, context: ParsingContext, isMethod: Boolean): Lambda {
+        tokenizer.tryConsume("static")
+        tokenizer.consume("def")
+        tokenizer.consume(TokenType.IDENTIFIER)
         val type = TypeParser.parseFunctionType(tokenizer, context, isMethod)
         if (context.scope is TraitDefinition) {
             tokenizer.consume(TokenType.EOF, "Trait methods must not have function bodies.")
