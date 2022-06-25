@@ -38,17 +38,14 @@ struct Camera:
     val up = forward.cross(right).norm().times(1.5)
     Camera(pos, forward, right, up)
 
-
 struct Ray:
   val start: Vector
   val dir: Vector
-
 
 struct Intersection:
   val thing: Thing
   val ray: Ray
   val dist: float
-
 
 trait Surface:
   def roughness() -> float

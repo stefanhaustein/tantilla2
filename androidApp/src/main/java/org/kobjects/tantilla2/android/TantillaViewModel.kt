@@ -38,7 +38,7 @@ class TantillaViewModel(
     val definition = mutableStateOf<Definition?>(null)
     val currentText = mutableStateOf(TextFieldValue())
     var editorParentScope: Scope = console.scope
-    val expanded = mutableStateMapOf<Definition, Unit>()
+    val expanded = mutableStateOf(setOf<Definition>())
     var withRuntimeException = mutableStateMapOf<Definition, TantillaRuntimeException>()
 
     init {
