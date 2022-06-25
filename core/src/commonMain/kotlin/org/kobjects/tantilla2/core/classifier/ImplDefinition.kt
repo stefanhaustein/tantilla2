@@ -14,6 +14,8 @@ class ImplDefinition(
     override val title: String
         get() = name
 
+    override val supportsMethods: Boolean
+        get() = true
 
     override fun resolve(name: String): Definition? = resolveDynamic(name, false)
 

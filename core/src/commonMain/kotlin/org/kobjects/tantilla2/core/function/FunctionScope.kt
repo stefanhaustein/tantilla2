@@ -7,4 +7,11 @@ class FunctionScope(parentScope: Scope, val functionType: FunctionType) : Scope(
     override val title: String
         get() = "FunctionScope"
 
+
+    override val supportsMethods: Boolean
+        get() = true
+
+    override val supportsLocalVariables: Boolean
+        get() = true
+
 }

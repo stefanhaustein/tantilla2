@@ -17,6 +17,12 @@ open class NativeClassDefinition(
     override val title: String
         get() = name
 
+    override val supportsMethods: Boolean
+        get() = true
+
+    override val supportsLocalVariables: Boolean
+        get() = true
+
     override val type: FunctionType
         get() = NativeClassMetaType(this, ctorParams)
 

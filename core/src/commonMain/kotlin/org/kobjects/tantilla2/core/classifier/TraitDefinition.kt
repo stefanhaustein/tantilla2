@@ -13,6 +13,9 @@ class TraitDefinition(
     override val title: String
         get() = name
 
+    override val supportsMethods: Boolean
+        get() = true
+
     var traitIndex = 0
 
     override fun serializeType(writer: CodeWriter) {

@@ -24,7 +24,7 @@ fun RenderKonsole(viewModel: TantillaViewModel) {
             RenderAppBar(
                 viewModel,
                 if (viewModel.fileName.value.isEmpty()) "Tantilla 2" else  viewModel.fileName.value,
-                "Clear Screen" to { (viewModel.console.konsole as ComposeKonsole).entries.clear() }
+
             )
 
             org.kobjects.konsole.compose.RenderKonsole(konsole = viewModel.console.konsole as ComposeKonsole)

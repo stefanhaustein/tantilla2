@@ -226,11 +226,21 @@ class Definition(
     fun serializeTitle(writer: CodeWriter) {
         when (kind) {
             Kind.STATIC_VARIABLE,
-            Kind.LOCAL_VARIABLE -> writer.keyword(if (mutable) "var " else "val ")
-                .declaration(name)
-                //.append(if (explicitType != null) ": " + explicitType.typeName else "")
-            Kind.METHOD,
-            Kind.FUNCTION -> writer.keyword("def ").declaration(name).appendType(type())
+            Kind.LOCAL_VARIABLE -> {
+                if (kind == Kind.STATIC_VARIABLE && scope.supportsLocalVariables) {
+                    writer.keyword("static ")
+                }
+                writer.keyword(if (mutable) "var " else "val ").declaration(name)
+                writer.append(": ")
+                writer.appendType(type())
+            }
+            Kind.METHOD  -> writer.keyword("def ").declaration(name).appendType(type())
+            Kind.FUNCTION -> {
+                if (scope.supportsMethods) {
+                    writer.keyword("static ")
+                }
+                writer.keyword("def ").declaration(name).appendType(type())
+            }
             Kind.TRAIT,
             Kind.IMPL,
             Kind.STRUCT -> writer.keyword(kind.name.lowercase()).append(' ').declaration(name)
@@ -246,8 +256,6 @@ class Definition(
            Kind.LOCAL_VARIABLE -> {
                if (resolvedInitializer != UnresolvedEvalueable) {
                    serializeTitle(writer)
-                   writer.append(": ")
-                   writer.appendType(type())
                    if (resolvedInitializer != null) {
                        writer.append(" = ")
                        writer.appendCode(resolvedInitializer)
@@ -277,6 +285,28 @@ class Definition(
            }
        }
     }
+
+    fun serializeSummaray(writer: CodeWriter) {
+        if (!isScope()) {
+            serializeCode(writer)
+            return
+        }
+        serializeTitle(writer)
+        writer.indent()
+        writer.newline()
+        val scope = value() as Scope
+        var first = true
+        for (name in scope.locals) {
+            if (first) {
+                first = false
+            } else {
+                writer.append(", ")
+            }
+            writer.append(name)
+        }
+        writer.outdent()
+    }
+
 
     fun isDyanmic() = kind == Definition.Kind.LOCAL_VARIABLE || kind == Definition.Kind.METHOD
 

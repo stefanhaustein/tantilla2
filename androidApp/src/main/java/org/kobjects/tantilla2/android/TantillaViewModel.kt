@@ -162,6 +162,7 @@ class TantillaViewModel(
         this.fileName.value = name
         Parser.parse(programText, console.scope)
         console.scope.hasError()
+        mode.value = Mode.HIERARCHY
     }
 
     fun highlightRuntimeException(e: TantillaRuntimeException?) {

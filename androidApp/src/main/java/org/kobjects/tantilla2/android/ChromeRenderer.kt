@@ -19,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import org.kobjects.konsole.compose.ComposeKonsole
 import org.kobjects.tantilla2.core.UserScope
 import org.kobjects.tantilla2.core.runtime.RootScope
 
@@ -28,8 +29,9 @@ fun RenderAppBar(
     title: String,
     vararg extraMenuItems: Pair<String, () -> Unit>) {
 
-    var showMenu = remember { mutableStateOf(false) }
-    var showExamplesMenu = remember { mutableStateOf(false) }
+    val showMenu = remember { mutableStateOf(false) }
+    val showExamplesMenu = remember { mutableStateOf(false) }
+    val showClearMenu = remember { mutableStateOf(false) }
 
     TopAppBar(
         title = {
@@ -81,8 +83,8 @@ fun RenderAppBar(
             ) {
                 Icon(Icons.Default.MoreVert, contentDescription = "More")
                 var menuItems = arrayOf(
-                    "Full Reset" to { viewModel.reset() },
                     "Run main()" to { viewModel.runMain() },
+                    "Clear ▶" to { showClearMenu.value = true },
                     "Examples \u25B6" to { showExamplesMenu.value = true },
                 )
 
@@ -95,6 +97,11 @@ fun RenderAppBar(
                     showExamplesMenu,
                     "HelloWorld" to  { viewModel.loadExample("HelloWorld.tt") },
                     "RayTracer" to  { viewModel.loadExample("RayTracer.tt") }
+                )
+                RenderDropDownMenu(
+                    showClearMenu,
+                    "Clear text output" to { (viewModel.console.konsole as ComposeKonsole).entries.clear() },
+                            "Full reset" to { viewModel.reset() }
                 )
             }
         }

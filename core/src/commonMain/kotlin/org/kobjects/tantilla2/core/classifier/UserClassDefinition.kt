@@ -14,6 +14,12 @@ class UserClassDefinition(
     override val title: String
         get() = name
 
+    override val supportsMethods: Boolean
+        get() = true
+
+    override val supportsLocalVariables: Boolean
+        get() = true
+
     override fun eval(context: RuntimeContext) = context
 
     override fun serializeType(writer: CodeWriter) {

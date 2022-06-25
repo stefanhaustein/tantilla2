@@ -21,6 +21,12 @@ abstract class Scope(
     var locals = mutableListOf<String>()
     abstract val title: String
 
+    open val supportsMethods: Boolean
+        get() = false
+
+    open val supportsLocalVariables: Boolean
+        get() = false
+
 /*
     override val type: Type
         get() = if (this is ClassDefinition) ClassMetaType(this) else MetaType(this)

@@ -75,21 +75,20 @@ fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
             .pointerInput(Unit) {
                 val editable = !definition.isScope() && viewModel.mode.value == TantillaViewModel.Mode.HIERARCHY
                 detectTapGestures(
-                    onLongPress = { if (editable) { viewModel.edit(definition.scope, definition) } },
-                    onTap = {
+                    onLongPress = {
                         if (definition.isScope()) {
                             viewModel.scope().value = definition.value() as Scope
-                        } else {
-                            if (viewModel.expanded.value.contains(definition)) {
-                                viewModel.expanded.value = viewModel.expanded.value - definition
-                                println("removing $definition from expanded")
-                            } else {
-                                viewModel.expanded.value = viewModel.expanded.value + definition
-                                println("adding $definition to expanded")
-                            }
-                            println("Expanded: ${viewModel.expanded.value}")
+                        } else if (editable) {
+                            viewModel.edit(definition.scope, definition)
                         }
-                    }
+                                  },
+                    onTap = {
+                            if (viewModel.expanded.value.contains(definition)) {
+                                viewModel.expanded.value -= definition
+                            } else {
+                                viewModel.expanded.value += definition
+                            }
+                        }
                 )
             }
     ) {
@@ -101,11 +100,11 @@ fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
             if (help || !expanded) {
                 definition.serializeTitle(writer)
             } else {
-                definition.serializeCode(writer)
+                definition.serializeSummaray(writer)
             }
             Text(AnsiConverter.ansiToAnnotatedString(writer.toString()))
 
-            if (help && expanded) {
+            if (help && expanded && !definition.isScope()) {
                 Divider(Modifier.padding(0.dp, 6.dp), color = Color.Transparent)
                 Text(AnsiConverter.ansiToAnnotatedString(definition.docString))
             }
