@@ -192,28 +192,14 @@ class Definition(
         }
 
         tokenizer.tryConsume("static")
-        tokenizer.consume(TokenType.IDENTIFIER) // var/val
-        tokenizer.consume(name)
+        tokenizer.tryConsume("mut")
+        tokenizer.tryConsume("var") || tokenizer.tryConsume("val") // var/val
 
-        if (tokenizer.tryConsume(":")) {
-            resolvedType = TypeParser.parseType(tokenizer, ParsingContext(scope, 0))
-            if (typeOnly) {
-                return
-            }
-        }
-        if (tokenizer.tryConsume("=")) {
-            resolvedInitializer = ExpressionParser.parseExpression(tokenizer, ParsingContext(scope, 0))
-            if (resolvedType == null) {
-                resolvedType = resolvedInitializer!!.returnType
-            } else {
-                resolvedInitializer = ExpressionParser.matchType(scope, resolvedInitializer!!, resolvedType!!)
-            }
-        } else if (resolvedType != null) {
-            resolvedInitializer = null
-        } else {
-            throw tokenizer.exception("Explicit type or initializer expression required (resolving: $name).")
-        }
-        if (kind == Kind.STATIC_VARIABLE) {
+        val resolved = Parser.resolveVariable(tokenizer, ParsingContext(scope, 0))
+        resolvedType = resolved.second
+        resolvedInitializer = resolved.third
+
+        if (kind == Definition.Kind.STATIC_VARIABLE) {
             resolvedValue = resolvedInitializer!!.eval(RuntimeContext(mutableListOf()))
         }
     }
@@ -229,7 +215,10 @@ class Definition(
                 if (kind == Kind.STATIC_VARIABLE && scope.supportsLocalVariables) {
                     writer.keyword("static ")
                 }
-                writer.keyword(if (mutable) "var " else "val ").declaration(name)
+                if (mutable) {
+                    writer.keyword("mut ")
+                }
+                writer.declaration(name)
                 writer.append(": ")
                 writer.appendType(type())
             }

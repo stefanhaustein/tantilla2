@@ -1,0 +1,132 @@
+package org.kobjects.tantilla2.core.parser
+
+import org.kobjects.greenspun.core.Control
+import org.kobjects.greenspun.core.Evaluable
+import org.kobjects.tantilla2.core.Definition
+import org.kobjects.tantilla2.core.RuntimeContext
+import org.kobjects.tantilla2.core.function.FunctionScope
+import org.kobjects.tantilla2.core.node.*
+import org.kobjects.tantilla2.core.returnType
+import org.kobjects.tantilla2.core.runtime.ListType
+import org.kobjects.tantilla2.core.runtime.RangeType
+import org.kobjects.tantilla2.core.runtime.Void
+
+object StatementParser {
+
+    fun parseStatement(
+        tokenizer: TantillaTokenizer,
+        context: ParsingContext,
+    ) : Evaluable<RuntimeContext> =
+        when (tokenizer.current.text) {
+            "for" -> parseFor(tokenizer, context)
+            "if" -> parseIf(tokenizer, context)
+            "let" -> parseLet(tokenizer, context)
+            "return" -> parseReturn(tokenizer, context)
+            "while" -> parseWhile(tokenizer, context)
+            else -> {
+                var expr = ExpressionParser.parseExpression(tokenizer, context)
+                if (tokenizer.tryConsume("=")) {
+                    if (expr !is Assignable) {
+                        tokenizer.exception("Target is not assignable")
+                    }
+                    expr = Assignment(expr as Assignable, ExpressionParser.parseExpression(tokenizer, context))
+                }
+                if (tokenizer.current.type != TokenType.EOF
+                    && tokenizer.current.type != TokenType.LINE_BREAK
+                    && !Parser.VALID_AFTER_STATEMENT.contains(tokenizer.current.text)) {
+                    throw tokenizer.exception("Unexpected token ${tokenizer.current} after end of statement.")
+                }
+                expr
+            }
+        }
+
+    fun parseLet(tokenizer: TantillaTokenizer, context: ParsingContext): Evaluable<RuntimeContext> {
+        tokenizer.consume("let")
+
+        val mutable = tokenizer.tryConsume("mut")
+        val resolved = Parser.resolveVariable(tokenizer, context)
+
+        val name = resolved.first
+        val type = resolved.second
+        val initializer = resolved.third
+
+        val definition = Definition(
+            context.scope, Definition.Kind.LOCAL_VARIABLE, name, resolvedType = type)
+
+        context.scope.add(definition)
+
+        // TODO: We need a let-node (derived from for Assignment) for re-serialization
+        return if (initializer == null) Control.Block<RuntimeContext>()
+        else Assignment(
+            LocalVariableReference(
+                name,
+                type,
+                0,
+                definition.index,
+                mutable
+            ),
+            resolved.third!!)
+    }
+
+
+
+    fun parseReturn(tokenizer: TantillaTokenizer, context: ParsingContext): Evaluable<RuntimeContext> {
+        tokenizer.consume("return")
+        if (context.scope !is FunctionScope) {
+            throw tokenizer.exception("Function scope expected for 'return'")
+        }
+        if (context.scope.functionType.returnType == Void) {
+            return FlowControl(Control.FlowSignal.Kind.RETURN)
+        }
+        val expression = ExpressionParser.parseExpression(tokenizer, context)
+        return FlowControl(Control.FlowSignal.Kind.RETURN, expression)
+    }
+
+    fun parseWhile(tokenizer: TantillaTokenizer, context: ParsingContext): Control.While<RuntimeContext> {
+        tokenizer.consume("while")
+        val condition = ExpressionParser.parseExpression(tokenizer, context)
+        tokenizer.consume(":")
+        return Control.While(condition, Parser.parse(tokenizer, context.indent()))
+    }
+
+    fun parseFor(tokenizer: TantillaTokenizer, context: ParsingContext): For {
+        tokenizer.consume("for")
+        val iteratorName = tokenizer.consume(TokenType.IDENTIFIER, "Loop variable name expected.")
+        tokenizer.consume("in")
+        val iterableExpression = ExpressionParser.parseExpression(tokenizer, context)
+        tokenizer.consume(":")
+        val iterableType = iterableExpression.returnType
+        val iteratorType = when (iterableType) {
+            RangeType -> org.kobjects.tantilla2.core.runtime.F64
+            is ListType -> iterableType.elementType
+            else -> throw RuntimeException("Can't iterate type $iterableType")
+        }
+
+        val iteratorIndex = context.scope.declareLocalVariable(
+            iteratorName, iteratorType, false)
+        val body = Parser.parse(tokenizer, context.indent())
+        return For(iteratorName, iteratorIndex, iterableExpression, body)
+    }
+
+    fun parseIf(tokenizer: TantillaTokenizer, context: ParsingContext): Control.If<RuntimeContext> {
+        tokenizer.consume("if")
+        val expressions = mutableListOf<Evaluable<RuntimeContext>>()
+        do {
+            val condition = ExpressionParser.parseExpression(tokenizer, context)
+            expressions.add(condition)
+            tokenizer.consume(":")
+            val block = Parser.parse(tokenizer, context.indent())
+            expressions.add(block)
+            Parser.skipLineBreaks(tokenizer, context.depth)
+        } while (tokenizer.tryConsume("elif"))
+
+        if (tokenizer.tryConsume("else")) {
+            tokenizer.consume(":")
+            val otherwise = Parser.parse(tokenizer, context.indent())
+            expressions.add(otherwise)
+        }
+
+        return Control.If(*expressions.toTypedArray())
+    }
+
+}

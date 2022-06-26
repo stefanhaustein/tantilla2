@@ -15,7 +15,7 @@ import org.kobjects.tantilla2.core.runtime.Void
 fun String.unquote() = this.substring(1, this.length - 1)
 
 object Parser {
-    val DECLARATION_KEYWORDS = setOf("def", "var", "val", "struct", "trait", "impl", "static")
+    val DECLARATION_KEYWORDS = setOf("def", "struct", "trait", "impl", "static", "mut")
 
     val VALID_AFTER_STATEMENT = setOf(")", ",", "]", "}", "<|")
 
@@ -52,33 +52,15 @@ object Parser {
                     break
                 }
                 tokenizer.next()
-            } else if (DECLARATION_KEYWORDS.contains(tokenizer.current.text)) {
+            } else if (DECLARATION_KEYWORDS.contains(tokenizer.current.text) ||
+                (context.scope !is FunctionScope
+                        && tokenizer.current.type == TokenType.IDENTIFIER
+                        && (tokenizer.lookAhead(1).text == ":" || tokenizer.lookAhead(1).text == "="))) {
                     val definition = parseDefinition(tokenizer, ParsingContext(scope, localDepth))
                     scope.add(definition)
-                    if (definition.kind == Definition.Kind.LOCAL_VARIABLE) {
-                        if (scope !is FunctionScope && scope !is UserClassDefinition) {
-                            throw IllegalStateException()
-                        }
-                        if (definition.initializer() != null) {
-                            statements.add(
-                                Assignment(
-                                    LocalVariableReference(
-                                        definition.name,
-                                        definition.type(),
-                                        0,
-                                        definition.index,
-                                        definition.mutable
-                                    ),
-                                    definition.initializer()!!
-                                )
-                            )
-                        }
-                    }
                 } else {
-                    val statement = parseStatement(tokenizer, ParsingContext(scope, localDepth))
-                    println("parsed statement: $statement")
+                    val statement = StatementParser.parseStatement(tokenizer, ParsingContext(scope, localDepth))
                     statements.add(statement)
-
             }
         }
         return if (statements.size == 1) statements[0]
@@ -88,12 +70,16 @@ object Parser {
     fun parseDefinition(tokenizer: TantillaTokenizer, context: ParsingContext): Definition {
         val startPos = tokenizer.current.pos
         val explicitlyStatic = tokenizer.tryConsume("static")
+        val mutable = tokenizer.tryConsume("mut")
         val scope = context.scope
+
+        if (tokenizer.current.type == TokenType.IDENTIFIER
+            && (tokenizer.lookAhead(1).text == "=" || tokenizer.lookAhead(1).text == ":")) {
+            val local = !explicitlyStatic && (scope is UserClassDefinition || scope is FunctionScope)
+            return parseVariableDeclaration(tokenizer, context, startPos, local, mutable)
+        }
+
         return when (tokenizer.current.text) {
-            "var", "val" -> {
-                val local = !explicitlyStatic && (scope is UserClassDefinition || scope is FunctionScope)
-                parseVariableDeclaration(tokenizer, context, startPos, local)
-            }
             "def" -> {
                 val isMethod = !explicitlyStatic && (scope is UserClassDefinition || scope is TraitDefinition ||
                         scope is ImplDefinition)
@@ -164,32 +150,6 @@ object Parser {
         return tokenizer.input.substring(startPos)
     }
 
-    fun parseStatement(
-        tokenizer: TantillaTokenizer,
-        context: ParsingContext,
-    ) : Evaluable<RuntimeContext> =
-        when (tokenizer.current.text) {
-            "if" -> parseIf(tokenizer, context)
-            "while" -> parseWhile(tokenizer, context)
-            "for" -> parseFor(tokenizer, context)
-            "return" -> parseReturn(tokenizer, context)
-            else -> {
-                var expr = parseExpression(tokenizer, context)
-                if (tokenizer.tryConsume("=")) {
-                    if (expr !is Assignable) {
-                        tokenizer.exception("Target is not assignable")
-                    }
-                    expr = Assignment(expr as Assignable, ExpressionParser.parseExpression(tokenizer, context))
-                }
-                if (tokenizer.current.type != TokenType.EOF
-                    && tokenizer.current.type != TokenType.LINE_BREAK
-                    && !VALID_AFTER_STATEMENT.contains(tokenizer.current.text)) {
-                    throw tokenizer.exception("Unexpected token ${tokenizer.current} after end of statement.")
-                }
-                expr
-            }
-        }
-
     fun skipLineBreaks(tokenizer: TantillaTokenizer, currentDepth: Int) {
         while (tokenizer.current.type == TokenType.LINE_BREAK
             && getIndent(tokenizer.current.text) >= currentDepth) {
@@ -197,75 +157,40 @@ object Parser {
         }
     }
 
-    fun parseReturn(tokenizer: TantillaTokenizer, context: ParsingContext): Evaluable<RuntimeContext> {
-        tokenizer.consume("return")
-        if (context.scope !is FunctionScope) {
-            throw tokenizer.exception("Function scope expected for 'return'")
+
+    fun resolveVariable(tokenizer: TantillaTokenizer, context: ParsingContext, typeOnly: Boolean = false):
+            Triple<String, Type, Evaluable<RuntimeContext>?> {
+        val name = tokenizer.consume(TokenType.IDENTIFIER)
+        val scope = context.scope
+        var type: Type? = null
+        var initializer: Evaluable<RuntimeContext>? = null
+        if (tokenizer.tryConsume(":")) {
+            type = TypeParser.parseType(tokenizer, ParsingContext(scope, 0))
+            if (typeOnly) {
+                return Triple(name, type, null)
+            }
         }
-        if (context.scope.functionType.returnType == Void) {
-            return FlowControl(Control.FlowSignal.Kind.RETURN)
+        if (tokenizer.tryConsume("=")) {
+            initializer = ExpressionParser.parseExpression(tokenizer, context)
+            if (type == null) {
+                type = initializer.returnType
+            } else {
+                initializer = ExpressionParser.matchType(scope, initializer, type)
+            }
+        } else if (type == null) {
+            throw tokenizer.exception("Explicit type or initializer expression required.")
         }
-        val expression = parseExpression(tokenizer, context)
-        return FlowControl(Control.FlowSignal.Kind.RETURN, expression)
+        return Triple(name, type, initializer)
     }
 
-    fun parseWhile(tokenizer: TantillaTokenizer, context: ParsingContext): Control.While<RuntimeContext> {
-        tokenizer.consume("while")
-        val condition = parseExpression(tokenizer, context)
-        tokenizer.consume(":")
-        return Control.While(condition, parse(tokenizer, context.indent()))
-    }
-
-    fun parseFor(tokenizer: TantillaTokenizer, context: ParsingContext): For {
-        tokenizer.consume("for")
-        val iteratorName = tokenizer.consume(TokenType.IDENTIFIER, "Loop variable name expected.")
-        tokenizer.consume("in")
-        val iterableExpression = parseExpression(tokenizer, context)
-        tokenizer.consume(":")
-        val iterableType = iterableExpression.returnType
-        val iteratorType = when (iterableType) {
-            RangeType -> org.kobjects.tantilla2.core.runtime.F64
-            is ListType -> iterableType.elementType
-            else -> throw RuntimeException("Can't iterate type $iterableType")
-        }
-
-        val iteratorIndex = context.scope.declareLocalVariable(
-            iteratorName, iteratorType, false)
-        val body = parse(tokenizer, context.indent())
-        return For(iteratorName, iteratorIndex, iterableExpression, body)
-    }
-
-    fun parseIf(tokenizer: TantillaTokenizer, context: ParsingContext): Control.If<RuntimeContext> {
-        tokenizer.consume("if")
-        val expressions = mutableListOf<Evaluable<RuntimeContext>>()
-        do {
-            val condition = ExpressionParser.parseExpression(tokenizer, context)
-            expressions.add(condition)
-            tokenizer.consume(":")
-            val block = parse(tokenizer, context.indent())
-            expressions.add(block)
-            skipLineBreaks(tokenizer, context.depth)
-        } while (tokenizer.tryConsume("elif"))
-
-        if (tokenizer.tryConsume("else")) {
-            tokenizer.consume(":")
-            val otherwise = parse(tokenizer, context.indent())
-            expressions.add(otherwise)
-        }
-
-        return Control.If(*expressions.toTypedArray())
-    }
 
     fun parseVariableDeclaration(
         tokenizer: TantillaTokenizer,
         context: ParsingContext,
         startPos: Int,
         local: Boolean,
+        mutable: Boolean,
     ) : Definition {
-        val mutable = if (tokenizer.tryConsume("var")) true
-            else if (tokenizer.tryConsume("val")) false
-            else throw tokenizer.exception("var or val expected.")
-
         val name = tokenizer.consume(TokenType.IDENTIFIER)
         val kind = if (local) Definition.Kind.LOCAL_VARIABLE
             else Definition.Kind.STATIC_VARIABLE
