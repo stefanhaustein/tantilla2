@@ -159,15 +159,16 @@ object Parser {
 
 
     fun resolveVariable(tokenizer: TantillaTokenizer, context: ParsingContext, typeOnly: Boolean = false):
-            Triple<String, Type, Evaluable<RuntimeContext>?> {
-        val name = tokenizer.consume(TokenType.IDENTIFIER)
+            Triple<Type, Boolean, Evaluable<RuntimeContext>?> {
+
         val scope = context.scope
         var type: Type? = null
         var initializer: Evaluable<RuntimeContext>? = null
-        if (tokenizer.tryConsume(":")) {
+        var typeIsExplicit = tokenizer.tryConsume(":")
+        if (typeIsExplicit) {
             type = TypeParser.parseType(tokenizer, ParsingContext(scope, 0))
             if (typeOnly) {
-                return Triple(name, type, null)
+                return Triple(type, true, null)
             }
         }
         if (tokenizer.tryConsume("=")) {
@@ -180,7 +181,7 @@ object Parser {
         } else if (type == null) {
             throw tokenizer.exception("Explicit type or initializer expression required.")
         }
-        return Triple(name, type, initializer)
+        return Triple(type, typeIsExplicit, initializer)
     }
 
 

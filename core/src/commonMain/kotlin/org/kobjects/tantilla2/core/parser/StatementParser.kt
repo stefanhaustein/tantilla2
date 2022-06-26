@@ -44,28 +44,19 @@ object StatementParser {
         tokenizer.consume("let")
 
         val mutable = tokenizer.tryConsume("mut")
+        val name = tokenizer.consume(TokenType.IDENTIFIER)
         val resolved = Parser.resolveVariable(tokenizer, context)
 
-        val name = resolved.first
-        val type = resolved.second
+        val type = resolved.first
+        val typeIsExplicit = resolved.second
         val initializer = resolved.third
 
         val definition = Definition(
-            context.scope, Definition.Kind.LOCAL_VARIABLE, name, resolvedType = type)
+            context.scope, Definition.Kind.LOCAL_VARIABLE, name, resolvedType = type, mutable = mutable)
 
         context.scope.add(definition)
 
-        // TODO: We need a let-node (derived from for Assignment) for re-serialization
-        return if (initializer == null) Control.Block<RuntimeContext>()
-        else Assignment(
-            LocalVariableReference(
-                name,
-                type,
-                0,
-                definition.index,
-                mutable
-            ),
-            resolved.third!!)
+        return Let(definition, type, typeIsExplicit, initializer)
     }
 
 

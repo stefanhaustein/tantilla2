@@ -195,8 +195,11 @@ class Definition(
         tokenizer.tryConsume("mut")
         tokenizer.tryConsume("var") || tokenizer.tryConsume("val") // var/val
 
+        tokenizer.consume(name)
+
         val resolved = Parser.resolveVariable(tokenizer, ParsingContext(scope, 0))
-        resolvedType = resolved.second
+        resolvedType = resolved.first
+
         resolvedInitializer = resolved.third
 
         if (kind == Definition.Kind.STATIC_VARIABLE) {
