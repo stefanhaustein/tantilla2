@@ -11,7 +11,6 @@ import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.parser.Parser
 import org.kobjects.tantilla2.core.parser.ParsingContext
 import org.kobjects.tantilla2.core.parser.TantillaTokenizer
-import org.kobjects.tantilla2.core.runtime.Void
 
 abstract class Scope(
     val parentContext: Scope?
@@ -35,7 +34,7 @@ abstract class Scope(
 
     fun add(definition: Definition) {
         definitions[definition.name] = definition
-        if (definition.kind == Definition.Kind.LOCAL_VARIABLE && definition.index == -1) {
+        if (definition.kind == Definition.Kind.FIELD && definition.index == -1) {
             definition.index = locals.size
             locals.add(definition.name)
         }
@@ -59,7 +58,7 @@ abstract class Scope(
     fun declareLocalVariable(name: String, type: Type, mutable: Boolean): Int {
         val definition = Definition(
             this,
-            Definition.Kind.LOCAL_VARIABLE,
+            Definition.Kind.FIELD,
             name,
             mutable = mutable,
             resolvedType = type

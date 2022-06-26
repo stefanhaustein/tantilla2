@@ -3,13 +3,7 @@ package org.kobjects.tantilla2.core.parser
 import org.kobjects.greenspun.core.*
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.classifier.*
-import org.kobjects.tantilla2.core.node.For
 import org.kobjects.tantilla2.core.function.*
-import org.kobjects.tantilla2.core.node.*
-import org.kobjects.tantilla2.core.parser.ExpressionParser.parseExpression
-import org.kobjects.tantilla2.core.runtime.ListType
-import org.kobjects.tantilla2.core.runtime.RangeType
-import org.kobjects.tantilla2.core.runtime.Void
 
 
 fun String.unquote() = this.substring(1, this.length - 1)
@@ -193,8 +187,8 @@ object Parser {
         mutable: Boolean,
     ) : Definition {
         val name = tokenizer.consume(TokenType.IDENTIFIER)
-        val kind = if (local) Definition.Kind.LOCAL_VARIABLE
-            else Definition.Kind.STATIC_VARIABLE
+        val kind = if (local) Definition.Kind.FIELD
+            else Definition.Kind.STATIC
         val text = consumeLine(tokenizer, startPos)
 
         return Definition(context.scope, kind, name, definitionText = text)

@@ -27,11 +27,11 @@ class Definition(
     private var resolvedInitializer: Evaluable<RuntimeContext>? = UnresolvedEvalueable
 
     enum class Kind {
-        LOCAL_VARIABLE, STATIC_VARIABLE, FUNCTION, METHOD, STRUCT, TRAIT, IMPL, UNPARSEABLE, UNIT
+        FIELD, STATIC, FUNCTION, METHOD, TRAIT, STRUCT, UNIT, IMPL, UNPARSEABLE
     }
 
     init {
-        if (kind == Kind.LOCAL_VARIABLE) {
+        if (kind == Kind.FIELD) {
             val existingIndex = scope.locals.indexOf(name)
             if (index != existingIndex) {
                 throw IllegalArgumentException("local variable inconsistency new index: $index; existing: $existingIndex")
@@ -63,7 +63,7 @@ class Definition(
         if (error == null) {
             try {
                 when (kind) {
-                    Kind.LOCAL_VARIABLE  -> initializer()
+                    Kind.FIELD  -> initializer()
                     Kind.UNPARSEABLE -> null
                     else -> value()
                 }
@@ -93,8 +93,8 @@ class Definition(
                 when (kind) {
                     Kind.FUNCTION -> resolvedType = resolveFunctionType(tokenizer, isMethod = false)
                     Kind.METHOD -> resolvedType = resolveFunctionType(tokenizer, isMethod = true)
-                    Kind.LOCAL_VARIABLE,
-                    Kind.STATIC_VARIABLE -> resolveVariable(tokenizer, typeOnly = true)
+                    Kind.FIELD,
+                    Kind.STATIC -> resolveVariable(tokenizer, typeOnly = true)
                     else -> resolvedType = value().dynamicType
                 }
             } catch (e: Exception) {
@@ -117,14 +117,14 @@ class Definition(
             println("Resolving: $definitionText")
             try {
                 when (kind) {
-                    Kind.STATIC_VARIABLE -> resolveVariable(tokenizer)
+                    Kind.STATIC -> resolveVariable(tokenizer)
                     Kind.FUNCTION -> resolvedValue =  Parser.parseDef(tokenizer, ParsingContext(scope, 0), isMethod = false)
                     Kind.METHOD -> resolvedValue =  Parser.parseDef(tokenizer, ParsingContext(scope, 0), isMethod = true)
                     Kind.STRUCT -> resolvedValue = resolveClass(tokenizer)
                     Kind.TRAIT -> resolvedValue = resolveTrait(tokenizer)
                     Kind.IMPL -> resolvedValue = resolveImpl(tokenizer)
                     Kind.UNPARSEABLE -> throw RuntimeException("Can't obtain value for unparseable definition.")
-                    Kind.LOCAL_VARIABLE -> throw RuntimeException("Can't obtain local variable value from Definition.")
+                    Kind.FIELD -> throw RuntimeException("Can't obtain local variable value from Definition.")
                     Kind.UNIT -> throw UnsupportedOperationException()
                 }
             } catch (e: Exception) {
@@ -135,7 +135,7 @@ class Definition(
     }
 
     fun initializer(): Evaluable<RuntimeContext>? {
-        if (kind != Kind.STATIC_VARIABLE && kind != Kind.LOCAL_VARIABLE) {
+        if (kind != Kind.STATIC && kind != Kind.FIELD) {
             throw IllegalStateException("Initilizer not available for $kind")
         }
         if (resolvedInitializer == UnresolvedEvalueable) {
@@ -202,7 +202,7 @@ class Definition(
 
         resolvedInitializer = resolved.third
 
-        if (kind == Definition.Kind.STATIC_VARIABLE) {
+        if (kind == Definition.Kind.STATIC) {
             resolvedValue = resolvedInitializer!!.eval(RuntimeContext(mutableListOf()))
         }
     }
@@ -213,9 +213,9 @@ class Definition(
 
     fun serializeTitle(writer: CodeWriter) {
         when (kind) {
-            Kind.STATIC_VARIABLE,
-            Kind.LOCAL_VARIABLE -> {
-                if (kind == Kind.STATIC_VARIABLE && scope.supportsLocalVariables) {
+            Kind.STATIC,
+            Kind.FIELD -> {
+                if (kind == Kind.STATIC && scope.supportsLocalVariables) {
                     writer.keyword("static ")
                 }
                 if (mutable) {
@@ -236,15 +236,15 @@ class Definition(
             Kind.IMPL,
             Kind.STRUCT -> writer.keyword(kind.name.lowercase()).append(' ').declaration(name)
             Kind.UNPARSEABLE -> writer.append("(unparseable: $name)")
-            Kind.UNIT -> writer.append("(scope $name)")
+            Kind.UNIT -> writer.keyword("unit ").declaration(name)
         }
     }
 
 
     override fun serializeCode(writer: CodeWriter, precedence: Int) {
        when (kind) {
-           Kind.STATIC_VARIABLE,
-           Kind.LOCAL_VARIABLE -> {
+           Kind.STATIC,
+           Kind.FIELD -> {
                if (resolvedInitializer != UnresolvedEvalueable) {
                    serializeTitle(writer)
                    if (resolvedInitializer != null) {
@@ -299,7 +299,7 @@ class Definition(
     }
 
 
-    fun isDyanmic() = kind == Definition.Kind.LOCAL_VARIABLE || kind == Definition.Kind.METHOD
+    fun isDyanmic() = kind == Definition.Kind.FIELD || kind == Definition.Kind.METHOD
 
     fun isStatic() = !isDyanmic()
 

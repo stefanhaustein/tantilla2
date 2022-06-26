@@ -19,7 +19,7 @@ struct Vector:
     sqrt(x * x + y * y + z * z)
 
   def norm() -> Vector:
-    self.times(1 / self.mag())
+    times(1 / mag())
 
   def cross(v2: Vector) -> Vector:
     Vector(y * v2.z - z * v2.y, z * v2.x - x * v2.z, x * v2.y - y * v2.x)
@@ -81,17 +81,17 @@ struct Sphere:
 impl Thing for Sphere:
 
   def surface() -> Surface:
-    self.surface
+    surface
 
   def normal(pos: Vector) -> Vector:
-    pos.minus(self.center).norm()
+    pos.minus(center).norm()
 
   def intersect(r: Ray) -> Intersection:
-    let eo = self.center.minus(r.start)
+    let eo = center.minus(r.start)
     let v = eo.dot(r.dir)
      let mut dist = 1/0
     if v >= 0 :
-      let disc = self.radius2 - (eo.dot(eo) - v * v)
+      let disc = radius2 - (eo.dot(eo) - v * v)
       if disc >= 0 :
         dist = v - sqrt(disc)
 
@@ -105,16 +105,16 @@ struct Plane:
 
 impl Thing for Plane:
   def surface() -> Surface:
-    self.surface
+    surface
 
   def normal(pos: Vector) -> Vector:
-    self.norm
+    norm
 
   def intersect(r: Ray) -> Intersection:
-    let denom = self.norm.dot(r.dir)
+    let denom = norm.dot(r.dir)
     let mut dist = 1/0
     if denom <= 0:
-      dist = (self.norm.dot(r.start) + self.offset) / (-denom)
+      dist = (norm.dot(r.start) + offset) / -denom
 
     Intersection(self, r, dist)
 
@@ -170,45 +170,45 @@ struct RayTracer:
     closest
 
   def testRay(r: Ray, s: Scene) -> float:
-    self.intersections(r, s).dist
+    intersections(r, s).dist
 
   def traceRay(r: Ray, s: Scene, depth: float) -> Color:
-    let isect = self.intersections(r, s)
+    let isect = intersections(r, s)
     if isect.dist == 1/0 :
       s.background
     else:
-      self.shade(isect, s, depth)
+      shade(isect, s, depth)
 
   def shade(isect: Intersection, s: Scene, depth: float) -> Color:
     let d = isect.ray.dir
     let pos = d.times(isect.dist).plus(isect.ray.start)
     let normal = isect.thing.normal(pos)
     let reflectDir = d.minus(normal.times(2 * normal.dot(d)))
-    let naturalColor = s.background.plus(self.getNaturalColor(isect.thing, pos, normal, reflectDir, s))
+    let naturalColor = s.background.plus(getNaturalColor(isect.thing, pos, normal, reflectDir, s))
     let mut reflectedColor = Color.GRAY
-    if depth < self.maxDepth :
-      reflectedColor = self.getReflectionColor(isect.thing, pos, normal, reflectDir, s, depth)
+    if depth < maxDepth :
+      reflectedColor = getReflectionColor(isect.thing, pos, normal, reflectDir, s, depth)
 
     naturalColor.plus(reflectedColor)
 
   def getReflectionColor(t: Thing, pos: Vector, normal: Vector, rd: Vector, s: Scene, depth: float) -> Color:
-    self.traceRay(Ray(pos, rd), s, depth + 1).scale(t.surface().reflect(pos))
+    traceRay(Ray(pos, rd), s, depth + 1).scale(t.surface().reflect(pos))
 
   def addLight(t: Thing, pos: Vector, norm: Vector, rd: Vector, s: Scene, col: Color, l: Light) -> Color:
     let ldis = l.pos.minus(pos)
     let livec = ldis.norm()
-    let nearIsect = self.testRay(Ray(pos, livec), s)
+    let nearIsect = testRay(Ray(pos, livec), s)
     let isInShadow = (nearIsect <= ldis.mag())
     if isInShadow :
       return col
 
     let illum = livec.dot(norm)
-    let mut lcolor = self.defaultColor
+    let mut lcolor = defaultColor
     if illum > 0 :
       lcolor = l.color.scale(illum)
 
     let specular = livec.dot(rd.norm())
-    let mut scolor = self.defaultColor
+    let mut scolor = defaultColor
     if specular > 0 :
       scolor = l.color.scale(specular ** t.surface().roughness())
 
@@ -217,9 +217,9 @@ struct RayTracer:
     col.plus(lcolor.times(diff)).plus(scolor.times(t.surface().specular(pos)))
 
   def getNaturalColor(t: Thing, pos: Vector, norm: Vector, rd: Vector, s: Scene) -> Color:
-    let mut col = self.defaultColor
+    let mut col = defaultColor
     for l in s.lights:
-      col = self.addLight(t, pos, norm, rd, s, col, l)
+      col = addLight(t, pos, norm, rd, s, col, l)
 
     col
 
@@ -236,7 +236,7 @@ struct RayTracer:
       if y % 2 == 0:
         yy = -yy-1
 
-      p.set_fill_color(self.traceRay(Ray(s.camera.pos, self.getPoint(x, yy, s.camera)), s, 0))
+      p.set_fill_color(traceRay(Ray(s.camera.pos, getPoint(x, yy, s.camera)), s, 0))
       p.rect(x, yy, 1, 1)
 
     if (y < screenHeight):

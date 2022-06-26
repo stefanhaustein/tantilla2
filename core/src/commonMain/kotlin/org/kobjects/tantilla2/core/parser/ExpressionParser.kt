@@ -7,12 +7,9 @@ import org.kobjects.tantilla2.core.*
 import org.kobjects.parserlib.expressionparser.ExpressionParser as GreenspunExpressionParser
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
 import org.kobjects.tantilla2.core.classifier.NativeClassMetaType
-import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.classifier.UserClassMetaType
 import org.kobjects.tantilla2.core.function.FunctionScope
 import org.kobjects.tantilla2.core.function.FunctionType
-import org.kobjects.tantilla2.core.function.LambdaImpl
-import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.node.*
 
 object ExpressionParser {
@@ -45,7 +42,7 @@ object ExpressionParser {
         return result
     }
 
-    fun reference(scope: Scope, definition: Definition) = if (definition.kind == Definition.Kind.LOCAL_VARIABLE) {
+    fun reference(scope: Scope, definition: Definition) = if (definition.kind == Definition.Kind.FIELD) {
         val depth = definition.depth(scope)
         LocalVariableReference(
             definition.name, definition.type(), depth, definition.index, definition.mutable
@@ -218,7 +215,7 @@ object ExpressionParser {
         var self: Evaluable<RuntimeContext>? = null
         val name = definition.name
         val value = when (definition.kind) {
-            Definition.Kind.LOCAL_VARIABLE ->
+            Definition.Kind.FIELD ->
                 PropertyReference(
                     base,
                     name,
@@ -231,7 +228,7 @@ object ExpressionParser {
                 StaticReference(definition)
             }
             Definition.Kind.FUNCTION -> StaticReference(definition)
-            Definition.Kind.STATIC_VARIABLE -> StaticReference(definition)
+            Definition.Kind.STATIC -> StaticReference(definition)
             else -> throw tokenizer.exception("Unsupported definition kind ${definition.kind} for $base.$name")
         }
         return parseMaybeApply(tokenizer, context, value, self)

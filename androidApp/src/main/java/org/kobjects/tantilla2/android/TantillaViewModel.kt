@@ -10,7 +10,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.input.TextFieldValue
-import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.konsole.compose.AnsiConverter.ansiToAnnotatedString
 import org.kobjects.tantilla2.console.ConsoleLoop
 import org.kobjects.tantilla2.core.*
@@ -68,7 +67,7 @@ class TantillaViewModel(
         val penImpl = PenImpl(PenDefinition, canvas)
         RootScope.add(Definition(
             RootScope,
-            Definition.Kind.STATIC_VARIABLE,
+            Definition.Kind.STATIC,
             "pen",
             resolvedType = PenDefinition,
             resolvedValue = penImpl

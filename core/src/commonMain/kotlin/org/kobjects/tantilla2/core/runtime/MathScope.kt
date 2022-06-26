@@ -5,9 +5,7 @@ import org.kobjects.tantilla2.core.function.Parameter
 import kotlin.math.ceil
 import kotlin.math.floor
 
-object MathScope : Scope(RootScope), Typed {
-    override val title: String
-        get() = "math"
+object MathScope : UnitScope(RootScope, "math") {
 
     init {
         defineNativeFunction(
@@ -25,7 +23,5 @@ object MathScope : Scope(RootScope), Typed {
             ceil(it.f64(0))
         }
     }
-
-    override val type = ScopeType(this)
 
 }

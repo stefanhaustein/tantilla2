@@ -52,7 +52,7 @@ object StatementParser {
         val initializer = resolved.third
 
         val definition = Definition(
-            context.scope, Definition.Kind.LOCAL_VARIABLE, name, resolvedType = type, mutable = mutable)
+            context.scope, Definition.Kind.FIELD, name, resolvedType = type, mutable = mutable)
 
         context.scope.add(definition)
 
