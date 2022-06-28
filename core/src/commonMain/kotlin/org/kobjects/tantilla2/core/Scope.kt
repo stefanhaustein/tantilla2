@@ -143,16 +143,13 @@ abstract class Scope(
         return null
     }
 
-    open fun hasError(): Boolean {
-        var result = false
+    open fun rebuild(compilationResults: CompilationResults): Boolean {
+        var ok = true
         for (definition in definitions.values) {
-            if (definition.hasError(true)) {
-                result = true
-            }
+            ok = definition.rebuild(compilationResults) && ok
         }
-        return result
+        return ok
     }
-
 
     fun defineNativeFunction(
         name: String,

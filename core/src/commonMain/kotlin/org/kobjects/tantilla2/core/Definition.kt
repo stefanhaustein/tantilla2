@@ -75,14 +75,19 @@ class Definition(
         return error;
     }
 
-    fun hasError(recursive: Boolean): Boolean {
+    fun rebuild(compilationResults: CompilationResults): Boolean {
+        var ok = true
         if (error() != null) {
-            return true
+            compilationResults.errors.add(this)
+            ok = false
         }
-        if (recursive && isScope()) {
-            return (value() as Scope).hasError()
+        if (isScope()) {
+            if (!(value() as Scope).rebuild(compilationResults)) {
+                compilationResults.errors.add(this)
+                ok = false
+            }
         }
-        return false
+        return ok
     }
 
 

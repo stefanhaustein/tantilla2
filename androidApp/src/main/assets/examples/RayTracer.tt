@@ -53,7 +53,6 @@ trait Surface:
   def specular(pos: Vector) ->  Color
   def reflect(pos: Vector) -> float
 
-
 trait Thing:
   def surface() -> Surface
   def normal(pos: Vector) -> Vector
@@ -90,9 +89,9 @@ impl Thing for Sphere:
     let eo = center.minus(r.start)
     let v = eo.dot(r.dir)
      let mut dist = 1/0
-    if v >= 0 :
+    if v >= 0:
       let disc = radius2 - (eo.dot(eo) - v * v)
-      if disc >= 0 :
+      if disc >= 0:
         dist = v - sqrt(disc)
 
     Intersection(self, r, dist)

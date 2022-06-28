@@ -63,7 +63,7 @@ fun RenderScope(viewModel: TantillaViewModel) {
 @Composable
 fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
     Card(
-        backgroundColor = if (definition.hasError(true)
+        backgroundColor = if (viewModel.compilationResults.value.errors.contains(definition)
             || viewModel.withRuntimeException.containsKey(definition)) Color(0xffff8888L) else Color(0xffeeeeee),
         modifier = Modifier
             .fillMaxWidth()

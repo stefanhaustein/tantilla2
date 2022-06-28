@@ -20,10 +20,8 @@ class ImplDefinition(
     override fun resolve(name: String): Definition? = resolveDynamic(name, false)
 
 
-    override fun hasError(): Boolean {
-        if (!trait.hasError()
-                    && !classifier.hasError()
-                && !super.hasError()) {
+    override fun rebuild(compilationResults: CompilationResults): Boolean {
+        if (super.rebuild(compilationResults)) {
 
             val vmt = MutableList<Lambda?>(trait.traitIndex) { null }
             for (definition in trait) {
@@ -35,9 +33,13 @@ class ImplDefinition(
                 vmt[index] = resolved.value() as Lambda
             }
             this.vmt = vmt.toList() as List<Lambda>
-            return false
+
+            compilationResults.classToTrait.getOrPut(classifier) { mutableMapOf() }[trait] = this
+            compilationResults.traitToClass.getOrPut(trait) { mutableMapOf() }[classifier] = this
+
+            return true
         }
-        return true
+        return false
     }
 
     override fun serializeType(writer: CodeWriter) {

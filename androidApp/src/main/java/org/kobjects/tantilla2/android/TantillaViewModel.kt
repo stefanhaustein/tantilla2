@@ -39,6 +39,7 @@ class TantillaViewModel(
     var editorParentScope: Scope = console.scope
     val expanded = mutableStateOf(setOf<Definition>())
     var withRuntimeException = mutableStateMapOf<Definition, TantillaRuntimeException>()
+    var compilationResults = mutableStateOf(CompilationResults())
 
     init {
         defineNatives()
@@ -155,12 +156,18 @@ class TantillaViewModel(
         }
     }
 
+    fun rebuild() {
+        val result = CompilationResults()
+        userScope.value.rebuild(result)
+        compilationResults.value = result
+    }
+
     fun loadExample(name: String) {
         val programText = exampleLoader(name)
         reset()
         this.fileName.value = name
         Parser.parse(programText, console.scope)
-        console.scope.hasError()
+        rebuild()
         mode.value = Mode.HIERARCHY
     }
 

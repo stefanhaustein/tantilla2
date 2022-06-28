@@ -1,6 +1,7 @@
 package org.kobjects.tantilla2.console
 
 import org.kobjects.konsole.Konsole
+import org.kobjects.tantilla2.core.CompilationResults
 import org.kobjects.tantilla2.core.runtime.RootScope
 import org.kobjects.tantilla2.core.RuntimeContext
 import org.kobjects.tantilla2.core.TantillaRuntimeException
@@ -41,7 +42,7 @@ class ConsoleLoop(
             try {
                 var parsed = Parser.parse(line, scope)
                 konsole.write("parsed: $parsed")
-                scope.hasError()
+                scope.rebuild(CompilationResults())
                 konsole.write("resolved: $parsed")
 
                 try {

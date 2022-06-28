@@ -190,7 +190,7 @@ object ExpressionParser {
         val traitName = tokenizer.consume(TokenType.IDENTIFIER)
         val className = base.returnType.typeName
         val impl = context.scope.resolveStatic("$traitName for $className")!!.value() as ImplDefinition
-        impl.hasError()
+        impl.rebuild(CompilationResults())
         return As(base, impl, implicit = false)
     }
 
