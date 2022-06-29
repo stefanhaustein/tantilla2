@@ -18,6 +18,10 @@ import org.kobjects.konsole.compose.AnsiConverter
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.Definition
 import org.kobjects.tantilla2.core.Scope
+import org.kobjects.tantilla2.core.classifier.ImplDefinition
+import org.kobjects.tantilla2.core.classifier.TraitDefinition
+import org.kobjects.tantilla2.core.classifier.UserClassDefinition
+import org.kobjects.tantilla2.core.dynamicType
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -38,21 +42,32 @@ fun RenderScope(viewModel: TantillaViewModel) {
     ) {
         LazyColumn(Modifier.fillMaxWidth(), contentPadding = PaddingValues(8.dp)) {
             for (kind in Definition.Kind.values()) {
-                var list = (if (kind == Definition.Kind.FIELD)
-                    scope.locals.map { scope[it]!! }
-                else
-                    definitions).filter { it.kind == kind }
-
-                if (list.isNotEmpty()) {
-                    item {
-                        Text(kind.name, Modifier.padding(0.dp, 4.dp, 0.dp, 0.dp))
+                val list: List<Definition>
+                if (kind == Definition.Kind.IMPL) {
+                    if (scope is UserClassDefinition) {
+                        list = viewModel.compilationResults.value.classToTrait[scope]?.values?.toList() ?: emptyList()
+                    } else if (scope is TraitDefinition) {
+                        list = viewModel.compilationResults.value.traitToClass[scope]?.values?.toList() ?: emptyList()
+                    } else {
+                        continue
                     }
-                    for (definition in list) {
-                        item(key = definition.hashCode()) {
-                            RenderDefinition(viewModel, definition)
+                } else {
+                    list = (if (kind == Definition.Kind.FIELD)
+                        scope.locals.map { scope[it]!! }
+                    else
+                        definitions).filter { it.kind == kind }
+                }
+                    if (list.isNotEmpty()) {
+                        item {
+                            Text(kind.name, Modifier.padding(0.dp, 4.dp, 0.dp, 0.dp))
+                        }
+                        for (definition in list) {
+                            item(key = definition.hashCode()) {
+                                RenderDefinition(viewModel, definition)
+                            }
                         }
                     }
-                }
+
             }
         }
     }

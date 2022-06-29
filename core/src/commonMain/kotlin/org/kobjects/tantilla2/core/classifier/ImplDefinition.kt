@@ -34,9 +34,6 @@ class ImplDefinition(
             }
             this.vmt = vmt.toList() as List<Lambda>
 
-            compilationResults.classToTrait.getOrPut(classifier) { mutableMapOf() }[trait] = this
-            compilationResults.traitToClass.getOrPut(trait) { mutableMapOf() }[classifier] = this
-
             return true
         }
         return false

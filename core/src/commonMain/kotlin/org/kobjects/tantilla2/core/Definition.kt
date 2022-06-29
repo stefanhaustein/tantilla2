@@ -82,9 +82,15 @@ class Definition(
             ok = false
         }
         if (isScope()) {
-            if (!(value() as Scope).rebuild(compilationResults)) {
+            val value = value() as Scope
+            if (!value.rebuild(compilationResults)) {
                 compilationResults.errors.add(this)
                 ok = false
+            } else if (value is ImplDefinition) {
+
+                compilationResults.classToTrait.getOrPut(value.classifier) { mutableMapOf() }[value.trait] = this
+                compilationResults.traitToClass.getOrPut(value.trait) { mutableMapOf() }[value.classifier] = this
+
             }
         }
         return ok
