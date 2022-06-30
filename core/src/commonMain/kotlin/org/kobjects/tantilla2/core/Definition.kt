@@ -129,8 +129,16 @@ class Definition(
             try {
                 when (kind) {
                     Kind.STATIC -> resolveVariable(tokenizer)
-                    Kind.FUNCTION -> resolvedValue =  Parser.parseDef(tokenizer, ParsingContext(scope, 0), isMethod = false)
-                    Kind.METHOD -> resolvedValue =  Parser.parseDef(tokenizer, ParsingContext(scope, 0), isMethod = true)
+                    Kind.FUNCTION -> {
+                        val resolved = Parser.parseDef(tokenizer, ParsingContext(scope, 0), isMethod = false)
+                        docString = resolved.first
+                        resolvedValue = resolved.second
+                    }
+                    Kind.METHOD -> {
+                        val resolved = Parser.parseDef(tokenizer, ParsingContext(scope, 0), isMethod = true)
+                        docString = resolved.first
+                        resolvedValue = resolved.second
+                    }
                     Kind.STRUCT -> resolvedValue = resolveClass(tokenizer)
                     Kind.TRAIT -> resolvedValue = resolveTrait(tokenizer)
                     Kind.IMPL -> resolvedValue = resolveImpl(tokenizer)
@@ -294,17 +302,12 @@ class Definition(
             return
         }
         serializeTitle(writer)
+        writer.append(":")
         writer.indent()
-        writer.newline()
         val scope = value() as Scope
-        var first = true
-        for (name in scope.locals) {
-            if (first) {
-                first = false
-            } else {
-                writer.append(", ")
-            }
-            writer.append(name)
+        for (definition in scope.iterator()) {
+            writer.newline()
+            definition.serializeTitle(writer)
         }
         writer.outdent()
     }

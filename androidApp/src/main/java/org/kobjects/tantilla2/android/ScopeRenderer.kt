@@ -41,9 +41,11 @@ fun RenderScope(viewModel: TantillaViewModel) {
             } },
     ) {
         LazyColumn(Modifier.fillMaxWidth(), contentPadding = PaddingValues(8.dp)) {
-            for (kind in Definition.Kind.values()) {
+            for (kind in Definition.Kind.values().toList() + listOf(null)) {
                 val list: List<Definition>
-                if (kind == Definition.Kind.IMPL) {
+                val title: String
+                if (kind == null) {
+                    title = "IMPL (defined elsewhere)"
                     if (scope is UserClassDefinition) {
                         list = viewModel.compilationResults.value.classToTrait[scope]?.values?.toList() ?: emptyList()
                     } else if (scope is TraitDefinition) {
@@ -52,6 +54,7 @@ fun RenderScope(viewModel: TantillaViewModel) {
                         continue
                     }
                 } else {
+                    title = kind.name
                     list = (if (kind == Definition.Kind.FIELD)
                         scope.locals.map { scope[it]!! }
                     else
@@ -59,7 +62,7 @@ fun RenderScope(viewModel: TantillaViewModel) {
                 }
                     if (list.isNotEmpty()) {
                         item {
-                            Text(kind.name, Modifier.padding(0.dp, 4.dp, 0.dp, 0.dp))
+                            Text(title, Modifier.padding(0.dp, 4.dp, 0.dp, 0.dp))
                         }
                         for (definition in list) {
                             item(key = definition.hashCode()) {

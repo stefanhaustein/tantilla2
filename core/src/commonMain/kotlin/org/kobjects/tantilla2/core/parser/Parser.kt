@@ -61,6 +61,13 @@ object Parser {
             else Control.Block<RuntimeContext>(*statements.toTypedArray())
     }
 
+    fun readDocString(tokenizer: TantillaTokenizer): String {
+        if (tokenizer.current.type == TokenType.STRING || tokenizer.current.type == TokenType.MULTILINE_STRING) {
+            return tokenizer.next().text
+        }
+        return ""
+    }
+
     fun parseDefinition(tokenizer: TantillaTokenizer, context: ParsingContext): Definition {
         val startPos = tokenizer.current.pos
         val explicitlyStatic = tokenizer.tryConsume("static")
@@ -86,26 +93,33 @@ object Parser {
             "struct" -> {
                 tokenizer.consume("struct")
                 val name = tokenizer.consume(TokenType.IDENTIFIER, "Struct name expected.")
+                tokenizer.consume(":")
+                val docString = readDocString(tokenizer)
                 val text = consumeBody(tokenizer, startPos, context.depth)
-                Definition(context.scope, Definition.Kind.STRUCT, name, definitionText = text)
+                Definition(context.scope, Definition.Kind.STRUCT, name, definitionText = text, docString = docString)
             }
             "trait" -> {
                 tokenizer.consume("trait")
                 val name = tokenizer.consume(TokenType.IDENTIFIER, "Trait name expected.")
+                tokenizer.consume(":")
+                val docString = readDocString(tokenizer)
                 val text = consumeBody(tokenizer, startPos, context.depth)
-                Definition(context.scope, Definition.Kind.TRAIT, name, definitionText = text)
+                Definition(context.scope, Definition.Kind.TRAIT, name, definitionText = text, docString = docString)
             }
             "impl" -> {
                 tokenizer.consume("impl")
                 val traitName = tokenizer.consume(TokenType.IDENTIFIER, "Trait name expected.")
                 tokenizer.consume("for")
                 val name = tokenizer.consume(TokenType.IDENTIFIER, "Class name expected.")
+                tokenizer.consume(":")
+                val docString = readDocString(tokenizer)
                 val text = consumeBody(tokenizer, startPos, context.depth)
                 Definition(
                     context.scope,
                     Definition.Kind.IMPL,
                     "$traitName for $name",
-                    definitionText = text
+                    definitionText = text,
+                    docString = docString
                 )
             }
             else -> throw tokenizer.exception("Declaration expected.")
@@ -195,23 +209,24 @@ object Parser {
     }
 
 
-    fun parseDef(tokenizer: TantillaTokenizer, context: ParsingContext, isMethod: Boolean): Lambda {
+    fun parseDef(tokenizer: TantillaTokenizer, context: ParsingContext, isMethod: Boolean): Pair<String, Lambda> {
         tokenizer.tryConsume("static")
         tokenizer.consume("def")
         tokenizer.consume(TokenType.IDENTIFIER)
         val type = TypeParser.parseFunctionType(tokenizer, context, isMethod)
         if (context.scope is TraitDefinition) {
             tokenizer.consume(TokenType.EOF, "Trait methods must not have function bodies.")
-            return TraitMethod(type, context.scope.traitIndex++)
+            return Pair("", TraitMethod(type, context.scope.traitIndex++))
         }
 
         tokenizer.consume(":")
+        val docString = readDocString(tokenizer)
         val functionScope = FunctionScope(context.scope, type)
         for (parameter in type.parameters) {
             functionScope.declareLocalVariable(parameter.name, parameter.type, false)
         }
         val body = parse(tokenizer, ParsingContext(functionScope, context.depth + 1))
-        return LambdaImpl(type, functionScope.locals.size, body)
+        return Pair(docString, LambdaImpl(type, functionScope.locals.size, body))
     }
 
 
