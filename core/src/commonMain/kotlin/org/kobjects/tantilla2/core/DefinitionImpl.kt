@@ -24,7 +24,6 @@ class DefinitionImpl (
 ) : Definition {
     var error: Exception? = null
 
-    private var resolvedInitializer: Evaluable<RuntimeContext>? = UnresolvedEvalueable
 
     init {
         if (kind == Definition.Kind.FIELD || kind == Definition.Kind.STATIC) {
@@ -94,8 +93,6 @@ class DefinitionImpl (
                 when (kind) {
                     Definition.Kind.FUNCTION -> resolvedType = resolveFunctionType(tokenizer, isMethod = false)
                     Definition.Kind.METHOD -> resolvedType = resolveFunctionType(tokenizer, isMethod = true)
-                    Definition.Kind.FIELD,
-                    Definition.Kind.STATIC -> resolveVariable(tokenizer, typeOnly = true)
                     else -> resolvedType = value().dynamicType
                 }
             } catch (e: Exception) {
@@ -118,7 +115,6 @@ class DefinitionImpl (
             println("Resolving: $definitionText")
             try {
                 when (kind) {
-                    Definition.Kind.STATIC -> resolveVariable(tokenizer)
                     Definition.Kind.FUNCTION -> {
                         val resolved = Parser.parseDef(tokenizer, ParsingContext(parentScope, 0), isMethod = false)
                         docString = resolved.first
@@ -133,8 +129,9 @@ class DefinitionImpl (
                     Definition.Kind.TRAIT -> resolvedValue = resolveTrait(tokenizer)
                     Definition.Kind.IMPL -> resolvedValue = resolveImpl(tokenizer)
                     Definition.Kind.UNPARSEABLE -> throw RuntimeException("Can't obtain value for unparseable definition.")
-                    Definition.Kind.FIELD -> throw RuntimeException("Can't obtain local variable value from Definition.")
                     Definition.Kind.UNIT -> throw UnsupportedOperationException()
+                    Definition.Kind.STATIC,
+                    Definition.Kind.FIELD -> throw IllegalStateException("Not supported here: $kind")
                 }
             } catch (e: Exception) {
                 throw exceptionInResolve(e, tokenizer)
@@ -144,18 +141,7 @@ class DefinitionImpl (
     }
 
     override fun initializer(): Evaluable<RuntimeContext>? {
-        if (kind != Definition.Kind.STATIC && kind != Definition.Kind.FIELD) {
-            throw IllegalStateException("Initilizer not available for $kind")
-        }
-        if (resolvedInitializer == UnresolvedEvalueable) {
-            val tokenizer = tokenizer()
-            try {
-                resolveVariable(tokenizer)
-            } catch (e: Exception) {
-                throw exceptionInResolve(e, tokenizer)
-            }
-        }
-        return resolvedInitializer
+        throw IllegalStateException("Initilizer not available for $kind")
     }
 
     private fun resolveClass(tokenizer: TantillaTokenizer): Scope {
@@ -194,27 +180,6 @@ class DefinitionImpl (
         return implContext
     }
 
-    private fun resolveVariable(tokenizer: TantillaTokenizer, typeOnly: Boolean = false) {
-        if (definitionText.isEmpty()) {
-            resolvedType = resolvedValue.dynamicType
-            return
-        }
-
-        tokenizer.tryConsume("static")
-        tokenizer.tryConsume("mut")
-        tokenizer.tryConsume("var") || tokenizer.tryConsume("val") // var/val
-
-        tokenizer.consume(name)
-
-        val resolved = Parser.resolveVariable(tokenizer, ParsingContext(parentScope, 0))
-        resolvedType = resolved.first
-
-        resolvedInitializer = resolved.third
-
-        if (kind == Definition.Kind.STATIC) {
-            resolvedValue = resolvedInitializer!!.eval(RuntimeContext(mutableListOf()))
-        }
-    }
 
 
     override fun toString() = serializeCode()
@@ -223,17 +188,7 @@ class DefinitionImpl (
     override fun serializeTitle(writer: CodeWriter) {
         when (kind) {
             Definition.Kind.STATIC,
-            Definition.Kind.FIELD -> {
-                if (kind == Definition.Kind.STATIC && parentScope.supportsLocalVariables) {
-                    writer.keyword("static ")
-                }
-                if (mutable) {
-                    writer.keyword("mut ")
-                }
-                writer.declaration(name)
-                writer.append(": ")
-                writer.appendType(valueType())
-            }
+            Definition.Kind.FIELD -> throw IllegalStateException("Unsupported here: $kind")
             Definition.Kind.METHOD  -> writer.keyword("def ").declaration(name).appendType(valueType())
             Definition.Kind.FUNCTION -> {
                 if (parentScope.supportsMethods) {
@@ -253,17 +208,7 @@ class DefinitionImpl (
     override fun serializeCode(writer: CodeWriter, precedence: Int) {
        when (kind) {
            Definition.Kind.STATIC,
-           Definition.Kind.FIELD -> {
-               if (resolvedInitializer != UnresolvedEvalueable) {
-                   serializeTitle(writer)
-                   if (resolvedInitializer != null) {
-                       writer.append(" = ")
-                       writer.appendCode(resolvedInitializer)
-                   }
-               } else {
-                   writer.append(definitionText)
-               }
-           }
+           Definition.Kind.FIELD -> throw IllegalStateException("Unsupported here: $kind")
            Definition.Kind.UNPARSEABLE -> writer.append(definitionText)
            Definition.Kind.TRAIT,
            Definition.Kind.STRUCT,
@@ -303,24 +248,19 @@ class DefinitionImpl (
     }
 
 
-    override fun isDynamic() = kind == Definition.Kind.FIELD || kind == Definition.Kind.METHOD
+    override fun isDynamic() = kind == Definition.Kind.METHOD
 
     override fun isScope() = error() == null && (
             kind == Definition.Kind.IMPL
             || kind == Definition.Kind.STRUCT
             || kind == Definition.Kind.TRAIT || kind == Definition.Kind.UNIT)
 
-    override fun findNode(node: Evaluable<RuntimeContext>): Definition? {
-        val rid = resolvedInitializer
-        if (rid != UnresolvedEvalueable && rid != null && rid.containsNode(node)) {
-            return this
-        }
-        return when (val value = resolvedValue) {
+    override fun findNode(node: Evaluable<RuntimeContext>): Definition? =
+        when (val value = resolvedValue) {
             is LambdaImpl -> if (value.body.containsNode(node)) this else null
             is Scope -> value.findNode(node)
             else -> null
         }
-    }
 
     override fun depth(scope: Scope): Int {
         if (scope == this.parentScope) {
@@ -330,25 +270,6 @@ class DefinitionImpl (
             throw IllegalStateException("Definition $this not found in scope.")
         }
         return 1 + depth(scope.parentScope!!)
-    }
-
-    object UnresolvedEvalueable: TantillaNode {
-        override fun children() = emptyList<Evaluable<RuntimeContext>>()
-
-        override fun eval(context: RuntimeContext): Any? {
-            TODO("Not yet implemented")
-        }
-
-        override fun reconstruct(newChildren: List<Evaluable<RuntimeContext>>): Evaluable<RuntimeContext> {
-            TODO("Not yet implemented")
-        }
-
-        override fun serializeCode(writer: CodeWriter, precedence: Int) {
-            TODO("Not yet implemented")
-        }
-
-        override val returnType: Type
-            get() = TODO("Not yet implemented")
     }
 
 

@@ -83,18 +83,6 @@ class VariableDefinition (
             compilationResults.errors.add(this)
             ok = false
         }
-        if (isScope()) {
-            val value = value() as Scope
-            if (!value.rebuild(compilationResults)) {
-                compilationResults.errors.add(this)
-                ok = false
-            } else if (value is ImplDefinition) {
-
-                compilationResults.classToTrait.getOrPut(value.classifier) { mutableMapOf() }[value.trait] = this
-                compilationResults.traitToClass.getOrPut(value.trait) { mutableMapOf() }[value.classifier] = this
-
-            }
-        }
         return ok
     }
 
@@ -103,13 +91,7 @@ class VariableDefinition (
         if (resolvedType == null) {
             val tokenizer = tokenizer()
             try {
-                when (kind) {
-                    Definition.Kind.FUNCTION -> resolvedType = resolveFunctionType(tokenizer, isMethod = false)
-                    Definition.Kind.METHOD -> resolvedType = resolveFunctionType(tokenizer, isMethod = true)
-                    Definition.Kind.FIELD,
-                    Definition.Kind.STATIC -> resolveVariable(tokenizer, typeOnly = true)
-                    else -> resolvedType = value().dynamicType
-                }
+                resolveVariable(tokenizer, typeOnly = true)
             } catch (e: Exception) {
                 throw exceptionInResolve(e, tokenizer)
             }
@@ -117,12 +99,6 @@ class VariableDefinition (
         return resolvedType!!
     }
 
-    private fun resolveFunctionType(tokenizer: TantillaTokenizer, isMethod: Boolean): FunctionType {
-        tokenizer.tryConsume("static")
-        tokenizer.consume("def")
-        tokenizer.consume(name)
-        return TypeParser.parseFunctionType(tokenizer, ParsingContext(parentScope, 0), isMethod)
-    }
 
     override fun value(): Any?  {
         if (resolvedValue == UnresolvedValue) {
@@ -131,22 +107,7 @@ class VariableDefinition (
             try {
                 when (kind) {
                     Definition.Kind.STATIC -> resolveVariable(tokenizer)
-                    Definition.Kind.FUNCTION -> {
-                        val resolved = Parser.parseDef(tokenizer, ParsingContext(parentScope, 0), isMethod = false)
-                        docString = resolved.first
-                        resolvedValue = resolved.second
-                    }
-                    Definition.Kind.METHOD -> {
-                        val resolved = Parser.parseDef(tokenizer, ParsingContext(parentScope, 0), isMethod = true)
-                        docString = resolved.first
-                        resolvedValue = resolved.second
-                    }
-                    Definition.Kind.STRUCT -> resolvedValue = resolveClass(tokenizer)
-                    Definition.Kind.TRAIT -> resolvedValue = resolveTrait(tokenizer)
-                    Definition.Kind.IMPL -> resolvedValue = resolveImpl(tokenizer)
-                    Definition.Kind.UNPARSEABLE -> throw RuntimeException("Can't obtain value for unparseable definition.")
-                    Definition.Kind.FIELD -> throw RuntimeException("Can't obtain local variable value from Definition.")
-                    Definition.Kind.UNIT -> throw UnsupportedOperationException()
+                    else -> throw RuntimeException("Can't obtain value for $kind.")
                 }
             } catch (e: Exception) {
                 throw exceptionInResolve(e, tokenizer)
@@ -156,9 +117,6 @@ class VariableDefinition (
     }
 
     override fun initializer(): Evaluable<RuntimeContext>? {
-        if (kind != Definition.Kind.STATIC && kind != Definition.Kind.FIELD) {
-            throw IllegalStateException("Initilizer not available for $kind")
-        }
         if (resolvedInitializer == UnresolvedEvalueable) {
             val tokenizer = tokenizer()
             try {
@@ -168,42 +126,6 @@ class VariableDefinition (
             }
         }
         return resolvedInitializer
-    }
-
-    private fun resolveClass(tokenizer: TantillaTokenizer): Scope {
-        val classContext = UserClassDefinition(name, parentScope)
-        tokenizer.consume("struct")
-        tokenizer.consume(name)
-        tokenizer.consume(":")
-        Parser.parse(tokenizer, ParsingContext(classContext, 1))
-        println("Class successfully resolved!")
-        return classContext
-    }
-
-    private fun resolveTrait(tokenizer: TantillaTokenizer): Scope {
-        val traitContext = TraitDefinition(name, parentScope)
-        tokenizer.consume("trait")
-        tokenizer.consume(name)
-        tokenizer.consume(":")
-        Parser.parse(tokenizer, ParsingContext(traitContext, 1))
-        println("Trait successfully resolved!")
-        return traitContext
-    }
-
-    private fun resolveImpl(tokenizer: TantillaTokenizer): Scope {
-        val traitName = name.substring(0, name.indexOf(' '))
-        val trait = parentScope.resolveStatic(traitName, true)!!.value() as TraitDefinition
-        val className = name.substring(name.lastIndexOf(' ') + 1)
-        val implFor = parentScope.resolveStatic(className, true)!!.value() as UserClassDefinition
-        val implContext = ImplDefinition(name, parentScope, trait, implFor)
-        tokenizer.consume("impl")
-        tokenizer.consume(traitName)
-        tokenizer.consume("for")
-        tokenizer.consume(className)
-        tokenizer.consume(":")
-        Parser.parse(tokenizer, ParsingContext(implContext, 0))
-        println("Impl successfully resolved!")
-        return implContext
     }
 
     private fun resolveVariable(tokenizer: TantillaTokenizer, typeOnly: Boolean = false) {
@@ -233,39 +155,20 @@ class VariableDefinition (
 
 
     override fun serializeTitle(writer: CodeWriter) {
-        when (kind) {
-            Definition.Kind.STATIC,
-            Definition.Kind.FIELD -> {
-                if (kind == Definition.Kind.STATIC && parentScope.supportsLocalVariables) {
-                    writer.keyword("static ")
-                }
-                if (mutable) {
-                    writer.keyword("mut ")
-                }
-                writer.declaration(name)
-                writer.append(": ")
-                writer.appendType(valueType())
-            }
-            Definition.Kind.METHOD  -> writer.keyword("def ").declaration(name).appendType(valueType())
-            Definition.Kind.FUNCTION -> {
-                if (parentScope.supportsMethods) {
-                    writer.keyword("static ")
-                }
-                writer.keyword("def ").declaration(name).appendType(valueType())
-            }
-            Definition.Kind.TRAIT,
-            Definition.Kind.IMPL,
-            Definition.Kind.STRUCT -> writer.keyword(kind.name.lowercase()).append(' ').declaration(name)
-            Definition.Kind.UNPARSEABLE -> writer.append("(unparseable: $name)")
-            Definition.Kind.UNIT -> writer.keyword("unit ").declaration(name)
+        if (kind == Definition.Kind.STATIC && parentScope.supportsLocalVariables) {
+            writer.keyword("static ")
         }
+        if (mutable) {
+            writer.keyword("mut ")
+        }
+        writer.declaration(name)
+        writer.append(": ")
+        writer.appendType(valueType())
     }
 
 
     override fun serializeCode(writer: CodeWriter, precedence: Int) {
-       when (kind) {
-           Definition.Kind.STATIC,
-           Definition.Kind.FIELD -> {
+
                if (resolvedInitializer != UnresolvedEvalueable) {
                    serializeTitle(writer)
                    if (resolvedInitializer != null) {
@@ -275,63 +178,23 @@ class VariableDefinition (
                } else {
                    writer.append(definitionText)
                }
-           }
-           Definition.Kind.UNPARSEABLE -> writer.append(definitionText)
-           Definition.Kind.TRAIT,
-           Definition.Kind.STRUCT,
-           Definition.Kind.IMPL -> {
-               if (resolvedValue != UnresolvedValue) {
-                   writer.appendCode(resolvedValue)
-               } else {
-                   writer.append(definitionText)
-               }
-           }
-           Definition.Kind.METHOD,
-           Definition.Kind.FUNCTION -> {
-               if (resolvedValue != UnresolvedValue) {
-                   writer.keyword("def ").declaration(name)
-                   writer.appendCode(resolvedValue)
-               } else {
-                    writer.append(definitionText)
-               }
-           }
-       }
     }
 
     override fun serializeSummary(writer: CodeWriter) {
-        if (!isScope()) {
-            serializeCode(writer)
-            return
-        }
-        serializeTitle(writer)
-        writer.append(":")
-        writer.indent()
-        val scope = value() as Scope
-        for (definition in scope.iterator()) {
-            writer.newline()
-            definition.serializeTitle(writer)
-        }
-        writer.outdent()
+        serializeCode(writer)
     }
 
 
-    override fun isDynamic() = kind == Definition.Kind.FIELD || kind == Definition.Kind.METHOD
+    override fun isDynamic() = kind == Definition.Kind.FIELD
 
-    override fun isScope() = error() == null && (
-            kind == Definition.Kind.IMPL
-            || kind == Definition.Kind.STRUCT
-            || kind == Definition.Kind.TRAIT || kind == Definition.Kind.UNIT)
+    override fun isScope() = false
 
     override fun findNode(node: Evaluable<RuntimeContext>): Definition? {
         val rid = resolvedInitializer
         if (rid != UnresolvedEvalueable && rid != null && rid.containsNode(node)) {
             return this
         }
-        return when (val value = resolvedValue) {
-            is LambdaImpl -> if (value.body.containsNode(node)) this else null
-            is Scope -> value.findNode(node)
-            else -> null
-        }
+        return null
     }
 
     override fun depth(scope: Scope): Int {
