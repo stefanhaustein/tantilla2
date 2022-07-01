@@ -51,11 +51,7 @@ class DefinitionImpl (
     override fun error(): Exception? {
         if (error == null) {
             try {
-                when (kind) {
-                    Definition.Kind.FIELD  -> initializer()
-                    Definition.Kind.UNPARSEABLE -> null
-                    else -> value()
-                }
+                value()
             } catch (e: Exception) {
                 println("Error in $parentScope.$name")
                 e.printStackTrace()
@@ -128,8 +124,8 @@ class DefinitionImpl (
                     Definition.Kind.STRUCT -> resolvedValue = resolveClass(tokenizer)
                     Definition.Kind.TRAIT -> resolvedValue = resolveTrait(tokenizer)
                     Definition.Kind.IMPL -> resolvedValue = resolveImpl(tokenizer)
-                    Definition.Kind.UNPARSEABLE -> throw RuntimeException("Can't obtain value for unparseable definition.")
                     Definition.Kind.UNIT -> throw UnsupportedOperationException()
+                    Definition.Kind.UNPARSEABLE,
                     Definition.Kind.STATIC,
                     Definition.Kind.FIELD -> throw IllegalStateException("Not supported here: $kind")
                 }
@@ -187,6 +183,7 @@ class DefinitionImpl (
 
     override fun serializeTitle(writer: CodeWriter) {
         when (kind) {
+            Definition.Kind.UNPARSEABLE,
             Definition.Kind.STATIC,
             Definition.Kind.FIELD -> throw IllegalStateException("Unsupported here: $kind")
             Definition.Kind.METHOD  -> writer.keyword("def ").declaration(name).appendType(valueType())
@@ -199,7 +196,6 @@ class DefinitionImpl (
             Definition.Kind.TRAIT,
             Definition.Kind.IMPL,
             Definition.Kind.STRUCT -> writer.keyword(kind.name.lowercase()).append(' ').declaration(name)
-            Definition.Kind.UNPARSEABLE -> writer.append("(unparseable: $name)")
             Definition.Kind.UNIT -> writer.keyword("unit ").declaration(name)
         }
     }
@@ -207,9 +203,9 @@ class DefinitionImpl (
 
     override fun serializeCode(writer: CodeWriter, precedence: Int) {
        when (kind) {
+           Definition.Kind.UNPARSEABLE,
            Definition.Kind.STATIC,
            Definition.Kind.FIELD -> throw IllegalStateException("Unsupported here: $kind")
-           Definition.Kind.UNPARSEABLE -> writer.append(definitionText)
            Definition.Kind.TRAIT,
            Definition.Kind.STRUCT,
            Definition.Kind.IMPL -> {

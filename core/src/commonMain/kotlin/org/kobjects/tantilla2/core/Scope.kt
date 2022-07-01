@@ -1,6 +1,7 @@
 package org.kobjects.tantilla2.core
 
 import org.kobjects.greenspun.core.Evaluable
+import org.kobjects.tantilla2.Unparseable
 import org.kobjects.tantilla2.core.classifier.UserClassDefinition
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
@@ -79,14 +80,13 @@ abstract class Scope(
         } catch (e: Exception) {
             e.printStackTrace()
             val name = oldDefinition?.name ?: "[error]"
-            replacement = DefinitionImpl(
+            replacement = Unparseable(
                 this,
-                Definition.Kind.UNPARSEABLE,
-                name,
                 definitionText = newContent
             )
         }
         definitions[replacement.name] = replacement
+
         return replacement
     }
 

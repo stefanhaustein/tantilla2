@@ -66,7 +66,6 @@ class VariableDefinition (
             try {
                 when (kind) {
                     Definition.Kind.FIELD  -> initializer()
-                    Definition.Kind.UNPARSEABLE -> null
                     else -> value()
                 }
             } catch (e: Exception) {
