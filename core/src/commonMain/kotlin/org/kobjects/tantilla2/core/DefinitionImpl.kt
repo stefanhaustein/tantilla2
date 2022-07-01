@@ -292,7 +292,7 @@ class DefinitionImpl (
        }
     }
 
-    override fun serializeSummaray(writer: CodeWriter) {
+    override fun serializeSummary(writer: CodeWriter) {
         if (!isScope()) {
             serializeCode(writer)
             return

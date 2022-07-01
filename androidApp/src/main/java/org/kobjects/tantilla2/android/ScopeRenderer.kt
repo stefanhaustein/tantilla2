@@ -17,7 +17,6 @@ import androidx.compose.ui.unit.dp
 import org.kobjects.konsole.compose.AnsiConverter
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.Definition
-import org.kobjects.tantilla2.core.DefinitionImpl
 import org.kobjects.tantilla2.core.Scope
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.classifier.UserClassDefinition
@@ -114,7 +113,7 @@ fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
             if (help || !expanded) {
                 definition.serializeTitle(writer)
             } else {
-                definition.serializeSummaray(writer)
+                definition.serializeSummary(writer)
             }
             Text(AnsiConverter.ansiToAnnotatedString(writer.toString()))
 

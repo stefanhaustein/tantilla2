@@ -22,7 +22,7 @@ interface Definition : SerializableCode {
     fun isScope(): Boolean
     fun rebuild(compilationResults: CompilationResults): Boolean
 
-    fun serializeSummaray(writer: CodeWriter)
+    fun serializeSummary(writer: CodeWriter)
     fun serializeTitle(writer: CodeWriter)
 
     enum class Kind {
