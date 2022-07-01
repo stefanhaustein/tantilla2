@@ -17,7 +17,7 @@ interface Definition : SerializableCode {
     fun initializer(): Evaluable<RuntimeContext>?
     fun depth(scope: Scope): Int
 
-    fun findNode(node: Evaluable<RuntimeContext>): DefinitionImpl?
+    fun findNode(node: Evaluable<RuntimeContext>): Definition?
     fun isDynamic(): Boolean
     fun isScope(): Boolean
     fun rebuild(compilationResults: CompilationResults): Boolean

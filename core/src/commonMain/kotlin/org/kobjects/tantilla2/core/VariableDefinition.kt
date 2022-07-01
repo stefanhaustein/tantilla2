@@ -11,7 +11,7 @@ import org.kobjects.tantilla2.core.node.TantillaNode
 import org.kobjects.tantilla2.core.node.containsNode
 import org.kobjects.tantilla2.core.parser.*
 
-class DefinitionImpl (
+class VariableDefinition (
     override val parentScope: Scope,
     override val kind: Definition.Kind,
     override val name: String,
@@ -27,10 +27,22 @@ class DefinitionImpl (
     private var resolvedInitializer: Evaluable<RuntimeContext>? = UnresolvedEvalueable
 
     init {
-        if (kind == Definition.Kind.FIELD || kind == Definition.Kind.STATIC) {
-            throw IllegalArgumentException("Variable definition ($kind) not supported in DefinitionImpl.")
+        when (kind) {
+            Definition.Kind.FIELD -> {
+                val existingIndex = parentScope.locals.indexOf(name)
+                if (index != existingIndex) {
+                    throw IllegalArgumentException("local variable inconsistency new index: $index; existing: $existingIndex")
+                }
+            }
+            Definition.Kind.STATIC -> {
+                if (index != -1) {
+                    throw IllegalArgumentException("index must be -1 for $kind")
+                }
+            }
+            else -> IllegalArgumentException("Kind must be FIELD or STATIC for VariableDefinition")
         }
     }
+
 
     private fun tokenizer(): TantillaTokenizer {
         val tokenizer = TantillaTokenizer(definitionText)

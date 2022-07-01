@@ -68,7 +68,7 @@ object Parser {
         return ""
     }
 
-    fun parseDefinition(tokenizer: TantillaTokenizer, context: ParsingContext): DefinitionImpl {
+    fun parseDefinition(tokenizer: TantillaTokenizer, context: ParsingContext): Definition {
         val startPos = tokenizer.current.pos
         val explicitlyStatic = tokenizer.tryConsume("static")
         val mutable = tokenizer.tryConsume("mut")
@@ -199,13 +199,13 @@ object Parser {
         startPos: Int,
         local: Boolean,
         mutable: Boolean,
-    ) : DefinitionImpl {
+    ) : VariableDefinition {
         val name = tokenizer.consume(TokenType.IDENTIFIER)
         val kind = if (local) Definition.Kind.FIELD
             else Definition.Kind.STATIC
         val text = consumeLine(tokenizer, startPos)
 
-        return DefinitionImpl(context.scope, kind, name, definitionText = text)
+        return VariableDefinition(context.scope, kind, name, definitionText = text)
     }
 
 

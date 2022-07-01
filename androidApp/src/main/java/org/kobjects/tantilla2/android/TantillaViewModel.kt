@@ -66,7 +66,7 @@ class TantillaViewModel(
         canvas.translate(bitmap.width / 2f, bitmap.height / 2f)
         canvas.scale(1f, -1f)
         val penImpl = PenImpl(PenDefinition, canvas)
-        RootScope.add(DefinitionImpl(
+        RootScope.add(VariableDefinition(
             RootScope,
             Definition.Kind.STATIC,
             "pen",

@@ -39,7 +39,7 @@ abstract class Scope(
         }
     }
 
-    fun findNode(node: Evaluable<RuntimeContext>): DefinitionImpl? {
+    fun findNode(node: Evaluable<RuntimeContext>): Definition? {
         for (definition in definitions.values) {
             val result = definition.findNode(node)
             if (result != null) {
@@ -55,7 +55,7 @@ abstract class Scope(
     override fun iterator(): Iterator<Definition> = definitions.values.iterator()
 
     fun declareLocalVariable(name: String, type: Type, mutable: Boolean): Int {
-        val definition = DefinitionImpl(
+        val definition = VariableDefinition(
             this,
             Definition.Kind.FIELD,
             name,
@@ -73,7 +73,7 @@ abstract class Scope(
         }
         val tokenizer = TantillaTokenizer(newContent)
         tokenizer.next()
-        var replacement: DefinitionImpl
+        var replacement: Definition
         try {
             replacement = Parser.parseDefinition(tokenizer, ParsingContext(this, 0))
         } catch (e: Exception) {
