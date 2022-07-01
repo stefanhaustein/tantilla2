@@ -40,7 +40,7 @@ abstract class Scope(
         }
     }
 
-    fun findNode(node: Evaluable<RuntimeContext>): Definition? {
+    fun findNode(node: Evaluable<RuntimeContext>): DefinitionImpl? {
         for (definition in definitions.values) {
             val result = definition.findNode(node)
             if (result != null) {
@@ -56,7 +56,7 @@ abstract class Scope(
     override fun iterator(): Iterator<Definition> = definitions.values.iterator()
 
     fun declareLocalVariable(name: String, type: Type, mutable: Boolean): Int {
-        val definition = Definition(
+        val definition = DefinitionImpl(
             this,
             Definition.Kind.FIELD,
             name,
@@ -74,13 +74,13 @@ abstract class Scope(
         }
         val tokenizer = TantillaTokenizer(newContent)
         tokenizer.next()
-        var replacement: Definition
+        var replacement: DefinitionImpl
         try {
             replacement = Parser.parseDefinition(tokenizer, ParsingContext(this, 0))
         } catch (e: Exception) {
             e.printStackTrace()
             val name = oldDefinition?.name ?: "[error]"
-            replacement = Definition(
+            replacement = DefinitionImpl(
                 this,
                 Definition.Kind.UNPARSEABLE,
                 name,
@@ -115,7 +115,7 @@ abstract class Scope(
     fun resolveDynamic(name: String, fallBackToStatic: Boolean): Definition? {
         val result = definitions[name]
         if (result != null) {
-            if (fallBackToStatic || result.isDyanmic()) {
+            if (fallBackToStatic || result.isDynamic()) {
                 return result
             }
         }
@@ -132,7 +132,7 @@ abstract class Scope(
     fun resolveStatic(name: String, fallBackToParent: Boolean = false): Definition? {
         val result = definitions[name]
         if (result != null) {
-            if (result.isDyanmic()) {
+            if (result.isDynamic()) {
                 throw RuntimeException("Static property expected; found: $result")
             }
             return result
@@ -162,7 +162,7 @@ abstract class Scope(
             override val parameters = parameter.toList()
         }
         val function = NativeFunction(type, operation)
-        definitions[name] = Definition(
+        definitions[name] = DefinitionImpl(
             this,
             if (parameter.isNotEmpty() && parameter[0].name == "self") Definition.Kind.METHOD else Definition.Kind.FUNCTION,
             name,

@@ -1,10 +1,7 @@
 package org.kobjects.tantilla2.core.node
 
 import org.kobjects.greenspun.core.Evaluable
-import org.kobjects.tantilla2.core.CodeWriter
-import org.kobjects.tantilla2.core.Definition
-import org.kobjects.tantilla2.core.RuntimeContext
-import org.kobjects.tantilla2.core.Type
+import org.kobjects.tantilla2.core.*
 
 
 data class StaticReference(val definition: Definition) : TantillaNode {

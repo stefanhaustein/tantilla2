@@ -1,6 +1,5 @@
 package org.kobjects.tantilla2.core.classifier
 
-import org.kobjects.tantilla2.core.Definition
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Parameter
 

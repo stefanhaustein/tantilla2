@@ -56,7 +56,7 @@ object ExpressionParser {
         val scope = context.scope
 
         val dynamicDefinition = scope.resolveDynamic(name, fallBackToStatic = false)
-        if (dynamicDefinition != null && dynamicDefinition.isDyanmic()) {
+        if (dynamicDefinition != null && dynamicDefinition.isDynamic()) {
             return parseMaybeApply(tokenizer, context, reference(scope, dynamicDefinition))
         }
 

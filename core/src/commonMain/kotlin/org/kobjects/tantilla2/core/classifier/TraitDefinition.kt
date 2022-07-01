@@ -1,7 +1,6 @@
 package org.kobjects.tantilla2.core.classifier
 
 import org.kobjects.tantilla2.core.CodeWriter
-import org.kobjects.tantilla2.core.Definition
 import org.kobjects.tantilla2.core.Scope
 import org.kobjects.tantilla2.core.Type
 

@@ -43,7 +43,7 @@ open class NativeClassDefinition(
         operation: (RuntimeContext) -> Any?) {
         val type = FunctionType.Impl(returnType, listOf(Parameter("self", this)) + parameter.toList())
         val function = NativeFunction(type, operation)
-        add(Definition(
+        add(DefinitionImpl(
             this,
             Definition.Kind.METHOD,
             name,
@@ -54,7 +54,7 @@ open class NativeClassDefinition(
     }
 
     init {
-        val def = Definition(
+        val def = DefinitionImpl(
             parent,
             Definition.Kind.STRUCT,
             name,
@@ -75,7 +75,7 @@ open class NativeClassDefinition(
             override val returnType = type
             override val parameters = listOf(Parameter("self", this@NativeClassDefinition))
         }
-        add(Definition(
+        add(DefinitionImpl(
             this,
             Definition.Kind.METHOD,
             name,
@@ -88,7 +88,7 @@ open class NativeClassDefinition(
                 override val returnType = Void
                 override val parameters = listOf(Parameter("self", this@NativeClassDefinition), Parameter("value", type))
             }
-            add(Definition(
+            add(DefinitionImpl(
                 this,
                 Definition.Kind.METHOD,
                 "set_$name",

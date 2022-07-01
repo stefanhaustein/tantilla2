@@ -3,6 +3,7 @@ package org.kobjects.tantilla2.core.parser
 import org.kobjects.greenspun.core.Control
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.tantilla2.core.Definition
+import org.kobjects.tantilla2.core.DefinitionImpl
 import org.kobjects.tantilla2.core.RuntimeContext
 import org.kobjects.tantilla2.core.function.FunctionScope
 import org.kobjects.tantilla2.core.node.*
@@ -51,7 +52,7 @@ object StatementParser {
         val typeIsExplicit = resolved.second
         val initializer = resolved.third
 
-        val definition = Definition(
+        val definition = DefinitionImpl(
             context.scope, Definition.Kind.FIELD, name, resolvedType = type, mutable = mutable)
 
         context.scope.add(definition)

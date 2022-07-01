@@ -1,6 +1,7 @@
 package org.kobjects.tantilla2.stdlib
 
 import org.kobjects.tantilla2.core.Definition
+import org.kobjects.tantilla2.core.DefinitionImpl
 import org.kobjects.tantilla2.core.classifier.NativeClassDefinition
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.runtime.F64
@@ -40,10 +41,10 @@ object ColorDefinition : NativeClassDefinition(
             Parameter("a", F64, org.kobjects.greenspun.core.F64.Const(1.0)),
         ) { Color.hsl(it.f64(0), it.f64(1) , it.f64(2) ) }
 
-        add(Definition(this, Definition.Kind.STATIC, "BLACK", mutable = false, docString = "Black", resolvedValue = Color(0.0, 0.0, 0.0, 1.0)))
-        add(Definition(this, Definition.Kind.STATIC, "TRANSPARENT", mutable = false, docString = "Black", resolvedValue = Color(0.0, 0.0, 0.0, 0.0)))
-        add(Definition(this, Definition.Kind.STATIC, "WHITE", mutable = false, docString = "White", resolvedValue = Color(1.0, 1.0, 1.0, 1.0)))
-        add(Definition(this, Definition.Kind.STATIC, "GRAY", mutable = false, docString = "50% Gray", resolvedValue = Color(0.5, 0.5, 0.5, 1.0)))
+        add(DefinitionImpl(this, Definition.Kind.STATIC, "BLACK", mutable = false, docString = "Black", resolvedValue = Color(0.0, 0.0, 0.0, 1.0)))
+        add(DefinitionImpl(this, Definition.Kind.STATIC, "TRANSPARENT", mutable = false, docString = "Black", resolvedValue = Color(0.0, 0.0, 0.0, 0.0)))
+        add(DefinitionImpl(this, Definition.Kind.STATIC, "WHITE", mutable = false, docString = "White", resolvedValue = Color(1.0, 1.0, 1.0, 1.0)))
+        add(DefinitionImpl(this, Definition.Kind.STATIC, "GRAY", mutable = false, docString = "50% Gray", resolvedValue = Color(0.5, 0.5, 0.5, 1.0)))
 
         defineNativeProperty(
             "r",

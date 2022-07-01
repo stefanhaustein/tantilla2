@@ -68,7 +68,7 @@ object Parser {
         return ""
     }
 
-    fun parseDefinition(tokenizer: TantillaTokenizer, context: ParsingContext): Definition {
+    fun parseDefinition(tokenizer: TantillaTokenizer, context: ParsingContext): DefinitionImpl {
         val startPos = tokenizer.current.pos
         val explicitlyStatic = tokenizer.tryConsume("static")
         val mutable = tokenizer.tryConsume("mut")
@@ -88,7 +88,7 @@ object Parser {
                 val name = tokenizer.consume(TokenType.IDENTIFIER, "Function name expected.")
                 println("consuming def $name")
                 val text = consumeBody(tokenizer, startPos, context.depth)
-                Definition(context.scope, if (isMethod) Definition.Kind.METHOD else Definition.Kind.FUNCTION, name, definitionText = text)
+                DefinitionImpl(context.scope, if (isMethod) Definition.Kind.METHOD else Definition.Kind.FUNCTION, name, definitionText = text)
             }
             "struct" -> {
                 tokenizer.consume("struct")
@@ -96,7 +96,7 @@ object Parser {
                 tokenizer.consume(":")
                 val docString = readDocString(tokenizer)
                 val text = consumeBody(tokenizer, startPos, context.depth)
-                Definition(context.scope, Definition.Kind.STRUCT, name, definitionText = text, docString = docString)
+                DefinitionImpl(context.scope, Definition.Kind.STRUCT, name, definitionText = text, docString = docString)
             }
             "trait" -> {
                 tokenizer.consume("trait")
@@ -104,7 +104,7 @@ object Parser {
                 tokenizer.consume(":")
                 val docString = readDocString(tokenizer)
                 val text = consumeBody(tokenizer, startPos, context.depth)
-                Definition(context.scope, Definition.Kind.TRAIT, name, definitionText = text, docString = docString)
+                DefinitionImpl(context.scope, Definition.Kind.TRAIT, name, definitionText = text, docString = docString)
             }
             "impl" -> {
                 tokenizer.consume("impl")
@@ -114,7 +114,7 @@ object Parser {
                 tokenizer.consume(":")
                 val docString = readDocString(tokenizer)
                 val text = consumeBody(tokenizer, startPos, context.depth)
-                Definition(
+                DefinitionImpl(
                     context.scope,
                     Definition.Kind.IMPL,
                     "$traitName for $name",
@@ -199,13 +199,13 @@ object Parser {
         startPos: Int,
         local: Boolean,
         mutable: Boolean,
-    ) : Definition {
+    ) : DefinitionImpl {
         val name = tokenizer.consume(TokenType.IDENTIFIER)
         val kind = if (local) Definition.Kind.FIELD
             else Definition.Kind.STATIC
         val text = consumeLine(tokenizer, startPos)
 
-        return Definition(context.scope, kind, name, definitionText = text)
+        return DefinitionImpl(context.scope, kind, name, definitionText = text)
     }
 
 

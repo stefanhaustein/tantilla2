@@ -1,14 +1,13 @@
 package org.kobjects.tantilla2.core.node
 
-import org.kobjects.greenspun.cas.derive
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.tantilla2.core.CodeWriter
-import org.kobjects.tantilla2.core.Definition
+import org.kobjects.tantilla2.core.DefinitionImpl
 import org.kobjects.tantilla2.core.RuntimeContext
 import org.kobjects.tantilla2.core.Type
 import org.kobjects.tantilla2.core.runtime.Void
 
-class Let(val definition: Definition, val type: Type, val typeIsExplicit: Boolean, val initializer: Evaluable<RuntimeContext>?) : TantillaNode {
+class Let(val definition: DefinitionImpl, val type: Type, val typeIsExplicit: Boolean, val initializer: Evaluable<RuntimeContext>?) : TantillaNode {
     override val returnType: Type
         get() = Void
 

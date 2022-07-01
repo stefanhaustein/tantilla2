@@ -17,11 +17,10 @@ import androidx.compose.ui.unit.dp
 import org.kobjects.konsole.compose.AnsiConverter
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.Definition
+import org.kobjects.tantilla2.core.DefinitionImpl
 import org.kobjects.tantilla2.core.Scope
-import org.kobjects.tantilla2.core.classifier.ImplDefinition
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.classifier.UserClassDefinition
-import org.kobjects.tantilla2.core.dynamicType
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -94,7 +93,7 @@ fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
                         if (definition.isScope()) {
                             viewModel.scope().value = definition.value() as Scope
                         } else if (editable) {
-                            viewModel.edit(definition.scope, definition)
+                            viewModel.edit(definition.scope!!, definition)
                         }
                                   },
                     onTap = {
