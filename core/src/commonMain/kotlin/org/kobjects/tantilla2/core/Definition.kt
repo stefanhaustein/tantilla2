@@ -3,7 +3,7 @@ package org.kobjects.tantilla2.core
 import org.kobjects.greenspun.core.Evaluable
 
 interface Definition : SerializableCode {
-    val scope: Scope?
+    val parentScope: Scope?
     val kind: Kind
     val name: String
     val mutable: Boolean
@@ -12,7 +12,7 @@ interface Definition : SerializableCode {
     var index: Int
 
     fun value(): Any?
-    fun type(): Type
+    fun valueType(): Type
     fun error(): Exception?
     fun initializer(): Evaluable<RuntimeContext>?
     fun depth(scope: Scope): Int

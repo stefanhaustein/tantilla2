@@ -33,7 +33,7 @@ fun RenderScope(viewModel: TantillaViewModel) {
         backgroundColor = Color.Transparent,
         topBar = {
             if (viewModel.mode.value == TantillaViewModel.Mode.HELP) {
-                RenderAppBar(viewModel, if (scope.parentContext == null) "Help" else scope.title)
+                RenderAppBar(viewModel, if (scope.parentScope == null) "Help" else scope.title)
             } else {
                 RenderAppBar(viewModel, scope.title, "Add" to {viewModel.edit(scope, null)})
             } },
@@ -92,7 +92,7 @@ fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
                         if (definition.isScope()) {
                             viewModel.scope().value = definition.value() as Scope
                         } else if (editable) {
-                            viewModel.edit(definition.scope!!, definition)
+                            viewModel.edit(definition.parentScope!!, definition)
                         }
                                   },
                     onTap = {

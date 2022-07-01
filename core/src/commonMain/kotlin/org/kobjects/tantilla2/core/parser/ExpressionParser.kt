@@ -45,7 +45,7 @@ object ExpressionParser {
     fun reference(scope: Scope, definition: Definition) = if (definition.kind == Definition.Kind.FIELD) {
         val depth = definition.depth(scope)
         LocalVariableReference(
-            definition.name, definition.type(), depth, definition.index, definition.mutable
+            definition.name, definition.valueType(), depth, definition.index, definition.mutable
         )
     }
     else StaticReference(definition)
@@ -61,7 +61,7 @@ object ExpressionParser {
         }
 
         val self = context.scope.resolveDynamic("self", fallBackToStatic = false)
-        val selfType = self?.type()
+        val selfType = self?.valueType()
         if (selfType is Scope) {
             val definition = selfType.resolveDynamic(name, fallBackToStatic = false)
             if (definition != null) {
@@ -219,7 +219,7 @@ object ExpressionParser {
                 PropertyReference(
                     base,
                     name,
-                    definition.type(),
+                    definition.valueType(),
                     definition.index,
                     definition.mutable
                 )

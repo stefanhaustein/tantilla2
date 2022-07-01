@@ -33,7 +33,7 @@ class TantillaViewModel(
     val mode = mutableStateOf(Mode.SHELL)
     var fileName = mutableStateOf("")
     val userScope = mutableStateOf<Scope>(console.scope)
-    val builtinScope = mutableStateOf<Scope>(console.scope.parentContext!!)
+    val builtinScope = mutableStateOf<Scope>(console.scope.parentScope!!)
     val definition = mutableStateOf<Definition?>(null)
     val currentText = mutableStateOf(TextFieldValue())
     var editorParentScope: Scope = console.scope
@@ -132,7 +132,7 @@ class TantillaViewModel(
         console.setUserScope(UserScope(RootScope))
         defineNatives()
         userScope.value = console.scope
-        builtinScope.value = console.scope.parentContext!!
+        builtinScope.value = console.scope.parentScope!!
         fileName.value = ""
     }
 
@@ -144,7 +144,7 @@ class TantillaViewModel(
                 console.konsole.write("main() undefined.")
                 return
             }
-            if (definition.type() !is FunctionType) {
+            if (definition.valueType() !is FunctionType) {
                 console.konsole.write("main is not a function.")
                 return
             }

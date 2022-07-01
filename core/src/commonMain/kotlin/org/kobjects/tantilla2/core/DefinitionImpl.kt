@@ -12,7 +12,7 @@ import org.kobjects.tantilla2.core.node.containsNode
 import org.kobjects.tantilla2.core.parser.*
 
 class DefinitionImpl (
-    override val scope: Scope,
+    override val parentScope: Scope,
     override val kind: Definition.Kind,
     override val name: String,
     val definitionText: String = "",
@@ -28,7 +28,7 @@ class DefinitionImpl (
 
     init {
         if (kind == Definition.Kind.FIELD) {
-            val existingIndex = scope.locals.indexOf(name)
+            val existingIndex = parentScope.locals.indexOf(name)
             if (index != existingIndex) {
                 throw IllegalArgumentException("local variable inconsistency new index: $index; existing: $existingIndex")
             }
@@ -49,7 +49,7 @@ class DefinitionImpl (
         if (e is ParsingException) {
             error = e
         } else {
-            error = ParsingException(tokenizer.current, "Error in ${scope.title}.$name: " +  (e.message ?: "Parsing Error"), e)
+            error = ParsingException(tokenizer.current, "Error in ${parentScope.title}.$name: " +  (e.message ?: "Parsing Error"), e)
         }
         error!!.printStackTrace()
         throw error!!
@@ -64,7 +64,7 @@ class DefinitionImpl (
                     else -> value()
                 }
             } catch (e: Exception) {
-                println("Error in $scope.$name")
+                println("Error in $parentScope.$name")
                 e.printStackTrace()
             }
         }
@@ -93,7 +93,7 @@ class DefinitionImpl (
     }
 
 
-    override fun type(): Type {
+    override fun valueType(): Type {
         if (resolvedType == null) {
             val tokenizer = tokenizer()
             try {
@@ -115,7 +115,7 @@ class DefinitionImpl (
         tokenizer.tryConsume("static")
         tokenizer.consume("def")
         tokenizer.consume(name)
-        return TypeParser.parseFunctionType(tokenizer, ParsingContext(scope, 0), isMethod)
+        return TypeParser.parseFunctionType(tokenizer, ParsingContext(parentScope, 0), isMethod)
     }
 
     override fun value(): Any?  {
@@ -126,12 +126,12 @@ class DefinitionImpl (
                 when (kind) {
                     Definition.Kind.STATIC -> resolveVariable(tokenizer)
                     Definition.Kind.FUNCTION -> {
-                        val resolved = Parser.parseDef(tokenizer, ParsingContext(scope, 0), isMethod = false)
+                        val resolved = Parser.parseDef(tokenizer, ParsingContext(parentScope, 0), isMethod = false)
                         docString = resolved.first
                         resolvedValue = resolved.second
                     }
                     Definition.Kind.METHOD -> {
-                        val resolved = Parser.parseDef(tokenizer, ParsingContext(scope, 0), isMethod = true)
+                        val resolved = Parser.parseDef(tokenizer, ParsingContext(parentScope, 0), isMethod = true)
                         docString = resolved.first
                         resolvedValue = resolved.second
                     }
@@ -165,7 +165,7 @@ class DefinitionImpl (
     }
 
     private fun resolveClass(tokenizer: TantillaTokenizer): Scope {
-        val classContext = UserClassDefinition(name, scope)
+        val classContext = UserClassDefinition(name, parentScope)
         tokenizer.consume("struct")
         tokenizer.consume(name)
         tokenizer.consume(":")
@@ -175,7 +175,7 @@ class DefinitionImpl (
     }
 
     private fun resolveTrait(tokenizer: TantillaTokenizer): Scope {
-        val traitContext = TraitDefinition(name, scope)
+        val traitContext = TraitDefinition(name, parentScope)
         tokenizer.consume("trait")
         tokenizer.consume(name)
         tokenizer.consume(":")
@@ -186,10 +186,10 @@ class DefinitionImpl (
 
     private fun resolveImpl(tokenizer: TantillaTokenizer): Scope {
         val traitName = name.substring(0, name.indexOf(' '))
-        val trait = scope.resolveStatic(traitName, true)!!.value() as TraitDefinition
+        val trait = parentScope.resolveStatic(traitName, true)!!.value() as TraitDefinition
         val className = name.substring(name.lastIndexOf(' ') + 1)
-        val implFor = scope.resolveStatic(className, true)!!.value() as UserClassDefinition
-        val implContext = ImplDefinition(name, scope, trait, implFor)
+        val implFor = parentScope.resolveStatic(className, true)!!.value() as UserClassDefinition
+        val implContext = ImplDefinition(name, parentScope, trait, implFor)
         tokenizer.consume("impl")
         tokenizer.consume(traitName)
         tokenizer.consume("for")
@@ -212,7 +212,7 @@ class DefinitionImpl (
 
         tokenizer.consume(name)
 
-        val resolved = Parser.resolveVariable(tokenizer, ParsingContext(scope, 0))
+        val resolved = Parser.resolveVariable(tokenizer, ParsingContext(parentScope, 0))
         resolvedType = resolved.first
 
         resolvedInitializer = resolved.third
@@ -230,7 +230,7 @@ class DefinitionImpl (
         when (kind) {
             Definition.Kind.STATIC,
             Definition.Kind.FIELD -> {
-                if (kind == Definition.Kind.STATIC && scope.supportsLocalVariables) {
+                if (kind == Definition.Kind.STATIC && parentScope.supportsLocalVariables) {
                     writer.keyword("static ")
                 }
                 if (mutable) {
@@ -238,14 +238,14 @@ class DefinitionImpl (
                 }
                 writer.declaration(name)
                 writer.append(": ")
-                writer.appendType(type())
+                writer.appendType(valueType())
             }
-            Definition.Kind.METHOD  -> writer.keyword("def ").declaration(name).appendType(type())
+            Definition.Kind.METHOD  -> writer.keyword("def ").declaration(name).appendType(valueType())
             Definition.Kind.FUNCTION -> {
-                if (scope.supportsMethods) {
+                if (parentScope.supportsMethods) {
                     writer.keyword("static ")
                 }
-                writer.keyword("def ").declaration(name).appendType(type())
+                writer.keyword("def ").declaration(name).appendType(valueType())
             }
             Definition.Kind.TRAIT,
             Definition.Kind.IMPL,
@@ -329,13 +329,13 @@ class DefinitionImpl (
     }
 
     override fun depth(scope: Scope): Int {
-        if (scope == this.scope) {
+        if (scope == this.parentScope) {
             return 0
         }
-        if (scope.parentContext == null) {
+        if (scope.parentScope == null) {
             throw IllegalStateException("Definition $this not found in scope.")
         }
-        return 1 + depth(scope.parentContext!!)
+        return 1 + depth(scope.parentScope!!)
     }
 
     object UnresolvedEvalueable: TantillaNode {

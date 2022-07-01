@@ -41,7 +41,7 @@ fun RenderAppBar(
                 Text(
                     text = "❮ $title",
                     Modifier.clickable {
-                        viewModel.scope().value = viewModel.scope().value.parentContext!!
+                        viewModel.scope().value = viewModel.scope().value.parentScope!!
                     })
             } else {
                 Text(text = title)

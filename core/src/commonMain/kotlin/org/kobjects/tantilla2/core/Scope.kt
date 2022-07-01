@@ -13,9 +13,8 @@ import org.kobjects.tantilla2.core.parser.ParsingContext
 import org.kobjects.tantilla2.core.parser.TantillaTokenizer
 
 abstract class Scope(
-    val parentContext: Scope?
+    val parentScope: Scope?
 ): SerializableCode, Iterable<Definition> {
-    var docString: String = ""
     private val definitions = mutableMapOf<String, Definition>()
     var locals = mutableListOf<String>()
     abstract val title: String
@@ -119,8 +118,8 @@ abstract class Scope(
                 return result
             }
         }
-        if (this is FunctionScope && parentContext is FunctionScope) {
-            return parentContext.resolveDynamic(name, fallBackToStatic)
+        if (this is FunctionScope && parentScope is FunctionScope) {
+            return parentScope.resolveDynamic(name, fallBackToStatic)
         }
         
         if (fallBackToStatic) {
@@ -137,8 +136,8 @@ abstract class Scope(
             }
             return result
         }
-        if (fallBackToParent && parentContext != null) {
-            return parentContext.resolveStatic(name, true)
+        if (fallBackToParent && parentScope != null) {
+            return parentScope.resolveStatic(name, true)
         }
         return null
     }
