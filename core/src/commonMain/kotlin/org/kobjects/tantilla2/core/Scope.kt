@@ -158,17 +158,6 @@ abstract class Scope(
         )
     }
 
-    fun remove(name: String) {
-        val removed = definitions.definitions.remove(name)
-        if (removed != null && removed.index != -1) {
-            definitions.locals.remove(name)
-            for (definition in definitions.iterator()) {
-                if (definition.index > removed.index) {
-                    definition.index--
-                }
-            }
-        }
-    }
 
     override fun toString() = name
 

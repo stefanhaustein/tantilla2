@@ -18,4 +18,15 @@ class DefinitionMap(val scope: Scope): Iterable<Definition> {
     }
 
 
+    fun remove(name: String) {
+        val removed = definitions.remove(name)
+        if (removed != null && removed.index != -1) {
+            locals.remove(name)
+            for (definition in this) {
+                if (definition.index > removed.index) {
+                    definition.index--
+                }
+            }
+        }
+    }
 }

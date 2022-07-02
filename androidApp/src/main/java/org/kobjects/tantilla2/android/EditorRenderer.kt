@@ -47,7 +47,7 @@ fun RenderEditor(viewModel: TantillaViewModel) {
                         }
                         if (definition != null) {
                             DropdownMenuItem(onClick = {
-                                scope.remove(definition.name)
+                                scope.definitions.remove(definition.name)
                                 viewModel.editing.value = false
                             }) {
                                 Text("Delete")
