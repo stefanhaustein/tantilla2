@@ -7,9 +7,9 @@ class UserClassMetaType(
     val wrapped: UserClassDefinition,
 ) : FunctionType.Impl(
     wrapped,
-    List<Parameter>(wrapped.locals.size) {
-        val name = wrapped.locals[it]
-        val def = wrapped[name]!!
+    List<Parameter>(wrapped.definitions.locals.size) {
+        val name = wrapped.definitions.locals[it]
+        val def = wrapped.definitions[name]!!
         Parameter(name, def.valueType(), def.initializer()) }
 ) {
     override fun resolve(name: String) = wrapped.resolveStatic(name, false)

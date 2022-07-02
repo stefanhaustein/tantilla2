@@ -26,16 +26,16 @@ import org.kobjects.tantilla2.core.classifier.UserClassDefinition
 fun RenderScope(viewModel: TantillaViewModel) {
     val scope = viewModel.scope().value
 
-    val definitions = scope.iterator().asSequence().toList().sortedBy { it.name }
+    val definitions = scope.definitions.iterator().asSequence().toList().sortedBy { it.name }
     val expandedDefinitions = viewModel.expanded.value
 
     Scaffold(
         backgroundColor = Color.Transparent,
         topBar = {
             if (viewModel.mode.value == TantillaViewModel.Mode.HELP) {
-                RenderAppBar(viewModel, if (scope.parentScope == null) "Help" else scope.title)
+                RenderAppBar(viewModel, if (scope.parentScope == null) "Help" else scope.name)
             } else {
-                RenderAppBar(viewModel, scope.title, "Add" to {viewModel.edit(scope, null)})
+                RenderAppBar(viewModel, scope.name, "Add" to {viewModel.edit(scope, null)})
             } },
     ) {
         LazyColumn(Modifier.fillMaxWidth(), contentPadding = PaddingValues(8.dp)) {
@@ -54,7 +54,7 @@ fun RenderScope(viewModel: TantillaViewModel) {
                 } else {
                     title = kind.name
                     list = (if (kind == Definition.Kind.FIELD)
-                        scope.locals.map { scope[it]!! }
+                        scope.definitions.locals.map { scope.definitions[it]!! }
                     else
                         definitions).filter { it.kind == kind }
                 }

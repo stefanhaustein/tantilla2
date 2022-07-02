@@ -2,11 +2,6 @@ package org.kobjects.tantilla2.core
 
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.parserlib.tokenizer.ParsingException
-import org.kobjects.tantilla2.core.classifier.UserClassDefinition
-import org.kobjects.tantilla2.core.classifier.ImplDefinition
-import org.kobjects.tantilla2.core.classifier.TraitDefinition
-import org.kobjects.tantilla2.core.function.FunctionType
-import org.kobjects.tantilla2.core.function.LambdaImpl
 import org.kobjects.tantilla2.core.node.TantillaNode
 import org.kobjects.tantilla2.core.node.containsNode
 import org.kobjects.tantilla2.core.parser.*
@@ -29,7 +24,7 @@ class VariableDefinition (
     init {
         when (kind) {
             Definition.Kind.FIELD -> {
-                val existingIndex = parentScope.locals.indexOf(name)
+                val existingIndex = parentScope.definitions.locals.indexOf(name)
                 if (index != existingIndex) {
                     throw IllegalArgumentException("local variable inconsistency new index: $index; existing: $existingIndex")
                 }
@@ -55,7 +50,7 @@ class VariableDefinition (
         if (e is ParsingException) {
             error = e
         } else {
-            error = ParsingException(tokenizer.current, "Error in ${parentScope.title}.$name: " +  (e.message ?: "Parsing Error"), e)
+            error = ParsingException(tokenizer.current, "Error in ${parentScope.name}.$name: " +  (e.message ?: "Parsing Error"), e)
         }
         error!!.printStackTrace()
         throw error!!

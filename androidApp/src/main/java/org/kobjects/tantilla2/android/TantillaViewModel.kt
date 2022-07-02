@@ -66,7 +66,7 @@ class TantillaViewModel(
         canvas.translate(bitmap.width / 2f, bitmap.height / 2f)
         canvas.scale(1f, -1f)
         val penImpl = PenImpl(PenDefinition, canvas)
-        RootScope.add(VariableDefinition(
+        RootScope.definitions.add(VariableDefinition(
             RootScope,
             Definition.Kind.STATIC,
             "pen",
@@ -139,7 +139,7 @@ class TantillaViewModel(
     fun runMain() {
         mode.value = Mode.SHELL
         try {
-            val definition = userScope.value["main"]
+            val definition = userScope.value.definitions["main"]
             if (definition == null) {
                 console.konsole.write("main() undefined.")
                 return

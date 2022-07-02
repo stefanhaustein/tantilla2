@@ -9,14 +9,11 @@ import org.kobjects.tantilla2.core.runtime.RootScope
 import org.kobjects.tantilla2.core.runtime.Void
 
 open class NativeClassDefinition(
-    val name: String,
+    override val name: String,
     parent: Scope = RootScope,
     val ctorParams: List<Parameter> = emptyList(),
     val ctor: ((RuntimeContext) -> Any?) = { throw UnsupportedOperationException() },
 ) : Scope(parent), Type, Typed, Lambda {
-    override val title: String
-        get() = name
-
     override val supportsMethods: Boolean
         get() = true
 
@@ -29,7 +26,7 @@ open class NativeClassDefinition(
     override fun eval(context: RuntimeContext) = ctor(context)
 
     override fun serializeType(writer: CodeWriter) {
-        writer.append(name)
+        writer.append(this.name)
     }
 
     override fun resolve(name: String): Definition? = resolveDynamic(name, false)
@@ -43,7 +40,7 @@ open class NativeClassDefinition(
         operation: (RuntimeContext) -> Any?) {
         val type = FunctionType.Impl(returnType, listOf(Parameter("self", this)) + parameter.toList())
         val function = NativeFunction(type, operation)
-        add(DefinitionImpl(
+        definitions.add(FunctionDefinition(
             this,
             Definition.Kind.METHOD,
             name,
@@ -57,10 +54,10 @@ open class NativeClassDefinition(
         val def = DefinitionImpl(
             parent,
             Definition.Kind.STRUCT,
-            name,
+            this.name,
             resolvedValue = this
         )
-        parent.add(def)
+        parent.definitions.add(def)
     }
 
 
@@ -75,7 +72,7 @@ open class NativeClassDefinition(
             override val returnType = type
             override val parameters = listOf(Parameter("self", this@NativeClassDefinition))
         }
-        add(DefinitionImpl(
+        definitions.add(FunctionDefinition(
             this,
             Definition.Kind.METHOD,
             name,
@@ -88,7 +85,7 @@ open class NativeClassDefinition(
                 override val returnType = Void
                 override val parameters = listOf(Parameter("self", this@NativeClassDefinition), Parameter("value", type))
             }
-            add(DefinitionImpl(
+            definitions.add(FunctionDefinition(
                 this,
                 Definition.Kind.METHOD,
                 "set_$name",

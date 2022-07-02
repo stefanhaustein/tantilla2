@@ -7,6 +7,7 @@ interface Definition : SerializableCode {
     val kind: Kind
     val name: String
     val mutable: Boolean
+        get() = false
 
     var docString: String
     var index: Int

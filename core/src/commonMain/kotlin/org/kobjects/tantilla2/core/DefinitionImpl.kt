@@ -5,10 +5,6 @@ import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.core.classifier.UserClassDefinition
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
-import org.kobjects.tantilla2.core.function.FunctionType
-import org.kobjects.tantilla2.core.function.LambdaImpl
-import org.kobjects.tantilla2.core.node.TantillaNode
-import org.kobjects.tantilla2.core.node.containsNode
 import org.kobjects.tantilla2.core.parser.*
 
 class DefinitionImpl (
@@ -23,8 +19,12 @@ class DefinitionImpl (
     var error: Exception? = null
 
     init {
-        if (kind == Definition.Kind.FIELD || kind == Definition.Kind.STATIC) {
-            throw IllegalArgumentException("Variable definition ($kind) not supported in DefinitionImpl.")
+        if (kind != Definition.Kind.UNIT
+            && kind != Definition.Kind.STATIC
+            && kind != Definition.Kind.TRAIT
+            && kind != Definition.Kind.STRUCT
+            && kind != Definition.Kind.IMPL) {
+            throw IllegalArgumentException("$kind not supported in DefinitionImpl.")
         }
     }
 
@@ -46,7 +46,7 @@ class DefinitionImpl (
         if (e is ParsingException) {
             error = e
         } else {
-            error = ParsingException(tokenizer.current, "Error in ${parentScope.title}.$name: " +  (e.message ?: "Parsing Error"), e)
+            error = ParsingException(tokenizer.current, "Error in ${parentScope.name}.$name: " +  (e.message ?: "Parsing Error"), e)
         }
         error!!.printStackTrace()
         throw error!!
@@ -90,23 +90,12 @@ class DefinitionImpl (
         if (resolvedType == null) {
             val tokenizer = tokenizer()
             try {
-                when (kind) {
-                    Definition.Kind.FUNCTION -> resolvedType = resolveFunctionType(tokenizer, isMethod = false)
-                    Definition.Kind.METHOD -> resolvedType = resolveFunctionType(tokenizer, isMethod = true)
-                    else -> resolvedType = value().dynamicType
-                }
+                resolvedType = value().dynamicType
             } catch (e: Exception) {
                 throw exceptionInResolve(e, tokenizer)
             }
         }
         return resolvedType!!
-    }
-
-    private fun resolveFunctionType(tokenizer: TantillaTokenizer, isMethod: Boolean): FunctionType {
-        tokenizer.tryConsume("static")
-        tokenizer.consume("def")
-        tokenizer.consume(name)
-        return TypeParser.parseFunctionType(tokenizer, ParsingContext(parentScope, 0), isMethod)
     }
 
     override fun value(): Any?  {
@@ -115,23 +104,11 @@ class DefinitionImpl (
             println("Resolving: $definitionText")
             try {
                 when (kind) {
-                    Definition.Kind.FUNCTION -> {
-                        val resolved = Parser.parseDef(tokenizer, ParsingContext(parentScope, 0), isMethod = false)
-                        docString = resolved.first
-                        resolvedValue = resolved.second
-                    }
-                    Definition.Kind.METHOD -> {
-                        val resolved = Parser.parseDef(tokenizer, ParsingContext(parentScope, 0), isMethod = true)
-                        docString = resolved.first
-                        resolvedValue = resolved.second
-                    }
                     Definition.Kind.STRUCT -> resolvedValue = resolveClass(tokenizer)
                     Definition.Kind.TRAIT -> resolvedValue = resolveTrait(tokenizer)
                     Definition.Kind.IMPL -> resolvedValue = resolveImpl(tokenizer)
                     Definition.Kind.UNIT -> throw UnsupportedOperationException()
-                    Definition.Kind.UNPARSEABLE,
-                    Definition.Kind.STATIC,
-                    Definition.Kind.FIELD -> throw IllegalStateException("Not supported here: $kind")
+                    else -> throw IllegalStateException("Not supported here: $kind")
                 }
             } catch (e: Exception) {
                 throw exceptionInResolve(e, tokenizer)
@@ -186,78 +163,38 @@ class DefinitionImpl (
 
 
     override fun serializeTitle(writer: CodeWriter) {
-        when (kind) {
-            Definition.Kind.UNPARSEABLE,
-            Definition.Kind.STATIC,
-            Definition.Kind.FIELD -> throw IllegalStateException("Unsupported here: $kind")
-            Definition.Kind.METHOD  -> writer.keyword("def ").declaration(name).appendType(valueType())
-            Definition.Kind.FUNCTION -> {
-                if (parentScope.supportsMethods) {
-                    writer.keyword("static ")
-                }
-                writer.keyword("def ").declaration(name).appendType(valueType())
-            }
-            Definition.Kind.TRAIT,
-            Definition.Kind.IMPL,
-            Definition.Kind.STRUCT -> writer.keyword(kind.name.lowercase()).append(' ').declaration(name)
-            Definition.Kind.UNIT -> writer.keyword("unit ").declaration(name)
-        }
+        writer.keyword(kind.name.lowercase()).append(' ').declaration(name)
     }
 
 
     override fun serializeCode(writer: CodeWriter, precedence: Int) {
-       when (kind) {
-           Definition.Kind.UNPARSEABLE,
-           Definition.Kind.STATIC,
-           Definition.Kind.FIELD -> throw IllegalStateException("Unsupported here: $kind")
-           Definition.Kind.TRAIT,
-           Definition.Kind.STRUCT,
-           Definition.Kind.IMPL -> {
+
                if (resolvedValue != UnresolvedValue) {
                    writer.appendCode(resolvedValue)
                } else {
                    writer.append(definitionText)
                }
-           }
-           Definition.Kind.METHOD,
-           Definition.Kind.FUNCTION -> {
-               if (resolvedValue != UnresolvedValue) {
-                   writer.keyword("def ").declaration(name)
-                   writer.appendCode(resolvedValue)
-               } else {
-                    writer.append(definitionText)
-               }
-           }
-       }
+
     }
 
     override fun serializeSummary(writer: CodeWriter) {
-        if (!isScope()) {
-            serializeCode(writer)
-            return
-        }
         serializeTitle(writer)
         writer.append(":")
         writer.indent()
         val scope = value() as Scope
-        for (definition in scope.iterator()) {
+        for (definition in scope.definitions.iterator()) {
             writer.newline()
             definition.serializeTitle(writer)
         }
         writer.outdent()
     }
 
+    override fun isDynamic() = false
 
-    override fun isDynamic() = kind == Definition.Kind.METHOD
-
-    override fun isScope() = error() == null && (
-            kind == Definition.Kind.IMPL
-            || kind == Definition.Kind.STRUCT
-            || kind == Definition.Kind.TRAIT || kind == Definition.Kind.UNIT)
+    override fun isScope() = error() == null
 
     override fun findNode(node: Evaluable<RuntimeContext>): Definition? =
         when (val value = resolvedValue) {
-            is LambdaImpl -> if (value.body.containsNode(node)) this else null
             is Scope -> value.findNode(node)
             else -> null
         }
@@ -269,7 +206,7 @@ class DefinitionImpl (
         if (scope.parentScope == null) {
             throw IllegalStateException("Definition $this not found in scope.")
         }
-        return 1 + depth(scope.parentScope!!)
+        return 1 + depth(scope.parentScope)
     }
 
 

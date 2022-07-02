@@ -8,7 +8,7 @@ import org.kobjects.tantilla2.core.function.Parameter
 object RootScope : Scope(null) {
 
 
-    override val title: String
+    override val name: String
         get() = "Root Scope"
 
     init {
@@ -22,7 +22,7 @@ object RootScope : Scope(null) {
         ) { Range(it.f64(0), it.f64(1)) }
 
 
-        add(DefinitionImpl(this, Definition.Kind.UNIT,"math", resolvedValue = MathScope))
+        definitions.add(DefinitionImpl(this, Definition.Kind.UNIT,"math", resolvedValue = MathScope))
 
     }
 

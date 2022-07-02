@@ -5,12 +5,9 @@ import org.kobjects.tantilla2.core.Scope
 import org.kobjects.tantilla2.core.Type
 
 class TraitDefinition(
-    val name: String,
+    override val name: String,
     parent: Scope,
 ) : Scope(parent), Type {
-
-    override val title: String
-        get() = name
 
     override val supportsMethods: Boolean
         get() = true
@@ -18,7 +15,7 @@ class TraitDefinition(
     var traitIndex = 0
 
     override fun serializeType(writer: CodeWriter) {
-        writer.append(name)
+        writer.append(this.name)
     }
 
     override fun isAssignableFrom(type: Type): Boolean {

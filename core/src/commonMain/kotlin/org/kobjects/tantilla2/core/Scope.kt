@@ -15,10 +15,9 @@ import org.kobjects.tantilla2.core.parser.TantillaTokenizer
 
 abstract class Scope(
     val parentScope: Scope?
-): SerializableCode, Iterable<Definition> {
-    private val definitions = mutableMapOf<String, Definition>()
-    var locals = mutableListOf<String>()
-    abstract val title: String
+): SerializableCode {
+    val definitions: DefinitionMap = DefinitionMap(this)
+    abstract val name: String
 
     open val supportsMethods: Boolean
         get() = false
@@ -32,16 +31,8 @@ abstract class Scope(
 
 */
 
-    fun add(definition: Definition) {
-        definitions[definition.name] = definition
-        if (definition.kind == Definition.Kind.FIELD && definition.index == -1) {
-            definition.index = locals.size
-            locals.add(definition.name)
-        }
-    }
-
     fun findNode(node: Evaluable<RuntimeContext>): Definition? {
-        for (definition in definitions.values) {
+        for (definition in definitions) {
             val result = definition.findNode(node)
             if (result != null) {
                 return result
@@ -51,10 +42,6 @@ abstract class Scope(
     }
 
 
-    operator fun get(name: String): Definition? = definitions[name]
-
-    override fun iterator(): Iterator<Definition> = definitions.values.iterator()
-
     fun declareLocalVariable(name: String, type: Type, mutable: Boolean): Int {
         val definition = VariableDefinition(
             this,
@@ -63,14 +50,14 @@ abstract class Scope(
             mutable = mutable,
             resolvedType = type
         )
-        add(definition)
+        definitions.add(definition)
         return definition.index
     }
 
 
     fun update(newContent: String, oldDefinition: Definition? = null): Definition {
         if (oldDefinition != null) {
-            definitions.remove(oldDefinition.name)
+            definitions.definitions.remove(oldDefinition.name)
         }
         val tokenizer = TantillaTokenizer(newContent)
         tokenizer.next()
@@ -85,7 +72,7 @@ abstract class Scope(
                 definitionText = newContent
             )
         }
-        definitions[replacement.name] = replacement
+        definitions.definitions[replacement.name] = replacement
 
         return replacement
     }
@@ -103,7 +90,7 @@ abstract class Scope(
             }
         }
         writer.indent()
-        for (definition in definitions.values) {
+        for (definition in definitions.definitions.values) {
             writer.newline()
             writer.newline()
             writer.appendCode(definition)
@@ -112,7 +99,7 @@ abstract class Scope(
     }
 
     fun resolveDynamic(name: String, fallBackToStatic: Boolean): Definition? {
-        val result = definitions[name]
+        val result = definitions.definitions[name]
         if (result != null) {
             if (fallBackToStatic || result.isDynamic()) {
                 return result
@@ -129,7 +116,7 @@ abstract class Scope(
     }
 
     fun resolveStatic(name: String, fallBackToParent: Boolean = false): Definition? {
-        val result = definitions[name]
+        val result = definitions.definitions[name]
         if (result != null) {
             if (result.isDynamic()) {
                 throw RuntimeException("Static property expected; found: $result")
@@ -144,7 +131,7 @@ abstract class Scope(
 
     open fun rebuild(compilationResults: CompilationResults): Boolean {
         var ok = true
-        for (definition in definitions.values) {
+        for (definition in definitions) {
             ok = definition.rebuild(compilationResults) && ok
         }
         return ok
@@ -161,7 +148,7 @@ abstract class Scope(
             override val parameters = parameter.toList()
         }
         val function = NativeFunction(type, operation)
-        definitions[name] = DefinitionImpl(
+        definitions.definitions[name] = FunctionDefinition(
             this,
             if (parameter.isNotEmpty() && parameter[0].name == "self") Definition.Kind.METHOD else Definition.Kind.FUNCTION,
             name,
@@ -172,10 +159,10 @@ abstract class Scope(
     }
 
     fun remove(name: String) {
-        val removed = definitions.remove(name)
+        val removed = definitions.definitions.remove(name)
         if (removed != null && removed.index != -1) {
-            locals.remove(name)
-            for (definition in iterator()) {
+            definitions.locals.remove(name)
+            for (definition in definitions.iterator()) {
                 if (definition.index > removed.index) {
                     definition.index--
                 }
@@ -183,6 +170,6 @@ abstract class Scope(
         }
     }
 
-    override fun toString() = title
+    override fun toString() = name
 
 }

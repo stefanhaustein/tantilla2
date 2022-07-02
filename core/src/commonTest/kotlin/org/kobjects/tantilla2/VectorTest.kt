@@ -6,7 +6,6 @@ import org.kobjects.tantilla2.core.runtime.RootScope
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
 
 class VectorTest {
     val VECTOR = """
@@ -48,7 +47,8 @@ class VectorTest {
     //    assertEquals("", parsingContext.serialize())
 
         val vectorImpl = parsingContext["Vector"]!!.value() as Scope
-        assertEquals(setOf("x", "y", "z", "times", "minus", "plus", "dot", "mag", "norm"), vectorImpl.iterator().asSequence().map { it.name }.toSet())
+        assertEquals(setOf("x", "y", "z", "times", "minus", "plus", "dot", "mag", "norm"),
+            vectorImpl.definitions.iterator().asSequence().map { it.name }.toSet())
 
       //  assertEquals("", parsingContext.toString())
 

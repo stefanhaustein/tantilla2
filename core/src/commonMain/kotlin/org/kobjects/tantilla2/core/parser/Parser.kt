@@ -51,7 +51,7 @@ object Parser {
                         && tokenizer.current.type == TokenType.IDENTIFIER
                         && (tokenizer.lookAhead(1).text == ":" || tokenizer.lookAhead(1).text == "="))) {
                     val definition = parseDefinition(tokenizer, ParsingContext(scope, localDepth))
-                    scope.add(definition)
+                    scope.definitions.add(definition)
                 } else {
                     val statement = StatementParser.parseStatement(tokenizer, ParsingContext(scope, localDepth))
                     statements.add(statement)
@@ -88,7 +88,7 @@ object Parser {
                 val name = tokenizer.consume(TokenType.IDENTIFIER, "Function name expected.")
                 println("consuming def $name")
                 val text = consumeBody(tokenizer, startPos, context.depth)
-                DefinitionImpl(context.scope, if (isMethod) Definition.Kind.METHOD else Definition.Kind.FUNCTION, name, definitionText = text)
+                FunctionDefinition(context.scope, if (isMethod) Definition.Kind.METHOD else Definition.Kind.FUNCTION, name, definitionText = text)
             }
             "struct" -> {
                 tokenizer.consume("struct")
@@ -226,7 +226,7 @@ object Parser {
             functionScope.declareLocalVariable(parameter.name, parameter.type, false)
         }
         val body = parse(tokenizer, ParsingContext(functionScope, context.depth + 1))
-        return Pair(docString, LambdaImpl(type, functionScope.locals.size, body))
+        return Pair(docString, LambdaImpl(type, functionScope.definitions.locals.size, body))
     }
 
 

@@ -77,7 +77,7 @@ object ExpressionParser {
         if (tokenizer.tryConsume("(")) {
             val firstParameter = parseExpression(tokenizer, context)
             val baseType = firstParameter.returnType as Scope
-            val definition = baseType[name]
+            val definition = baseType.definitions[name]
             if (!tokenizer.tryConsume(",") && tokenizer.current.text != ")") {
                 throw tokenizer.exception("Comma or closing paren expected after first parameter.")
             }
@@ -141,7 +141,7 @@ object ExpressionParser {
         } */
         val body = Parser.parse(tokenizer, ParsingContext(functionScope, context.depth + 1))
 
-        return LambdaReference(type, functionScope.locals.size, body)
+        return LambdaReference(type, functionScope.definitions.locals.size, body)
     }
 
 
