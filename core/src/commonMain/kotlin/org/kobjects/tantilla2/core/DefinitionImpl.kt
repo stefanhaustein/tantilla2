@@ -16,20 +16,24 @@ class DefinitionImpl (
     override val kind: Definition.Kind,
     override val name: String,
     val definitionText: String = "",
-    override val mutable: Boolean = false,
     private var resolvedType: Type? = null,
     private var resolvedValue: Any? = UnresolvedValue,
     override var docString: String = "",
-    override var index: Int = -1,
 ) : Definition {
     var error: Exception? = null
-
 
     init {
         if (kind == Definition.Kind.FIELD || kind == Definition.Kind.STATIC) {
             throw IllegalArgumentException("Variable definition ($kind) not supported in DefinitionImpl.")
         }
     }
+
+    override val mutable: Boolean
+        get() = false
+
+    override var index: Int
+        get() = -1
+        set(_) = throw UnsupportedOperationException()
 
     private fun tokenizer(): TantillaTokenizer {
         val tokenizer = TantillaTokenizer(definitionText)
