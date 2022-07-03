@@ -2,14 +2,32 @@ package org.kobjects.tantilla2.core.classifier
 
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.function.Lambda
+import org.kobjects.tantilla2.core.parser.Parser
+import org.kobjects.tantilla2.core.parser.ParsingContext
+import org.kobjects.tantilla2.core.parser.TantillaTokenizer
 
 class ImplDefinition(
+    parentContext: Scope,
     override val name: String,
-    parentContext: Scope?,
-    val trait: TraitDefinition,
-    val classifier: UserClassDefinition,
-) : Scope(parentContext), Type {
+    definitionText: String,
+    override var docString: String,
+) : Scope(parentContext, definitionText), Type {
     var vmt = listOf<Lambda>()
+
+    var resolvedTrait: TraitDefinition? = null
+    var resolvedStruct: UserClassDefinition? = null
+
+    val trait: TraitDefinition
+        get() {
+            value()
+            return resolvedTrait!!
+        }
+
+    val struct: UserClassDefinition
+        get() {
+            value()
+            return resolvedStruct!!
+        }
 
     override val supportsMethods: Boolean
         get() = true
@@ -39,6 +57,27 @@ class ImplDefinition(
     override fun serializeType(writer: CodeWriter) {
         writer.append(this.name)
     }
+
+
+    override fun resolve(tokenizer: TantillaTokenizer) {
+
+        val traitName = name.substring(0, name.indexOf(' '))
+        resolvedTrait = parentScope!!.resolveStatic(traitName, true)!!.value() as TraitDefinition
+        val className = name.substring(name.lastIndexOf(' ') + 1)
+        resolvedStruct = parentScope!!.resolveStatic(className, true)!!.value() as UserClassDefinition
+
+        tokenizer.consume("impl")
+        tokenizer.consume(traitName)
+        tokenizer.consume("for")
+        tokenizer.consume(className)
+        tokenizer.consume(":")
+        Parser.parse(tokenizer, ParsingContext(this, 0))
+        println("Impl successfully resolved!")
+
+    }
+
+    override val kind: Definition.Kind
+        get() = Definition.Kind.IMPL
 
 
 }

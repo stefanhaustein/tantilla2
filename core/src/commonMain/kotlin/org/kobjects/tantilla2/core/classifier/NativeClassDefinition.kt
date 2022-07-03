@@ -13,12 +13,16 @@ open class NativeClassDefinition(
     parent: Scope = RootScope,
     val ctorParams: List<Parameter> = emptyList(),
     val ctor: ((RuntimeContext) -> Any?) = { throw UnsupportedOperationException() },
-) : Scope(parent), Type, Typed, Lambda {
+    override var docString: String = "",
+) : Scope(parent, ""), Type, Typed, Lambda {
     override val supportsMethods: Boolean
         get() = true
 
     override val supportsLocalVariables: Boolean
         get() = true
+
+    override val kind: Definition.Kind
+        get() = Definition.Kind.STRUCT
 
     override val type: FunctionType
         get() = NativeClassMetaType(this, ctorParams)
@@ -51,13 +55,7 @@ open class NativeClassDefinition(
     }
 
     init {
-        val def = DefinitionImpl(
-            parent,
-            Definition.Kind.STRUCT,
-            this.name,
-            resolvedValue = this
-        )
-        parent.definitions.add(def)
+        parent.definitions.add(this)
     }
 
 

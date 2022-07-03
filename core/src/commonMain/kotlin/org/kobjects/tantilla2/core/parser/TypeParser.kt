@@ -54,7 +54,7 @@ object TypeParser {
             val selfType: Type = when (context.scope) {
                 is UserClassDefinition -> context.scope
                 is TraitDefinition -> context.scope
-                is ImplDefinition -> context.scope.classifier
+                is ImplDefinition -> context.scope.struct
                 else ->
                     throw IllegalStateException("self supported for classes, traits and implemenetations only; got: ${context}")
             }

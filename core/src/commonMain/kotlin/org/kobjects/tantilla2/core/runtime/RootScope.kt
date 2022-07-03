@@ -1,8 +1,8 @@
 package org.kobjects.tantilla2.core.runtime
 
 import org.kobjects.tantilla2.core.Definition
-import org.kobjects.tantilla2.core.DefinitionImpl
 import org.kobjects.tantilla2.core.Scope
+import org.kobjects.tantilla2.core.UnitScope
 import org.kobjects.tantilla2.core.function.Parameter
 
 object RootScope : Scope(null) {
@@ -22,10 +22,15 @@ object RootScope : Scope(null) {
         ) { Range(it.f64(0), it.f64(1)) }
 
 
-        definitions.add(DefinitionImpl(this, Definition.Kind.UNIT,"math", resolvedValue = MathScope))
+        definitions.add(MathScope)
 
     }
 
+    override val kind: Definition.Kind
+        get() = Definition.Kind.UNIT
 
+    override var docString: String
+        get() = ""
+        set(_) = throw UnsupportedOperationException()
 
 }

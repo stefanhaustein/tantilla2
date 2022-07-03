@@ -96,7 +96,7 @@ object Parser {
                 tokenizer.consume(":")
                 val docString = readDocString(tokenizer)
                 val text = consumeBody(tokenizer, startPos, context.depth)
-                DefinitionImpl(context.scope, Definition.Kind.STRUCT, name, definitionText = text, docString = docString)
+                UserClassDefinition(context.scope, name, definitionText = text, docString = docString)
             }
             "trait" -> {
                 tokenizer.consume("trait")
@@ -104,7 +104,7 @@ object Parser {
                 tokenizer.consume(":")
                 val docString = readDocString(tokenizer)
                 val text = consumeBody(tokenizer, startPos, context.depth)
-                DefinitionImpl(context.scope, Definition.Kind.TRAIT, name, definitionText = text, docString = docString)
+                TraitDefinition(context.scope, name, definitionText = text, docString = docString)
             }
             "impl" -> {
                 tokenizer.consume("impl")
@@ -114,9 +114,8 @@ object Parser {
                 tokenizer.consume(":")
                 val docString = readDocString(tokenizer)
                 val text = consumeBody(tokenizer, startPos, context.depth)
-                DefinitionImpl(
+                ImplDefinition(
                     context.scope,
-                    Definition.Kind.IMPL,
                     "$traitName for $name",
                     definitionText = text,
                     docString = docString

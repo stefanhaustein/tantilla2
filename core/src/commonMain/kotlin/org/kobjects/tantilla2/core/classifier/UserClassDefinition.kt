@@ -5,9 +5,14 @@ import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Lambda
 
 class UserClassDefinition(
-    override val name: String,
     parentScope: Scope,
-) : Scope(parentScope), Type, Typed, Lambda {
+    override val name: String,
+    definitionText: String,
+    override var docString: String,
+) : Scope(parentScope, definitionText), Type, Typed, Lambda {
+    override val kind: Definition.Kind
+        get() = Definition.Kind.STRUCT
+
     override val type: FunctionType
         get() = UserClassMetaType(this)
 

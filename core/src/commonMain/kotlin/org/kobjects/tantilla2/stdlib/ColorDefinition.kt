@@ -1,7 +1,6 @@
 package org.kobjects.tantilla2.stdlib
 
 import org.kobjects.tantilla2.core.Definition
-import org.kobjects.tantilla2.core.DefinitionImpl
 import org.kobjects.tantilla2.core.VariableDefinition
 import org.kobjects.tantilla2.core.classifier.NativeClassDefinition
 import org.kobjects.tantilla2.core.function.Parameter
