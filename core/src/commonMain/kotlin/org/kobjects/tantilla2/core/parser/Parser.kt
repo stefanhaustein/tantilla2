@@ -80,7 +80,7 @@ object Parser {
             return parseVariableDeclaration(tokenizer, context, startPos, local, mutable)
         }
 
-        return when (tokenizer.current.text) {
+        return when (val kind = tokenizer.current.text) {
             "def" -> {
                 val isMethod = !explicitlyStatic && (scope is UserClassDefinition || scope is TraitDefinition ||
                         scope is ImplDefinition)
@@ -90,21 +90,16 @@ object Parser {
                 val text = consumeBody(tokenizer, startPos, context.depth)
                 FunctionDefinition(context.scope, if (isMethod) Definition.Kind.METHOD else Definition.Kind.FUNCTION, name, definitionText = text)
             }
-            "struct" -> {
-                tokenizer.consume("struct")
+            "struct",
+            "trait"-> {
+                tokenizer.consume(kind)
                 val name = tokenizer.consume(TokenType.IDENTIFIER, "Struct name expected.")
                 tokenizer.consume(":")
                 val docString = readDocString(tokenizer)
-                val text = consumeBody(tokenizer, startPos, context.depth)
-                UserClassDefinition(context.scope, name, definitionText = text, docString = docString)
-            }
-            "trait" -> {
-                tokenizer.consume("trait")
-                val name = tokenizer.consume(TokenType.IDENTIFIER, "Trait name expected.")
-                tokenizer.consume(":")
-                val docString = readDocString(tokenizer)
-                val text = consumeBody(tokenizer, startPos, context.depth)
-                TraitDefinition(context.scope, name, definitionText = text, docString = docString)
+                val definition = if (kind == "struct") UserClassDefinition(context.scope, name, docString = docString)
+                else TraitDefinition(context.scope, name, docString = docString)
+                parseScopeBody(tokenizer, ParsingContext(definition, context.depth + 1))
+                definition
             }
             "impl" -> {
                 tokenizer.consume("impl")
@@ -123,6 +118,11 @@ object Parser {
             }
             else -> throw tokenizer.exception("Declaration expected.")
         }
+    }
+
+    fun parseScopeBody(tokenizer: TantillaTokenizer, parsingContext: ParsingContext): Scope {
+        parse(tokenizer, parsingContext)
+        return parsingContext.scope
     }
 
     fun consumeLine(tokenizer: TantillaTokenizer, startPos: Int): String {

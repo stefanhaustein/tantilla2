@@ -5,13 +5,14 @@ import org.kobjects.tantilla2.core.function.Lambda
 import org.kobjects.tantilla2.core.parser.Parser
 import org.kobjects.tantilla2.core.parser.ParsingContext
 import org.kobjects.tantilla2.core.parser.TantillaTokenizer
+import org.kobjects.tantilla2.core.parser.TokenType
 
 class ImplDefinition(
     parentContext: Scope,
     override val name: String,
-    definitionText: String,
+    val definitionText: String,
     override var docString: String,
-) : Scope(parentContext, definitionText), Type {
+) : Scope(parentContext), Type {
     var vmt = listOf<Lambda>()
 
     var resolvedTrait: TraitDefinition? = null
@@ -59,21 +60,27 @@ class ImplDefinition(
     }
 
 
-    override fun resolve(tokenizer: TantillaTokenizer) {
+    override fun value(): ImplDefinition {
+        if (resolvedTrait == null) {
 
-        val traitName = name.substring(0, name.indexOf(' '))
-        resolvedTrait = parentScope!!.resolveStatic(traitName, true)!!.value() as TraitDefinition
-        val className = name.substring(name.lastIndexOf(' ') + 1)
-        resolvedStruct = parentScope!!.resolveStatic(className, true)!!.value() as UserClassDefinition
+            val traitName = name.substring(0, name.indexOf(' '))
+            resolvedTrait =
+                parentScope!!.resolveStatic(traitName, true)!!.value() as TraitDefinition
+            val className = name.substring(name.lastIndexOf(' ') + 1)
+            resolvedStruct =
+                parentScope!!.resolveStatic(className, true)!!.value() as UserClassDefinition
 
-        tokenizer.consume("impl")
-        tokenizer.consume(traitName)
-        tokenizer.consume("for")
-        tokenizer.consume(className)
-        tokenizer.consume(":")
-        Parser.parse(tokenizer, ParsingContext(this, 0))
-        println("Impl successfully resolved!")
-
+            val tokenizer = TantillaTokenizer(definitionText)
+            tokenizer.consume(TokenType.BOF)
+            tokenizer.consume("impl")
+            tokenizer.consume(traitName)
+            tokenizer.consume("for")
+            tokenizer.consume(className)
+            tokenizer.consume(":")
+            Parser.parse(tokenizer, ParsingContext(this, 0))
+            println("Impl successfully resolved!")
+        }
+        return this
     }
 
     override val kind: Definition.Kind

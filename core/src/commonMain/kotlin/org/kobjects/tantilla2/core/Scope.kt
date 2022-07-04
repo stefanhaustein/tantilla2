@@ -17,11 +17,9 @@ import org.kobjects.tantilla2.core.parser.TokenType
 
 abstract class Scope(
     override val parentScope: Scope?,
-    val definitionText: String = "",
 ): Definition {
     var error: Exception? = null
     val definitions: DefinitionMap = DefinitionMap(this)
-    var resolved = definitionText == ""
 
     open val supportsMethods: Boolean
         get() = false
@@ -136,13 +134,6 @@ abstract class Scope(
         get() = -1
         set(_) = throw UnsupportedOperationException()
 
-    private fun tokenizer(): TantillaTokenizer {
-        val tokenizer = TantillaTokenizer(definitionText)
-        tokenizer.consume(TokenType.BOF)
-        error = null
-        return tokenizer
-    }
-
     private fun exceptionInResolve(e: Exception, tokenizer: TantillaTokenizer): Exception {
         if (e is ParsingException) {
             error = e
@@ -185,26 +176,7 @@ abstract class Scope(
 
     override fun valueType(): Type = value().dynamicType
 
-    override fun value(): Any? {
-        if (!resolved) {
-            val tokenizer = tokenizer()
-            println("Resolving: $definitionText")
-            try {
-                resolve(tokenizer)
-                resolved = true
-            } catch (e: Exception) {
-                throw exceptionInResolve(e, tokenizer)
-            }
-        }
-        return this
-    }
-
-    open fun resolve(tokenizer: TantillaTokenizer) {
-        tokenizer.consume(TokenType.IDENTIFIER)  // Kind
-        tokenizer.consume(name)
-        tokenizer.consume(":")
-        Parser.parse(tokenizer, ParsingContext(this, 1))
-    }
+    override fun value(): Scope = this
 
     override fun initializer(): Evaluable<RuntimeContext>? {
         throw IllegalStateException("Initilizer not available for $kind")
@@ -219,10 +191,6 @@ abstract class Scope(
     }
 
     override fun serializeCode(writer: CodeWriter, precedence: Int) {
-       if (!resolved) {
-           writer.append(definitionText)
-           return
-       }
 
         writer.keyword(kind.name.lowercase()).append(' ')
 

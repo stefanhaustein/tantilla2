@@ -7,9 +7,8 @@ import org.kobjects.tantilla2.core.function.Lambda
 class UserClassDefinition(
     parentScope: Scope,
     override val name: String,
-    definitionText: String,
     override var docString: String,
-) : Scope(parentScope, definitionText), Type, Typed, Lambda {
+) : Scope(parentScope), Type, Typed, Lambda {
     override val kind: Definition.Kind
         get() = Definition.Kind.STRUCT
 

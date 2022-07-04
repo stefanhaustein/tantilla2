@@ -11,9 +11,8 @@ import org.kobjects.tantilla2.core.parser.TantillaTokenizer
 class TraitDefinition(
     parent: Scope,
     override val name: String,
-    definitionText: String,
     override var docString: String,
-) : Scope(parent, definitionText), Type {
+) : Scope(parent), Type {
 
     override val supportsMethods: Boolean
         get() = true
@@ -27,14 +26,6 @@ class TraitDefinition(
     override fun isAssignableFrom(type: Type): Boolean {
         return type == this || (type is ImplDefinition && type.trait == this)
     }
-
-    override fun resolve(tokenizer: TantillaTokenizer) {
-            tokenizer.consume("trait")
-            tokenizer.consume(name)
-            tokenizer.consume(":")
-            Parser.parse(tokenizer, ParsingContext(this, 1))
-            println("Trait successfully resolved!")
-        }
 
     override val kind: Definition.Kind
         get() = Definition.Kind.TRAIT

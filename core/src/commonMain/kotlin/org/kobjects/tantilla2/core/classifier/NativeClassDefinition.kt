@@ -14,7 +14,7 @@ open class NativeClassDefinition(
     val ctorParams: List<Parameter> = emptyList(),
     val ctor: ((RuntimeContext) -> Any?) = { throw UnsupportedOperationException() },
     override var docString: String = "",
-) : Scope(parent, ""), Type, Typed, Lambda {
+) : Scope(parent), Type, Typed, Lambda {
     override val supportsMethods: Boolean
         get() = true
 
