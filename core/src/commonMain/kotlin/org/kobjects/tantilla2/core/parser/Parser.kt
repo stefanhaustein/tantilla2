@@ -76,13 +76,13 @@ object Parser {
 
         if (tokenizer.current.type == TokenType.IDENTIFIER
             && (tokenizer.lookAhead(1).text == "=" || tokenizer.lookAhead(1).text == ":")) {
-            val local = !explicitlyStatic && (scope is UserClassDefinition || scope is FunctionScope)
+            val local = !explicitlyStatic && (scope is StructDefinition || scope is FunctionScope)
             return parseVariableDeclaration(tokenizer, context, startPos, local, mutable)
         }
 
         return when (val kind = tokenizer.current.text) {
             "def" -> {
-                val isMethod = !explicitlyStatic && (scope is UserClassDefinition || scope is TraitDefinition ||
+                val isMethod = !explicitlyStatic && (scope is StructDefinition || scope is TraitDefinition ||
                         scope is ImplDefinition)
                 tokenizer.consume("def")
                 val name = tokenizer.consume(TokenType.IDENTIFIER, "Function name expected.")
@@ -96,7 +96,7 @@ object Parser {
                 val name = tokenizer.consume(TokenType.IDENTIFIER, "Struct name expected.")
                 tokenizer.consume(":")
                 val docString = readDocString(tokenizer)
-                val definition = if (kind == "struct") UserClassDefinition(context.scope, name, docString = docString)
+                val definition = if (kind == "struct") StructDefinition(context.scope, name, docString = docString)
                 else TraitDefinition(context.scope, name, docString = docString)
                 parseScopeBody(tokenizer, ParsingContext(definition, context.depth + 1))
                 definition

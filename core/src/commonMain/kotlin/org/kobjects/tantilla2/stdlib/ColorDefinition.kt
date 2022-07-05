@@ -2,11 +2,13 @@ package org.kobjects.tantilla2.stdlib
 
 import org.kobjects.tantilla2.core.Definition
 import org.kobjects.tantilla2.core.VariableDefinition
-import org.kobjects.tantilla2.core.classifier.NativeClassDefinition
+import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.runtime.F64
+import org.kobjects.tantilla2.core.runtime.RootScope
 
-object ColorDefinition : NativeClassDefinition(
+object ColorDefinition : NativeStructDefinition(
+    RootScope,
     "Color",
     ctorParams = listOf(
         Parameter("r", F64),

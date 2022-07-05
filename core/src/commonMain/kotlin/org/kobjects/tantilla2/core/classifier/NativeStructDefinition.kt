@@ -2,38 +2,28 @@ package org.kobjects.tantilla2.core.classifier
 
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.function.FunctionType
-import org.kobjects.tantilla2.core.function.Lambda
 import org.kobjects.tantilla2.core.function.NativeFunction
 import org.kobjects.tantilla2.core.function.Parameter
-import org.kobjects.tantilla2.core.runtime.RootScope
 import org.kobjects.tantilla2.core.runtime.Void
 
-open class NativeClassDefinition(
-    override val name: String,
-    parent: Scope = RootScope,
+open class NativeStructDefinition(
+    parent: Scope,
+    name: String,
     val ctorParams: List<Parameter> = emptyList(),
-    val ctor: ((RuntimeContext) -> Any?) = { throw UnsupportedOperationException() },
-    override var docString: String = "",
-) : Scope(parent), Type, Typed, Lambda {
-    override val supportsMethods: Boolean
-        get() = true
+    val ctor: (RuntimeContext) -> Any? = { throw UnsupportedOperationException() },
+    docString: String = "",
+) : StructDefinition(parent, name, docString) {
 
-    override val supportsLocalVariables: Boolean
-        get() = true
-
-    override val kind: Definition.Kind
-        get() = Definition.Kind.STRUCT
-
-    override val type: FunctionType
-        get() = NativeClassMetaType(this, ctorParams)
-
-    override fun eval(context: RuntimeContext) = ctor(context)
-
-    override fun serializeType(writer: CodeWriter) {
-        writer.append(this.name)
+    // TODO: May lead to nondeterminism, remove
+    init {
+        parent.definitions.add(this)
     }
 
-    override fun resolve(name: String): Definition? = resolveDynamic(name, false)
+
+    override val type: FunctionType
+        get() = StructMetaType(this, ctorParams)
+
+    override fun eval(context: RuntimeContext) = ctor(context)
 
 
     fun defineMethod(
@@ -54,10 +44,6 @@ open class NativeClassDefinition(
         ))
     }
 
-    init {
-        parent.definitions.add(this)
-    }
-
 
     fun defineNativeProperty(
         name: String,
@@ -68,7 +54,7 @@ open class NativeClassDefinition(
     ) {
         val getterType = object : FunctionType {
             override val returnType = type
-            override val parameters = listOf(Parameter("self", this@NativeClassDefinition))
+            override val parameters = listOf(Parameter("self", this@NativeStructDefinition))
         }
         definitions.add(FunctionDefinition(
             this,
@@ -81,7 +67,7 @@ open class NativeClassDefinition(
         if (setter != null) {
             val setterType = object : FunctionType {
                 override val returnType = Void
-                override val parameters = listOf(Parameter("self", this@NativeClassDefinition), Parameter("value", type))
+                override val parameters = listOf(Parameter("self", this@NativeStructDefinition), Parameter("value", type))
             }
             definitions.add(FunctionDefinition(
                 this,

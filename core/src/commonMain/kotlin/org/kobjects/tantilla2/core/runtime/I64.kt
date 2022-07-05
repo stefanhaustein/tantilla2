@@ -1,11 +1,11 @@
 package org.kobjects.tantilla2.core.runtime
 
-import org.kobjects.tantilla2.core.classifier.NativeClassDefinition
+import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
 import org.kobjects.tantilla2.core.function.Parameter
 import kotlin.math.max
 import kotlin.math.min
 
-object I64 : NativeClassDefinition("int") {
+object I64 : NativeStructDefinition(RootScope, "int") {
 
     init {
         defineMethod(

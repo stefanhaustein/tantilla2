@@ -19,7 +19,7 @@ import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.Definition
 import org.kobjects.tantilla2.core.Scope
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
-import org.kobjects.tantilla2.core.classifier.UserClassDefinition
+import org.kobjects.tantilla2.core.classifier.StructDefinition
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -39,12 +39,12 @@ fun RenderScope(viewModel: TantillaViewModel) {
             } },
     ) {
         LazyColumn(Modifier.fillMaxWidth(), contentPadding = PaddingValues(8.dp)) {
-            for (kind in Definition.Kind.values().toList() + listOf(null)) {
+            for (kind in Definition.Kind.values().toList() /* + listOf(null) */) {
                 val list: List<Definition>
                 val title: String
                 if (kind == null) {
                     title = "IMPL (defined elsewhere)"
-                    if (scope is UserClassDefinition) {
+                    if (scope is StructDefinition) {
                         list = viewModel.compilationResults.value.classToTrait[scope]?.values?.toList() ?: emptyList()
                     } else if (scope is TraitDefinition) {
                         list = viewModel.compilationResults.value.traitToClass[scope]?.values?.toList() ?: emptyList()
@@ -63,7 +63,7 @@ fun RenderScope(viewModel: TantillaViewModel) {
                             Text(title, Modifier.padding(0.dp, 4.dp, 0.dp, 0.dp))
                         }
                         for (definition in list) {
-                            item(key = definition.hashCode()) {
+                            item(key = scope.name + "::" + definition.name) {
                                 RenderDefinition(viewModel, definition)
                             }
                         }

@@ -6,8 +6,7 @@ import org.kobjects.greenspun.core.Str
 import org.kobjects.tantilla2.core.*
 import org.kobjects.parserlib.expressionparser.ExpressionParser as GreenspunExpressionParser
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
-import org.kobjects.tantilla2.core.classifier.NativeClassMetaType
-import org.kobjects.tantilla2.core.classifier.UserClassMetaType
+import org.kobjects.tantilla2.core.classifier.StructMetaType
 import org.kobjects.tantilla2.core.function.FunctionScope
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.node.*
@@ -253,7 +252,7 @@ object ExpressionParser {
         }
 
         val hasArgs = openingParenConsumed || tokenizer.tryConsume("(")
-        if (!hasArgs && (type is UserClassMetaType || type is NativeClassMetaType)) {
+        if (!hasArgs && (type is StructMetaType || type is StructMetaType)) {
             return value
         }
 

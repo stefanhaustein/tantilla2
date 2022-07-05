@@ -2,11 +2,12 @@ package org.kobjects.tantilla2.stdlib
 
 import org.kobjects.tantilla2.core.Type
 import org.kobjects.tantilla2.core.function.Parameter
-import org.kobjects.tantilla2.core.classifier.NativeClassDefinition
+import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
 import org.kobjects.tantilla2.core.runtime.F64
+import org.kobjects.tantilla2.core.runtime.RootScope
 import org.kobjects.tantilla2.core.runtime.Void
 
-object PenDefinition : NativeClassDefinition("Pen"), Type {
+object PenDefinition : NativeStructDefinition(RootScope, "Pen"), Type {
 
     init {
         defineNativeFunction(

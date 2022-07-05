@@ -5,7 +5,7 @@ import org.kobjects.tantilla2.core.RuntimeContext
 import org.kobjects.tantilla2.core.Type
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
-import org.kobjects.tantilla2.core.classifier.UserClassDefinition
+import org.kobjects.tantilla2.core.classifier.StructDefinition
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.runtime.ListType
@@ -52,7 +52,7 @@ object TypeParser {
         val parameters = mutableListOf<Parameter>()
         if (isMethod) {
             val selfType: Type = when (context.scope) {
-                is UserClassDefinition -> context.scope
+                is StructDefinition -> context.scope
                 is TraitDefinition -> context.scope
                 is ImplDefinition -> context.scope.struct
                 else ->

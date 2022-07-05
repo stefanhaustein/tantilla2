@@ -16,7 +16,7 @@ class ImplDefinition(
     var vmt = listOf<Lambda>()
 
     var resolvedTrait: TraitDefinition? = null
-    var resolvedStruct: UserClassDefinition? = null
+    var resolvedStruct: StructDefinition? = null
 
     val trait: TraitDefinition
         get() {
@@ -24,7 +24,7 @@ class ImplDefinition(
             return resolvedTrait!!
         }
 
-    val struct: UserClassDefinition
+    val struct: StructDefinition
         get() {
             value()
             return resolvedStruct!!
@@ -68,7 +68,7 @@ class ImplDefinition(
                 parentScope!!.resolveStatic(traitName, true)!!.value() as TraitDefinition
             val className = name.substring(name.lastIndexOf(' ') + 1)
             resolvedStruct =
-                parentScope!!.resolveStatic(className, true)!!.value() as UserClassDefinition
+                parentScope!!.resolveStatic(className, true)!!.value() as StructDefinition
 
             val tokenizer = TantillaTokenizer(definitionText)
             tokenizer.consume(TokenType.BOF)

@@ -3,8 +3,9 @@ package org.kobjects.tantilla2.core.classifier
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Lambda
+import org.kobjects.tantilla2.core.function.Parameter
 
-class UserClassDefinition(
+open class StructDefinition(
     parentScope: Scope,
     override val name: String,
     override var docString: String,
@@ -13,7 +14,10 @@ class UserClassDefinition(
         get() = Definition.Kind.STRUCT
 
     override val type: FunctionType
-        get() = UserClassMetaType(this)
+        get() = StructMetaType(this, List<Parameter>(definitions.locals.size) {
+            val name = definitions.locals[it]
+            val def = definitions[name]!!
+            Parameter(name, def.valueType(), def.initializer()) })
 
     override val supportsMethods: Boolean
         get() = true
@@ -21,7 +25,7 @@ class UserClassDefinition(
     override val supportsLocalVariables: Boolean
         get() = true
 
-    override fun eval(context: RuntimeContext) = context
+    override fun eval(context: RuntimeContext): Any? = context
 
     override fun serializeType(writer: CodeWriter) {
         writer.append(this.name)

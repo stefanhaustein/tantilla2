@@ -1,12 +1,12 @@
 package org.kobjects.tantilla2.core.runtime
 
 import org.kobjects.tantilla2.core.Type
-import org.kobjects.tantilla2.core.classifier.NativeClassDefinition
+import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
 import org.kobjects.tantilla2.core.function.Parameter
 
 data class ListType(
     val elementType: Type,
-) : NativeClassDefinition("List[${elementType.typeName}]", RootScope) {
+) : NativeStructDefinition(RootScope, "List[${elementType.typeName}]") {
 
     fun empty() = TypedList(this)
 

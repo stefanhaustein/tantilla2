@@ -1,11 +1,11 @@
 package org.kobjects.tantilla2.core.runtime
 
 import org.kobjects.tantilla2.core.Type
-import org.kobjects.tantilla2.core.classifier.NativeClassDefinition
+import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
 import org.kobjects.tantilla2.core.function.Parameter
 import kotlin.math.*
 
-object F64 : NativeClassDefinition("float"), Type {
+object F64 : NativeStructDefinition(RootScope, "float"), Type {
 
     init {
         defineMethod(
