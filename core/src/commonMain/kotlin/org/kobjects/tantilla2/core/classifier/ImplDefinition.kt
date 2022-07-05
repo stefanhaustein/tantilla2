@@ -1,7 +1,7 @@
 package org.kobjects.tantilla2.core.classifier
 
 import org.kobjects.tantilla2.core.*
-import org.kobjects.tantilla2.core.function.Lambda
+import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.parser.Parser
 import org.kobjects.tantilla2.core.parser.ParsingContext
 import org.kobjects.tantilla2.core.parser.TantillaTokenizer
@@ -13,7 +13,7 @@ class ImplDefinition(
     val definitionText: String,
     override var docString: String,
 ) : Scope(parentContext), Type {
-    var vmt = listOf<Lambda>()
+    var vmt = listOf<Callable>()
 
     var resolvedTrait: TraitDefinition? = null
     var resolvedStruct: StructDefinition? = null
@@ -39,16 +39,16 @@ class ImplDefinition(
     override fun rebuild(compilationResults: CompilationResults): Boolean {
         if (super.rebuild(compilationResults)) {
 
-            val vmt = MutableList<Lambda?>(trait.traitIndex) { null }
+            val vmt = MutableList<Callable?>(trait.traitIndex) { null }
             for (definition in trait.definitions) {
                 val index = (definition.value() as TraitMethod).index
                 val resolved = resolve(definition.name)
                 if (resolved == null) {
                     throw RuntimeException("Can't resolve '${definition.name}' for '${this.name}'")
                 }
-                vmt[index] = resolved.value() as Lambda
+                vmt[index] = resolved.value() as Callable
             }
-            this.vmt = vmt.toList() as List<Lambda>
+            this.vmt = vmt.toList() as List<Callable>
 
             return true
         }

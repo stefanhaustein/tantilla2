@@ -21,7 +21,7 @@ import org.kobjects.tantilla2.core.runtime.Void
 import org.kobjects.tantilla2.stdlib.PenDefinition
 import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.core.function.FunctionType
-import org.kobjects.tantilla2.core.function.Lambda
+import org.kobjects.tantilla2.core.function.Callable
 import java.lang.Exception
 
 class TantillaViewModel(
@@ -81,7 +81,7 @@ class TantillaViewModel(
             Parameter("callback", FunctionType.Impl(Void, emptyList()))
         ) { context ->
             Choreographer.getInstance().postFrameCallback {
-                val fn = context[0] as Lambda
+                val fn = context[0] as Callable
                 val functionContext = RuntimeContext(MutableList(fn.scopeSize) { null }, fn.closure)
                 fn.eval(functionContext)
             }
@@ -148,7 +148,7 @@ class TantillaViewModel(
                 console.konsole.write("main is not a function.")
                 return
             }
-            val function = definition.value() as Lambda
+            val function = definition.value() as Callable
             function.eval(RuntimeContext(MutableList(function.scopeSize) { null }))
         } catch (e: Exception) {
             e.printStackTrace()

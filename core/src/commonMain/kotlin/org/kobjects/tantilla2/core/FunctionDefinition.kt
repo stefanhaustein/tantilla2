@@ -3,7 +3,7 @@ package org.kobjects.tantilla2.core
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.core.function.FunctionType
-import org.kobjects.tantilla2.core.function.LambdaImpl
+import org.kobjects.tantilla2.core.function.CallableImpl
 import org.kobjects.tantilla2.core.node.containsNode
 import org.kobjects.tantilla2.core.parser.*
 
@@ -104,10 +104,6 @@ class FunctionDefinition (
         return resolvedValue
     }
 
-    override fun initializer(): Evaluable<RuntimeContext>? {
-        throw IllegalStateException("Initilizer not available for $kind")
-    }
-
     override fun toString() = serializeCode()
 
     override fun serializeTitle(writer: CodeWriter) {
@@ -140,7 +136,7 @@ class FunctionDefinition (
 
     override fun findNode(node: Evaluable<RuntimeContext>): Definition? =
         when (val value = resolvedValue) {
-            is LambdaImpl -> if (value.body.containsNode(node)) this else null
+            is CallableImpl -> if (value.body.containsNode(node)) this else null
             else -> null
         }
 

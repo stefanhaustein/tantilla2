@@ -5,14 +5,13 @@ import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.RuntimeContext
 import org.kobjects.tantilla2.core.SerializableCode
-import org.kobjects.tantilla2.core.serializeCode
 
-class LambdaImpl(
+class CallableImpl(
     override val type: FunctionType,
     override val scopeSize: Int,
     val body: Evaluable<RuntimeContext>,
     override val closure: RuntimeContext? = null
-    ) : Lambda, SerializableCode {
+    ) : Callable, SerializableCode {
 
 
     // get() = "(${type.parameters}) -> ${type.returnType}"

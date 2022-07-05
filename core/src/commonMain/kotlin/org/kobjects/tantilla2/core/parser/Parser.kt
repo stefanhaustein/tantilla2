@@ -208,7 +208,7 @@ object Parser {
     }
 
 
-    fun parseDef(tokenizer: TantillaTokenizer, context: ParsingContext, isMethod: Boolean): Pair<String, Lambda> {
+    fun parseDef(tokenizer: TantillaTokenizer, context: ParsingContext, isMethod: Boolean): Pair<String, Callable> {
         tokenizer.tryConsume("static")
         tokenizer.consume("def")
         tokenizer.consume(TokenType.IDENTIFIER)
@@ -225,7 +225,7 @@ object Parser {
             functionScope.declareLocalVariable(parameter.name, parameter.type, false)
         }
         val body = parse(tokenizer, ParsingContext(functionScope, context.depth + 1))
-        return Pair(docString, LambdaImpl(type, functionScope.definitions.locals.size, body))
+        return Pair(docString, CallableImpl(type, functionScope.definitions.locals.size, body))
     }
 
 

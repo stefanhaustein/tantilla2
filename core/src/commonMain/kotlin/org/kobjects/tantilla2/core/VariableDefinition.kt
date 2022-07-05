@@ -110,7 +110,7 @@ class VariableDefinition (
         return resolvedValue
     }
 
-    override fun initializer(): Evaluable<RuntimeContext>? {
+    fun initializer(): Evaluable<RuntimeContext>? {
         if (resolvedInitializer == UnresolvedEvalueable) {
             val tokenizer = tokenizer()
             try {

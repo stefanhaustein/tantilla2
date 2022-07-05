@@ -31,8 +31,6 @@ class Unparseable(
 
     override fun error(): Exception? = null
 
-    override fun initializer(): Evaluable<RuntimeContext>? = null
-
     override fun depth(scope: Scope): Int = throw UnsupportedOperationException()
 
     override fun findNode(node: Evaluable<RuntimeContext>): Definition? = null

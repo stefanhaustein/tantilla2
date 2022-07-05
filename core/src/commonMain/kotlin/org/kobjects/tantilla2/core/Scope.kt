@@ -175,11 +175,6 @@ abstract class Scope(
 
     override fun value(): Scope = this
 
-    override fun initializer(): Evaluable<RuntimeContext>? {
-        throw IllegalStateException("Initilizer not available for $kind")
-    }
-
-
     override fun toString() = name
 
 

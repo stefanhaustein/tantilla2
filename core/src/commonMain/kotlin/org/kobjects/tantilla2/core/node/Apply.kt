@@ -4,7 +4,7 @@ import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.RuntimeContext
 import org.kobjects.tantilla2.core.function.FunctionType
-import org.kobjects.tantilla2.core.function.Lambda
+import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.returnType
 
 
@@ -16,10 +16,10 @@ class Apply(
 ) : TantillaNode {
     override fun eval(context: RuntimeContext): Any? {
         val shouldBeLambda = callable.eval(context)
-        if (shouldBeLambda !is Lambda) {
+        if (shouldBeLambda !is Callable) {
             throw IllegalStateException("Lambda expected; got $shouldBeLambda")
         }
-        val function = shouldBeLambda as Lambda
+        val function = shouldBeLambda as Callable
         val functionContext = RuntimeContext(MutableList<Any?>(function.scopeSize) {
             if (it < parameters.size) {
                 val result = parameters[it].eval(context)

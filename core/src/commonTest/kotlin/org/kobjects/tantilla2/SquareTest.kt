@@ -1,7 +1,7 @@
 package org.kobjects.tantilla2
 
 import org.kobjects.tantilla2.core.*
-import org.kobjects.tantilla2.core.function.Lambda
+import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.parser.Parser
 import org.kobjects.tantilla2.core.runtime.RootScope
 import kotlin.test.Test
@@ -24,7 +24,7 @@ class SquareTest {
         // assertEquals("def square (x: float):\n  x * x", squareImpl.toString())
 
         val runtimeContext = RuntimeContext(mutableListOf(4.0))
-        val result = (squareImpl.value()!! as Lambda).eval(runtimeContext)
+        val result = (squareImpl.value()!! as Callable).eval(runtimeContext)
 
         assertEquals(16.0, result)
 

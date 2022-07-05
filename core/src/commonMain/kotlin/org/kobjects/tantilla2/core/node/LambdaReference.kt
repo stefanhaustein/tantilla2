@@ -5,8 +5,8 @@ import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.RuntimeContext
 import org.kobjects.tantilla2.core.Type
 import org.kobjects.tantilla2.core.function.FunctionType
-import org.kobjects.tantilla2.core.function.Lambda
-import org.kobjects.tantilla2.core.function.LambdaImpl
+import org.kobjects.tantilla2.core.function.Callable
+import org.kobjects.tantilla2.core.function.CallableImpl
 
 class LambdaReference(
     val type: FunctionType,
@@ -18,8 +18,8 @@ class LambdaReference(
 
     override fun children(): List<Evaluable<RuntimeContext>> = emptyList()
 
-    override fun eval(context: RuntimeContext): Lambda {
-        return LambdaImpl(type, scopeSize, body, context)
+    override fun eval(context: RuntimeContext): Callable {
+        return CallableImpl(type, scopeSize, body, context)
     }
 
     override fun reconstruct(newChildren: List<Evaluable<RuntimeContext>>) = this

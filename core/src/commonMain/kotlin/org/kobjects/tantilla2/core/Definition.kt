@@ -15,7 +15,6 @@ interface Definition : SerializableCode {
     fun value(): Any?
     fun valueType(): Type
     fun error(): Exception?
-    fun initializer(): Evaluable<RuntimeContext>?
     fun depth(scope: Scope): Int
 
     fun findNode(node: Evaluable<RuntimeContext>): Definition?
