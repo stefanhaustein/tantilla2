@@ -8,7 +8,6 @@ import org.kobjects.parserlib.expressionparser.ExpressionParser as GreenspunExpr
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
 import org.kobjects.tantilla2.core.classifier.StructMetaType
 import org.kobjects.tantilla2.core.function.FunctionDefinition
-import org.kobjects.tantilla2.core.function.FunctionScope
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.node.*
 

@@ -71,8 +71,7 @@ abstract class Scope(
             }
         }
         val parent = parentScope
-        if ((this is FunctionScope || this is FunctionDefinition)
-            && (parent is FunctionScope || parent is FunctionDefinition)) {
+        if (this is FunctionDefinition && parent is FunctionDefinition) {
             return parent.resolveDynamic(name, fallBackToStatic)
         }
         

@@ -47,8 +47,7 @@ object Parser {
                 }
                 tokenizer.next()
             } else if (DECLARATION_KEYWORDS.contains(tokenizer.current.text) ||
-                (context.scope !is FunctionScope
-                        && context.scope !is FunctionDefinition
+                (context.scope !is FunctionDefinition
                         && tokenizer.current.type == TokenType.IDENTIFIER
                         && (tokenizer.lookAhead(1).text == ":" || tokenizer.lookAhead(1).text == "="))) {
                     val definition = parseDefinition(tokenizer, ParsingContext(scope, localDepth))
@@ -77,7 +76,7 @@ object Parser {
 
         if (tokenizer.current.type == TokenType.IDENTIFIER
             && (tokenizer.lookAhead(1).text == "=" || tokenizer.lookAhead(1).text == ":")) {
-            val local = !explicitlyStatic && (scope is StructDefinition || scope is FunctionScope || scope is FunctionDefinition)
+            val local = !explicitlyStatic && (scope is StructDefinition || scope is FunctionDefinition)
             return parseVariableDeclaration(tokenizer, context, startPos, local, mutable)
         }
 

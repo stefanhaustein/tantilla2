@@ -4,7 +4,6 @@ import org.kobjects.greenspun.core.Control
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.function.FunctionDefinition
-import org.kobjects.tantilla2.core.function.FunctionScope
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.node.*
 import org.kobjects.tantilla2.core.runtime.ListType
@@ -63,7 +62,7 @@ object StatementParser {
 
     fun parseReturn(tokenizer: TantillaTokenizer, context: ParsingContext): Evaluable<RuntimeContext> {
         tokenizer.consume("return")
-        if (context.scope !is FunctionScope && context.scope !is FunctionDefinition) {
+        if (context.scope !is FunctionDefinition) {
             throw tokenizer.exception("Function scope expected for 'return'")
         }
         if ((context.scope.valueType() as FunctionType).returnType == Void) {
