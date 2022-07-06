@@ -7,6 +7,7 @@ import org.kobjects.tantilla2.core.*
 import org.kobjects.parserlib.expressionparser.ExpressionParser as GreenspunExpressionParser
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
 import org.kobjects.tantilla2.core.classifier.StructMetaType
+import org.kobjects.tantilla2.core.function.FunctionDefinition
 import org.kobjects.tantilla2.core.function.FunctionScope
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.node.*
@@ -125,7 +126,7 @@ object ExpressionParser {
         }
 
         tokenizer.consume(":")
-        val functionScope = FunctionScope(context.scope, type)
+        val functionScope = FunctionDefinition(context.scope, Definition.Kind.FUNCTION, "<anonymous>", resolvedType = type)
         for (i in type.parameters.indices) {
             val parameter = type.parameters[i]
             functionScope.declareLocalVariable(parameterNames[i], parameter.type, false)

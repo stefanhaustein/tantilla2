@@ -71,7 +71,8 @@ abstract class Scope(
             }
         }
         val parent = parentScope
-        if (this is FunctionScope && parent is FunctionScope) {
+        if ((this is FunctionScope || this is FunctionDefinition)
+            && (parent is FunctionScope || parent is FunctionDefinition)) {
             return parent.resolveDynamic(name, fallBackToStatic)
         }
         
@@ -169,7 +170,7 @@ abstract class Scope(
 
     override fun valueType(): Type = value().dynamicType
 
-    override fun value(): Scope = this
+    override fun value(): Any = this
 
     override fun toString() = name
 

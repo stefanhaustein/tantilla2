@@ -11,6 +11,8 @@ interface Definition : SerializableCode {
 
     var docString: String
     var index: Int
+        get() = -1
+        set(_) = throw UnsupportedOperationException()
 
     fun value(): Any?
     fun valueType(): Type

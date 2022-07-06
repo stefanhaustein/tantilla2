@@ -14,14 +14,19 @@ class FunctionDefinition (
     private var resolvedType: Type? = null,
     private var resolvedValue: Any? = UnresolvedValue,
     override var docString: String = "",
-) : Definition {
-    var error: Exception? = null
+) : Scope() {
 
     init {
         if (kind != Definition.Kind.FUNCTION && kind != Definition.Kind.METHOD) {
             throw IllegalArgumentException("Variable definition ($kind) not supported in DefinitionImpl.")
         }
     }
+
+  /*  override val supportsMethods: Boolean
+        get() = true
+*/
+    override val supportsLocalVariables: Boolean
+        get() = true
 
     override val mutable: Boolean
         get() = false
@@ -88,19 +93,19 @@ class FunctionDefinition (
         return TypeParser.parseFunctionType(tokenizer, ParsingContext(parentScope, 0), isMethod)
     }
 
-    override fun value(): Any?  {
+    override fun value(): Any {
         if (resolvedValue == UnresolvedValue) {
             val tokenizer = tokenizer()
             println("Resolving: $definitionText")
             try {
-                        val resolved = Parser.parseDef(tokenizer, ParsingContext(parentScope, 0), isMethod = kind == Definition.Kind.METHOD)
+                        val resolved = Parser.parseDef(tokenizer, ParsingContext(this, 0), isMethod = kind == Definition.Kind.METHOD)
                         docString = resolved.first
                         resolvedValue = resolved.second
             } catch (e: Exception) {
                 throw exceptionInResolve(e, tokenizer)
             }
         }
-        return resolvedValue
+        return resolvedValue!!
     }
 
     override fun toString() = serializeCode()

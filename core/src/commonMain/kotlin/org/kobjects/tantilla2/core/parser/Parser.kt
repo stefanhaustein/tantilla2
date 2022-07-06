@@ -48,6 +48,7 @@ object Parser {
                 tokenizer.next()
             } else if (DECLARATION_KEYWORDS.contains(tokenizer.current.text) ||
                 (context.scope !is FunctionScope
+                        && context.scope !is FunctionDefinition
                         && tokenizer.current.type == TokenType.IDENTIFIER
                         && (tokenizer.lookAhead(1).text == ":" || tokenizer.lookAhead(1).text == "="))) {
                     val definition = parseDefinition(tokenizer, ParsingContext(scope, localDepth))
@@ -76,7 +77,7 @@ object Parser {
 
         if (tokenizer.current.type == TokenType.IDENTIFIER
             && (tokenizer.lookAhead(1).text == "=" || tokenizer.lookAhead(1).text == ":")) {
-            val local = !explicitlyStatic && (scope is StructDefinition || scope is FunctionScope)
+            val local = !explicitlyStatic && (scope is StructDefinition || scope is FunctionScope || scope is FunctionDefinition)
             return parseVariableDeclaration(tokenizer, context, startPos, local, mutable)
         }
 
@@ -212,20 +213,21 @@ object Parser {
         tokenizer.tryConsume("static")
         tokenizer.consume("def")
         tokenizer.consume(TokenType.IDENTIFIER)
-        val type = TypeParser.parseFunctionType(tokenizer, context, isMethod)
-        if (context.scope is TraitDefinition) {
+        val type = TypeParser.parseFunctionType(tokenizer, ParsingContext(context.scope.parentScope!!, context.depth), isMethod)
+        val parentScope = context.scope.parentScope
+        if (parentScope is TraitDefinition) {
             tokenizer.consume(TokenType.EOF, "Trait methods must not have function bodies.")
-            return Pair("", TraitMethod(type, context.scope.traitIndex++))
+            return Pair("", TraitMethod(type, parentScope.traitIndex++))
         }
 
         tokenizer.consume(":")
         val docString = readDocString(tokenizer)
-        val functionScope = FunctionScope(context.scope, type)
+        // val functionScope = FunctionScope(context.scope, type)
         for (parameter in type.parameters) {
-            functionScope.declareLocalVariable(parameter.name, parameter.type, false)
+            context.scope.declareLocalVariable(parameter.name, parameter.type, false)
         }
-        val body = parse(tokenizer, ParsingContext(functionScope, context.depth + 1))
-        return Pair(docString, CallableImpl(type, functionScope.definitions.locals.size, body))
+        val body = parse(tokenizer, ParsingContext(context.scope, context.depth + 1))
+        return Pair(docString, CallableImpl(type, context.scope.definitions.locals.size, body))
     }
 
 
