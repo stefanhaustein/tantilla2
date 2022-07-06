@@ -1,9 +1,8 @@
-package org.kobjects.tantilla2.core
+package org.kobjects.tantilla2.core.function
 
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.parserlib.tokenizer.ParsingException
-import org.kobjects.tantilla2.core.function.FunctionType
-import org.kobjects.tantilla2.core.function.CallableImpl
+import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.node.containsNode
 import org.kobjects.tantilla2.core.parser.*
 
