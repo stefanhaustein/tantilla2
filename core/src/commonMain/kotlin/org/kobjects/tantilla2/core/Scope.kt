@@ -10,7 +10,6 @@ import org.kobjects.tantilla2.core.parser.ParsingContext
 import org.kobjects.tantilla2.core.parser.TantillaTokenizer
 
 abstract class Scope(
-    override val parentScope: Scope?,
 ): Definition {
     var error: Exception? = null
     val definitions: DefinitionMap = DefinitionMap(this)

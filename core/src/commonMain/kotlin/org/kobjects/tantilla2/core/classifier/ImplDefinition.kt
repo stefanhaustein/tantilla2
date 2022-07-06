@@ -8,11 +8,11 @@ import org.kobjects.tantilla2.core.parser.TantillaTokenizer
 import org.kobjects.tantilla2.core.parser.TokenType
 
 class ImplDefinition(
-    parentContext: Scope,
+    override val parentScope: Scope,
     override val name: String,
     val definitionText: String,
     override var docString: String,
-) : Scope(parentContext), Type {
+) : Scope(), Type {
     var vmt = listOf<Callable>()
 
     var resolvedTrait: TraitDefinition? = null

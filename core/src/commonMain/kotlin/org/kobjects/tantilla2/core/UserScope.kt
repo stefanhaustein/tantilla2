@@ -1,8 +1,8 @@
 package org.kobjects.tantilla2.core
 
 class UserScope(
-    parentScope: Scope,
-) : Scope(parentScope) {
+    override val parentScope: Scope,
+) : Scope() {
     override val kind: Definition.Kind
         get() = Definition.Kind.UNIT
 

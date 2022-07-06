@@ -9,10 +9,10 @@ import org.kobjects.tantilla2.core.parser.ParsingContext
 import org.kobjects.tantilla2.core.parser.TantillaTokenizer
 
 class TraitDefinition(
-    parent: Scope,
+    override val parentScope: Scope,
     override val name: String,
     override var docString: String,
-) : Scope(parent), Type {
+) : Scope(), Type {
 
     override val supportsMethods: Boolean
         get() = true

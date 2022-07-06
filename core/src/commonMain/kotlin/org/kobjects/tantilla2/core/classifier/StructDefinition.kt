@@ -6,10 +6,10 @@ import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.Parameter
 
 open class StructDefinition(
-    parentScope: Scope,
+    override val parentScope: Scope,
     override val name: String,
     override var docString: String,
-) : Scope(parentScope), Type, Typed, Callable {
+) : Scope(), Type, Typed, Callable {
     override val kind: Definition.Kind
         get() = Definition.Kind.STRUCT
 
