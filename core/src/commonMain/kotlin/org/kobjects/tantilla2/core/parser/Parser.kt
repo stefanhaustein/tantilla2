@@ -208,27 +208,5 @@ object Parser {
     }
 
 
-    fun parseDef(tokenizer: TantillaTokenizer, context: ParsingContext, isMethod: Boolean): Pair<String, Callable> {
-        tokenizer.tryConsume("static")
-        tokenizer.consume("def")
-        tokenizer.consume(TokenType.IDENTIFIER)
-        val type = TypeParser.parseFunctionType(tokenizer, ParsingContext(context.scope.parentScope!!, context.depth), isMethod)
-        val parentScope = context.scope.parentScope
-        if (parentScope is TraitDefinition) {
-            tokenizer.consume(TokenType.EOF, "Trait methods must not have function bodies.")
-            return Pair("", TraitMethod(type, parentScope.traitIndex++))
-        }
-
-        tokenizer.consume(":")
-        val docString = readDocString(tokenizer)
-        // val functionScope = FunctionScope(context.scope, type)
-        for (parameter in type.parameters) {
-            context.scope.declareLocalVariable(parameter.name, parameter.type, false)
-        }
-        val body = parse(tokenizer, ParsingContext(context.scope, context.depth + 1))
-        return Pair(docString, CallableImpl(type, context.scope.definitions.locals.size, body))
-    }
-
-
 
 }

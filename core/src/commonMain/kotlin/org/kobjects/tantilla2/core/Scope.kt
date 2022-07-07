@@ -107,13 +107,17 @@ abstract class Scope(
             override val returnType = returnType
             override val parameters = parameter.toList()
         }
-        val function = NativeFunction(type, operation)
+        val body = object : Evaluable<RuntimeContext> {
+            override fun children() = emptyList<Evaluable<RuntimeContext>>()
+            override fun eval(context: RuntimeContext) = operation(context)
+            override fun reconstruct(newChildren: List<Evaluable<RuntimeContext>>) = this
+        }
         definitions.definitions[name] = FunctionDefinition(
             this,
             if (parameter.isNotEmpty() && parameter[0].name == "self") Definition.Kind.METHOD else Definition.Kind.FUNCTION,
             name,
             resolvedType = type,
-            resolvedValue = function,
+            resolvedBody = body,
             docString = docString
         )
     }

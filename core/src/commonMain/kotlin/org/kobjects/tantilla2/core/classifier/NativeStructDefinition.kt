@@ -1,10 +1,12 @@
 package org.kobjects.tantilla2.core.classifier
 
+import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.function.FunctionDefinition
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.NativeFunction
 import org.kobjects.tantilla2.core.function.Parameter
+import org.kobjects.tantilla2.core.node.NativeEvaluable
 import org.kobjects.tantilla2.core.runtime.Void
 
 open class NativeStructDefinition(
@@ -34,14 +36,18 @@ open class NativeStructDefinition(
         vararg parameter: Parameter,
         operation: (RuntimeContext) -> Any?) {
         val type = FunctionType.Impl(returnType, listOf(Parameter("self", this)) + parameter.toList())
-        val function = NativeFunction(type, operation)
+        val body = object : Evaluable<RuntimeContext> {
+            override fun children() = emptyList<Evaluable<RuntimeContext>>()
+            override fun eval(context: RuntimeContext) = operation(context)
+            override fun reconstruct(newChildren: List<Evaluable<RuntimeContext>>) = this
+        }
         definitions.add(
             FunctionDefinition(
             this,
             Definition.Kind.METHOD,
             name,
             resolvedType = type,
-            resolvedValue = function,
+            resolvedBody = body,
             docString = docString
         )
         )
@@ -65,7 +71,7 @@ open class NativeStructDefinition(
             Definition.Kind.METHOD,
             name,
             resolvedType = getterType,
-            resolvedValue = NativeFunction(getterType, getter),
+            resolvedBody = NativeEvaluable(getter),
             docString = docString
         )
         )
@@ -80,7 +86,7 @@ open class NativeStructDefinition(
                 Definition.Kind.METHOD,
                 "set_$name",
                 resolvedType = setterType,
-                resolvedValue = NativeFunction(setterType, setter),
+                resolvedBody = NativeEvaluable(setter),
                 docString = docString
             )
             )

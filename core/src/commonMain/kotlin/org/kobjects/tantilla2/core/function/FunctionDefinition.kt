@@ -1,8 +1,10 @@
 package org.kobjects.tantilla2.core.function
 
+import org.kobjects.greenspun.core.Control
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.core.*
+import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.node.containsNode
 import org.kobjects.tantilla2.core.parser.*
 
@@ -11,10 +13,10 @@ class FunctionDefinition (
     override val kind: Definition.Kind,
     override val name: String,
     val definitionText: String = "",
-    private var resolvedType: Type? = null,
-    private var resolvedValue: Any? = UnresolvedValue,
+    private var resolvedType: FunctionType? = null,
+    internal var resolvedBody: Evaluable<RuntimeContext>? = null,
     override var docString: String = "",
-) : Scope() {
+) : Scope(), Callable {
 
     init {
         if (kind != Definition.Kind.FUNCTION && kind != Definition.Kind.METHOD) {
@@ -34,6 +36,10 @@ class FunctionDefinition (
     override var index: Int
         get() = -1
         set(_) = throw UnsupportedOperationException()
+
+
+    override val scopeSize: Int
+        get() = if (definitionText.isEmpty() || parentScope is TraitDefinition) super.scopeSize else value().definitions.locals.size
 
     private fun tokenizer(): TantillaTokenizer {
         val tokenizer = TantillaTokenizer(definitionText)
@@ -74,7 +80,7 @@ class FunctionDefinition (
     }
 
 
-    override fun valueType(): Type {
+    override fun valueType(): FunctionType {
         if (resolvedType == null) {
             val tokenizer = tokenizer()
             try {
@@ -93,20 +99,54 @@ class FunctionDefinition (
         return TypeParser.parseFunctionType(tokenizer, ParsingContext(parentScope, 0), isMethod)
     }
 
-    override fun value(): Any {
-        if (resolvedValue == UnresolvedValue) {
+    override fun value(): FunctionDefinition {
+        if (resolvedBody == null) {
             val tokenizer = tokenizer()
             println("Resolving: $definitionText")
             try {
-                        val resolved = Parser.parseDef(tokenizer, ParsingContext(this, 0), isMethod = kind == Definition.Kind.METHOD)
-                        docString = resolved.first
-                        resolvedValue = resolved.second
+                        resolve()
             } catch (e: Exception) {
                 throw exceptionInResolve(e, tokenizer)
             }
         }
-        return resolvedValue!!
+        return this
     }
+
+    private fun resolve() {
+        val tokenizer = tokenizer()
+        tokenizer.tryConsume("static")
+        tokenizer.consume("def")
+        tokenizer.consume(TokenType.IDENTIFIER)
+        val type = TypeParser.parseFunctionType(tokenizer, ParsingContext(parentScope, 0), kind == Definition.Kind.METHOD)
+        if (parentScope is TraitDefinition) {
+            tokenizer.consume(TokenType.EOF, "Trait methods must not have function bodies.")
+            resolvedBody = TraitMethod(type, parentScope.traitIndex++)
+        } else {
+            tokenizer.consume(":")
+            docString = Parser.readDocString(tokenizer)
+            // val functionScope = FunctionScope(context.scope, type)
+            for (parameter in type.parameters) {
+                declareLocalVariable(parameter.name, parameter.type, false)
+            }
+            resolvedBody = Parser.parse(tokenizer, ParsingContext(this, 1))
+        }
+    }
+
+    override val type: FunctionType
+        get() = valueType()
+
+    override fun eval(context: RuntimeContext): Any? {
+        val result = value().resolvedBody!!.eval(context)
+        if (result is Control.FlowSignal) {
+            if (result.kind == Control.FlowSignal.Kind.RETURN) {
+                return result.value
+            }
+            throw IllegalStateException("Unexpected signal: $result")
+        }
+        return result
+    }
+
+
 
     override fun toString() = serializeCode()
 
@@ -120,13 +160,15 @@ class FunctionDefinition (
 
     override fun serializeCode(writer: CodeWriter, precedence: Int) {
 
-               if (resolvedValue != UnresolvedValue) {
-                   writer.keyword("def ").declaration(name)
-                   writer.appendCode(resolvedValue)
+               if (resolvedBody == null) {
+                   writer.append(definitionText)
                } else {
-                    writer.append(definitionText)
+                   writer.keyword("def ").declaration(name).append(":")
+                   writer.indent()
+                   writer.newline()
+                   writer.appendCode(resolvedBody)
+                   writer.outdent()
                }
-
     }
 
     override fun serializeSummary(writer: CodeWriter) {
@@ -139,10 +181,7 @@ class FunctionDefinition (
     override fun isScope() = false
 
     override fun findNode(node: Evaluable<RuntimeContext>): Definition? =
-        when (val value = resolvedValue) {
-            is CallableImpl -> if (value.body.containsNode(node)) this else null
-            else -> null
-        }
+        if (resolvedBody?.containsNode(node) ?: false) this else null
 
     override fun depth(scope: Scope): Int {
         if (scope == this.parentScope) {
@@ -154,6 +193,4 @@ class FunctionDefinition (
         return 1 + depth(scope.parentScope!!)
     }
 
-
-    object UnresolvedValue
 }

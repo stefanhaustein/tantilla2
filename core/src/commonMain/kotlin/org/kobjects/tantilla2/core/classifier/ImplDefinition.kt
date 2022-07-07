@@ -2,6 +2,7 @@ package org.kobjects.tantilla2.core.classifier
 
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.function.Callable
+import org.kobjects.tantilla2.core.function.FunctionDefinition
 import org.kobjects.tantilla2.core.parser.Parser
 import org.kobjects.tantilla2.core.parser.ParsingContext
 import org.kobjects.tantilla2.core.parser.TantillaTokenizer
@@ -41,7 +42,7 @@ class ImplDefinition(
 
             val vmt = MutableList<Callable?>(trait.traitIndex) { null }
             for (definition in trait.definitions) {
-                val index = (definition.value() as TraitMethod).index
+                val index = ((definition.value() as FunctionDefinition).resolvedBody as TraitMethod).index
                 val resolved = resolve(definition.name)
                 if (resolved == null) {
                     throw RuntimeException("Can't resolve '${definition.name}' for '${this.name}'")
