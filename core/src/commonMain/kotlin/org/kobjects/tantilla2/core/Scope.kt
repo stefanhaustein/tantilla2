@@ -112,7 +112,7 @@ abstract class Scope(
             override fun eval(context: RuntimeContext) = operation(context)
             override fun reconstruct(newChildren: List<Evaluable<RuntimeContext>>) = this
         }
-        definitions.definitions[name] = NativeFunction(
+        definitions.definitions[name] = NativeFunctionDefinition(
             this,
             if (parameter.isNotEmpty() && parameter[0].name == "self") Definition.Kind.METHOD else Definition.Kind.FUNCTION,
             name,
@@ -144,7 +144,7 @@ abstract class Scope(
     override fun error(): Exception? {
         if (error == null) {
             try {
-                value()
+                value
             } catch (e: Exception) {
                 println("Error in $parentScope.$name")
                 e.printStackTrace()
@@ -171,9 +171,8 @@ abstract class Scope(
         return ok
     }
 
-    override fun valueType(): Type = value().dynamicType
-
-    override fun value(): Any = this
+    override val value
+        get() = this
 
     override fun toString() = name
 
@@ -201,7 +200,7 @@ abstract class Scope(
         serializeTitle(writer)
         writer.append(":")
         writer.indent()
-        val scope = value() as Scope
+        val scope = value
         for (definition in scope.definitions.iterator()) {
             writer.newline()
             definition.serializeTitle(writer)

@@ -5,7 +5,7 @@ import org.kobjects.tantilla2.core.classifier.Adapter
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.FunctionType
 
-class TraitMethod(override val type: FunctionType, val index: Int): Callable, Evaluable<RuntimeContext> {
+class TraitMethodBody(val index: Int):  Evaluable<RuntimeContext> {
     override fun eval(context: RuntimeContext): Any? {
       val self = context.variables[0] as Adapter
       val methodImpl = self.vmt[index]

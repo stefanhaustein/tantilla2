@@ -12,32 +12,11 @@ class Unparseable(
     override val kind: Definition.Kind
         get() = Definition.Kind.UNPARSEABLE
 
-    override val mutable: Boolean
-        get() = false
+    override val value: Any?
+        get() = null
 
-    override var docString: String
-        get() = ""
-        set(_) = throw UnsupportedOperationException()
-
-    override var index: Int
-        get() = -1
-        set(_) = throw UnsupportedOperationException()
-
-    override fun value(): Any? = null
-
-    override fun valueType(): Type {
-        TODO("Not yet implemented")
-    }
-
-    override fun error(): Exception? = null
-
-    override fun depth(scope: Scope): Int = throw UnsupportedOperationException()
-
-    override fun findNode(node: Evaluable<RuntimeContext>): Definition? = null
-
-    override fun isDynamic() = false
-
-    override fun isScope() = false
+    override val type: Type
+        get() = throw UnsupportedOperationException()
 
     override fun rebuild(compilationResults: CompilationResults) = false
 

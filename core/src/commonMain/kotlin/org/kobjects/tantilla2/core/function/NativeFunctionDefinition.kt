@@ -2,7 +2,7 @@ package org.kobjects.tantilla2.core.function
 
 import org.kobjects.tantilla2.core.*
 
-class NativeFunction(
+class NativeFunctionDefinition(
     override val parentScope: Scope,
     override val kind: Definition.Kind,
     override val name: String,
@@ -15,12 +15,8 @@ class NativeFunction(
         get() = "(${type.parameters}) -> ${type.returnType}"
 */
     override fun eval(context: RuntimeContext) = body(context)
-    override fun value() = this
-
-    override fun valueType() = type
-    override fun rebuild(compilationResults: CompilationResults): Boolean {
-        TODO("Not yet implemented")
-    }
+    override val value
+        get() = this
 
     override fun serializeSummary(writer: CodeWriter) {
         serializeTitle(writer)
@@ -34,9 +30,7 @@ class NativeFunction(
         type.serializeType(writer)
     }
 
-    override fun serializeCode(writer: CodeWriter, precedence: Int) {
-        TODO("Not yet implemented")
-    }
+    override fun serializeCode(writer: CodeWriter, precedence: Int) = throw UnsupportedOperationException()
 
     override fun toString() = "def $name$type"
 }

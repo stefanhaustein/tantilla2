@@ -12,11 +12,13 @@ class FunctionDefinition (
     override val parentScope: Scope,
     override val kind: Definition.Kind,
     override val name: String,
-    val definitionText: String = "",
-    private var resolvedType: FunctionType? = null,
-    internal var resolvedBody: Evaluable<RuntimeContext>? = null,
-    override var docString: String = "",
+    val definitionText: String,
+    private var resolvedType: FunctionType? = null
 ) : Scope(), Callable {
+
+    override var docString: String = ""
+
+    internal var resolvedBody: Evaluable<RuntimeContext>? = null
 
     init {
         if (kind != Definition.Kind.FUNCTION && kind != Definition.Kind.METHOD) {
@@ -31,7 +33,7 @@ class FunctionDefinition (
         get() = true
 
     override val scopeSize: Int
-        get() = if (definitionText.isEmpty() || parentScope is TraitDefinition) super.scopeSize else value().definitions.locals.size
+        get() = if (definitionText.isEmpty() || parentScope is TraitDefinition) super.scopeSize else value.definitions.locals.size
 
     private fun tokenizer(): TantillaTokenizer {
         val tokenizer = TantillaTokenizer(definitionText)
@@ -53,7 +55,7 @@ class FunctionDefinition (
     override fun error(): Exception? {
         if (error == null) {
             try {
-                value()
+                value
             } catch (e: Exception) {
                 println("Error in $parentScope.$name")
                 e.printStackTrace()
@@ -72,17 +74,18 @@ class FunctionDefinition (
     }
 
 
-    override fun valueType(): FunctionType {
-        if (resolvedType == null) {
-            val tokenizer = tokenizer()
-            try {
-                resolvedType = resolveFunctionType(tokenizer, isMethod = kind == Definition.Kind.METHOD)
-            } catch (e: Exception) {
-                throw exceptionInResolve(e, tokenizer)
+    override val type: FunctionType
+        get() {
+            if (resolvedType == null) {
+                val tokenizer = tokenizer()
+                try {
+                    resolvedType = resolveFunctionType(tokenizer, isMethod = kind == Definition.Kind.METHOD)
+                } catch (e: Exception) {
+                    throw exceptionInResolve(e, tokenizer)
+                }
             }
+            return resolvedType!!
         }
-        return resolvedType!!
-    }
 
     private fun resolveFunctionType(tokenizer: TantillaTokenizer, isMethod: Boolean): FunctionType {
         tokenizer.tryConsume("static")
@@ -91,18 +94,19 @@ class FunctionDefinition (
         return TypeParser.parseFunctionType(tokenizer, ParsingContext(parentScope, 0), isMethod)
     }
 
-    override fun value(): FunctionDefinition {
-        if (resolvedBody == null) {
-            val tokenizer = tokenizer()
-            println("Resolving: $definitionText")
-            try {
-                        resolve()
-            } catch (e: Exception) {
-                throw exceptionInResolve(e, tokenizer)
+    override val value: FunctionDefinition
+        get() {
+            if (resolvedBody == null) {
+                val tokenizer = tokenizer()
+                println("Resolving: $definitionText")
+                try {
+                    resolve()
+                } catch (e: Exception) {
+                    throw exceptionInResolve(e, tokenizer)
+                }
             }
+            return this
         }
-        return this
-    }
 
     private fun resolve() {
         val tokenizer = tokenizer()
@@ -110,25 +114,24 @@ class FunctionDefinition (
         tokenizer.consume("def")
         tokenizer.consume(TokenType.IDENTIFIER)
         val type = TypeParser.parseFunctionType(tokenizer, ParsingContext(parentScope, 0), kind == Definition.Kind.METHOD)
+        for (parameter in type.parameters) {
+            declareLocalVariable(parameter.name, parameter.type, false)
+        }
         if (parentScope is TraitDefinition) {
+            if (tokenizer.tryConsume(":")) {
+                docString = Parser.readDocString(tokenizer)
+            }
             tokenizer.consume(TokenType.EOF, "Trait methods must not have function bodies.")
-            resolvedBody = TraitMethod(type, parentScope.traitIndex++)
+            resolvedBody = TraitMethodBody(parentScope.traitIndex++)
         } else {
             tokenizer.consume(":")
             docString = Parser.readDocString(tokenizer)
-            // val functionScope = FunctionScope(context.scope, type)
-            for (parameter in type.parameters) {
-                declareLocalVariable(parameter.name, parameter.type, false)
-            }
             resolvedBody = Parser.parse(tokenizer, ParsingContext(this, 1))
         }
     }
 
-    override val type: FunctionType
-        get() = valueType()
-
     override fun eval(context: RuntimeContext): Any? {
-        val result = value().resolvedBody!!.eval(context)
+        val result = value.resolvedBody!!.eval(context)
         if (result is Control.FlowSignal) {
             if (result.kind == Control.FlowSignal.Kind.RETURN) {
                 return result.value
@@ -146,7 +149,7 @@ class FunctionDefinition (
                 if (parentScope.supportsMethods && kind == Definition.Kind.FUNCTION) {
                     writer.keyword("static ")
                 }
-                writer.keyword("def ").declaration(name).appendType(valueType())
+                writer.keyword("def ").declaration(name).appendType(type)
     }
 
 

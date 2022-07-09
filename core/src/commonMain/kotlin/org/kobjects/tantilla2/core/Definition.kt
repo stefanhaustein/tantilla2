@@ -9,13 +9,19 @@ interface Definition : SerializableCode {
     val mutable: Boolean
         get() = false
 
+    val value: Any?
+    val type: Type
+        get() = value.dynamicType
+
     var docString: String
+        get() = ""
+        set(_) = throw UnsupportedOperationException()
+
     var index: Int
         get() = -1
         set(_) = throw UnsupportedOperationException()
 
-    fun value(): Any?
-    fun valueType(): Type
+
     fun error(): Exception? = null
     fun depth(scope: Scope): Int {
             if (scope == this.parentScope) {
@@ -30,7 +36,7 @@ interface Definition : SerializableCode {
     fun findNode(node: Evaluable<RuntimeContext>): Definition? = null
     fun isDynamic() = kind == Kind.METHOD || kind == Kind.FIELD
     fun isScope(): Boolean = false
-    fun rebuild(compilationResults: CompilationResults): Boolean
+    fun rebuild(compilationResults: CompilationResults): Boolean = true
 
     fun serializeSummary(writer: CodeWriter)
     fun serializeTitle(writer: CodeWriter)

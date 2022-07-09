@@ -17,7 +17,7 @@ open class StructDefinition(
         get() = StructMetaType(this, List<Parameter>(definitions.locals.size) {
             val name = definitions.locals[it]
             val def = definitions[name] as VariableDefinition
-            Parameter(name, def.valueType(), def.initializer()) })
+            Parameter(name, def.type, def.initializer()) })
 
     override val supportsMethods: Boolean
         get() = true

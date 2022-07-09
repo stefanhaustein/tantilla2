@@ -65,7 +65,7 @@ object StatementParser {
         if (context.scope !is FunctionDefinition) {
             throw tokenizer.exception("Function scope expected for 'return'")
         }
-        if ((context.scope.valueType() as FunctionType).returnType == Void) {
+        if (context.scope.type.returnType == Void) {
             return FlowControl(Control.FlowSignal.Kind.RETURN)
         }
         val expression = ExpressionParser.parseExpression(tokenizer, context)

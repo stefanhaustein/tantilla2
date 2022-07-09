@@ -61,7 +61,7 @@ class VariableDefinition (
             try {
                 when (kind) {
                     Definition.Kind.FIELD  -> initializer()
-                    else -> value()
+                    else -> value
                 }
             } catch (e: Exception) {
                 println("Error in $parentScope.$name")
@@ -81,34 +81,36 @@ class VariableDefinition (
     }
 
 
-    override fun valueType(): Type {
-        if (resolvedType == null) {
-            val tokenizer = tokenizer()
-            try {
-                resolveVariable(tokenizer, typeOnly = true)
-            } catch (e: Exception) {
-                throw exceptionInResolve(e, tokenizer)
-            }
-        }
-        return resolvedType!!
-    }
-
-
-    override fun value(): Any?  {
-        if (resolvedValue == UnresolvedValue) {
-            val tokenizer = tokenizer()
-            println("Resolving: $definitionText")
-            try {
-                when (kind) {
-                    Definition.Kind.STATIC -> resolveVariable(tokenizer)
-                    else -> throw RuntimeException("Can't obtain value for $kind.")
+    override val type: Type
+        get() {
+            if (resolvedType == null) {
+                val tokenizer = tokenizer()
+                try {
+                    resolveVariable(tokenizer, typeOnly = true)
+                } catch (e: Exception) {
+                    throw exceptionInResolve(e, tokenizer)
                 }
-            } catch (e: Exception) {
-                throw exceptionInResolve(e, tokenizer)
             }
+            return resolvedType!!
         }
-        return resolvedValue
-    }
+
+
+    override val value: Any?
+        get() {
+            if (resolvedValue == UnresolvedValue) {
+                val tokenizer = tokenizer()
+                println("Resolving: $definitionText")
+                try {
+                    when (kind) {
+                        Definition.Kind.STATIC -> resolveVariable(tokenizer)
+                        else -> throw RuntimeException("Can't obtain value for $kind.")
+                    }
+                } catch (e: Exception) {
+                    throw exceptionInResolve(e, tokenizer)
+                }
+            }
+            return resolvedValue
+        }
 
     fun initializer(): Evaluable<RuntimeContext>? {
         if (resolvedInitializer == UnresolvedEvalueable) {
@@ -157,7 +159,7 @@ class VariableDefinition (
         }
         writer.declaration(name)
         writer.append(": ")
-        writer.appendType(valueType())
+        writer.appendType(type)
     }
 
 

@@ -144,11 +144,11 @@ class TantillaViewModel(
                 console.konsole.write("main() undefined.")
                 return
             }
-            if (definition.valueType() !is FunctionType) {
+            if (definition.type !is FunctionType) {
                 console.konsole.write("main is not a function.")
                 return
             }
-            val function = definition.value() as Callable
+            val function = definition.value as Callable
             function.eval(RuntimeContext(MutableList(function.scopeSize) { null }))
         } catch (e: Exception) {
             e.printStackTrace()

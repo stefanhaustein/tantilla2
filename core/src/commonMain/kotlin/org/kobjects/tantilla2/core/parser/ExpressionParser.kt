@@ -28,7 +28,7 @@ object ExpressionParser {
         }
         val implName = expectedType.typeName + " for " + expr.returnType.typeName
         try {
-            val impl = context.resolveStatic(implName, true)!!.value() as ImplDefinition
+            val impl = context.resolveStatic(implName, true)!!.value as ImplDefinition
             return As(expr, impl, implicit = true)
         } catch (e: Exception) {
             throw IllegalArgumentException("Can't convert $expr with type '${expr.returnType}' to '$expectedType' -- '$implName' not available.", e)
@@ -44,7 +44,7 @@ object ExpressionParser {
     fun reference(scope: Scope, definition: Definition) = if (definition.kind == Definition.Kind.FIELD) {
         val depth = definition.depth(scope)
         LocalVariableReference(
-            definition.name, definition.valueType(), depth, definition.index, definition.mutable
+            definition.name, definition.type, depth, definition.index, definition.mutable
         )
     }
     else StaticReference(definition)
@@ -60,7 +60,7 @@ object ExpressionParser {
         }
 
         val self = context.scope.resolveDynamic("self", fallBackToStatic = false)
-        val selfType = self?.valueType()
+        val selfType = self?.type
         if (selfType is Scope) {
             val definition = selfType.resolveDynamic(name, fallBackToStatic = false)
             if (definition != null) {
@@ -125,7 +125,7 @@ object ExpressionParser {
         }
 
         tokenizer.consume(":")
-        val functionScope = FunctionDefinition(context.scope, Definition.Kind.FUNCTION, "<anonymous>", resolvedType = type)
+        val functionScope = FunctionDefinition(context.scope, Definition.Kind.FUNCTION, "<anonymous>", "", resolvedType = type)
         for (i in type.parameters.indices) {
             val parameter = type.parameters[i]
             functionScope.declareLocalVariable(parameterNames[i], parameter.type, false)
@@ -188,7 +188,7 @@ object ExpressionParser {
     ): Evaluable<RuntimeContext> {
         val traitName = tokenizer.consume(TokenType.IDENTIFIER)
         val className = base.returnType.typeName
-        val impl = context.scope.resolveStatic("$traitName for $className")!!.value() as ImplDefinition
+        val impl = context.scope.resolveStatic("$traitName for $className")!!.value as ImplDefinition
         impl.rebuild(CompilationResults())
         return As(base, impl, implicit = false)
     }
@@ -218,7 +218,7 @@ object ExpressionParser {
                 PropertyReference(
                     base,
                     name,
-                    definition.valueType(),
+                    definition.type,
                     definition.index,
                     definition.mutable
                 )

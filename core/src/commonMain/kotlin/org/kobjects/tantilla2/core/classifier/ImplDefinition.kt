@@ -21,13 +21,13 @@ class ImplDefinition(
 
     val trait: TraitDefinition
         get() {
-            value()
+            value
             return resolvedTrait!!
         }
 
     val struct: StructDefinition
         get() {
-            value()
+            value
             return resolvedStruct!!
         }
 
@@ -42,12 +42,12 @@ class ImplDefinition(
 
             val vmt = MutableList<Callable?>(trait.traitIndex) { null }
             for (definition in trait.definitions) {
-                val index = ((definition.value() as FunctionDefinition).resolvedBody as TraitMethod).index
+                val index = ((definition.value as FunctionDefinition).resolvedBody as TraitMethodBody).index
                 val resolved = resolve(definition.name)
                 if (resolved == null) {
                     throw RuntimeException("Can't resolve '${definition.name}' for '${this.name}'")
                 }
-                vmt[index] = resolved.value() as Callable
+                vmt[index] = resolved.value as Callable
             }
             this.vmt = vmt.toList() as List<Callable>
 
@@ -61,28 +61,28 @@ class ImplDefinition(
     }
 
 
-    override fun value(): ImplDefinition {
-        if (resolvedTrait == null) {
+    override val value: ImplDefinition
+        get() {
+            if (resolvedTrait == null) {
+                val traitName = name.substring(0, name.indexOf(' '))
+                resolvedTrait =
+                    parentScope.resolveStatic(traitName, true)!!.value as TraitDefinition
+                val className = name.substring(name.lastIndexOf(' ') + 1)
+                resolvedStruct =
+                    parentScope.resolveStatic(className, true)!!.value as StructDefinition
 
-            val traitName = name.substring(0, name.indexOf(' '))
-            resolvedTrait =
-                parentScope!!.resolveStatic(traitName, true)!!.value() as TraitDefinition
-            val className = name.substring(name.lastIndexOf(' ') + 1)
-            resolvedStruct =
-                parentScope!!.resolveStatic(className, true)!!.value() as StructDefinition
-
-            val tokenizer = TantillaTokenizer(definitionText)
-            tokenizer.consume(TokenType.BOF)
-            tokenizer.consume("impl")
-            tokenizer.consume(traitName)
-            tokenizer.consume("for")
-            tokenizer.consume(className)
-            tokenizer.consume(":")
-            Parser.parse(tokenizer, ParsingContext(this, 0))
-            println("Impl successfully resolved!")
+                val tokenizer = TantillaTokenizer(definitionText)
+                tokenizer.consume(TokenType.BOF)
+                tokenizer.consume("impl")
+                tokenizer.consume(traitName)
+                tokenizer.consume("for")
+                tokenizer.consume(className)
+                tokenizer.consume(":")
+                Parser.parse(tokenizer, ParsingContext(this, 0))
+                println("Impl successfully resolved!")
+            }
+            return this
         }
-        return this
-    }
 
     override val kind: Definition.Kind
         get() = Definition.Kind.IMPL

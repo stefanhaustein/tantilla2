@@ -7,7 +7,7 @@ import org.kobjects.tantilla2.core.*
 data class StaticReference(val definition: Definition) : TantillaNode {
     override fun children() = emptyList<Evaluable<RuntimeContext>>()
 
-    override fun eval(ctx: RuntimeContext): Any? = definition.value()
+    override fun eval(ctx: RuntimeContext): Any? = definition.value
 
     override fun reconstruct(newChildren: List<Evaluable<RuntimeContext>>) = this
 
@@ -16,7 +16,7 @@ data class StaticReference(val definition: Definition) : TantillaNode {
     }
 
     override val returnType: Type
-        get() = definition.valueType()
+        get() = definition.type
 
     override fun toString(): String = definition.name
 }

@@ -2,7 +2,7 @@ package org.kobjects.tantilla2.core.classifier
 
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.function.FunctionType
-import org.kobjects.tantilla2.core.function.NativeFunction
+import org.kobjects.tantilla2.core.function.NativeFunctionDefinition
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.runtime.Void
 
@@ -34,7 +34,7 @@ open class NativeStructDefinition(
         operation: (RuntimeContext) -> Any?) {
         val type = FunctionType.Impl(returnType, listOf(Parameter("self", this)) + parameter.toList())
         definitions.add(
-            NativeFunction(
+            NativeFunctionDefinition(
             this,
             Definition.Kind.METHOD,
             name,
@@ -58,7 +58,7 @@ open class NativeStructDefinition(
             override val parameters = listOf(Parameter("self", this@NativeStructDefinition))
         }
         definitions.add(
-            NativeFunction(
+            NativeFunctionDefinition(
                this,
                 Definition.Kind.METHOD,
                 name,
@@ -72,7 +72,7 @@ open class NativeStructDefinition(
                 override val parameters = listOf(Parameter("self", this@NativeStructDefinition), Parameter("value", type))
             }
             definitions.add(
-                NativeFunction(
+                NativeFunctionDefinition(
                     this,
                     Definition.Kind.METHOD,
                     "set_$name",
