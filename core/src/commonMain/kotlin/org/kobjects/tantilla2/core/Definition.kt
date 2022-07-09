@@ -16,12 +16,20 @@ interface Definition : SerializableCode {
 
     fun value(): Any?
     fun valueType(): Type
-    fun error(): Exception?
-    fun depth(scope: Scope): Int
+    fun error(): Exception? = null
+    fun depth(scope: Scope): Int {
+            if (scope == this.parentScope) {
+                return 0
+            }
+            if (scope.parentScope == null) {
+                throw IllegalStateException("Definition $this not found in scope.")
+            }
+            return 1 + depth(scope.parentScope!!)
+    }
 
-    fun findNode(node: Evaluable<RuntimeContext>): Definition?
-    fun isDynamic(): Boolean
-    fun isScope(): Boolean
+    fun findNode(node: Evaluable<RuntimeContext>): Definition? = null
+    fun isDynamic() = kind == Kind.METHOD || kind == Kind.FIELD
+    fun isScope(): Boolean = false
     fun rebuild(compilationResults: CompilationResults): Boolean
 
     fun serializeSummary(writer: CodeWriter)

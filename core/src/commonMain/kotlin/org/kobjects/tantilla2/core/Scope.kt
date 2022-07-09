@@ -112,25 +112,25 @@ abstract class Scope(
             override fun eval(context: RuntimeContext) = operation(context)
             override fun reconstruct(newChildren: List<Evaluable<RuntimeContext>>) = this
         }
-        definitions.definitions[name] = FunctionDefinition(
+        definitions.definitions[name] = NativeFunction(
             this,
             if (parameter.isNotEmpty() && parameter[0].name == "self") Definition.Kind.METHOD else Definition.Kind.FUNCTION,
             name,
-            resolvedType = type,
-            resolvedBody = body,
-            docString = docString
+            docString,
+            type,
+            operation
         )
     }
 
 
-
+/*
     override val mutable: Boolean
         get() = false
 
     override var index: Int
         get() = -1
         set(_) = throw UnsupportedOperationException()
-
+*/
     private fun exceptionInResolve(e: Exception, tokenizer: TantillaTokenizer): Exception {
         if (e is ParsingException) {
             error = e

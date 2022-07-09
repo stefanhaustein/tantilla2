@@ -30,14 +30,6 @@ class FunctionDefinition (
     override val supportsLocalVariables: Boolean
         get() = true
 
-    override val mutable: Boolean
-        get() = false
-
-    override var index: Int
-        get() = -1
-        set(_) = throw UnsupportedOperationException()
-
-
     override val scopeSize: Int
         get() = if (definitionText.isEmpty() || parentScope is TraitDefinition) super.scopeSize else value().definitions.locals.size
 
@@ -183,14 +175,5 @@ class FunctionDefinition (
     override fun findNode(node: Evaluable<RuntimeContext>): Definition? =
         if (resolvedBody?.containsNode(node) ?: false) this else null
 
-    override fun depth(scope: Scope): Int {
-        if (scope == this.parentScope) {
-            return 0
-        }
-        if (scope.parentScope == null) {
-            throw IllegalStateException("Definition $this not found in scope.")
-        }
-        return 1 + depth(scope.parentScope!!)
-    }
 
 }
