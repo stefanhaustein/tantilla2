@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import org.kobjects.konsole.compose.ComposeKonsole
+import org.kobjects.tantilla2.android.model.TantillaViewModel
 import org.kobjects.tantilla2.core.UserScope
 import org.kobjects.tantilla2.core.runtime.RootScope
 

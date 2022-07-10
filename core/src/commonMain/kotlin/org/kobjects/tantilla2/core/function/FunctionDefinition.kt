@@ -158,7 +158,7 @@ class FunctionDefinition (
                if (resolvedBody == null) {
                    writer.append(definitionText)
                } else {
-                   writer.keyword("def ").declaration(name).append(":")
+                   writer.keyword("def ").declaration(name).appendType(type).append(":")
                    writer.indent()
                    writer.newline()
                    writer.appendCode(resolvedBody)

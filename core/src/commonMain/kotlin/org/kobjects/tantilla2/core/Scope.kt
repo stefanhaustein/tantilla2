@@ -107,11 +107,6 @@ abstract class Scope(
             override val returnType = returnType
             override val parameters = parameter.toList()
         }
-        val body = object : Evaluable<RuntimeContext> {
-            override fun children() = emptyList<Evaluable<RuntimeContext>>()
-            override fun eval(context: RuntimeContext) = operation(context)
-            override fun reconstruct(newChildren: List<Evaluable<RuntimeContext>>) = this
-        }
         definitions.definitions[name] = NativeFunctionDefinition(
             this,
             if (parameter.isNotEmpty() && parameter[0].name == "self") Definition.Kind.METHOD else Definition.Kind.FUNCTION,
@@ -122,15 +117,6 @@ abstract class Scope(
         )
     }
 
-
-/*
-    override val mutable: Boolean
-        get() = false
-
-    override var index: Int
-        get() = -1
-        set(_) = throw UnsupportedOperationException()
-*/
     private fun exceptionInResolve(e: Exception, tokenizer: TantillaTokenizer): Exception {
         if (e is ParsingException) {
             error = e
@@ -181,20 +167,22 @@ abstract class Scope(
         writer.keyword(kind.name.lowercase()).append(' ').declaration(name)
     }
 
-    override fun serializeCode(writer: CodeWriter, precedence: Int) {
-
-        writer.keyword(kind.name.lowercase()).append(' ')
-
-        writer.indent()
+    fun serializeBody(writer: CodeWriter) {
         for (definition in definitions.definitions.values) {
-            writer.newline()
-            writer.newline()
             writer.appendCode(definition)
+            writer.newline()
+            writer.newline()
         }
-        writer.outdent()
+
     }
 
-
+    override fun serializeCode(writer: CodeWriter, precedence: Int) {
+        writer.keyword(kind.name.lowercase()).append(' ').declaration(name).append(":")
+        writer.indent()
+        writer.newline()
+        serializeBody(writer)
+        writer.outdent()
+    }
 
     override fun serializeSummary(writer: CodeWriter) {
         serializeTitle(writer)

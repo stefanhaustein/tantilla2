@@ -12,7 +12,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.coroutineScope
 import org.kobjects.konsole.compose.ComposeKonsole
+import org.kobjects.tantilla2.android.model.Platform
+import org.kobjects.tantilla2.android.model.TantillaViewModel
 import org.kobjects.tantilla2.console.ConsoleLoop
+import java.io.File
 import java.lang.Math.abs
 
 
@@ -52,7 +55,7 @@ class MainActivity : AppCompatActivity() {
         val viewModel = TantillaViewModel(
             console,
             bitmap,
-            ::loadExample,
+            AndroidPlatform()
         )
 
         lifecycle.coroutineScope.launchWhenCreated {
@@ -67,8 +70,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun loadExample(name: String) =
-        assets.open("examples/$name").bufferedReader().use { it.readText() }
 
     @Composable
     fun MyTheme(
@@ -86,6 +87,21 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
+
+
+    inner class AndroidPlatform : Platform {
+        override val rootDirectory: File
+            get() = filesDir
+
+        override fun loadExample(name: String) =
+            assets.open("examples/$name").bufferedReader().use { it.readText() }
+
+        override var fileName: String
+            get() = getPreferences(0).getString("filename", "Scratch.tt")!!
+            set(value) = getPreferences(0).edit().putString("filename", value).apply()
+
+
+    }
 
     companion object {
         val LIGHT_COLORS = Colors(

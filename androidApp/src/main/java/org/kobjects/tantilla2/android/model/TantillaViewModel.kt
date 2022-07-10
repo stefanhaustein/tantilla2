@@ -1,4 +1,4 @@
-package org.kobjects.tantilla2.android
+package org.kobjects.tantilla2.android.model
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -20,18 +20,21 @@ import org.kobjects.tantilla2.core.runtime.RootScope
 import org.kobjects.tantilla2.core.runtime.Void
 import org.kobjects.tantilla2.stdlib.PenDefinition
 import org.kobjects.parserlib.tokenizer.ParsingException
+import org.kobjects.tantilla2.android.PenImpl
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Callable
+import java.io.File
 import java.lang.Exception
+import java.nio.charset.StandardCharsets
 
 class TantillaViewModel(
     val console: ConsoleLoop,
     val bitmap: Bitmap,
-    val exampleLoader: (String) -> String,
+    val platform: Platform
 ) {
     var editing = mutableStateOf(false)
     val mode = mutableStateOf(Mode.SHELL)
-    var fileName = mutableStateOf("")
+    var fileName = mutableStateOf(platform.fileName)
     val userScope = mutableStateOf<Scope>(console.scope)
     val builtinScope = mutableStateOf<Scope>(console.scope.parentScope!!)
     val definition = mutableStateOf<Definition?>(null)
@@ -86,8 +89,14 @@ class TantillaViewModel(
                 fn.eval(functionContext)
             }
         }
-
     }
+
+    fun saveAs(newName: String) {
+        fileName.value = newName
+        platform.fileName = newName
+        save()
+    }
+
 
     fun scope(): MutableState<Scope> = if (mode.value == Mode.HELP) builtinScope else userScope
 
@@ -163,7 +172,7 @@ class TantillaViewModel(
     }
 
     fun loadExample(name: String) {
-        val programText = exampleLoader(name)
+        val programText = platform.loadExample(name)
         reset()
         this.fileName.value = name
         Parser.parse(programText, console.scope)
@@ -181,6 +190,16 @@ class TantillaViewModel(
             withRuntimeException.put(definition, e)
             definition = definition
         }
+    }
+
+    fun save() {
+        val code = CodeWriter().appendCode(userScope.value).toString()
+        val file = File(platform.rootDirectory, fileName.value)
+        println("Saving code to $file:")
+        println(code)
+        val writer = file.writer(StandardCharsets.UTF_8)
+        writer.write(code)
+        writer.close()
     }
 
 

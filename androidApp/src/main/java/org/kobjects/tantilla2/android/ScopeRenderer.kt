@@ -15,11 +15,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import org.kobjects.konsole.compose.AnsiConverter
+import org.kobjects.tantilla2.android.model.TantillaViewModel
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.Definition
 import org.kobjects.tantilla2.core.Scope
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.classifier.StructDefinition
+import org.kobjects.tantilla2.core.runtime.RootScope
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -33,9 +35,9 @@ fun RenderScope(viewModel: TantillaViewModel) {
         backgroundColor = Color.Transparent,
         topBar = {
             if (viewModel.mode.value == TantillaViewModel.Mode.HELP) {
-                RenderAppBar(viewModel, if (scope.parentScope == null) "Help" else scope.name)
+                RenderAppBar(viewModel, if (scope.parentScope == null) viewModel.fileName.value else scope.name)
             } else {
-                RenderAppBar(viewModel, scope.name, "Add" to {viewModel.edit(scope, null)})
+                RenderAppBar(viewModel, if (scope.parentScope == RootScope) viewModel.fileName.value else  scope.name, "Add" to {viewModel.edit(scope, null)})
             } },
     ) {
         LazyColumn(Modifier.fillMaxWidth(), contentPadding = PaddingValues(8.dp)) {

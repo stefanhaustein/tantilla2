@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import org.kobjects.konsole.compose.ComposeKonsole
+import org.kobjects.tantilla2.android.model.TantillaViewModel
 
 
 @Composable
@@ -23,7 +24,7 @@ fun RenderKonsole(viewModel: TantillaViewModel) {
         Column() {
             RenderAppBar(
                 viewModel,
-                if (viewModel.fileName.value.isEmpty()) "Tantilla 2" else  viewModel.fileName.value,
+                viewModel.fileName.value,
 
             )
 

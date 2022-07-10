@@ -11,6 +11,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import org.kobjects.tantilla2.android.model.TantillaViewModel
 
 
 @Composable
@@ -27,6 +28,7 @@ fun RenderEditor(viewModel: TantillaViewModel) {
                     IconButton(onClick = {
                         scope.update(viewModel.currentText.value.text, definition)
                         viewModel.editing.value = false
+                        viewModel.save()
                     }) {
                         Icon(Icons.Default.Check, contentDescription = "Save")
                     }

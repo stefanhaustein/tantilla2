@@ -2,6 +2,7 @@ package org.kobjects.tantilla2.android
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
+import org.kobjects.tantilla2.android.model.TantillaViewModel
 
 
 @Composable

@@ -7,9 +7,13 @@ class UserScope(
         get() = Definition.Kind.UNIT
 
     override val name: String
-        get() = "UserScope"
+        get() = "<UserScope>"
 
     override var docString: String
         get() = ""
         set(_) = throw UnsupportedOperationException()
+
+    override fun serializeCode(writer: CodeWriter, precedence: Int) {
+        serializeBody(writer)
+    }
 }
