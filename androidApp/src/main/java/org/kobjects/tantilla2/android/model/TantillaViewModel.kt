@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.input.TextFieldValue
+import org.kobjects.dialog.DialogManager
 import org.kobjects.konsole.compose.AnsiConverter.ansiToAnnotatedString
 import org.kobjects.tantilla2.console.ConsoleLoop
 import org.kobjects.tantilla2.core.*
@@ -24,8 +25,8 @@ import org.kobjects.tantilla2.android.PenImpl
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Callable
 import java.io.File
-import java.lang.Exception
 import java.nio.charset.StandardCharsets
+import kotlin.Exception
 
 class TantillaViewModel(
     val console: ConsoleLoop,
@@ -43,10 +44,17 @@ class TantillaViewModel(
     val expanded = mutableStateOf(setOf<Definition>())
     var withRuntimeException = mutableStateMapOf<Definition, TantillaRuntimeException>()
     var compilationResults = mutableStateOf(CompilationResults())
+    val dialogManager = DialogManager()
 
     init {
         defineNatives()
         console.errorListener = ::highlightRuntimeException
+
+        val file = File(platform.rootDirectory, platform.fileName)
+        if (file.exists()) {
+            load(file)
+        }
+
     }
 
     fun defineNatives() {
@@ -90,6 +98,13 @@ class TantillaViewModel(
             }
         }
     }
+
+    fun saveAs() {
+        dialogManager.showPrompt("Save As", "File Name", fileName.value) {
+            saveAs(it)
+        }
+    }
+
 
     fun saveAs(newName: String) {
         fileName.value = newName
@@ -171,14 +186,28 @@ class TantillaViewModel(
         compilationResults.value = result
     }
 
+    fun load(file: File) {
+        reset()
+        this.fileName.value = file.name
+        loadCode(file.readText())
+    }
+
     fun loadExample(name: String) {
-        val programText = platform.loadExample(name)
         reset()
         this.fileName.value = name
-        Parser.parse(programText, console.scope)
+        loadCode(platform.loadExample(name))
+    }
+
+    fun loadCode(code: String) {
+        try {
+            Parser.parse(code, console.scope)
+        } catch (e: Exception) {
+            dialogManager.showError(e.toString())
+        }
         rebuild()
         mode.value = Mode.HIERARCHY
     }
+
 
     fun highlightRuntimeException(e: TantillaRuntimeException?) {
         withRuntimeException.values.clear()

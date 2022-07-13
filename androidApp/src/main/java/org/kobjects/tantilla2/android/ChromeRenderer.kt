@@ -23,6 +23,8 @@ import org.kobjects.konsole.compose.ComposeKonsole
 import org.kobjects.tantilla2.android.model.TantillaViewModel
 import org.kobjects.tantilla2.core.UserScope
 import org.kobjects.tantilla2.core.runtime.RootScope
+import java.io.File
+import kotlin.math.exp
 
 @Composable
 fun RenderAppBar(
@@ -33,6 +35,8 @@ fun RenderAppBar(
     val showMenu = remember { mutableStateOf(false) }
     val showExamplesMenu = remember { mutableStateOf(false) }
     val showClearMenu = remember { mutableStateOf(false) }
+    val showFileMenu = remember { mutableStateOf(false) }
+    val showLoadMenu = remember { mutableStateOf(false) }
 
     TopAppBar(
         title = {
@@ -86,7 +90,7 @@ fun RenderAppBar(
                 var menuItems = arrayOf(
                     "Run main()" to { viewModel.runMain() },
                     "Clear ▶" to { showClearMenu.value = true },
-                    "Examples \u25B6" to { showExamplesMenu.value = true },
+                    "File \u25B6" to { showFileMenu.value = true },
                 )
 
                 if (!extraMenuItems.isEmpty()) {
@@ -94,6 +98,12 @@ fun RenderAppBar(
                 }
 
                 RenderDropDownMenu(showMenu, *menuItems)
+                RenderDropDownMenu(
+                    showFileMenu,
+                    "Save as..." to { viewModel.saveAs() },
+                    "Load..." to { showLoadMenu.value = true },
+                    "Examples \u25B6" to { showExamplesMenu.value = true },
+                    )
                 RenderDropDownMenu(
                     showExamplesMenu,
                     "HelloWorld" to  { viewModel.loadExample("HelloWorld.tt") },
@@ -104,6 +114,7 @@ fun RenderAppBar(
                     "Clear text output" to { (viewModel.console.konsole as ComposeKonsole).entries.clear() },
                             "Full reset" to { viewModel.reset() }
                 )
+                RenderFileSelector(viewModel, showLoadMenu)
             }
         }
     )
@@ -128,5 +139,19 @@ fun RenderDropDownMenu(expanded: MutableState<Boolean>, vararg items: Pair<Strin
             }
         }
     }
-
 }
+
+@Composable
+fun RenderFileSelector(viewModel: TantillaViewModel, expanded: MutableState<Boolean>) {
+    DropdownMenu(expanded = expanded.value, onDismissRequest = { expanded.value = false }) {
+        for (file in viewModel.platform.rootDirectory.listFiles()) {
+            DropdownMenuItem(onClick = {
+                expanded.value = false
+                viewModel.load(file)
+            }) {
+                Text(file.name)
+            }
+        }
+    }
+}
+
