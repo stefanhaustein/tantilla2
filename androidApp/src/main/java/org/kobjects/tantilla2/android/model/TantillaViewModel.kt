@@ -157,7 +157,7 @@ class TantillaViewModel(
         defineNatives()
         userScope.value = console.scope
         builtinScope.value = console.scope.parentScope!!
-        fileName.value = ""
+        saveAs("Scratch.kt")
     }
 
     fun runMain() {

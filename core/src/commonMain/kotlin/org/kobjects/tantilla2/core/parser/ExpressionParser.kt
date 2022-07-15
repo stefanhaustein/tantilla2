@@ -41,13 +41,13 @@ object ExpressionParser {
         return result
     }
 
-    fun reference(scope: Scope, definition: Definition) = if (definition.kind == Definition.Kind.FIELD) {
+    fun reference(scope: Scope, definition: Definition, qualified: Boolean) = if (definition.kind == Definition.Kind.FIELD) {
         val depth = definition.depth(scope)
         LocalVariableReference(
             definition.name, definition.type, depth, definition.index, definition.mutable
         )
     }
-    else StaticReference(definition)
+    else StaticReference(definition, qualified)
 
 
     fun parseFreeIdentifier(tokenizer: TantillaTokenizer, context: ParsingContext): Evaluable<RuntimeContext> {
@@ -56,7 +56,7 @@ object ExpressionParser {
 
         val dynamicDefinition = scope.resolveDynamic(name, fallBackToStatic = false)
         if (dynamicDefinition != null && dynamicDefinition.isDynamic()) {
-            return parseMaybeApply(tokenizer, context, reference(scope, dynamicDefinition))
+            return parseMaybeApply(tokenizer, context, reference(scope, dynamicDefinition, false))
         }
 
         val self = context.scope.resolveDynamic("self", fallBackToStatic = false)
@@ -64,13 +64,13 @@ object ExpressionParser {
         if (selfType is Scope) {
             val definition = selfType.resolveDynamic(name, fallBackToStatic = false)
             if (definition != null) {
-                return property(tokenizer, context, reference(scope, self), definition)
+                return property(tokenizer, context, reference(scope, self, false), definition)
             }
         }
 
         val staticDefinition = scope.resolveStatic(name, fallBackToParent = true)
         if (staticDefinition != null) {
-            return parseMaybeApply(tokenizer, context, reference(scope, staticDefinition))
+            return parseMaybeApply(tokenizer, context, reference(scope, staticDefinition, false))
         }
 
         if (tokenizer.tryConsume("(")) {
@@ -81,7 +81,7 @@ object ExpressionParser {
                 throw tokenizer.exception("Comma or closing paren expected after first parameter.")
             }
             if (definition != null) {
-                return parseMaybeApply(tokenizer, context, reference(context.scope, definition), firstParameter, openingParenConsumed = true)
+                return parseMaybeApply(tokenizer, context, reference(context.scope, definition, false), firstParameter, openingParenConsumed = true)
             }
         }
 
@@ -224,10 +224,10 @@ object ExpressionParser {
                 )
             Definition.Kind.METHOD -> {
                 self = base
-                StaticReference(definition)
+                StaticReference(definition, false)
             }
-            Definition.Kind.FUNCTION -> StaticReference(definition)
-            Definition.Kind.STATIC -> StaticReference(definition)
+            Definition.Kind.FUNCTION -> StaticReference(definition, true)
+            Definition.Kind.STATIC -> StaticReference(definition, true)
             else -> throw tokenizer.exception("Unsupported definition kind ${definition.kind} for $base.$name")
         }
         return parseMaybeApply(tokenizer, context, value, self)
