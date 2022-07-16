@@ -205,6 +205,10 @@ class TantillaViewModel(
             dialogManager.showError(e.toString())
         }
         rebuild()
+
+        println("Rebuilt and re-serialized code:")
+        println(CodeWriter().appendCode(userScope.value).toString())
+
         mode.value = Mode.HIERARCHY
     }
 

@@ -56,7 +56,14 @@ object ExpressionParser {
 
         val dynamicDefinition = scope.resolveDynamic(name, fallBackToStatic = false)
         if (dynamicDefinition != null && dynamicDefinition.isDynamic()) {
-            return parseMaybeApply(tokenizer, context, reference(scope, dynamicDefinition, false))
+            return parseMaybeApply(
+                tokenizer,
+                context,
+                reference(scope, dynamicDefinition, false),
+                self = null,
+                openingParenConsumed = false,
+                asMethod = false
+            )
         }
 
         val self = context.scope.resolveDynamic("self", fallBackToStatic = false)
@@ -70,7 +77,13 @@ object ExpressionParser {
 
         val staticDefinition = scope.resolveStatic(name, fallBackToParent = true)
         if (staticDefinition != null) {
-            return parseMaybeApply(tokenizer, context, reference(scope, staticDefinition, false))
+            return parseMaybeApply(
+                tokenizer,
+                context,
+                reference(scope, staticDefinition, false),
+                self = null,
+                openingParenConsumed = false,
+                asMethod = false)
         }
 
         if (tokenizer.tryConsume("(")) {
@@ -81,7 +94,14 @@ object ExpressionParser {
                 throw tokenizer.exception("Comma or closing paren expected after first parameter.")
             }
             if (definition != null) {
-                return parseMaybeApply(tokenizer, context, reference(context.scope, definition, false), firstParameter, openingParenConsumed = true)
+                return parseMaybeApply(
+                    tokenizer,
+                    context,
+                    reference(context.scope, definition, false),
+                    firstParameter,
+                    openingParenConsumed = true,
+                    asMethod = false
+                )
             }
         }
 
@@ -230,15 +250,22 @@ object ExpressionParser {
             Definition.Kind.STATIC -> StaticReference(definition, true)
             else -> throw tokenizer.exception("Unsupported definition kind ${definition.kind} for $base.$name")
         }
-        return parseMaybeApply(tokenizer, context, value, self)
+        return parseMaybeApply(
+            tokenizer,
+            context,
+            value,
+            self,
+            openingParenConsumed = false,
+            asMethod = self != null)
     }
 
     fun parseMaybeApply(
         tokenizer: TantillaTokenizer,
         context: ParsingContext,
         value: Evaluable<RuntimeContext>,
-        self: Evaluable<RuntimeContext>? = null,
-        openingParenConsumed: Boolean = false,
+        self: Evaluable<RuntimeContext>?,
+        openingParenConsumed: Boolean,
+        asMethod: Boolean
     ): Evaluable<RuntimeContext> {
         val type = value.returnType
 
@@ -252,7 +279,7 @@ object ExpressionParser {
         }
 
         val hasArgs = openingParenConsumed || tokenizer.tryConsume("(")
-        if (!hasArgs && (type is StructMetaType || type is StructMetaType)) {
+        if (!hasArgs && type is StructMetaType) {
             return value
         }
 
@@ -313,7 +340,7 @@ object ExpressionParser {
             value,
             List(parameterExpressions.size) { parameterExpressions[it]!!},
             !hasArgs,
-            self != null
+            asMethod
         )
     }
 
@@ -326,7 +353,8 @@ object ExpressionParser {
                 tokenizer, context, _, base -> parseElementAt(tokenizer, context, base)
             },
             GreenspunExpressionParser.suffix(8, "(") {
-                tokenizer, context, _, base -> parseMaybeApply(tokenizer, context, base, openingParenConsumed = true) },
+                tokenizer, context, _, base -> parseMaybeApply(
+                tokenizer, context, base, self =null, openingParenConsumed = true, asMethod = false) },
             GreenspunExpressionParser.suffix(7, "as") {
                 tokenizer, context, _, base -> parseAs(tokenizer, context, base) },
             GreenspunExpressionParser.infix(6, "**") { _, _, _, l, r -> F64.Pow(l, r)},

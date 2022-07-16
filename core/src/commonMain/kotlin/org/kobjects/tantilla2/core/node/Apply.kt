@@ -41,12 +41,12 @@ class Apply(
         get() = (callable.returnType as FunctionType).returnType
 
     override fun serializeCode(sb: CodeWriter, parentPrcedence: Int) {
-        var startIndex = 0
-        if (asMethod) {
+        val startIndex = if (!asMethod) 0 else {
             sb.appendCode(parameters[0])
             sb.append(".")
-            startIndex = 1
+            1
         }
+
         sb.appendCode(callable)
         if (!implicit) {
             sb.append("(")

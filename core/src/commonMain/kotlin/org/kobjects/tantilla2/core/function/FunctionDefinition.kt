@@ -33,7 +33,9 @@ class FunctionDefinition (
         get() = true
 
     override val scopeSize: Int
-        get() = if (definitionText.isEmpty() || parentScope is TraitDefinition) super.scopeSize else value.definitions.locals.size
+        get() = if (definitionText.isEmpty()
+            || parentScope is TraitDefinition) super.scopeSize
+            else value.definitions.locals.size
 
     private fun tokenizer(): TantillaTokenizer {
         val tokenizer = TantillaTokenizer(definitionText)
@@ -154,20 +156,25 @@ class FunctionDefinition (
 
 
     override fun serializeCode(writer: CodeWriter, precedence: Int) {
-
-               if (resolvedBody == null) {
-                   writer.append(definitionText)
-               } else {
-                   writer.keyword("def ").declaration(name).appendType(type).append(":")
-                   writer.indent()
-                   writer.newline()
-                   writer.appendCode(resolvedBody)
-                   writer.outdent()
-               }
+        if (resolvedBody == null) {
+            writer.append(definitionText)
+        } else {
+            if (parentScope.supportsMethods && !isDynamic()) {
+                writer.keyword("static ")
+            }
+            writer.keyword("def ").declaration(name).appendType(type)
+            if (resolvedBody !is TraitMethodBody) {
+                writer.append(":")
+                writer.indent()
+                writer.newline()
+                writer.appendCode(resolvedBody)
+                writer.outdent()
+            }
+        }
     }
 
     override fun serializeSummary(writer: CodeWriter) {
-            serializeCode(writer)
+        serializeCode(writer)
     }
 
 
