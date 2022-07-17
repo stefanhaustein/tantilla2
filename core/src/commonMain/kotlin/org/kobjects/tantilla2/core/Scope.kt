@@ -20,12 +20,6 @@ abstract class Scope(
     open val supportsLocalVariables: Boolean
         get() = false
 
-/*
-    override val type: Type
-        get() = if (this is ClassDefinition) ClassMetaType(this) else MetaType(this)
-
-*/
-
 
     fun declareLocalVariable(name: String, type: Type, mutable: Boolean): Int {
         val definition = VariableDefinition(
@@ -162,7 +156,6 @@ abstract class Scope(
 
     override fun toString() = name
 
-
     override fun serializeTitle(writer: CodeWriter) {
         writer.keyword(kind.name.lowercase()).append(' ').declaration(name)
     }
@@ -173,7 +166,6 @@ abstract class Scope(
             writer.newline()
             writer.newline()
         }
-
     }
 
     override fun serializeCode(writer: CodeWriter, precedence: Int) {
@@ -200,7 +192,6 @@ abstract class Scope(
 
     override fun isScope() = error() == null
 
-
     override fun findNode(node: Evaluable<RuntimeContext>): Definition? {
         for (definition in definitions) {
             val result = definition.findNode(node)
@@ -211,16 +202,5 @@ abstract class Scope(
         return null
     }
 
-
-    override fun depth(scope: Scope): Int {
-        val parent = parentScope
-        if (scope == parent) {
-            return 0
-        }
-        if (parent == null) {
-            throw IllegalStateException("Definition $this not found in scope.")
-        }
-        return 1 + depth(parent)
-    }
 
 }

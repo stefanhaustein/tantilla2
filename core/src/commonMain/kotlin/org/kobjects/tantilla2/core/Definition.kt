@@ -23,14 +23,15 @@ interface Definition : SerializableCode {
 
 
     fun error(): Exception? = null
+
     fun depth(scope: Scope): Int {
-            if (scope == this.parentScope) {
-                return 0
-            }
-            if (scope.parentScope == null) {
-                throw IllegalStateException("Definition $this not found in scope.")
-            }
-            return 1 + depth(scope.parentScope!!)
+        if (scope == this.parentScope) {
+            return 0
+        }
+        if (scope.parentScope == null) {
+            throw IllegalStateException("Definition $this not found in scope.")
+        }
+        return 1 + depth(scope.parentScope!!)
     }
 
     fun findNode(node: Evaluable<RuntimeContext>): Definition? = null

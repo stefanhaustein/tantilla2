@@ -193,16 +193,6 @@ class VariableDefinition (
         return null
     }
 
-    override fun depth(scope: Scope): Int {
-        if (scope == this.parentScope) {
-            return 0
-        }
-        if (scope.parentScope == null) {
-            throw IllegalStateException("Definition $this not found in scope.")
-        }
-        return 1 + depth(scope.parentScope!!)
-    }
-
     object UnresolvedEvalueable: TantillaNode {
         override fun children() = emptyList<Evaluable<RuntimeContext>>()
 

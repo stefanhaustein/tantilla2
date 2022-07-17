@@ -36,7 +36,6 @@ class ImplDefinition(
 
     override fun resolve(name: String): Definition? = resolveDynamic(name, false)
 
-
     override fun rebuild(compilationResults: CompilationResults): Boolean {
         if (super.rebuild(compilationResults)) {
 
