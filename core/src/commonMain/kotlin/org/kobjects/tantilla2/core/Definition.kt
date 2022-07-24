@@ -21,7 +21,6 @@ interface Definition : SerializableCode {
         get() = -1
         set(_) = throw UnsupportedOperationException()
 
-
     fun error(): Exception? = null
 
     fun depth(scope: Scope): Int {
@@ -37,7 +36,16 @@ interface Definition : SerializableCode {
     fun findNode(node: Evaluable<RuntimeContext>): Definition? = null
     fun isDynamic() = kind == Kind.METHOD || kind == Kind.FIELD
     fun isScope(): Boolean = false
-    fun rebuild(compilationResults: CompilationResults): Boolean = true
+    fun rebuild(compilationResults: CompilationResults): Boolean {
+        val error = error()
+        val localResult = CompilationResults.DefinitionCompilationResult(
+            this,
+            if (error == null) emptyList() else listOf(error),
+            false)
+
+        compilationResults.definitionCompilationResults.put(this, localResult)
+        return error == null
+    }
 
     fun serializeSummary(writer: CodeWriter)
     fun serializeTitle(writer: CodeWriter)

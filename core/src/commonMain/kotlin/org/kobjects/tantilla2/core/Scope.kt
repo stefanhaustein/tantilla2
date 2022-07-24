@@ -134,21 +134,23 @@ abstract class Scope(
     }
 
     override fun rebuild(compilationResults: CompilationResults): Boolean {
-        var ok = true
-        if (error() != null) {
-            compilationResults.errors.add(this)
-            ok = false
-        }
+        var childError = false
+        val error = error()
         for (definition in definitions) {
             if (!definition.rebuild(compilationResults)) {
-                compilationResults.errors.add(this)
-                ok = false
+                childError = true
             } else if (definition is ImplDefinition) {
                 compilationResults.classToTrait.getOrPut(definition.struct) { mutableMapOf() }[definition.trait] = this
                 compilationResults.traitToClass.getOrPut(definition.trait) { mutableMapOf() }[definition.struct] = this
             }
         }
-        return ok
+        val localResult = CompilationResults.DefinitionCompilationResult(
+            this,
+            if (error == null) emptyList() else listOf(error),
+            childError)
+
+        compilationResults.definitionCompilationResults.put(this, localResult)
+        return !childError && error == null
     }
 
     override val value

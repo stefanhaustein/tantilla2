@@ -71,16 +71,6 @@ class VariableDefinition (
         return error;
     }
 
-    override fun rebuild(compilationResults: CompilationResults): Boolean {
-        var ok = true
-        if (error() != null) {
-            compilationResults.errors.add(this)
-            ok = false
-        }
-        return ok
-    }
-
-
     override val type: Type
         get() {
             if (resolvedType == null) {
@@ -126,7 +116,12 @@ class VariableDefinition (
 
     private fun resolveVariable(tokenizer: TantillaTokenizer, typeOnly: Boolean = false) {
         if (definitionText.isEmpty()) {
-            resolvedType = resolvedValue.dynamicType
+            if (resolvedType == null) {
+                if (resolvedValue == UnresolvedValue) {
+                    throw RuntimeException("Can't resolve variable without definition text: $name")
+                }
+                resolvedType = resolvedValue.dynamicType
+            }
             return
         }
 

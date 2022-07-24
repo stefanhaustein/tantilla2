@@ -66,16 +66,6 @@ class FunctionDefinition (
         return error;
     }
 
-    override fun rebuild(compilationResults: CompilationResults): Boolean {
-        var ok = true
-        if (error() != null) {
-            compilationResults.errors.add(this)
-            ok = false
-        }
-        return ok
-    }
-
-
     override val type: FunctionType
         get() {
             if (resolvedType == null) {
