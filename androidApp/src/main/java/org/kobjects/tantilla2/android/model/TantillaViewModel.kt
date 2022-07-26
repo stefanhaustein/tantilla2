@@ -77,7 +77,7 @@ class TantillaViewModel(
         canvas.translate(bitmap.width / 2f, bitmap.height / 2f)
         canvas.scale(1f, -1f)
         val penImpl = PenImpl(PenDefinition, canvas)
-        RootScope.definitions.add(VariableDefinition(
+        RootScope.definitions.add(NativePropertyDefinition(
             RootScope,
             Definition.Kind.STATIC,
             "pen",
@@ -148,7 +148,7 @@ class TantillaViewModel(
         this.definition.value = definition
         val writer = CodeWriter(highlighting = CodeWriter.defaultHighlighting)
         definition?.serializeCode(writer)
-        currentText.value = currentText.value.copy(annotatedString = ansiToAnnotatedString(writer.toString()).withError(definition?.error()))
+        currentText.value = currentText.value.copy(annotatedString = ansiToAnnotatedString(writer.toString()).withError(definition?.errors?.firstOrNull()))
         editing.value = true
     }
 

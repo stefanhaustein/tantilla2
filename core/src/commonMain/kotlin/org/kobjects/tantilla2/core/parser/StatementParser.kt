@@ -4,7 +4,6 @@ import org.kobjects.greenspun.core.Control
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.function.FunctionDefinition
-import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.node.*
 import org.kobjects.tantilla2.core.runtime.ListType
 import org.kobjects.tantilla2.core.runtime.RangeType
@@ -50,7 +49,7 @@ object StatementParser {
         val typeIsExplicit = resolved.second
         val initializer = resolved.third
 
-        val definition = VariableDefinition(
+        val definition = FieldDefinition(
             context.scope, Definition.Kind.FIELD, name, resolvedType = type, mutable = mutable)
 
         context.scope.definitions.add(definition)

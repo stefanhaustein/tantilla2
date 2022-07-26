@@ -16,7 +16,7 @@ open class StructDefinition(
     override val type: FunctionType
         get() = StructMetaType(this, List<Parameter>(definitions.locals.size) {
             val name = definitions.locals[it]
-            val def = definitions[name] as VariableDefinition
+            val def = definitions[name] as FieldDefinition
             Parameter(name, def.type, def.initializer()) })
 
     override val supportsMethods: Boolean

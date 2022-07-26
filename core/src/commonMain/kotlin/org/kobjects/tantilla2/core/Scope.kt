@@ -22,7 +22,7 @@ abstract class Scope(
 
 
     fun declareLocalVariable(name: String, type: Type, mutable: Boolean): Int {
-        val definition = VariableDefinition(
+        val definition = FieldDefinition(
             this,
             Definition.Kind.FIELD,
             name,
@@ -121,21 +121,23 @@ abstract class Scope(
         throw error!!
     }
 
-    override fun error(): Exception? {
-        if (error == null) {
-            try {
-                value
-            } catch (e: Exception) {
-                println("Error in $parentScope.$name")
-                e.printStackTrace()
+    override val errors: List<Exception>
+        get() {
+            if (error == null) {
+                try {
+                    value
+                } catch (e: Exception) {
+                    println("Error in $parentScope.$name")
+                    e.printStackTrace()
+                }
             }
-        }
-        return error;
+            val error = error
+            return if (error == null) emptyList() else listOf(error)
     }
 
     override fun rebuild(compilationResults: CompilationResults): Boolean {
         var childError = false
-        val error = error()
+        val errors = errors
         for (definition in definitions) {
             if (!definition.rebuild(compilationResults)) {
                 childError = true
@@ -146,15 +148,17 @@ abstract class Scope(
         }
         val localResult = CompilationResults.DefinitionCompilationResult(
             this,
-            if (error == null) emptyList() else listOf(error),
+            errors,
             childError)
 
         compilationResults.definitionCompilationResults.put(this, localResult)
         return !childError && error == null
     }
 
-    override val value
+    override var value: Any?
         get() = this
+        set(value) = throw UnsupportedOperationException()
+
 
     override fun toString() = name
 
@@ -182,7 +186,7 @@ abstract class Scope(
         serializeTitle(writer)
         writer.append(":")
         writer.indent()
-        val scope = value
+        val scope = value as Scope
         for (definition in scope.definitions.iterator()) {
             writer.newline()
             definition.serializeTitle(writer)
@@ -192,7 +196,7 @@ abstract class Scope(
 
     override fun isDynamic() = false
 
-    override fun isScope() = error() == null
+    override fun isScope() = errors.isEmpty()
 
     override fun findNode(node: Evaluable<RuntimeContext>): Definition? {
         for (definition in definitions) {

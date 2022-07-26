@@ -6,7 +6,7 @@ import org.kobjects.tantilla2.core.node.TantillaNode
 import org.kobjects.tantilla2.core.node.containsNode
 import org.kobjects.tantilla2.core.parser.*
 
-class VariableDefinition (
+class FieldDefinition (
     override val parentScope: Scope,
     override val kind: Definition.Kind,
     override val name: String,
@@ -56,19 +56,22 @@ class VariableDefinition (
         throw error!!
     }
 
-    override fun error(): Exception? {
-        if (error == null) {
-            try {
-                when (kind) {
-                    Definition.Kind.FIELD  -> initializer()
-                    else -> value
+    override val errors: List<Exception>
+        get() {
+            if (error == null) {
+                try {
+                    when (kind) {
+                        Definition.Kind.FIELD  -> initializer()
+                        else -> value
+                    }
+                } catch (e: Exception) {
+                    println("Error in $parentScope.$name")
+                    e.printStackTrace()
                 }
-            } catch (e: Exception) {
-                println("Error in $parentScope.$name")
-                e.printStackTrace()
-            }
+
         }
-        return error;
+        val error = error
+        return if (error == null) emptyList() else listOf(error)
     }
 
     override val type: Type
@@ -85,7 +88,7 @@ class VariableDefinition (
         }
 
 
-    override val value: Any?
+    override var value: Any?
         get() {
             if (resolvedValue == UnresolvedValue) {
                 val tokenizer = tokenizer()
@@ -101,6 +104,8 @@ class VariableDefinition (
             }
             return resolvedValue
         }
+        set(value) = throw UnsupportedOperationException()
+
 
     fun initializer(): Evaluable<RuntimeContext>? {
         if (resolvedInitializer == UnresolvedEvalueable) {

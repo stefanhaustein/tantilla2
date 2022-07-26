@@ -198,13 +198,13 @@ object Parser {
         startPos: Int,
         local: Boolean,
         mutable: Boolean,
-    ) : VariableDefinition {
+    ) : FieldDefinition {
         val name = tokenizer.consume(TokenType.IDENTIFIER)
         val kind = if (local) Definition.Kind.FIELD
             else Definition.Kind.STATIC
         val text = consumeLine(tokenizer, startPos)
 
-        return VariableDefinition(context.scope, kind, name, definitionText = text)
+        return FieldDefinition(context.scope, kind, name, definitionText = text)
     }
 
 

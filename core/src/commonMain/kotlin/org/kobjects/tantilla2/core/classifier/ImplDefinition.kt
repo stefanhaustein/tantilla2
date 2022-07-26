@@ -60,7 +60,7 @@ class ImplDefinition(
     }
 
 
-    override val value: ImplDefinition
+    override var value: Any?
         get() {
             if (resolvedTrait == null) {
                 val traitName = name.substring(0, name.indexOf(' '))
@@ -82,6 +82,8 @@ class ImplDefinition(
             }
             return this
         }
+        set(value) = throw UnsupportedOperationException()
+
 
     override val kind: Definition.Kind
         get() = Definition.Kind.IMPL
