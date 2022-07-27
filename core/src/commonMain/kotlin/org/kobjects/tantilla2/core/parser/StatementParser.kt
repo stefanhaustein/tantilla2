@@ -49,8 +49,8 @@ object StatementParser {
         val typeIsExplicit = resolved.second
         val initializer = resolved.third
 
-        val definition = FieldDefinition(
-            context.scope, Definition.Kind.FIELD, name, resolvedType = type, mutable = mutable)
+        val definition = LocalVariableDefinition(
+            context.scope, Definition.Kind.FIELD, name, type = type, mutable = mutable)
 
         context.scope.definitions.add(definition)
 

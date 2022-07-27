@@ -22,12 +22,12 @@ abstract class Scope(
 
 
     fun declareLocalVariable(name: String, type: Type, mutable: Boolean): Int {
-        val definition = FieldDefinition(
+        val definition = LocalVariableDefinition(
             this,
             Definition.Kind.FIELD,
             name,
             mutable = mutable,
-            resolvedType = type
+            type = type
         )
         definitions.add(definition)
         return definition.index

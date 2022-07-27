@@ -77,7 +77,7 @@ object Parser {
         if (tokenizer.current.type == TokenType.IDENTIFIER
             && (tokenizer.lookAhead(1).text == "=" || tokenizer.lookAhead(1).text == ":")) {
             val local = !explicitlyStatic && (scope is StructDefinition || scope is FunctionDefinition)
-            return parseVariableDeclaration(tokenizer, context, startPos, local, mutable)
+            return parseFieldDeclaration(tokenizer, context, startPos, local, mutable)
         }
 
         return when (val kind = tokenizer.current.text) {
@@ -192,7 +192,7 @@ object Parser {
     }
 
 
-    fun parseVariableDeclaration(
+    fun parseFieldDeclaration(
         tokenizer: TantillaTokenizer,
         context: ParsingContext,
         startPos: Int,

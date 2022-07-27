@@ -14,12 +14,9 @@ class NativePropertyDefinition (
         get() = -1
         set(value) = throw UnsupportedOperationException()
 
-
-
     override val type: Type
         get() = resolvedType
-
-
+    
     override var value: Any?
         get() = resolvedValue
         set(value) = throw UnsupportedOperationException()

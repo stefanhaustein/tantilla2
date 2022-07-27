@@ -12,11 +12,11 @@ class FieldDefinition (
     override val name: String,
     val definitionText: String = "",
     override val mutable: Boolean = false,
-    private var resolvedType: Type? = null,
-    private var resolvedValue: Any? = UnresolvedValue,
     override var docString: String = "",
-    override var index: Int = -1,
 ) : Definition {
+    private var resolvedType: Type? = null
+    private var resolvedValue: Any? = UnresolvedValue
+    override var index: Int = -1
     var error: Exception? = null
 
     private var resolvedInitializer: Evaluable<RuntimeContext>? = UnresolvedEvalueable

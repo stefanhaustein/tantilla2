@@ -4,7 +4,7 @@ import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.runtime.Void
 
-class Let(val definition: FieldDefinition, val type: Type, val typeIsExplicit: Boolean, val initializer: Evaluable<RuntimeContext>?) : TantillaNode {
+class Let(val definition: LocalVariableDefinition, val type: Type, val typeIsExplicit: Boolean, val initializer: Evaluable<RuntimeContext>?) : TantillaNode {
     override val returnType: Type
         get() = Void
 
