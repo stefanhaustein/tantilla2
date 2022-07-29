@@ -8,7 +8,6 @@ import org.kobjects.tantilla2.core.parser.*
 
 class LocalVariableDefinition (
     override val parentScope: Scope,
-    override val kind: Definition.Kind,
     override val name: String,
     override val mutable: Boolean = false,
     override val type: Type,
@@ -16,21 +15,15 @@ class LocalVariableDefinition (
     override var index: Int = -1,
 ) : Definition {
 
+    override val kind = Definition.Kind.FIELD
+
     init {
-        when (kind) {
-            Definition.Kind.FIELD -> {
+
                 val existingIndex = parentScope.definitions.locals.indexOf(name)
                 if (index != existingIndex) {
                     throw IllegalArgumentException("local variable inconsistency new index: $index; existing: $existingIndex")
                 }
-            }
-            Definition.Kind.STATIC -> {
-                if (index != -1) {
-                    throw IllegalArgumentException("index must be -1 for $kind")
-                }
-            }
-            else -> IllegalArgumentException("Kind must be FIELD or STATIC for VariableDefinition")
-        }
+
     }
 
 
@@ -39,6 +32,13 @@ class LocalVariableDefinition (
         get() = throw UnsupportedOperationException()
         set(value) = throw UnsupportedOperationException()
 
+
+
+    override fun getValue(self: Any?) = (self as RuntimeContext)[index]
+
+    override fun setValue(self: Any?, newValue: Any?) {
+        (self as RuntimeContext).variables[index] = newValue
+    }
 
 
     override fun toString() = serializeCode()

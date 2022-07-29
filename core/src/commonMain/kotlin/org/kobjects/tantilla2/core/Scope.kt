@@ -24,7 +24,6 @@ abstract class Scope(
     fun declareLocalVariable(name: String, type: Type, mutable: Boolean): Int {
         val definition = LocalVariableDefinition(
             this,
-            Definition.Kind.FIELD,
             name,
             mutable = mutable,
             type = type

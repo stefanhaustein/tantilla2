@@ -6,7 +6,7 @@ import org.kobjects.tantilla2.core.node.TantillaNode
 import org.kobjects.tantilla2.core.node.containsNode
 import org.kobjects.tantilla2.core.parser.*
 
-class FieldDefinition (
+class FieldDefinition(
     override val parentScope: Scope,
     override val kind: Definition.Kind,
     override val name: String,
@@ -44,7 +44,7 @@ class FieldDefinition (
         get() {
             try {
                 resolve()
-            } catch(e: Exception) {
+            } catch (e: Exception) {
                 listOf(e)
             }
             return emptyList()
@@ -65,6 +65,21 @@ class FieldDefinition (
         }
         set(value) = throw UnsupportedOperationException()
 
+
+    override fun getValue(self: Any?): Any? {
+        resolve()
+        return if (index == -1) resolvedValue else (self as RuntimeContext)[index]
+    }
+
+
+    override fun setValue(self: Any?, newValue: Any?) {
+        resolve()
+        if (index == -1) {
+            resolvedValue = newValue
+        } else {
+            (self as RuntimeContext).variables[index] = newValue
+        }
+    }
 
     fun initializer(): Evaluable<RuntimeContext>? {
         resolve()
@@ -92,7 +107,8 @@ class FieldDefinition (
 
             tokenizer.consume(name)
 
-            val resolved = Parser.resolveVariable(tokenizer, ParsingContext(parentScope, 0), typeOnly)
+            val resolved =
+                Parser.resolveVariable(tokenizer, ParsingContext(parentScope, 0), typeOnly)
             resolvedType = resolved.first
 
             if (typeOnly) {
@@ -110,7 +126,11 @@ class FieldDefinition (
             if (e is ParsingException) {
                 error = e
             } else {
-                error = ParsingException(tokenizer.current, "Error in ${parentScope.name}.$name: " +  (e.message ?: "Parsing Error"), e)
+                error = ParsingException(
+                    tokenizer.current,
+                    "Error in ${parentScope.name}.$name: " + (e.message ?: "Parsing Error"),
+                    e
+                )
             }
             throw error!!
         }
@@ -137,8 +157,8 @@ class FieldDefinition (
         if (resolutionState == ResolutionState.RESOLVED) {
             serializeTitle(writer)
             if (resolvedInitializer != null) {
-                 writer.append(" = ")
-                 writer.appendCode(resolvedInitializer)
+                writer.append(" = ")
+                writer.appendCode(resolvedInitializer)
             }
         } else {
             writer.append(definitionText)
@@ -165,5 +185,5 @@ class FieldDefinition (
     enum class ResolutionState {
         UNRESOLVED, TYPE_RESOLVED, RESOLVED, ERROR
     }
-
 }
+
