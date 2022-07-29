@@ -15,11 +15,12 @@ class FieldDefinition (
     override var docString: String = "",
 ) : Definition {
     private var resolvedType: Type? = null
-    private var resolvedValue: Any? = UnresolvedValue
+    private var resolvedValue: Any? = null
     override var index: Int = -1
-    var error: Exception? = null
+    private var resolutionState: ResolutionState = ResolutionState.UNRESOLVED
+    var error: ParsingException? = null
 
-    private var resolvedInitializer: Evaluable<RuntimeContext>? = UnresolvedEvalueable
+    private var resolvedInitializer: Evaluable<RuntimeContext>? = null
 
     init {
         when (kind) {
@@ -39,110 +40,79 @@ class FieldDefinition (
     }
 
 
-    private fun tokenizer(): TantillaTokenizer {
-        val tokenizer = TantillaTokenizer(definitionText)
-        tokenizer.consume(TokenType.BOF)
-        error = null
-        return tokenizer
-    }
-
-    private fun exceptionInResolve(e: Exception, tokenizer: TantillaTokenizer): Exception {
-        if (e is ParsingException) {
-            error = e
-        } else {
-            error = ParsingException(tokenizer.current, "Error in ${parentScope.name}.$name: " +  (e.message ?: "Parsing Error"), e)
-        }
-        error!!.printStackTrace()
-        throw error!!
-    }
-
     override val errors: List<Exception>
         get() {
-            if (error == null) {
-                try {
-                    when (kind) {
-                        Definition.Kind.FIELD  -> initializer()
-                        else -> value
-                    }
-                } catch (e: Exception) {
-                    println("Error in $parentScope.$name")
-                    e.printStackTrace()
-                }
-
+            try {
+                resolve()
+            } catch(e: Exception) {
+                listOf(e)
+            }
+            return emptyList()
         }
-        val error = error
-        return if (error == null) emptyList() else listOf(error)
-    }
+
 
     override val type: Type
         get() {
-            if (resolvedType == null) {
-                val tokenizer = tokenizer()
-                try {
-                    resolveVariable(tokenizer, typeOnly = true)
-                } catch (e: Exception) {
-                    throw exceptionInResolve(e, tokenizer)
-                }
-            }
+            resolve(typeOnly = true)
             return resolvedType!!
         }
 
 
     override var value: Any?
         get() {
-            if (resolvedValue == UnresolvedValue) {
-                val tokenizer = tokenizer()
-                println("Resolving: $definitionText")
-                try {
-                    when (kind) {
-                        Definition.Kind.STATIC -> resolveVariable(tokenizer)
-                        else -> throw RuntimeException("Can't obtain value for $kind.")
-                    }
-                } catch (e: Exception) {
-                    throw exceptionInResolve(e, tokenizer)
-                }
-            }
+            resolve()
             return resolvedValue
         }
         set(value) = throw UnsupportedOperationException()
 
 
     fun initializer(): Evaluable<RuntimeContext>? {
-        if (resolvedInitializer == UnresolvedEvalueable) {
-            val tokenizer = tokenizer()
-            try {
-                resolveVariable(tokenizer)
-            } catch (e: Exception) {
-                throw exceptionInResolve(e, tokenizer)
-            }
-        }
+        resolve()
         return resolvedInitializer
     }
 
-    private fun resolveVariable(tokenizer: TantillaTokenizer, typeOnly: Boolean = false) {
-        if (definitionText.isEmpty()) {
-            if (resolvedType == null) {
-                if (resolvedValue == UnresolvedValue) {
-                    throw RuntimeException("Can't resolve variable without definition text: $name")
-                }
-                resolvedType = resolvedValue.dynamicType
+    private fun resolve(typeOnly: Boolean = false) {
+        when (resolutionState) {
+            ResolutionState.RESOLVED -> return
+            ResolutionState.TYPE_RESOLVED -> if (typeOnly) return
+            ResolutionState.ERROR -> {
+                throw error!!
             }
-            return
         }
 
-        tokenizer.tryConsume("static")
-        tokenizer.tryConsume("mut")
-        tokenizer.tryConsume("var") || tokenizer.tryConsume("val") // var/val
+        val tokenizer = TantillaTokenizer(definitionText)
+        tokenizer.consume(TokenType.BOF)
+        error = null
+        resolvedInitializer = null
 
-        tokenizer.consume(name)
+        try {
+            tokenizer.tryConsume("static")
+            tokenizer.tryConsume("mut")
+            tokenizer.tryConsume("var") || tokenizer.tryConsume("val") // var/val
 
-        val resolved = Parser.resolveVariable(tokenizer, ParsingContext(parentScope, 0))
-        resolvedType = resolved.first
+            tokenizer.consume(name)
 
-        resolvedInitializer = resolved.third
+            val resolved = Parser.resolveVariable(tokenizer, ParsingContext(parentScope, 0), typeOnly)
+            resolvedType = resolved.first
 
-        if (kind == Definition.Kind.STATIC) {
-            resolvedValue = resolvedInitializer!!.eval(RuntimeContext(mutableListOf()))
+            if (typeOnly) {
+                resolutionState = ResolutionState.TYPE_RESOLVED
+            } else {
+                resolvedInitializer = resolved.third
+                if (kind == Definition.Kind.STATIC) {
+                    resolvedValue = resolvedInitializer!!.eval(RuntimeContext(mutableListOf()))
+                }
+                resolutionState = ResolutionState.RESOLVED
+            }
+
+        } catch (e: Exception) {
+            resolutionState = ResolutionState.ERROR
+            if (e is ParsingException) {
+                error = e
+            } else {
+                error = ParsingException(tokenizer.current, "Error in ${parentScope.name}.$name: " +  (e.message ?: "Parsing Error"), e)
+            }
+            throw error!!
         }
     }
 
@@ -164,16 +134,15 @@ class FieldDefinition (
 
 
     override fun serializeCode(writer: CodeWriter, precedence: Int) {
-
-               if (resolvedInitializer != UnresolvedEvalueable) {
-                   serializeTitle(writer)
-                   if (resolvedInitializer != null) {
-                       writer.append(" = ")
-                       writer.appendCode(resolvedInitializer)
-                   }
-               } else {
-                   writer.append(definitionText)
-               }
+        if (resolutionState == ResolutionState.RESOLVED) {
+            serializeTitle(writer)
+            if (resolvedInitializer != null) {
+                 writer.append(" = ")
+                 writer.appendCode(resolvedInitializer)
+            }
+        } else {
+            writer.append(definitionText)
+        }
     }
 
     override fun serializeSummary(writer: CodeWriter) {
@@ -187,31 +156,14 @@ class FieldDefinition (
 
     override fun findNode(node: Evaluable<RuntimeContext>): Definition? {
         val rid = resolvedInitializer
-        if (rid != UnresolvedEvalueable && rid != null && rid.containsNode(node)) {
+        if (rid != null && rid.containsNode(node)) {
             return this
         }
         return null
     }
 
-    object UnresolvedEvalueable: TantillaNode {
-        override fun children() = emptyList<Evaluable<RuntimeContext>>()
-
-        override fun eval(context: RuntimeContext): Any? {
-            TODO("Not yet implemented")
-        }
-
-        override fun reconstruct(newChildren: List<Evaluable<RuntimeContext>>): Evaluable<RuntimeContext> {
-            TODO("Not yet implemented")
-        }
-
-        override fun serializeCode(writer: CodeWriter, precedence: Int) {
-            TODO("Not yet implemented")
-        }
-
-        override val returnType: Type
-            get() = TODO("Not yet implemented")
+    enum class ResolutionState {
+        UNRESOLVED, TYPE_RESOLVED, RESOLVED, ERROR
     }
 
-
-    object UnresolvedValue
 }
