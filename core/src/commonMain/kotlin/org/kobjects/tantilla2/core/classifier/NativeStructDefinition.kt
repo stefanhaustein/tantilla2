@@ -50,36 +50,18 @@ open class NativeStructDefinition(
         name: String,
         docString: String,
         type: Type,
-        getter: (RuntimeContext) -> Any?,
-        setter: ((RuntimeContext) -> Any?)? = null
+        getter: (Any?) -> Any?,
+        setter: ((Any?, Any?) -> Unit)? = null
     ) {
-        val getterType = object : FunctionType {
-            override val returnType = type
-            override val parameters = listOf(Parameter("self", this@NativeStructDefinition))
-        }
         definitions.add(
-            NativeFunctionDefinition(
+            NativePropertyDefinition(
                this,
-                Definition.Kind.METHOD,
+                Definition.Kind.PROPERTY,
                 name,
-                docString,
-                getterType,
-                getter,
-        ))
-        if (setter != null) {
-            val setterType = object : FunctionType {
-                override val returnType = Void
-                override val parameters = listOf(Parameter("self", this@NativeStructDefinition), Parameter("value", type))
-            }
-            definitions.add(
-                NativeFunctionDefinition(
-                    this,
-                    Definition.Kind.METHOD,
-                    "set_$name",
-                    docString,
-                    setterType,
-                    setter))
-        }
+                docString = docString,
+                type = type,
+                getter = getter,
+                setter = setter))
     }
 
 

@@ -38,7 +38,7 @@ class TantillaViewModel(
     val mode = mutableStateOf(Mode.SHELL)
     var fileName = mutableStateOf(platform.fileName)
     val userScope = mutableStateOf<Scope>(console.scope)
-    val builtinScope = mutableStateOf<Scope>(console.scope.parentScope!!)
+    val builtinScope = mutableStateOf<Scope>(console.scope.parentScope)
     val definition = mutableStateOf<Definition?>(null)
     val currentText = mutableStateOf(TextFieldValue())
     var editorParentScope: Scope = console.scope
@@ -83,8 +83,8 @@ class TantillaViewModel(
             RootScope,
             Definition.Kind.STATIC,
             "pen",
-            resolvedType = PenDefinition,
-            resolvedValue = penImpl
+            type = PenDefinition,
+            getter = {penImpl}
         )
         )
 

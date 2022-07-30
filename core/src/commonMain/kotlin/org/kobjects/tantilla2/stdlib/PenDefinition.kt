@@ -42,20 +42,16 @@ object PenDefinition : NativeStructDefinition(RootScope, "Pen"), Type {
             "fill_color",
         "Color value used for filling shapes",
             ColorDefinition,
-            { (it[0] as Pen).fillColor },
-            {
-                (it[0] as Pen).fillColor = it[1] as Color
-                null }
+            { (it as Pen).fillColor },
+            { self, value -> (self as Pen).fillColor = value as Color }
         )
 
         defineNativeProperty(
             "stroke_color",
             "Color value used for drawing lines shapes",
             ColorDefinition,
-            { (it[0] as Pen).strokeColor },
-            {
-                (it[0] as Pen).strokeColor = it[1] as Color
-                null }
+            { (it as Pen).strokeColor },
+            { self, value -> (self as Pen).strokeColor = value as Color }
         )
     }
 

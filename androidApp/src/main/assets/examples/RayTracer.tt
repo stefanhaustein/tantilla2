@@ -226,7 +226,7 @@ struct RayTracer:
     cam.forward.plus(cam.right.times(x / 200)).plus(cam.up.times(y / 200)).norm()
 
   def render(s: Scene, p: Pen, screenWidth: float, screenHeight: float):
-    p.set_stroke_color(Color.TRANSPARENT)
+    p.stroke_color = Color.TRANSPARENT
     renderRow(s, p, screenWidth, screenHeight, 0)
 
   def renderRow(s: Scene, p: Pen, screenWidth: float, screenHeight: float, y: float):
@@ -235,7 +235,7 @@ struct RayTracer:
       if y % 2 == 0:
         yy = -yy-1
 
-      p.set_fill_color(traceRay(Ray(s.camera.pos, getPoint(x, yy, s.camera)), s, 0))
+      p.fill_color = traceRay(Ray(s.camera.pos, getPoint(x, yy, s.camera)), s, 0)
       p.rect(x, yy, 1, 1)
 
     if (y < screenHeight):

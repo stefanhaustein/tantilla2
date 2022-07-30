@@ -1,5 +1,7 @@
 package org.kobjects.tantilla2.core
 
+import org.kobjects.tantilla2.core.classifier.NativePropertyDefinition
+
 class DefinitionMap(val scope: Scope): Iterable<Definition> {
     val definitions = mutableMapOf<String, Definition>()
     var locals = mutableListOf<String>()
@@ -11,7 +13,7 @@ class DefinitionMap(val scope: Scope): Iterable<Definition> {
 
     fun add(definition: Definition) {
         definitions[definition.name] = definition
-        if (definition.kind == Definition.Kind.PROPERTY && definition.index == -1) {
+        if (definition.kind == Definition.Kind.PROPERTY && definition !is NativePropertyDefinition && definition.index == -1) {
             definition.index = locals.size
             locals.add(definition.name)
         }

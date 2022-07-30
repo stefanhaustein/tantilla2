@@ -2,13 +2,13 @@ package org.kobjects.tantilla2.core.classifier
 
 import org.kobjects.tantilla2.core.*
 
-class NativePropertyDefinition (
+class NativePropertyDefinition(
     override val parentScope: Scope,
     override val kind: Definition.Kind,
     override val name: String,
-    override val mutable: Boolean = false,
-    private var resolvedValue: Any?,
-    private var resolvedType: Type = resolvedValue.dynamicType,
+    override val type: Type,
+    private val getter: (self: Any?) -> Any?,
+    private val setter: ((self: Any?, newValue: Any?) -> Unit)? = null,
     override var docString: String = "",
 ) : Definition {
 
@@ -16,13 +16,18 @@ class NativePropertyDefinition (
         get() = -1
         set(value) = throw UnsupportedOperationException()
 
-    override val type: Type
-        get() = resolvedType
+    override fun getValue(self: Any?) = getter(self)
 
-    override fun getValue(self: Any?) = resolvedValue
+    override fun setValue(self: Any?, newValue: Any?) {
+        val setter = setter ?: throw UnsupportedOperationException()
+        setter(self, newValue)
+    }
+
+    override val mutable: Boolean
+        get() = setter != null
+
 
     override fun toString() = serializeCode()
-
 
     override fun serializeTitle(writer: CodeWriter) {
         if (kind == Definition.Kind.STATIC && parentScope.supportsLocalVariables) {
@@ -50,4 +55,20 @@ class NativePropertyDefinition (
 
     override fun isScope() = false
 
+
+    companion object {
+        fun constant(
+            parentScope: Scope,
+            name: String,
+            value: Any,
+            docString: String = "",
+        ) = NativePropertyDefinition(
+            parentScope,
+            Definition.Kind.STATIC,
+            name,
+            type = value.dynamicType,
+            getter = { value },
+            docString = docString
+        )
+    }
 }
