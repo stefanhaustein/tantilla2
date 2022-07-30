@@ -15,10 +15,11 @@ class FieldDefinition(
     override var docString: String = "",
 ) : Definition {
     private var resolvedType: Type? = null
-    private var resolvedValue: Any? = null
     override var index: Int = -1
     private var resolutionState: ResolutionState = ResolutionState.UNRESOLVED
     var error: ParsingException? = null
+
+    private var currentValue: Any? = null
 
     private var resolvedInitializer: Evaluable<RuntimeContext>? = null
 
@@ -59,14 +60,14 @@ class FieldDefinition(
 
     override fun getValue(self: Any?): Any? {
         resolve()
-        return if (index == -1) resolvedValue else (self as RuntimeContext)[index]
+        return if (index == -1) currentValue else (self as RuntimeContext)[index]
     }
 
 
     override fun setValue(self: Any?, newValue: Any?) {
         resolve()
         if (index == -1) {
-            resolvedValue = newValue
+            currentValue = newValue
         } else {
             (self as RuntimeContext).variables[index] = newValue
         }
@@ -107,7 +108,7 @@ class FieldDefinition(
             } else {
                 resolvedInitializer = resolved.third
                 if (kind == Definition.Kind.STATIC) {
-                    resolvedValue = resolvedInitializer!!.eval(RuntimeContext(mutableListOf()))
+                    currentValue = resolvedInitializer!!.eval(RuntimeContext(mutableListOf()))
                 }
                 resolutionState = ResolutionState.RESOLVED
             }
@@ -172,6 +173,24 @@ class FieldDefinition(
         }
         return null
     }
+
+    override fun reset() {
+        resolutionState = ResolutionState.UNRESOLVED
+        resolvedInitializer = null
+        currentValue = null
+        resolvedType = null
+
+        super.reset()
+    }
+
+    override fun initialize() {
+        resolve()
+        if (kind == Definition.Kind.STATIC) {
+            currentValue = resolvedInitializer!!.eval(RuntimeContext(mutableListOf()))
+        }
+        super.initialize()
+    }
+
 
     enum class ResolutionState {
         UNRESOLVED, TYPE_RESOLVED, RESOLVED, ERROR

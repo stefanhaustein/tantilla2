@@ -163,6 +163,12 @@ class FunctionDefinition (
     override fun findNode(node: Evaluable<RuntimeContext>): Definition? =
         if (resolvedBody?.containsNode(node) ?: false) this else null
 
+    override fun reset() {
+        resolutionState = ResolutionState.UNRESOLVED
+        resolvedType = null
+        resolvedBody = null
+        super.reset()
+    }
 
     enum class ResolutionState {
         UNRESOLVED, TYPE_RESOLVED, RESOLVED, ERROR

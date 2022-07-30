@@ -114,15 +114,6 @@ abstract class Scope(
         )
     }
 
-    private fun exceptionInResolve(e: Exception, tokenizer: TantillaTokenizer): Exception {
-        if (e is ParsingException) {
-            error = e
-        } else {
-            error = ParsingException(tokenizer.current, "Error in ${parentScope}.$name: " +  (e.message ?: "Parsing Error"), e)
-        }
-        error!!.printStackTrace()
-        throw error!!
-    }
 
     override val errors: List<Exception>
         get() {
@@ -206,6 +197,19 @@ abstract class Scope(
             }
         }
         return null
+    }
+
+    override fun initialize() {
+        for (definition in definitions) {
+            definition.initialize()
+        }
+    }
+
+    override fun reset() {
+        error = null
+        for (definition in definitions) {
+            definition.reset()
+        }
     }
 
 

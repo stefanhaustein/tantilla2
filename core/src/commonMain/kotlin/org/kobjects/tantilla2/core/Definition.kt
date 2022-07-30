@@ -50,6 +50,19 @@ interface Definition : SerializableCode {
         return errors.isEmpty()
     }
 
+    /**
+     * Initialize all static values
+     */
+    fun initialize() {
+    }
+
+    /**
+     * Reset the compilation state
+     */
+    fun reset() {
+    }
+
+
     fun serializeSummary(writer: CodeWriter)
     fun serializeTitle(writer: CodeWriter)
 
