@@ -1,10 +1,6 @@
-package org.kobjects.tantilla2.core
+package org.kobjects.tantilla2.core.function
 
-import org.kobjects.greenspun.core.Evaluable
-import org.kobjects.parserlib.tokenizer.ParsingException
-import org.kobjects.tantilla2.core.node.TantillaNode
-import org.kobjects.tantilla2.core.node.containsNode
-import org.kobjects.tantilla2.core.parser.*
+import org.kobjects.tantilla2.core.*
 
 class LocalVariableDefinition (
     override val parentScope: Scope,
@@ -15,7 +11,7 @@ class LocalVariableDefinition (
     override var index: Int = -1,
 ) : Definition {
 
-    override val kind = Definition.Kind.FIELD
+    override val kind = Definition.Kind.PROPERTY
 
     init {
 
@@ -61,7 +57,7 @@ class LocalVariableDefinition (
     }
 
 
-    override fun isDynamic() = kind == Definition.Kind.FIELD
+    override fun isDynamic() = kind == Definition.Kind.PROPERTY
 
     override fun isScope() = false
 

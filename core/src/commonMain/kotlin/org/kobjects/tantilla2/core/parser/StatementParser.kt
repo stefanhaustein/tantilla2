@@ -4,6 +4,7 @@ import org.kobjects.greenspun.core.Control
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.function.FunctionDefinition
+import org.kobjects.tantilla2.core.function.LocalVariableDefinition
 import org.kobjects.tantilla2.core.node.*
 import org.kobjects.tantilla2.core.runtime.ListType
 import org.kobjects.tantilla2.core.runtime.RangeType

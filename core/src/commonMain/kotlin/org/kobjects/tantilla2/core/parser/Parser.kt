@@ -82,8 +82,8 @@ object Parser {
 
         return when (val kind = tokenizer.current.text) {
             "def" -> {
-                val isMethod = !explicitlyStatic && (scope is StructDefinition || scope is TraitDefinition ||
-                        scope is ImplDefinition)
+                val isMethod = !explicitlyStatic
+                        && (scope is StructDefinition || scope is TraitDefinition || scope is ImplDefinition)
                 tokenizer.consume("def")
                 val name = tokenizer.consume(TokenType.IDENTIFIER, "Function name expected.")
                 println("consuming def $name")
@@ -200,7 +200,7 @@ object Parser {
         mutable: Boolean,
     ) : FieldDefinition {
         val name = tokenizer.consume(TokenType.IDENTIFIER)
-        val kind = if (local) Definition.Kind.FIELD
+        val kind = if (local) Definition.Kind.PROPERTY
             else Definition.Kind.STATIC
         val text = consumeLine(tokenizer, startPos)
 

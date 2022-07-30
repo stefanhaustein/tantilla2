@@ -1,4 +1,6 @@
-package org.kobjects.tantilla2.core
+package org.kobjects.tantilla2.core.classifier
+
+import org.kobjects.tantilla2.core.*
 
 class NativePropertyDefinition (
     override val parentScope: Scope,
@@ -44,7 +46,7 @@ class NativePropertyDefinition (
         serializeCode(writer)
     }
 
-    override fun isDynamic() = kind == Definition.Kind.FIELD
+    override fun isDynamic() = kind == Definition.Kind.PROPERTY
 
     override fun isScope() = false
 

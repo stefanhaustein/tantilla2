@@ -1,8 +1,8 @@
-package org.kobjects.tantilla2.core
+package org.kobjects.tantilla2.core.classifier
 
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.parserlib.tokenizer.ParsingException
-import org.kobjects.tantilla2.core.node.TantillaNode
+import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.node.containsNode
 import org.kobjects.tantilla2.core.parser.*
 
@@ -24,7 +24,7 @@ class FieldDefinition(
 
     init {
         when (kind) {
-            Definition.Kind.FIELD -> {
+            Definition.Kind.PROPERTY -> {
                 val existingIndex = parentScope.definitions.locals.indexOf(name)
                 if (index != existingIndex) {
                     throw IllegalArgumentException("local variable inconsistency new index: $index; existing: $existingIndex")
@@ -161,7 +161,7 @@ class FieldDefinition(
     }
 
 
-    override fun isDynamic() = kind == Definition.Kind.FIELD
+    override fun isDynamic() = kind == Definition.Kind.PROPERTY
 
     override fun isScope() = false
 

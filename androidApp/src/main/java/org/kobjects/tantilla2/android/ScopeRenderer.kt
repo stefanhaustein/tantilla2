@@ -55,7 +55,7 @@ fun RenderScope(viewModel: TantillaViewModel) {
                     }
                 } else {
                     title = kind.name
-                    list = (if (kind == Definition.Kind.FIELD)
+                    list = (if (kind == Definition.Kind.PROPERTY)
                         scope.definitions.locals.map { scope.definitions[it]!! }
                     else
                         definitions).filter { it.kind == kind }

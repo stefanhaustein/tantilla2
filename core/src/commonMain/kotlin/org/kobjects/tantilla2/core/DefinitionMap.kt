@@ -11,7 +11,7 @@ class DefinitionMap(val scope: Scope): Iterable<Definition> {
 
     fun add(definition: Definition) {
         definitions[definition.name] = definition
-        if (definition.kind == Definition.Kind.FIELD && definition.index == -1) {
+        if (definition.kind == Definition.Kind.PROPERTY && definition.index == -1) {
             definition.index = locals.size
             locals.add(definition.name)
         }

@@ -9,6 +9,7 @@ import org.kobjects.tantilla2.core.classifier.ImplDefinition
 import org.kobjects.tantilla2.core.classifier.StructMetaType
 import org.kobjects.tantilla2.core.function.FunctionDefinition
 import org.kobjects.tantilla2.core.function.FunctionType
+import org.kobjects.tantilla2.core.function.LambdaScope
 import org.kobjects.tantilla2.core.node.*
 
 object ExpressionParser {
@@ -41,7 +42,7 @@ object ExpressionParser {
         return result
     }
 
-    fun reference(scope: Scope, definition: Definition, qualified: Boolean) = if (definition.kind == Definition.Kind.FIELD) {
+    fun reference(scope: Scope, definition: Definition, qualified: Boolean) = if (definition.kind == Definition.Kind.PROPERTY) {
         val depth = definition.depth(scope)
         LocalVariableReference(
             definition.name, definition.type, depth, definition.index, definition.mutable
@@ -145,7 +146,7 @@ object ExpressionParser {
         }
 
         tokenizer.consume(":")
-        val functionScope = FunctionDefinition(context.scope, Definition.Kind.FUNCTION, "<anonymous>", "", resolvedType = type)
+        val functionScope = LambdaScope(context.scope) // resolvedType = type)
         for (i in type.parameters.indices) {
             val parameter = type.parameters[i]
             functionScope.declareLocalVariable(parameterNames[i], parameter.type, false)
@@ -234,12 +235,7 @@ object ExpressionParser {
         var self: Evaluable<RuntimeContext>? = null
         val name = definition.name
         val value = when (definition.kind) {
-            Definition.Kind.FIELD ->
-                PropertyReference(
-                    base,
-                    name,
-                    definition
-                )
+            Definition.Kind.PROPERTY -> PropertyReference(base, definition)
             Definition.Kind.METHOD -> {
                 self = base
                 StaticReference(definition, false)

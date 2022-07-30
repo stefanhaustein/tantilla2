@@ -27,7 +27,6 @@ interface Definition : SerializableCode {
 
     fun setValue(self: Any?, newValue: Any?): Unit = throw UnsupportedOperationException()
 
-
     fun depth(scope: Scope): Int {
         if (scope == this.parentScope) {
             return 0
@@ -39,7 +38,7 @@ interface Definition : SerializableCode {
     }
 
     fun findNode(node: Evaluable<RuntimeContext>): Definition? = null
-    fun isDynamic() = kind == Kind.METHOD || kind == Kind.FIELD
+    fun isDynamic() = kind == Kind.METHOD || kind == Kind.PROPERTY
     fun isScope(): Boolean = false
     fun rebuild(compilationResults: CompilationResults): Boolean {
         val localResult = CompilationResults.DefinitionCompilationResult(
@@ -55,6 +54,6 @@ interface Definition : SerializableCode {
     fun serializeTitle(writer: CodeWriter)
 
     enum class Kind {
-        FIELD, STATIC, FUNCTION, METHOD, TRAIT, STRUCT, UNIT, IMPL, UNPARSEABLE
+        PROPERTY, STATIC, FUNCTION, METHOD, TRAIT, STRUCT, UNIT, IMPL, UNPARSEABLE
     }
 }

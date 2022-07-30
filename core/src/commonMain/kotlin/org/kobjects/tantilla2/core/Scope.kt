@@ -58,13 +58,13 @@ abstract class Scope(
 
     fun resolveDynamic(name: String, fallBackToStatic: Boolean): Definition? {
         val result = definitions.definitions[name]
-        if (result != null) {
-            if (fallBackToStatic || result.isDynamic()) {
-                return result
-            }
+        if (result != null && (result.isDynamic() || fallBackToStatic)) {
+            return result
         }
         val parent = parentScope
-        if (this is FunctionDefinition && parent is FunctionDefinition) {
+        // TODO: Document this check (looks like nested function support)
+        if ((this is FunctionDefinition || this is LambdaScope)
+            && (parent is FunctionDefinition || parent is LambdaScope)) {
             return parent.resolveDynamic(name, fallBackToStatic)
         }
         
@@ -72,6 +72,10 @@ abstract class Scope(
             return resolveStatic(name, true)
         }
         return null
+    }
+
+    fun remove(name: String) {
+        definitions.remove(name)
     }
 
     fun resolveStatic(name: String, fallBackToParent: Boolean = false): Definition? {

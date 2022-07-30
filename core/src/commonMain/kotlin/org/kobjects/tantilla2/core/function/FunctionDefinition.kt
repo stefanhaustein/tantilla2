@@ -4,6 +4,7 @@ import org.kobjects.greenspun.core.Control
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.core.*
+import org.kobjects.tantilla2.core.classifier.FieldDefinition
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.node.containsNode
 import org.kobjects.tantilla2.core.parser.*
@@ -13,11 +14,11 @@ class FunctionDefinition (
     override val kind: Definition.Kind,
     override val name: String,
     val definitionText: String,
-    private var resolvedType: FunctionType? = null
 ) : Scope(), Callable {
-
     override var docString: String = ""
 
+    private var resolutionState: ResolutionState = ResolutionState.UNRESOLVED
+    private var resolvedType: FunctionType? = null
     internal var resolvedBody: Evaluable<RuntimeContext>? = null
 
     init {
@@ -26,105 +27,93 @@ class FunctionDefinition (
         }
     }
 
-  /*  override val supportsMethods: Boolean
-        get() = true
-*/
     override val supportsLocalVariables: Boolean
         get() = true
 
     override val scopeSize: Int
-        get() = if (definitionText.isEmpty()
-            || parentScope is TraitDefinition) super.scopeSize
-            else (getValue(null) as FunctionDefinition).definitions.locals.size
-
-    private fun tokenizer(): TantillaTokenizer {
-        val tokenizer = TantillaTokenizer(definitionText)
-        tokenizer.consume(TokenType.BOF)
-        error = null
-        return tokenizer
-    }
-
-    private fun exceptionInResolve(e: Exception, tokenizer: TantillaTokenizer): Exception {
-        if (e is ParsingException) {
-            error = e
-        } else {
-            error = ParsingException(tokenizer.current, "Error in ${parentScope.name}.$name: " +  (e.message ?: "Parsing Error"), e)
-        }
-        error!!.printStackTrace()
-        throw error!!
-    }
+        get() = if (parentScope is TraitDefinition) super.scopeSize
+            else getValue(null).definitions.locals.size
 
     override val errors: List<Exception>
         get() {
-            if (error == null) {
-                try {
-                   getValue(null)
-                } catch (e: Exception) {
-                    println("Error in $parentScope.$name")
-                    e.printStackTrace()
-                }
+            try {
+                resolve()
+            } catch (e: Exception) {
+                return listOf(e)
             }
-            val error = error
-            return if (error == null) emptyList() else listOf(error)
+            return emptyList()
     }
 
     override val type: FunctionType
         get() {
-            if (resolvedType == null) {
-                val tokenizer = tokenizer()
-                try {
-                    resolvedType = resolveFunctionType(tokenizer, isMethod = kind == Definition.Kind.METHOD)
-                } catch (e: Exception) {
-                    throw exceptionInResolve(e, tokenizer)
-                }
-            }
+            resolve(typeOnly = true)
             return resolvedType!!
         }
 
-    private fun resolveFunctionType(tokenizer: TantillaTokenizer, isMethod: Boolean): FunctionType {
-        tokenizer.tryConsume("static")
-        tokenizer.consume("def")
-        tokenizer.consume(name)
-        return TypeParser.parseFunctionType(tokenizer, ParsingContext(parentScope, 0), isMethod)
-    }
-
     override fun getValue(self: Any?): FunctionDefinition {
-        if (resolvedBody == null) {
-            val tokenizer = tokenizer()
-            println("Resolving: $definitionText")
-            try {
-                resolve()
-            } catch (e: Exception) {
-                throw exceptionInResolve(e, tokenizer)
-            }
-        }
+        resolve()
         return this
     }
 
-    private fun resolve() {
-        val tokenizer = tokenizer()
-        tokenizer.tryConsume("static")
-        tokenizer.consume("def")
-        tokenizer.consume(TokenType.IDENTIFIER)
-        val type = TypeParser.parseFunctionType(tokenizer, ParsingContext(parentScope, 0), kind == Definition.Kind.METHOD)
-        for (parameter in type.parameters) {
-            declareLocalVariable(parameter.name, parameter.type, false)
-        }
-        if (parentScope is TraitDefinition) {
-            if (tokenizer.tryConsume(":")) {
-                docString = Parser.readDocString(tokenizer)
+    private fun resolve(typeOnly: Boolean = false) {
+        when (resolutionState) {
+            ResolutionState.RESOLVED -> return
+            ResolutionState.TYPE_RESOLVED -> if (typeOnly) return
+            ResolutionState.ERROR -> {
+                throw error!!
             }
-            tokenizer.consume(TokenType.EOF, "Trait methods must not have function bodies.")
-            resolvedBody = TraitMethodBody(parentScope.traitIndex++)
-        } else {
-            tokenizer.consume(":")
-            docString = Parser.readDocString(tokenizer)
-            resolvedBody = Parser.parse(tokenizer, ParsingContext(this, 1))
         }
+
+        val tokenizer = TantillaTokenizer(definitionText)
+        tokenizer.consume(TokenType.BOF)
+        error = null
+
+        try {
+           tokenizer.tryConsume("static")
+           tokenizer.consume("def")
+           tokenizer.consume(TokenType.IDENTIFIER)
+           resolvedType = TypeParser.parseFunctionType(
+               tokenizer,
+               ParsingContext(parentScope, 0),
+               kind == Definition.Kind.METHOD
+           )
+
+           if (typeOnly) {
+               resolutionState = ResolutionState.TYPE_RESOLVED
+               return
+           }
+
+           for (parameter in type.parameters) {
+               declareLocalVariable(parameter.name, parameter.type, false)
+           }
+           if (parentScope is TraitDefinition) {
+               if (tokenizer.tryConsume(":")) {
+                   docString = Parser.readDocString(tokenizer)
+               }
+               tokenizer.consume(TokenType.EOF, "Trait methods must not have function bodies.")
+               resolvedBody = TraitMethodBody(parentScope.traitIndex++)
+           } else {
+               tokenizer.consume(":")
+               docString = Parser.readDocString(tokenizer)
+               resolvedBody = Parser.parse(tokenizer, ParsingContext(this, 1))
+           }
+
+           resolutionState = ResolutionState.RESOLVED
+       } catch (e: Exception) {
+           if (e is ParsingException) {
+               error = e
+           } else {
+               error = ParsingException(tokenizer.current, "Error in ${parentScope.name}.$name: " +  (e.message ?: "Parsing Error"), e)
+           }
+           error!!.printStackTrace()
+           resolutionState = ResolutionState.ERROR
+           throw error!!
+       }
     }
 
     override fun eval(context: RuntimeContext): Any? {
-        val result = (getValue(null) as FunctionDefinition).resolvedBody!!.eval(context)
+        resolve()
+        val result = resolvedBody!!.eval(context)
         if (result is Control.FlowSignal) {
             if (result.kind == Control.FlowSignal.Kind.RETURN) {
                 return result.value
@@ -133,8 +122,6 @@ class FunctionDefinition (
         }
         return result
     }
-
-
 
     override fun toString() = serializeCode()
 
@@ -177,4 +164,7 @@ class FunctionDefinition (
         if (resolvedBody?.containsNode(node) ?: false) this else null
 
 
+    enum class ResolutionState {
+        UNRESOLVED, TYPE_RESOLVED, RESOLVED, ERROR
+    }
 }

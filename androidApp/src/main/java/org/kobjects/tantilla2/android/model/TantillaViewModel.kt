@@ -22,6 +22,7 @@ import org.kobjects.tantilla2.core.runtime.Void
 import org.kobjects.tantilla2.stdlib.PenDefinition
 import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.android.PenImpl
+import org.kobjects.tantilla2.core.classifier.NativePropertyDefinition
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Callable
 import java.io.File
@@ -77,13 +78,15 @@ class TantillaViewModel(
         canvas.translate(bitmap.width / 2f, bitmap.height / 2f)
         canvas.scale(1f, -1f)
         val penImpl = PenImpl(PenDefinition, canvas)
-        RootScope.definitions.add(NativePropertyDefinition(
+        RootScope.definitions.add(
+            NativePropertyDefinition(
             RootScope,
             Definition.Kind.STATIC,
             "pen",
             resolvedType = PenDefinition,
             resolvedValue = penImpl
-        ))
+        )
+        )
 
         RootScope.defineNativeFunction(
             "requestAnimationFrame",

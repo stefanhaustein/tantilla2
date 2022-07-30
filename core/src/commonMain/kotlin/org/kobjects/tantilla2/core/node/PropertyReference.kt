@@ -8,7 +8,6 @@ import org.kobjects.tantilla2.core.Type
 
 class PropertyReference(
     val base: Evaluable<RuntimeContext>,
-    val name: String,
     val definition: Definition
 ) : Assignable {
     override val returnType: Type
@@ -22,7 +21,7 @@ class PropertyReference(
     }
 
     override fun reconstruct(newChildren: List<Evaluable<RuntimeContext>>): Evaluable<RuntimeContext> =
-        PropertyReference(newChildren[0], name, definition)
+        PropertyReference(newChildren[0], definition)
 
     override fun assign(context: RuntimeContext, value: Any?) {
         val self = base.eval(context)
@@ -31,7 +30,7 @@ class PropertyReference(
 
     override fun serializeCode(writer: CodeWriter, precedence: Int) {
         writer.appendCode(base)
-        writer.append('.').append(name)
+        writer.append('.').append(definition.name)
     }
 
     override fun toString() = CodeWriter().appendCode(this).toString()
