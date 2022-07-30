@@ -9,9 +9,8 @@ interface Definition : SerializableCode {
     val mutable: Boolean
         get() = false
 
-    var value: Any?
     val type: Type
-        get() = value.dynamicType
+        get() = getValue(null).dynamicType
 
     var docString: String
         get() = ""
@@ -24,11 +23,9 @@ interface Definition : SerializableCode {
     val errors: List<Exception>
         get() = emptyList()
 
-    fun getValue(self: Any?) = value
+    fun getValue(self: Any?): Any?
 
-    fun setValue(self: Any?, newValue: Any?) {
-        value = newValue
-    }
+    fun setValue(self: Any?, newValue: Any?): Unit = throw UnsupportedOperationException()
 
 
     fun depth(scope: Scope): Int {

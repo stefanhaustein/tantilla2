@@ -26,14 +26,6 @@ class LocalVariableDefinition (
 
     }
 
-
-
-    override var value: Any?
-        get() = throw UnsupportedOperationException()
-        set(value) = throw UnsupportedOperationException()
-
-
-
     override fun getValue(self: Any?) = (self as RuntimeContext)[index]
 
     override fun setValue(self: Any?, newValue: Any?) {

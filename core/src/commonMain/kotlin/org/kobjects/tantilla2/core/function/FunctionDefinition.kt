@@ -35,7 +35,7 @@ class FunctionDefinition (
     override val scopeSize: Int
         get() = if (definitionText.isEmpty()
             || parentScope is TraitDefinition) super.scopeSize
-            else (value as FunctionDefinition).definitions.locals.size
+            else (getValue(null) as FunctionDefinition).definitions.locals.size
 
     private fun tokenizer(): TantillaTokenizer {
         val tokenizer = TantillaTokenizer(definitionText)
@@ -58,7 +58,7 @@ class FunctionDefinition (
         get() {
             if (error == null) {
                 try {
-                   value
+                   getValue(null)
                 } catch (e: Exception) {
                     println("Error in $parentScope.$name")
                     e.printStackTrace()
@@ -88,21 +88,18 @@ class FunctionDefinition (
         return TypeParser.parseFunctionType(tokenizer, ParsingContext(parentScope, 0), isMethod)
     }
 
-    override var value: Any?
-        get() {
-            if (resolvedBody == null) {
-                val tokenizer = tokenizer()
-                println("Resolving: $definitionText")
-                try {
-                    resolve()
-                } catch (e: Exception) {
-                    throw exceptionInResolve(e, tokenizer)
-                }
+    override fun getValue(self: Any?): FunctionDefinition {
+        if (resolvedBody == null) {
+            val tokenizer = tokenizer()
+            println("Resolving: $definitionText")
+            try {
+                resolve()
+            } catch (e: Exception) {
+                throw exceptionInResolve(e, tokenizer)
             }
-            return this
         }
-        set(value) = throw UnsupportedOperationException()
-
+        return this
+    }
 
     private fun resolve() {
         val tokenizer = tokenizer()
@@ -127,7 +124,7 @@ class FunctionDefinition (
     }
 
     override fun eval(context: RuntimeContext): Any? {
-        val result = (value as FunctionDefinition).resolvedBody!!.eval(context)
+        val result = (getValue(null) as FunctionDefinition).resolvedBody!!.eval(context)
         if (result is Control.FlowSignal) {
             if (result.kind == Control.FlowSignal.Kind.RETURN) {
                 return result.value

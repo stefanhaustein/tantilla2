@@ -21,13 +21,13 @@ class ImplDefinition(
 
     val trait: TraitDefinition
         get() {
-            value
+            getValue(null)
             return resolvedTrait!!
         }
 
     val struct: StructDefinition
         get() {
-            value
+            getValue(null)
             return resolvedStruct!!
         }
 
@@ -41,12 +41,12 @@ class ImplDefinition(
 
             val vmt = MutableList<Callable?>(trait.traitIndex) { null }
             for (definition in trait.definitions) {
-                val index = ((definition.value as FunctionDefinition).resolvedBody as TraitMethodBody).index
+                val index = ((definition.getValue(null) as FunctionDefinition).resolvedBody as TraitMethodBody).index
                 val resolved = resolve(definition.name)
                 if (resolved == null) {
                     throw RuntimeException("Can't resolve '${definition.name}' for '${this.name}'")
                 }
-                vmt[index] = resolved.value as Callable
+                vmt[index] = resolved.getValue(null) as Callable
             }
             this.vmt = vmt.toList() as List<Callable>
 
@@ -60,15 +60,14 @@ class ImplDefinition(
     }
 
 
-    override var value: Any?
-        get() {
+    override fun getValue(scope: Any?): ImplDefinition {
             if (resolvedTrait == null) {
                 val traitName = name.substring(0, name.indexOf(' '))
                 resolvedTrait =
-                    parentScope.resolveStatic(traitName, true)!!.value as TraitDefinition
+                    parentScope.resolveStatic(traitName, true)!!.getValue(null) as TraitDefinition
                 val className = name.substring(name.lastIndexOf(' ') + 1)
                 resolvedStruct =
-                    parentScope.resolveStatic(className, true)!!.value as StructDefinition
+                    parentScope.resolveStatic(className, true)!!.getValue(null) as StructDefinition
 
                 val tokenizer = TantillaTokenizer(definitionText)
                 tokenizer.consume(TokenType.BOF)
@@ -82,8 +81,6 @@ class ImplDefinition(
             }
             return this
         }
-        set(value) = throw UnsupportedOperationException()
-
 
     override val kind: Definition.Kind
         get() = Definition.Kind.IMPL

@@ -92,7 +92,7 @@ fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
                 detectTapGestures(
                     onLongPress = {
                         if (definition.isScope()) {
-                            viewModel.scope().value = definition.value as Scope
+                            viewModel.scope().value = definition.getValue(null) as Scope
                         } else if (editable) {
                             viewModel.edit(definition.parentScope!!, definition)
                         }

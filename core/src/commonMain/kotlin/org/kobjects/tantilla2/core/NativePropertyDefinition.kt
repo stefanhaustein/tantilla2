@@ -17,10 +17,7 @@ class NativePropertyDefinition (
     override val type: Type
         get() = resolvedType
 
-    override var value: Any?
-        get() = resolvedValue
-        set(value) = throw UnsupportedOperationException()
-
+    override fun getValue(self: Any?) = resolvedValue
 
     override fun toString() = serializeCode()
 

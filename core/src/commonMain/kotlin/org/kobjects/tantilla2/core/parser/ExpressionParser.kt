@@ -28,7 +28,7 @@ object ExpressionParser {
         }
         val implName = expectedType.typeName + " for " + expr.returnType.typeName
         try {
-            val impl = context.resolveStatic(implName, true)!!.value as ImplDefinition
+            val impl = context.resolveStatic(implName, true)!!.getValue(null) as ImplDefinition
             return As(expr, impl, implicit = true)
         } catch (e: Exception) {
             throw IllegalArgumentException("Can't convert $expr with type '${expr.returnType}' to '$expectedType' -- '$implName' not available.", e)
@@ -208,7 +208,7 @@ object ExpressionParser {
     ): Evaluable<RuntimeContext> {
         val traitName = tokenizer.consume(TokenType.IDENTIFIER)
         val className = base.returnType.typeName
-        val impl = context.scope.resolveStatic("$traitName for $className")!!.value as ImplDefinition
+        val impl = context.scope.resolveStatic("$traitName for $className")!!.getValue(null) as ImplDefinition
         impl.rebuild(CompilationResults())
         return As(base, impl, implicit = false)
     }
@@ -238,9 +238,7 @@ object ExpressionParser {
                 PropertyReference(
                     base,
                     name,
-                    definition.type,
-                    definition.index,
-                    definition.mutable
+                    definition
                 )
             Definition.Kind.METHOD -> {
                 self = base

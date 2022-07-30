@@ -57,15 +57,6 @@ class FieldDefinition(
             return resolvedType!!
         }
 
-
-    override var value: Any?
-        get() {
-            resolve()
-            return resolvedValue
-        }
-        set(value) = throw UnsupportedOperationException()
-
-
     override fun getValue(self: Any?): Any? {
         resolve()
         return if (index == -1) resolvedValue else (self as RuntimeContext)[index]

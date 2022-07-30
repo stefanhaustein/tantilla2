@@ -15,9 +15,8 @@ class NativeFunctionDefinition(
         get() = "(${type.parameters}) -> ${type.returnType}"
 */
     override fun eval(context: RuntimeContext) = body(context)
-    override var value: Any?
-        get() = this
-        set(value) = throw UnsupportedOperationException()
+
+    override fun getValue(self: Any?): NativeFunctionDefinition = this
 
 
     override fun serializeSummary(writer: CodeWriter) {

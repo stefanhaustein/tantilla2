@@ -12,9 +12,7 @@ class Unparseable(
     override val kind: Definition.Kind
         get() = Definition.Kind.UNPARSEABLE
 
-    override var value: Any?
-        get() = null
-        set(value) = throw UnsupportedOperationException()
+    override fun getValue(self: Any?) = throw UnsupportedOperationException()
 
     override val type: Type
         get() = throw UnsupportedOperationException()

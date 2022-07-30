@@ -29,7 +29,7 @@ object TypeParser {
             tokenizer.consume("]")
             return ListType(elementType)
         }
-        return context.scope.resolveStatic(name, true)!!.value as Type
+        return context.scope.resolveStatic(name, true)!!.getValue(null) as Type
     }
 
 

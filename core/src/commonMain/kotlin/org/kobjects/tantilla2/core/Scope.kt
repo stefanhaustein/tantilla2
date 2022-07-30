@@ -124,7 +124,7 @@ abstract class Scope(
         get() {
             if (error == null) {
                 try {
-                    value
+                    getValue(null)
                 } catch (e: Exception) {
                     println("Error in $parentScope.$name")
                     e.printStackTrace()
@@ -154,10 +154,7 @@ abstract class Scope(
         return !childError && error == null
     }
 
-    override var value: Any?
-        get() = this
-        set(value) = throw UnsupportedOperationException()
-
+    override fun getValue(self: Any?) = this
 
     override fun toString() = name
 
@@ -185,7 +182,7 @@ abstract class Scope(
         serializeTitle(writer)
         writer.append(":")
         writer.indent()
-        val scope = value as Scope
+        val scope = getValue(null) as Scope
         for (definition in scope.definitions.iterator()) {
             writer.newline()
             definition.serializeTitle(writer)
