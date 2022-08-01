@@ -6,4 +6,5 @@ interface Platform {
     val rootDirectory: File
     var fileName: String
     fun loadExample(name: String): String
+    fun runAsync(runnable: Runnable)
 }

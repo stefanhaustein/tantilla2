@@ -1,7 +1,6 @@
 package org.kobjects.tantilla2.core
 
 import org.kobjects.greenspun.core.Evaluable
-import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.Unparseable
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
 import org.kobjects.tantilla2.core.function.*
@@ -129,24 +128,20 @@ abstract class Scope(
             return if (error == null) emptyList() else listOf(error)
     }
 
-    override fun rebuild(compilationResults: CompilationResults): Boolean {
-        var childError = false
-        val errors = errors
+    override fun resolveAll(compilationResults: CompilationResults): Boolean {
+        var childError = errors.isNotEmpty()
         for (definition in definitions) {
-            if (!definition.rebuild(compilationResults)) {
+            if (!definition.resolveAll(compilationResults)) {
                 childError = true
             } else if (definition is ImplDefinition) {
                 compilationResults.classToTrait.getOrPut(definition.struct) { mutableMapOf() }[definition.trait] = this
                 compilationResults.traitToClass.getOrPut(definition.trait) { mutableMapOf() }[definition.struct] = this
             }
         }
-        val localResult = CompilationResults.DefinitionCompilationResult(
-            this,
-            errors,
-            childError)
-
-        compilationResults.definitionCompilationResults.put(this, localResult)
-        return !childError && error == null
+        if (childError) {
+            compilationResults.definitionsWithErrors.add(this)
+        }
+        return !childError
     }
 
     override fun getValue(self: Any?) = this

@@ -3,6 +3,8 @@ package org.kobjects.tantilla2.android
 import android.graphics.Bitmap
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.Colors
@@ -17,6 +19,7 @@ import org.kobjects.tantilla2.android.model.TantillaViewModel
 import org.kobjects.tantilla2.console.ConsoleLoop
 import java.io.File
 import java.lang.Math.abs
+import java.util.concurrent.LinkedBlockingQueue
 
 
 fun greet(): String {
@@ -90,6 +93,22 @@ class MainActivity : AppCompatActivity() {
 
 
     inner class AndroidPlatform : Platform {
+        val taskQueue = LinkedBlockingQueue<Runnable>()
+
+        init {
+
+            Thread {
+                while (true) {
+                    try {
+                        taskQueue.take().run()
+                    } catch (e: Throwable) {
+                        println("Error in task queue")
+                        e.printStackTrace()
+                    }
+                }
+            }.start()
+        }
+
         override val rootDirectory: File
             get() = filesDir
 
@@ -100,6 +119,11 @@ class MainActivity : AppCompatActivity() {
             get() = getPreferences(0).getString("filename", "Scratch.tt")!!
             set(value) = getPreferences(0).edit().putString("filename", value).apply()
 
+        override fun runAsync(task: Runnable) {
+            Handler(Looper.getMainLooper()).postDelayed(task, 1)
+    //        taskQueue.add(runnable)
+
+        }
 
     }
 

@@ -1,15 +1,18 @@
 package org.kobjects.tantilla2.android
 
+import android.annotation.SuppressLint
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -23,7 +26,7 @@ import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.classifier.StructDefinition
 import org.kobjects.tantilla2.core.runtime.RootScope
 
-@OptIn(ExperimentalMaterialApi::class)
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun RenderScope(viewModel: TantillaViewModel) {
     val scope = viewModel.scope().value
@@ -77,18 +80,18 @@ fun RenderScope(viewModel: TantillaViewModel) {
 }
 
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
     Card(
-        backgroundColor = if (viewModel.compilationResults.value.definitionCompilationResults[definition]?.errorOrChildError ?: false
+        backgroundColor = if (viewModel.compilationResults.value.definitionsWithErrors.contains(definition)
             || viewModel.withRuntimeException.containsKey(definition)) Color(0xffff8888L) else Color(0xffeeeeee),
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(4.dp))
             .padding(4.dp)
             .pointerInput(Unit) {
-                val editable = !definition.isScope() && viewModel.mode.value == TantillaViewModel.Mode.HIERARCHY
+                val editable =
+                    !definition.isScope() && viewModel.mode.value == TantillaViewModel.Mode.HIERARCHY
                 detectTapGestures(
                     onLongPress = {
                         if (definition.isScope()) {
@@ -96,32 +99,44 @@ fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
                         } else if (editable) {
                             viewModel.edit(definition.parentScope!!, definition)
                         }
-                                  },
+                    },
                     onTap = {
-                            if (viewModel.expanded.value.contains(definition)) {
-                                viewModel.expanded.value -= definition
-                            } else {
-                                viewModel.expanded.value += definition
-                            }
+                        if (viewModel.expanded.value.contains(definition)) {
+                            viewModel.expanded.value -= definition
+                        } else {
+                            viewModel.expanded.value += definition
                         }
+                    }
                 )
             }
     ) {
-
-        Column(Modifier.padding(8.dp)) {
+        Box(Modifier.padding(8.dp)) {
             val expanded = viewModel.expanded.value.contains(definition)
             val help = viewModel.mode.value == TantillaViewModel.Mode.HELP
-            val writer = CodeWriter(highlighting = CodeWriter.defaultHighlighting)
-            if (help || !expanded) {
-                definition.serializeTitle(writer)
-            } else {
-                definition.serializeSummary(writer)
+            Column() {
+                val writer = CodeWriter(highlighting = CodeWriter.defaultHighlighting)
+                if (!expanded) {
+                    definition.serializeTitle(writer)
+                } else {
+                    definition.serializeSummary(writer)
+                }
+                Text(AnsiConverter.ansiToAnnotatedString(writer.toString()))
             }
-            Text(AnsiConverter.ansiToAnnotatedString(writer.toString()))
-
-            if (help && expanded && !definition.isScope()) {
-                Divider(Modifier.padding(0.dp, 6.dp), color = Color.Transparent)
-                Text(AnsiConverter.ansiToAnnotatedString(definition.docString))
+            Row(modifier = Modifier
+                .align(Alignment.TopEnd)
+                .alpha(0.2f)) {
+                if (definition.isScope() || !help) {
+                    Icon(
+                        Icons.Default.Fullscreen,
+                        contentDescription = "Open",
+                        modifier = Modifier.clickable {
+                            if (definition.isScope()) {
+                                viewModel.scope().value = definition.getValue(null) as Scope
+                            } else {
+                                viewModel.edit(definition.parentScope!!, definition)
+                            }
+                        })
+                }
             }
         }
     }

@@ -36,8 +36,8 @@ class ImplDefinition(
 
     override fun resolve(name: String): Definition? = resolveDynamic(name, false)
 
-    override fun rebuild(compilationResults: CompilationResults): Boolean {
-        if (super.rebuild(compilationResults)) {
+    override fun resolveAll(compilationResults: CompilationResults): Boolean {
+        if (super.resolveAll(compilationResults)) {
 
             val vmt = MutableList<Callable?>(trait.traitIndex) { null }
             for (definition in trait.definitions) {

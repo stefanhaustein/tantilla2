@@ -10,6 +10,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.*
 import org.kobjects.dialog.DialogManager
 import org.kobjects.konsole.compose.AnsiConverter.ansiToAnnotatedString
 import org.kobjects.tantilla2.console.ConsoleLoop
@@ -26,14 +28,16 @@ import org.kobjects.tantilla2.core.classifier.NativePropertyDefinition
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Callable
 import java.io.File
+import java.lang.Runnable
 import java.nio.charset.StandardCharsets
+import java.util.concurrent.LinkedBlockingQueue
 import kotlin.Exception
 
 class TantillaViewModel(
     val console: ConsoleLoop,
     val bitmap: Bitmap,
     val platform: Platform
-) {
+) : ViewModel() {
     var editing = mutableStateOf(false)
     val mode = mutableStateOf(Mode.SHELL)
     var fileName = mutableStateOf(platform.fileName)
@@ -46,6 +50,7 @@ class TantillaViewModel(
     var withRuntimeException = mutableStateMapOf<Definition, TantillaRuntimeException>()
     var compilationResults = mutableStateOf(CompilationResults())
     val dialogManager = DialogManager()
+    val taskQueue = LinkedBlockingQueue<Runnable>()
 
     init {
         defineNatives()
@@ -55,6 +60,7 @@ class TantillaViewModel(
         if (file.exists()) {
             load(file)
         }
+
 
     }
 
@@ -165,54 +171,54 @@ class TantillaViewModel(
 
     fun runMain() {
         mode.value = Mode.SHELL
-        try {
-            val definition = userScope.value.definitions["main"]
-            if (definition == null) {
-                console.konsole.write("main() undefined.")
-                return
+            try {
+                val definition = userScope.value.definitions["main"]
+                    ?: throw RuntimeException("main() undefined.")
+                if (definition.type !is FunctionType) {
+                    throw RuntimeException("main is not a function.")
+                }
+                val function = definition.getValue(null) as Callable
+                userScope.value.initialize()
+                function.eval(RuntimeContext(MutableList(function.scopeSize) { null }))
+            } catch (e: Exception) {
+                e.printStackTrace()
+                console.konsole.write(e.message ?: e.toString())
             }
-            if (definition.type !is FunctionType) {
-                console.konsole.write("main is not a function.")
-                return
-            }
-            val function = definition.getValue(null) as Callable
-            function.eval(RuntimeContext(MutableList(function.scopeSize) { null }))
-        } catch (e: Exception) {
-            e.printStackTrace()
-            console.konsole.write(e.message ?: e.toString())
-        }
     }
 
-    fun rebuild() {
-        val result = CompilationResults()
-        userScope.value.rebuild(result)
+    private fun rebuild() {
+        val result = userScope.value.rebuild()
         compilationResults.value = result
     }
 
     fun load(file: File) {
-        reset()
-        this.fileName.value = file.name
-        loadCode(file.readText())
+        platform.runAsync {
+            reset()
+            this.fileName.value = file.name
+            loadCode(file.readText())
+        }
     }
 
     fun loadExample(name: String) {
-        reset()
-        this.fileName.value = name
-        loadCode(platform.loadExample(name))
+        platform.runAsync {
+            reset()
+            this.fileName.value = name
+            loadCode(platform.loadExample(name))
+        }
     }
 
-    fun loadCode(code: String) {
-        try {
-            Parser.parse(code, console.scope)
-        } catch (e: Exception) {
-            dialogManager.showError(e.toString())
-        }
-        rebuild()
+    private fun loadCode(code: String) {
+            try {
+                Parser.parse(code, console.scope)
+            } catch (e: Exception) {
+                dialogManager.showError(e.toString())
+            }
+            rebuild()
 
-        println("Rebuilt and re-serialized code:")
-        println(CodeWriter().appendCode(userScope.value).toString())
+            println("Rebuilt and re-serialized code:")
+            println(CodeWriter().appendCode(userScope.value).toString())
 
-        mode.value = Mode.HIERARCHY
+            mode.value = Mode.HIERARCHY
     }
 
 

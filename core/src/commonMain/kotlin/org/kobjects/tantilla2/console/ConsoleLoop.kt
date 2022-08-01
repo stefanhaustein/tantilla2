@@ -42,7 +42,7 @@ class ConsoleLoop(
             try {
                 var parsed = Parser.parse(line, scope)
                 konsole.write("parsed: $parsed")
-                scope.rebuild(CompilationResults())
+                scope.resolveAll(CompilationResults())
                 konsole.write("resolved: $parsed")
 
                 try {

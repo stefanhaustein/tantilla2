@@ -7,7 +7,6 @@ import org.kobjects.tantilla2.core.*
 import org.kobjects.parserlib.expressionparser.ExpressionParser as GreenspunExpressionParser
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
 import org.kobjects.tantilla2.core.classifier.StructMetaType
-import org.kobjects.tantilla2.core.function.FunctionDefinition
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.LambdaScope
 import org.kobjects.tantilla2.core.node.*
@@ -210,7 +209,7 @@ object ExpressionParser {
         val traitName = tokenizer.consume(TokenType.IDENTIFIER)
         val className = base.returnType.typeName
         val impl = context.scope.resolveStatic("$traitName for $className")!!.getValue(null) as ImplDefinition
-        impl.rebuild(CompilationResults())
+        impl.resolveAll(CompilationResults())
         return As(base, impl, implicit = false)
     }
 

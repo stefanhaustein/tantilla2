@@ -88,7 +88,8 @@ fun RenderAppBar(
             ) {
                 Icon(Icons.Default.MoreVert, contentDescription = "More")
                 var menuItems = arrayOf(
-                    "Run main()" to { viewModel.runMain() },
+                    "Run main()" to {
+                        viewModel.runMain() },
                     "Clear ▶" to { showClearMenu.value = true },
                     "File \u25B6" to { showFileMenu.value = true },
                 )

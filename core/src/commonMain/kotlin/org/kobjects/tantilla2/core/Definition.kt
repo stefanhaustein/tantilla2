@@ -40,14 +40,21 @@ interface Definition : SerializableCode {
     fun findNode(node: Evaluable<RuntimeContext>): Definition? = null
     fun isDynamic() = kind == Kind.METHOD || kind == Kind.PROPERTY
     fun isScope(): Boolean = false
-    fun rebuild(compilationResults: CompilationResults): Boolean {
-        val localResult = CompilationResults.DefinitionCompilationResult(
-            this,
-            errors,
-            false)
 
-        compilationResults.definitionCompilationResults.put(this, localResult)
-        return errors.isEmpty()
+
+    fun rebuild(): CompilationResults {
+        reset()
+        val results = CompilationResults()
+        resolveAll(results)
+        return results
+    }
+
+    fun resolveAll(compilationResults: CompilationResults): Boolean {
+        val ok = errors.isEmpty()
+        if (!ok) {
+            compilationResults.definitionsWithErrors.add(this)
+        }
+        return ok
     }
 
     /**

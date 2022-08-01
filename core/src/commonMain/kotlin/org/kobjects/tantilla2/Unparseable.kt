@@ -17,7 +17,7 @@ class Unparseable(
     override val type: Type
         get() = throw UnsupportedOperationException()
 
-    override fun rebuild(compilationResults: CompilationResults) = false
+    override fun resolveAll(compilationResults: CompilationResults) = false
 
     override fun serializeSummary(writer: CodeWriter) {
         serializeCode(writer)

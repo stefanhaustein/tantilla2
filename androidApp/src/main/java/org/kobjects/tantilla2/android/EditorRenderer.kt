@@ -61,7 +61,7 @@ fun RenderEditor(viewModel: TantillaViewModel) {
         }
     ) {
         Column() {
-            val errors = viewModel.definition.value!!.errors
+            val errors = viewModel.definition.value?.errors ?: emptyList()
             if (!errors.isEmpty()) {
                 Text(errors[0].message ?: errors[0].toString())
             }

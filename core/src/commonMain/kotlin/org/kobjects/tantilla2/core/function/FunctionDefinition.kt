@@ -59,9 +59,9 @@ class FunctionDefinition (
         when (resolutionState) {
             ResolutionState.RESOLVED -> return
             ResolutionState.TYPE_RESOLVED -> if (typeOnly) return
-            ResolutionState.ERROR -> {
+          /*  ResolutionState.ERROR -> {
                 throw error!!
-            }
+            } */
         }
 
         val tokenizer = TantillaTokenizer(definitionText)
