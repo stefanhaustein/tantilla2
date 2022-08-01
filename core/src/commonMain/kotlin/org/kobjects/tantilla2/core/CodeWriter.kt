@@ -111,7 +111,7 @@ class CodeWriter(
         } else {
             appendCode(code.children()[0], precedence)
             append(" $name ")
-            appendCode(code.children()[1], precedence)
+            appendCode(code.children()[1], precedence + 1)
         }
     }
 

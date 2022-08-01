@@ -32,7 +32,6 @@ fun RenderScope(viewModel: TantillaViewModel) {
     val scope = viewModel.scope().value
 
     val definitions = scope.definitions.iterator().asSequence().toList().sortedBy { it.name }
-    val expandedDefinitions = viewModel.expanded.value
 
     Scaffold(
         backgroundColor = Color.Transparent,
