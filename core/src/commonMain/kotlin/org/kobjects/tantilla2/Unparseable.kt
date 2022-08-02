@@ -1,5 +1,6 @@
 package org.kobjects.tantilla2
 
+import org.kobjects.greenspun.core.Bool
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.tantilla2.core.*
 
@@ -23,7 +24,7 @@ class Unparseable(
         serializeCode(writer)
     }
 
-    override fun serializeTitle(writer: CodeWriter) {
+    override fun serializeTitle(writer: CodeWriter, abbreviated: Boolean) {
         writer.append("(error: $name)")
     }
 

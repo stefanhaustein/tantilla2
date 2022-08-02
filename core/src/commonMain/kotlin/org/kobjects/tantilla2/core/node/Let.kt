@@ -23,8 +23,8 @@ class Let(val definition: LocalVariableDefinition, val type: Type, val typeIsExp
 
 
     override fun serializeCode(writer: CodeWriter, precedence: Int) {
-        writer.keyword("let ")
-        writer.declaration(definition.name)
+        writer.appendKeyword("let ")
+        writer.appendDeclaration(definition.name)
         if (typeIsExplicit) {
             writer.append(": ")
             writer.appendType(type)

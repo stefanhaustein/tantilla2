@@ -38,7 +38,7 @@ class CodeWriter(
         return this
     }
 
-    fun start(kind: Kind): CodeWriter {
+    fun appendStart(kind: Kind): CodeWriter {
         val s = highlighting[kind]
         if (s != null) {
             sb.append(s.first)
@@ -46,9 +46,9 @@ class CodeWriter(
         return this
     }
 
-    fun wrapped(kind: Kind, s: String) = start(kind).append(s).end(kind)
+    fun appendWrapped(kind: Kind, s: String) = appendStart(kind).append(s).appendEnd(kind)
 
-    fun end(kind: Kind): CodeWriter {
+    fun appendEnd(kind: Kind): CodeWriter {
         val s = highlighting[kind]
         if (s != null) {
             sb.append(s.second)
@@ -56,11 +56,11 @@ class CodeWriter(
         return this
     }
 
-    fun keyword(name: String) = wrapped(Kind.KEYWORD, name)
+    fun appendKeyword(name: String) = appendWrapped(Kind.KEYWORD, name)
 
-    fun declaration(name: String) = wrapped(Kind.DECLARATION, name)
+    fun appendDeclaration(name: String) = appendWrapped(Kind.DECLARATION, name)
 
-    fun stringLiteral(text: String) = wrapped(Kind.STRING, text)
+    fun stringLiteral(text: String) = appendWrapped(Kind.STRING, text)
 
     fun newline(): CodeWriter {
         sb.append('\n').append(indent)
@@ -75,7 +75,7 @@ class CodeWriter(
     fun appendCode(code: Any?, parentPrecedence: Int = 0): CodeWriter {
         val error = code is Evaluable<*> && errorMap.containsKey(code)
         if (error) {
-            start(Kind.ERROR)
+            appendStart(Kind.ERROR)
         }
         when (code) {
             is SerializableCode -> code.serializeCode(this, parentPrecedence)
@@ -94,14 +94,19 @@ class CodeWriter(
             is Control.If<*> -> appendIf(code as Control.If<RuntimeContext>)
             is Control.Block<*> -> appendBlock(code as Control.Block<RuntimeContext>)
             is Control.While<*> -> appendWhile(code as Control.While<RuntimeContext>)
-            is Str.Const<*> -> wrapped(Kind.STRING, code.toString())
+            is Str.Const<*> -> appendWrapped(Kind.STRING, code.toString())
             else -> append(code.toString())
         }
         if (error) {
-            end(Kind.ERROR)
+            appendEnd(Kind.ERROR)
         }
         return this
     }
+
+    fun appendTripleQuoted(s: String) {
+        appendWrapped(Kind.STRING, tripleQuote(s))
+    }
+
 
     fun appendInfix(code: Evaluable<*>, parentPrecedence: Int, name: String, precedence: Int) {
         if (parentPrecedence > precedence) {
@@ -162,6 +167,9 @@ class CodeWriter(
     }
 
     companion object {
+        fun tripleQuote(s: String) = "\"\"\"$s\"\"\""
+
+
         val defaultHighlighting = mapOf(
             Kind.KEYWORD to Pair(Ansi.rgbForeground(0xdc7900), Ansi.FOREGROUND_DEFAULT),
             Kind.DECLARATION to Pair(Ansi.rgbForeground(0x3889c4), Ansi.FOREGROUND_DEFAULT),

@@ -27,6 +27,24 @@ interface FunctionType :Type {
         }
     }
 
+    fun serializeAbbreviatedType(writer: CodeWriter) {
+        val startIndex = if (isMethod()) 1 else 0
+        writer.append("(")
+        if (parameters.size > startIndex) {
+            writer.append(parameters[startIndex].name)
+            for (i in startIndex + 1 until parameters.size) {
+                writer.append(", ")
+                writer.append(parameters[i].name)
+            }
+        }
+        writer.append(")")
+        if (returnType != Void) {
+            writer.append(" -> ")
+            writer.appendType(returnType)
+        }
+    }
+
+
     open class Impl(override val returnType: Type, override val parameters: List<Parameter>) : FunctionType {
 
         override fun toString() = CodeWriter().appendType(this).toString()

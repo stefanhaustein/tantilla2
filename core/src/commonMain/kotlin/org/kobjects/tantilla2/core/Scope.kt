@@ -148,8 +148,8 @@ abstract class Scope(
 
     override fun toString() = name
 
-    override fun serializeTitle(writer: CodeWriter) {
-        writer.keyword(kind.name.lowercase()).append(' ').declaration(name)
+    override fun serializeTitle(writer: CodeWriter, abbreviated: Boolean) {
+        writer.appendKeyword(kind.name.lowercase()).append(' ').appendDeclaration(name)
     }
 
     fun serializeBody(writer: CodeWriter) {
@@ -161,9 +161,13 @@ abstract class Scope(
     }
 
     override fun serializeCode(writer: CodeWriter, precedence: Int) {
-        writer.keyword(kind.name.lowercase()).append(' ').declaration(name).append(":")
+        writer.appendKeyword(kind.name.lowercase()).append(' ').appendDeclaration(name).append(":")
         writer.indent()
         writer.newline()
+        if (docString.isNotEmpty()) {
+            writer.appendTripleQuoted(docString)
+            writer.newline()
+        }
         serializeBody(writer)
         writer.outdent()
     }
@@ -171,11 +175,15 @@ abstract class Scope(
     override fun serializeSummary(writer: CodeWriter) {
         serializeTitle(writer)
         writer.append(":")
+        if(docString.isNotEmpty()) {
+            writer.newline()
+            writer.appendWrapped(CodeWriter.Kind.STRING, docString)
+        }
         writer.indent()
         val scope = getValue(null) as Scope
         for (definition in scope.definitions.iterator()) {
             writer.newline()
-            definition.serializeTitle(writer)
+            definition.serializeTitle(writer, abbreviated = true)
         }
         writer.outdent()
     }

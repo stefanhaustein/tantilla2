@@ -32,14 +32,14 @@ class LocalVariableDefinition (
     override fun toString() = serializeCode()
 
 
-    override fun serializeTitle(writer: CodeWriter) {
+    override fun serializeTitle(writer: CodeWriter, abbreviated: Boolean) {
         if (kind == Definition.Kind.STATIC && parentScope.supportsLocalVariables) {
-            writer.keyword("static ")
+            writer.appendKeyword("static ")
         }
         if (mutable) {
-            writer.keyword("mut ")
+            writer.appendKeyword("mut ")
         }
-        writer.declaration(name)
+        writer.appendDeclaration(name)
         writer.append(": ")
         writer.appendType(type)
     }

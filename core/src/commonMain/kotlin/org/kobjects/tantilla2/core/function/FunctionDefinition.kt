@@ -4,7 +4,6 @@ import org.kobjects.greenspun.core.Control
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.core.*
-import org.kobjects.tantilla2.core.classifier.FieldDefinition
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.node.containsNode
 import org.kobjects.tantilla2.core.parser.*
@@ -125,11 +124,16 @@ class FunctionDefinition (
 
     override fun toString() = serializeCode()
 
-    override fun serializeTitle(writer: CodeWriter) {
+    override fun serializeTitle(writer: CodeWriter, abbreviated: Boolean) {
                 if (parentScope.supportsMethods && kind == Definition.Kind.FUNCTION) {
-                    writer.keyword("static ")
+                    writer.appendKeyword("static ")
                 }
-                writer.keyword("def ").declaration(name).appendType(type)
+                writer.appendKeyword("def ").appendDeclaration(name)
+        if (abbreviated) {
+            type.serializeAbbreviatedType(writer)
+        } else {
+            type.serializeType(writer)
+        }
     }
 
 
@@ -138,13 +142,18 @@ class FunctionDefinition (
             writer.append(definitionText)
         } else {
             if (parentScope.supportsMethods && !isDynamic()) {
-                writer.keyword("static ")
+                writer.appendKeyword("static ")
             }
-            writer.keyword("def ").declaration(name).appendType(type)
+            writer.appendKeyword("def ").appendDeclaration(name).appendType(type)
             if (resolvedBody !is TraitMethodBody) {
                 writer.append(":")
                 writer.indent()
                 writer.newline()
+                if (docString.isNotEmpty()) {
+                    writer.appendTripleQuoted(docString)
+                    writer.newline()
+                }
+
                 writer.appendCode(resolvedBody)
                 writer.outdent()
             }

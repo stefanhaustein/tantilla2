@@ -21,14 +21,22 @@ class NativeFunctionDefinition(
 
     override fun serializeSummary(writer: CodeWriter) {
         serializeTitle(writer)
-        writer.append('\n')
-        writer.append(docString)
+        writer.newline()
+        if (docString.isEmpty()) {
+            writer.newline()
+        } else {
+            writer.appendWrapped(CodeWriter.Kind.STRING, docString)
+        }
     }
 
-    override fun serializeTitle(writer: CodeWriter) {
-        writer.keyword("def ")
-        writer.declaration(name)
-        type.serializeType(writer)
+    override fun serializeTitle(writer: CodeWriter, abbreviated: Boolean) {
+        writer.appendKeyword("def ")
+        writer.appendDeclaration(name)
+        if (abbreviated) {
+            type.serializeAbbreviatedType(writer)
+        } else {
+            type.serializeType(writer)
+        }
     }
 
     override fun serializeCode(writer: CodeWriter, precedence: Int) = throw UnsupportedOperationException()

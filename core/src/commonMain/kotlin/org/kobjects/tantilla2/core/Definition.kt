@@ -71,7 +71,7 @@ interface Definition : SerializableCode {
 
 
     fun serializeSummary(writer: CodeWriter)
-    fun serializeTitle(writer: CodeWriter)
+    fun serializeTitle(writer: CodeWriter, abbreviated: Boolean = false)
 
     enum class Kind {
         PROPERTY, STATIC, FUNCTION, METHOD, TRAIT, STRUCT, UNIT, IMPL, UNPARSEABLE
