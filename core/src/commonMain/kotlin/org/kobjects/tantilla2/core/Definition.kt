@@ -2,7 +2,7 @@ package org.kobjects.tantilla2.core
 
 import org.kobjects.greenspun.core.Evaluable
 
-interface Definition : SerializableCode {
+interface Definition : SerializableCode, Comparable<Definition> {
     val parentScope: Scope?
     val kind: Kind
     val name: String
@@ -75,5 +75,18 @@ interface Definition : SerializableCode {
 
     enum class Kind {
         PROPERTY, STATIC, FUNCTION, METHOD, TRAIT, STRUCT, UNIT, IMPL, UNPARSEABLE
+    }
+
+
+    override fun compareTo(other: Definition): Int {
+        var d = kind.compareTo(other.kind)
+        if (d != 0) {
+            return d
+        }
+        d = index.compareTo(other.index)
+        if (d != 0) {
+            return d
+        }
+        return name.compareTo(other.name)
     }
 }

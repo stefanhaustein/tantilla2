@@ -31,7 +31,7 @@ import org.kobjects.tantilla2.core.runtime.RootScope
 fun RenderScope(viewModel: TantillaViewModel) {
     val scope = viewModel.scope().value
 
-    val definitions = scope.iterator().asSequence().toList().sortedBy { it.name }
+    val definitions = scope.sorted()
 
     Scaffold(
         backgroundColor = Color.Transparent,

@@ -47,6 +47,7 @@ abstract class Scope(
 
     override fun iterator(): Iterator<Definition> = definitions.values.iterator()
 
+    fun sorted() = definitions.values.toList().sorted()
 
     fun update(newContent: String, oldDefinition: Definition? = null): Definition {
         if (oldDefinition != null) {
@@ -205,7 +206,7 @@ abstract class Scope(
         }
         writer.indent()
         val scope = getValue(null) as Scope
-        for (definition in scope.iterator()) {
+        for (definition in scope.sorted()) {
             writer.newline()
             definition.serializeTitle(writer, abbreviated = true)
         }
