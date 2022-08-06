@@ -17,7 +17,7 @@ class ImplDefinition(
     var vmt = listOf<Callable>()
 
     var resolvedTrait: TraitDefinition? = null
-    var resolvedStruct: StructDefinition? = null
+    var resolvedScope: Scope? = null
 
     val trait: TraitDefinition
         get() {
@@ -25,10 +25,10 @@ class ImplDefinition(
             return resolvedTrait!!
         }
 
-    val struct: StructDefinition
+    val scope: Scope
         get() {
             getValue(null)
-            return resolvedStruct!!
+            return resolvedScope!!
         }
 
     override val supportsMethods: Boolean
@@ -66,8 +66,8 @@ class ImplDefinition(
                 resolvedTrait =
                     parentScope.resolveStatic(traitName, true)!!.getValue(null) as TraitDefinition
                 val className = name.substring(name.lastIndexOf(' ') + 1)
-                resolvedStruct =
-                    parentScope.resolveStatic(className, true)!!.getValue(null) as StructDefinition
+                resolvedScope =
+                    parentScope.resolveStatic(className, true)!!.getValue(null) as Scope
 
                 val tokenizer = TantillaTokenizer(definitionText)
                 tokenizer.consume(TokenType.BOF)

@@ -159,8 +159,8 @@ abstract class Scope(
             if (!definition.resolveAll(compilationResults)) {
                 childError = true
             } else if (definition is ImplDefinition) {
-                compilationResults.classToTrait.getOrPut(definition.struct) { mutableMapOf() }[definition.trait] = this
-                compilationResults.traitToClass.getOrPut(definition.trait) { mutableMapOf() }[definition.struct] = this
+                compilationResults.classToTrait.getOrPut(definition.scope) { mutableMapOf() }[definition.trait] = this
+                compilationResults.traitToClass.getOrPut(definition.trait) { mutableMapOf() }[definition.scope] = this
             }
         }
         if (childError) {

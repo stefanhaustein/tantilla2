@@ -9,7 +9,7 @@ import org.kobjects.tantilla2.core.function.*
 fun String.unquote() = this.substring(1, this.length - 1)
 
 object Parser {
-    val DECLARATION_KEYWORDS = setOf("def", "struct", "trait", "impl", "static", "mut")
+    val DECLARATION_KEYWORDS = setOf("def", "struct", "trait", "unit", "impl", "static", "mut")
 
     val VALID_AFTER_STATEMENT = setOf(")", ",", "]", "}", "<|")
 
@@ -90,6 +90,7 @@ object Parser {
                 val text = consumeBody(tokenizer, startPos, context.depth)
                 FunctionDefinition(context.scope, if (isMethod) Definition.Kind.METHOD else Definition.Kind.FUNCTION, name, definitionText = text)
             }
+            "unit",
             "struct",
             "trait"-> {
                 tokenizer.consume(kind)
@@ -97,6 +98,7 @@ object Parser {
                 tokenizer.consume(":")
                 val docString = readDocString(tokenizer)
                 val definition = if (kind == "struct") StructDefinition(context.scope, name, docString = docString)
+                else if (kind == "unit") UnitScope(context.scope, name, docString = docString)
                 else TraitDefinition(context.scope, name, docString = docString)
                 parseScopeBody(tokenizer, ParsingContext(definition, context.depth + 1))
                 definition
