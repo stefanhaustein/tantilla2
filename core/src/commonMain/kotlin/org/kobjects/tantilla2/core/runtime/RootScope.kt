@@ -23,8 +23,7 @@ object RootScope : Scope() {
             Parameter("end", F64)
         ) { Range(it.f64(0), it.f64(1)) }
 
-
-        definitions.add(MathScope)
+        add(MathScope)
 
     }
 

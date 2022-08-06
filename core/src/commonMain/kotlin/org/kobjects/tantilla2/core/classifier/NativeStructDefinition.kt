@@ -16,7 +16,7 @@ open class NativeStructDefinition(
 
     // TODO: May lead to nondeterminism, remove
     init {
-        parent.definitions.add(this)
+        parent.add(this)
     }
 
 
@@ -33,7 +33,7 @@ open class NativeStructDefinition(
         vararg parameter: Parameter,
         operation: (RuntimeContext) -> Any?) {
         val type = FunctionType.Impl(returnType, listOf(Parameter("self", this)) + parameter.toList())
-        definitions.add(
+        add(
             NativeFunctionDefinition(
             this,
             Definition.Kind.METHOD,
@@ -53,7 +53,7 @@ open class NativeStructDefinition(
         getter: (Any?) -> Any?,
         setter: ((Any?, Any?) -> Unit)? = null
     ) {
-        definitions.add(
+        add(
             NativePropertyDefinition(
                this,
                 Definition.Kind.PROPERTY,

@@ -6,6 +6,7 @@ import org.kobjects.greenspun.core.Str
 import org.kobjects.tantilla2.core.*
 import org.kobjects.parserlib.expressionparser.ExpressionParser as GreenspunExpressionParser
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
+import org.kobjects.tantilla2.core.classifier.PropertyReference
 import org.kobjects.tantilla2.core.classifier.StructMetaType
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.LambdaScope
@@ -89,7 +90,7 @@ object ExpressionParser {
         if (tokenizer.tryConsume("(")) {
             val firstParameter = parseExpression(tokenizer, context)
             val baseType = firstParameter.returnType as Scope
-            val definition = baseType.definitions[name]
+            val definition = baseType[name]
             if (!tokenizer.tryConsume(",") && tokenizer.current.text != ")") {
                 throw tokenizer.exception("Comma or closing paren expected after first parameter.")
             }
@@ -160,7 +161,7 @@ object ExpressionParser {
         } */
         val body = Parser.parse(tokenizer, ParsingContext(functionScope, context.depth + 1))
 
-        return LambdaReference(type, functionScope.definitions.locals.size, body)
+        return LambdaReference(type, functionScope.locals.size, body)
     }
 
 

@@ -31,7 +31,7 @@ import org.kobjects.tantilla2.core.runtime.RootScope
 fun RenderScope(viewModel: TantillaViewModel) {
     val scope = viewModel.scope().value
 
-    val definitions = scope.definitions.iterator().asSequence().toList().sortedBy { it.name }
+    val definitions = scope.iterator().asSequence().toList().sortedBy { it.name }
 
     Scaffold(
         backgroundColor = Color.Transparent,
@@ -58,7 +58,7 @@ fun RenderScope(viewModel: TantillaViewModel) {
                 } else {
                     title = kind.name
                     list = (if (kind == Definition.Kind.PROPERTY)
-                        scope.definitions.locals.map { scope.definitions[it]!! }
+                        scope.locals.map { scope[it]!! }
                     else
                         definitions).filter { it.kind == kind }
                 }

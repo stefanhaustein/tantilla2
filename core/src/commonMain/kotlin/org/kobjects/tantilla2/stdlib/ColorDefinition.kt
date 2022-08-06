@@ -43,10 +43,10 @@ object ColorDefinition : NativeStructDefinition(
             Parameter("a", F64, org.kobjects.greenspun.core.F64.Const(1.0)),
         ) { Color.hsl(it.f64(0), it.f64(1) , it.f64(2) ) }
 
-        definitions.add(NativePropertyDefinition.constant(this,  "BLACK", docString = "Black", value = Color(0.0, 0.0, 0.0, 1.0)))
-        definitions.add(NativePropertyDefinition.constant(this, "TRANSPARENT", docString = "Transparent", value  = Color(0.0, 0.0, 0.0, 0.0)))
-        definitions.add(NativePropertyDefinition.constant(this, "WHITE", docString = "White", value = Color(1.0, 1.0, 1.0, 1.0)))
-        definitions.add(NativePropertyDefinition.constant(this, "GRAY", docString = "50% Gray", value = Color(0.5, 0.5, 0.5, 1.0)))
+        add(NativePropertyDefinition.constant(this,  "BLACK", docString = "Black", value = Color(0.0, 0.0, 0.0, 1.0)))
+        add(NativePropertyDefinition.constant(this, "TRANSPARENT", docString = "Transparent", value  = Color(0.0, 0.0, 0.0, 0.0)))
+        add(NativePropertyDefinition.constant(this, "WHITE", docString = "White", value = Color(1.0, 1.0, 1.0, 1.0)))
+        add(NativePropertyDefinition.constant(this, "GRAY", docString = "50% Gray", value = Color(0.5, 0.5, 0.5, 1.0)))
 
         defineNativeProperty(
             "r",

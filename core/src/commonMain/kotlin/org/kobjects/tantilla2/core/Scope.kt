@@ -3,15 +3,18 @@ package org.kobjects.tantilla2.core
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.tantilla2.Unparseable
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
+import org.kobjects.tantilla2.core.classifier.NativePropertyDefinition
 import org.kobjects.tantilla2.core.function.*
 import org.kobjects.tantilla2.core.parser.Parser
 import org.kobjects.tantilla2.core.parser.ParsingContext
 import org.kobjects.tantilla2.core.parser.TantillaTokenizer
 
 abstract class Scope(
-): Definition {
+): Definition, Iterable<Definition> {
     var error: Exception? = null
-    val definitions: DefinitionMap = DefinitionMap(this)
+
+    private val definitions = mutableMapOf<String, Definition>()
+    val locals = mutableListOf<String>()
 
     open val supportsMethods: Boolean
         get() = false
@@ -19,6 +22,13 @@ abstract class Scope(
     open val supportsLocalVariables: Boolean
         get() = false
 
+    fun add(definition: Definition) {
+        definitions[definition.name] = definition
+        if (definition.kind == Definition.Kind.PROPERTY && definition !is NativePropertyDefinition && definition.index == -1) {
+            definition.index = locals.size
+            locals.add(definition.name)
+        }
+    }
 
     fun declareLocalVariable(name: String, type: Type, mutable: Boolean): Int {
         val definition = LocalVariableDefinition(
@@ -27,14 +37,20 @@ abstract class Scope(
             mutable = mutable,
             type = type
         )
-        definitions.add(definition)
+        add(definition)
         return definition.index
     }
 
 
+    operator fun get(name: String): Definition? = definitions[name]
+
+
+    override fun iterator(): Iterator<Definition> = definitions.values.iterator()
+
+
     fun update(newContent: String, oldDefinition: Definition? = null): Definition {
         if (oldDefinition != null) {
-            definitions.definitions.remove(oldDefinition.name)
+            definitions.remove(oldDefinition.name)
         }
         val tokenizer = TantillaTokenizer(newContent)
         tokenizer.next()
@@ -49,14 +65,14 @@ abstract class Scope(
                 definitionText = newContent
             )
         }
-        definitions.definitions[replacement.name] = replacement
+        definitions[replacement.name] = replacement
 
         return replacement
     }
 
 
     fun resolveDynamic(name: String, fallBackToStatic: Boolean): Definition? {
-        val result = definitions.definitions[name]
+        val result = definitions[name]
         if (result != null && (result.isDynamic() || fallBackToStatic)) {
             return result
         }
@@ -74,11 +90,19 @@ abstract class Scope(
     }
 
     fun remove(name: String) {
-        definitions.remove(name)
+        val removed = definitions.remove(name)
+        if (removed != null && removed.index != -1) {
+            locals.remove(name)
+            for (definition in this) {
+                if (definition.index > removed.index) {
+                    definition.index--
+                }
+            }
+        }
     }
 
     fun resolveStatic(name: String, fallBackToParent: Boolean = false): Definition? {
-        val result = definitions.definitions[name]
+        val result = definitions[name]
         if (result != null) {
             if (result.isDynamic()) {
                 throw RuntimeException("Static property expected; found: $result")
@@ -103,7 +127,7 @@ abstract class Scope(
             override val returnType = returnType
             override val parameters = parameter.toList()
         }
-        definitions.definitions[name] = NativeFunctionDefinition(
+        definitions[name] = NativeFunctionDefinition(
             this,
             if (parameter.isNotEmpty() && parameter[0].name == "self") Definition.Kind.METHOD else Definition.Kind.FUNCTION,
             name,
@@ -130,7 +154,7 @@ abstract class Scope(
 
     override fun resolveAll(compilationResults: CompilationResults): Boolean {
         var childError = errors.isNotEmpty()
-        for (definition in definitions) {
+        for (definition in this) {
             if (!definition.resolveAll(compilationResults)) {
                 childError = true
             } else if (definition is ImplDefinition) {
@@ -153,7 +177,7 @@ abstract class Scope(
     }
 
     fun serializeBody(writer: CodeWriter) {
-        for (definition in definitions.definitions.values) {
+        for (definition in this) {
             writer.appendCode(definition)
             writer.newline()
             writer.newline()
@@ -181,7 +205,7 @@ abstract class Scope(
         }
         writer.indent()
         val scope = getValue(null) as Scope
-        for (definition in scope.definitions.iterator()) {
+        for (definition in scope.iterator()) {
             writer.newline()
             definition.serializeTitle(writer, abbreviated = true)
         }
@@ -193,7 +217,7 @@ abstract class Scope(
     override fun isScope() = errors.isEmpty()
 
     override fun findNode(node: Evaluable<RuntimeContext>): Definition? {
-        for (definition in definitions) {
+        for (definition in this) {
             val result = definition.findNode(node)
             if (result != null) {
                 return result
@@ -203,14 +227,14 @@ abstract class Scope(
     }
 
     override fun initialize() {
-        for (definition in definitions) {
+        for (definition in this) {
             definition.initialize()
         }
     }
 
     override fun reset() {
         error = null
-        for (definition in definitions) {
+        for (definition in this) {
             definition.reset()
         }
     }

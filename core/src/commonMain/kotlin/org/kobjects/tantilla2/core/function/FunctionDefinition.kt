@@ -31,7 +31,7 @@ class FunctionDefinition (
 
     override val scopeSize: Int
         get() = if (parentScope is TraitDefinition) super.scopeSize
-            else getValue(null).definitions.locals.size
+            else getValue(null).locals.size
 
     override val errors: List<Exception>
         get() {

@@ -40,7 +40,7 @@ class ImplDefinition(
         if (super.resolveAll(compilationResults)) {
 
             val vmt = MutableList<Callable?>(trait.traitIndex) { null }
-            for (definition in trait.definitions) {
+            for (definition in trait) {
                 val index = ((definition.getValue(null) as FunctionDefinition).resolvedBody as TraitMethodBody).index
                 val resolved = resolve(definition.name)
                 if (resolved == null) {

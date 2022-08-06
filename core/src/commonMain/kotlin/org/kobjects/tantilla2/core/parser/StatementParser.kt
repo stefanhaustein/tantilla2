@@ -53,7 +53,7 @@ object StatementParser {
         val definition = LocalVariableDefinition(
             context.scope, name, type = type, mutable = mutable)
 
-        context.scope.definitions.add(definition)
+        context.scope.add(definition)
 
         return Let(definition, type, typeIsExplicit, initializer)
     }

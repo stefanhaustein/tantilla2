@@ -26,7 +26,7 @@ class FieldDefinition(
     init {
         when (kind) {
             Definition.Kind.PROPERTY -> {
-                val existingIndex = parentScope.definitions.locals.indexOf(name)
+                val existingIndex = parentScope.locals.indexOf(name)
                 if (index != existingIndex) {
                     throw IllegalArgumentException("local variable inconsistency new index: $index; existing: $existingIndex")
                 }

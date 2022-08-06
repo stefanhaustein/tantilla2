@@ -1,10 +1,11 @@
-package org.kobjects.tantilla2.core.node
+package org.kobjects.tantilla2.core.classifier
 
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.Definition
 import org.kobjects.tantilla2.core.RuntimeContext
 import org.kobjects.tantilla2.core.Type
+import org.kobjects.tantilla2.core.node.Assignable
 
 class PropertyReference(
     val base: Evaluable<RuntimeContext>,

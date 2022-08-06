@@ -51,7 +51,7 @@ object Parser {
                         && tokenizer.current.type == TokenType.IDENTIFIER
                         && (tokenizer.lookAhead(1).text == ":" || tokenizer.lookAhead(1).text == "="))) {
                     val definition = parseDefinition(tokenizer, ParsingContext(scope, localDepth))
-                    scope.definitions.add(definition)
+                    scope.add(definition)
                 } else {
                     val statement = StatementParser.parseStatement(tokenizer, ParsingContext(scope, localDepth))
                     statements.add(statement)
