@@ -6,18 +6,18 @@ import org.kobjects.tantilla2.core.runtime.ListType
 import org.kobjects.tantilla2.core.runtime.TypedList
 
 class ListLiteral(
-    val elements: List<Evaluable<RuntimeContext>>,
+    val elements: List<Evaluable<LocalRuntimeContext>>,
 ) : TantillaNode {
 
-    override fun eval(context: RuntimeContext): TypedList {
+    override fun eval(context: LocalRuntimeContext): TypedList {
         return returnType.create(elements.size) { elements[it].eval(context) }
     }
 
     override val returnType = ListType(commonType(elements.map { it.returnType }))
 
-    override fun children(): List<Evaluable<RuntimeContext>> = elements
+    override fun children(): List<Evaluable<LocalRuntimeContext>> = elements
 
-    override fun reconstruct(newChildren: List<Evaluable<RuntimeContext>>) = ListLiteral(newChildren)
+    override fun reconstruct(newChildren: List<Evaluable<LocalRuntimeContext>>) = ListLiteral(newChildren)
 
     override fun serializeCode(writer: CodeWriter, precedence: Int) {
         writer.append('[')

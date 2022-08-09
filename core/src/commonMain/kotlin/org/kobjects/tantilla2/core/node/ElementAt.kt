@@ -7,8 +7,8 @@ import org.kobjects.tantilla2.core.runtime.ListType
 import org.kobjects.tantilla2.core.runtime.TypedList
 
 class ElementAt(
-    val baseExpr: Evaluable<RuntimeContext>,
-    val indexExpr: Evaluable<RuntimeContext>) : Assignable {
+    val baseExpr: Evaluable<LocalRuntimeContext>,
+    val indexExpr: Evaluable<LocalRuntimeContext>) : Assignable {
 
     init {
         if (baseExpr.returnType !is ListType) {
@@ -19,7 +19,7 @@ class ElementAt(
         }
     }
 
-    override fun assign(context: RuntimeContext, value: Any?) {
+    override fun assign(context: LocalRuntimeContext, value: Any?) {
         val list = baseExpr.eval(context) as TypedList
         val index = indexExpr.evalF64(context).toInt()
         list[index] = value
@@ -29,9 +29,9 @@ class ElementAt(
     override val returnType: Type
         get() = (baseExpr.returnType as ListType).elementType
 
-    override fun children(): List<Evaluable<RuntimeContext>> = listOf(baseExpr, indexExpr)
+    override fun children(): List<Evaluable<LocalRuntimeContext>> = listOf(baseExpr, indexExpr)
 
-    override fun eval(context: RuntimeContext): Any? {
+    override fun eval(context: LocalRuntimeContext): Any? {
         val list = baseExpr.eval(context) as TypedList
         val index = indexExpr.evalF64(context).toInt()
         if (index < 0 || index >= list.size) {
@@ -40,7 +40,7 @@ class ElementAt(
        return list[index]
     }
 
-    override fun reconstruct(newChildren: List<Evaluable<RuntimeContext>>): Evaluable<RuntimeContext> =
+    override fun reconstruct(newChildren: List<Evaluable<LocalRuntimeContext>>): Evaluable<LocalRuntimeContext> =
         ElementAt(newChildren[0], newChildren[1])
 
     override fun serializeCode(writer: CodeWriter, precedence: Int) {

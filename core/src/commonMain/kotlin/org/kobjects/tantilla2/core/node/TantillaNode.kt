@@ -1,11 +1,11 @@
 package org.kobjects.tantilla2.core.node
 
 import org.kobjects.greenspun.core.Evaluable
-import org.kobjects.tantilla2.core.RuntimeContext
+import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.SerializableCode
 import org.kobjects.tantilla2.core.Type
 
-fun Evaluable<RuntimeContext>.containsNode(node: Evaluable<RuntimeContext>): Boolean {
+fun Evaluable<LocalRuntimeContext>.containsNode(node: Evaluable<LocalRuntimeContext>): Boolean {
     if (this == node) {
         return true
     }
@@ -18,11 +18,11 @@ fun Evaluable<RuntimeContext>.containsNode(node: Evaluable<RuntimeContext>): Boo
 }
 
 
-interface TantillaNode : Evaluable<RuntimeContext>, SerializableCode {
+interface TantillaNode : Evaluable<LocalRuntimeContext>, SerializableCode {
 
     val returnType: Type
 
-    override fun evalF64(context: RuntimeContext): Double {
+    override fun evalF64(context: LocalRuntimeContext): Double {
         val result = eval(context) as Number
     /*    if (result !is Double) {
             println("Double expected for $this")

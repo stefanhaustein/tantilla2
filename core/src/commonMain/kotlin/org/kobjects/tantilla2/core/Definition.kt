@@ -37,7 +37,7 @@ interface Definition : SerializableCode, Comparable<Definition> {
         return 1 + depth(scope.parentScope!!)
     }
 
-    fun findNode(node: Evaluable<RuntimeContext>): Definition? = null
+    fun findNode(node: Evaluable<LocalRuntimeContext>): Definition? = null
     fun isDynamic() = kind == Kind.METHOD || kind == Kind.PROPERTY
     fun isScope(): Boolean = false
 

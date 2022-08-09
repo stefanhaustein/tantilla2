@@ -23,7 +23,7 @@ class TraitTest {
 
     @Test
     fun testTrait() {
-        val parsingContext = UserScope(RootScope)
+        val parsingContext = UserRootScope(RootScope)
 
         val result = Parser.parse(TEST, parsingContext)
 
@@ -40,7 +40,7 @@ class TraitTest {
 
         assertFalse(parsingContext.hasError())
 
-        val runtimeContext = RuntimeContext(mutableListOf())
+        val runtimeContext = LocalRuntimeContext(mutableListOf())
         assertEquals("Woof", result.eval(runtimeContext))
     }
 

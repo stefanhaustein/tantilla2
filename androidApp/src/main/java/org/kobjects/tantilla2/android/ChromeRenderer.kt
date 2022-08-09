@@ -21,7 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import org.kobjects.konsole.compose.ComposeKonsole
 import org.kobjects.tantilla2.android.model.TantillaViewModel
-import org.kobjects.tantilla2.core.UserScope
+import org.kobjects.tantilla2.core.UserRootScope
 import org.kobjects.tantilla2.core.runtime.RootScope
 import java.io.File
 import kotlin.math.exp
@@ -41,7 +41,7 @@ fun RenderAppBar(
     TopAppBar(
         title = {
             if (viewModel.mode.value != TantillaViewModel.Mode.SHELL
-                && viewModel.scope().value !is RootScope && viewModel.scope().value !is UserScope
+                && viewModel.scope().value !is RootScope && viewModel.scope().value !is UserRootScope
             ) {
                 Text(
                     text = "❮ $title",
@@ -88,8 +88,11 @@ fun RenderAppBar(
             ) {
                 Icon(Icons.Default.MoreVert, contentDescription = "More")
                 var menuItems = arrayOf(
+                    if (viewModel.globalRuntimeContext.value.activeThreads == 0)
                     "Run main()" to {
-                        viewModel.runMain() },
+                        viewModel.runMain() } else "Stop" to {
+                            viewModel.stop()
+                         },
                     "Clear ▶" to { showClearMenu.value = true },
                     "File \u25B6" to { showFileMenu.value = true },
                 )
@@ -112,7 +115,8 @@ fun RenderAppBar(
                 )
                 RenderDropDownMenu(
                     showClearMenu,
-                    "Clear text output" to { (viewModel.console.konsole as ComposeKonsole).entries.clear() },
+                    "Clear text output" to { (viewModel.clearConsole()) },
+                            "Clear bitmap" to { viewModel.clearBitmap() },
                             "Full reset" to { viewModel.reset() }
                 )
                 RenderFileSelector(viewModel, showLoadMenu)

@@ -14,6 +14,7 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.*
 import org.kobjects.dialog.DialogManager
 import org.kobjects.konsole.compose.AnsiConverter.ansiToAnnotatedString
+import org.kobjects.konsole.compose.ComposeKonsole
 import org.kobjects.tantilla2.console.ConsoleLoop
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.function.Parameter
@@ -50,7 +51,7 @@ class TantillaViewModel(
     var withRuntimeException = mutableStateMapOf<Definition, TantillaRuntimeException>()
     var compilationResults = mutableStateOf(CompilationResults())
     val dialogManager = DialogManager()
-    val taskQueue = LinkedBlockingQueue<Runnable>()
+    val globalRuntimeContext = mutableStateOf(GlobalRuntimeContext())
 
     init {
         defineNatives()
@@ -60,8 +61,13 @@ class TantillaViewModel(
         if (file.exists()) {
             load(file)
         }
+    }
 
-
+    fun clearBitmap() {
+        val filler = IntArray(bitmap.width)
+        for (y in 0 until bitmap.height) {
+            bitmap.setPixels(filler, 0,  bitmap.width, 0, y, bitmap.width, 1)
+        }
     }
 
     fun defineNatives() {
@@ -100,10 +106,20 @@ class TantillaViewModel(
             Void,
             Parameter("callback", FunctionType.Impl(Void, emptyList()))
         ) { context ->
-            Choreographer.getInstance().postFrameCallback {
-                val fn = context[0] as Callable
-                val functionContext = RuntimeContext(MutableList(fn.scopeSize) { null }, fn.closure)
-                fn.eval(functionContext)
+            if (!context.globalRuntimeContext.stopRequested) {
+                Choreographer.getInstance().postFrameCallback {
+                    try {
+                        val fn = context[0] as Callable
+                        val functionContext = LocalRuntimeContext(
+                            context.globalRuntimeContext,
+                            fn.scopeSize,
+                            closure = fn.closure
+                        )
+                        fn.eval(functionContext)
+                    } finally {
+                        context.globalRuntimeContext.activeThreads--
+                    }
+                }
             }
         }
     }
@@ -162,16 +178,24 @@ class TantillaViewModel(
     }
 
     fun reset() {
-        console.setUserScope(UserScope(RootScope))
+        clearBitmap()
+        clearConsole()
+        console.setUserScope(UserRootScope(RootScope))
         defineNatives()
         userScope.value = console.scope
         builtinScope.value = console.scope.parentScope!!
         saveAs("Scratch.kt")
     }
 
+    fun stop() {
+        globalRuntimeContext.value.stopRequested = true
+        globalRuntimeContext.value = GlobalRuntimeContext()
+    }
+
     fun runMain() {
         mode.value = Mode.SHELL
             try {
+                globalRuntimeContext.value.activeThreads++
                 val definition = userScope.value["main"]
                     ?: throw RuntimeException("main() undefined.")
                 if (definition.type !is FunctionType) {
@@ -179,10 +203,12 @@ class TantillaViewModel(
                 }
                 val function = definition.getValue(null) as Callable
                 userScope.value.initialize()
-                function.eval(RuntimeContext(MutableList(function.scopeSize) { null }))
+                function.eval(LocalRuntimeContext(globalRuntimeContext.value, function.scopeSize))
             } catch (e: Exception) {
                 e.printStackTrace()
                 console.konsole.write(e.message ?: e.toString())
+            } finally {
+                globalRuntimeContext.value.activeThreads--
             }
     }
 
@@ -242,6 +268,10 @@ class TantillaViewModel(
         val writer = file.writer(StandardCharsets.UTF_8)
         writer.write(code)
         writer.close()
+    }
+
+    fun clearConsole() {
+       (console.konsole as ComposeKonsole).entries.clear()
     }
 
 

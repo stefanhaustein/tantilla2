@@ -1,8 +1,12 @@
 package org.kobjects.tantilla2.core
 
-class UserScope(
+import org.kobjects.tantilla2.core.classifier.FieldDefinition
+
+class UserRootScope(
     override val parentScope: Scope,
 ) : Scope() {
+    val staticFields = mutableListOf<FieldDefinition>()
+
     override val kind: Definition.Kind
         get() = Definition.Kind.UNIT
 
@@ -15,5 +19,14 @@ class UserScope(
 
     override fun serializeCode(writer: CodeWriter, precedence: Int) {
         serializeBody(writer)
+    }
+
+    override fun registerStatic(fieldDefinition: FieldDefinition) {
+        staticFields.add(fieldDefinition)
+    }
+
+    override fun reset() {
+        super.reset()
+        staticFields.clear()
     }
 }

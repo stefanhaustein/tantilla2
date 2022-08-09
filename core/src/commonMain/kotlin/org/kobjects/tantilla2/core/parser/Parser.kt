@@ -21,7 +21,7 @@ object Parser {
         return s.length - lastBreak - 1
     }
 
-    fun parse(s: String, context: Scope): Evaluable<RuntimeContext> {
+    fun parse(s: String, context: Scope): Evaluable<LocalRuntimeContext> {
         val tokenizer = TantillaTokenizer(s)
         tokenizer.consume(TokenType.BOF);
         val result = parse(tokenizer, ParsingContext(context, 0))
@@ -32,8 +32,8 @@ object Parser {
     fun parse(
         tokenizer: TantillaTokenizer,
         context: ParsingContext,
-    ): Evaluable<RuntimeContext> {
-        val statements = mutableListOf<Evaluable<RuntimeContext>>()
+    ): Evaluable<LocalRuntimeContext> {
+        val statements = mutableListOf<Evaluable<LocalRuntimeContext>>()
         val scope = context.scope
         var localDepth = context.depth
         while (tokenizer.current.type != TokenType.EOF
@@ -58,7 +58,7 @@ object Parser {
             }
         }
         return if (statements.size == 1) statements[0]
-            else Control.Block<RuntimeContext>(*statements.toTypedArray())
+            else Control.Block<LocalRuntimeContext>(*statements.toTypedArray())
     }
 
     fun readDocString(tokenizer: TantillaTokenizer): String {
@@ -168,11 +168,11 @@ object Parser {
 
 
     fun resolveVariable(tokenizer: TantillaTokenizer, context: ParsingContext, typeOnly: Boolean = false):
-            Triple<Type, Boolean, Evaluable<RuntimeContext>?> {
+            Triple<Type, Boolean, Evaluable<LocalRuntimeContext>?> {
 
         val scope = context.scope
         var type: Type? = null
-        var initializer: Evaluable<RuntimeContext>? = null
+        var initializer: Evaluable<LocalRuntimeContext>? = null
         var typeIsExplicit = tokenizer.tryConsume(":")
         if (typeIsExplicit) {
             type = TypeParser.parseType(tokenizer, ParsingContext(scope, 0))

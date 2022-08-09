@@ -1,9 +1,9 @@
 package org.kobjects.tantilla2.core.node
 
 import org.kobjects.greenspun.core.Evaluable
-import org.kobjects.tantilla2.core.RuntimeContext
+import org.kobjects.tantilla2.core.LocalRuntimeContext
 
 interface Assignable : TantillaNode {
 
-    fun assign(context: RuntimeContext, value: Any?)
+    fun assign(context: LocalRuntimeContext, value: Any?)
 }

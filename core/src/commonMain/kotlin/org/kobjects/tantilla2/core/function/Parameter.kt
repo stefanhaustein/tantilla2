@@ -2,14 +2,14 @@ package org.kobjects.tantilla2.core.function
 
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.tantilla2.core.CodeWriter
-import org.kobjects.tantilla2.core.RuntimeContext
+import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.SerializableCode
 import org.kobjects.tantilla2.core.Type
 
 data class Parameter(
     val name: String,
     val type: Type,
-    val defaultValueExpression: Evaluable<RuntimeContext>? = null,
+    val defaultValueExpression: Evaluable<LocalRuntimeContext>? = null,
     val isVararg: Boolean = false,
 ): SerializableCode {
 

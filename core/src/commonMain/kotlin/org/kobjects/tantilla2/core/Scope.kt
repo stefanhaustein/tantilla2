@@ -2,6 +2,7 @@ package org.kobjects.tantilla2.core
 
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.tantilla2.Unparseable
+import org.kobjects.tantilla2.core.classifier.FieldDefinition
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
 import org.kobjects.tantilla2.core.classifier.NativePropertyDefinition
 import org.kobjects.tantilla2.core.function.*
@@ -123,7 +124,7 @@ abstract class Scope(
         docString: String,
         returnType: Type,
         vararg parameter: Parameter,
-        operation: (RuntimeContext) -> Any?) {
+        operation: (LocalRuntimeContext) -> Any?) {
         val type = object : FunctionType {
             override val returnType = returnType
             override val parameters = parameter.toList()
@@ -167,6 +168,10 @@ abstract class Scope(
             compilationResults.definitionsWithErrors.add(this)
         }
         return !childError
+    }
+
+    open fun registerStatic(fieldDefinition: FieldDefinition) {
+        parentScope!!.registerStatic(fieldDefinition)
     }
 
     override fun getValue(self: Any?) = this
@@ -217,7 +222,7 @@ abstract class Scope(
 
     override fun isScope() = errors.isEmpty()
 
-    override fun findNode(node: Evaluable<RuntimeContext>): Definition? {
+    override fun findNode(node: Evaluable<LocalRuntimeContext>): Definition? {
         for (definition in this) {
             val result = definition.findNode(node)
             if (result != null) {

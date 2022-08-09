@@ -18,7 +18,7 @@ class FunctionDefinition (
 
     private var resolutionState: ResolutionState = ResolutionState.UNRESOLVED
     private var resolvedType: FunctionType? = null
-    internal var resolvedBody: Evaluable<RuntimeContext>? = null
+    internal var resolvedBody: Evaluable<LocalRuntimeContext>? = null
 
     init {
         if (kind != Definition.Kind.FUNCTION && kind != Definition.Kind.METHOD) {
@@ -110,7 +110,7 @@ class FunctionDefinition (
        }
     }
 
-    override fun eval(context: RuntimeContext): Any? {
+    override fun eval(context: LocalRuntimeContext): Any? {
         resolve()
         val result = resolvedBody!!.eval(context)
         if (result is Control.FlowSignal) {
@@ -169,7 +169,7 @@ class FunctionDefinition (
 
     override fun isScope() = false
 
-    override fun findNode(node: Evaluable<RuntimeContext>): Definition? =
+    override fun findNode(node: Evaluable<LocalRuntimeContext>): Definition? =
         if (resolvedBody?.containsNode(node) ?: false) this else null
 
     override fun reset() {

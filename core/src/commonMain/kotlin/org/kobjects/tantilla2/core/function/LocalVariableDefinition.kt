@@ -22,10 +22,10 @@ class LocalVariableDefinition (
 
     }
 
-    override fun getValue(self: Any?) = (self as RuntimeContext)[index]
+    override fun getValue(self: Any?) = (self as LocalRuntimeContext)[index]
 
     override fun setValue(self: Any?, newValue: Any?) {
-        (self as RuntimeContext).variables[index] = newValue
+        (self as LocalRuntimeContext).variables[index] = newValue
     }
 
 

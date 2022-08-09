@@ -21,7 +21,7 @@ class FieldDefinition(
 
     private var currentValue: Any? = null
 
-    private var resolvedInitializer: Evaluable<RuntimeContext>? = null
+    private var resolvedInitializer: Evaluable<LocalRuntimeContext>? = null
 
     init {
         when (kind) {
@@ -60,7 +60,7 @@ class FieldDefinition(
 
     override fun getValue(self: Any?): Any? {
         resolve()
-        return if (index == -1) currentValue else (self as RuntimeContext)[index]
+        return if (index == -1) currentValue else (self as LocalRuntimeContext)[index]
     }
 
 
@@ -69,11 +69,11 @@ class FieldDefinition(
         if (index == -1) {
             currentValue = newValue
         } else {
-            (self as RuntimeContext).variables[index] = newValue
+            (self as LocalRuntimeContext).variables[index] = newValue
         }
     }
 
-    fun initializer(): Evaluable<RuntimeContext>? {
+    fun initializer(): Evaluable<LocalRuntimeContext>? {
         resolve()
         return resolvedInitializer
     }
@@ -108,10 +108,14 @@ class FieldDefinition(
             } else {
                 resolvedInitializer = resolved.third
                 if (kind == Definition.Kind.STATIC) {
-                    currentValue = resolvedInitializer!!.eval(RuntimeContext(mutableListOf()))
+                    currentValue = resolvedInitializer!!.eval(LocalRuntimeContext(
+                        GlobalRuntimeContext()
+                    ))
+                    parentScope.registerStatic(this)
                 }
                 resolutionState = ResolutionState.RESOLVED
             }
+
 
         } catch (e: Exception) {
             resolutionState = ResolutionState.ERROR
@@ -166,7 +170,7 @@ class FieldDefinition(
 
     override fun isScope() = false
 
-    override fun findNode(node: Evaluable<RuntimeContext>): Definition? {
+    override fun findNode(node: Evaluable<LocalRuntimeContext>): Definition? {
         val rid = resolvedInitializer
         if (rid != null && rid.containsNode(node)) {
             return this
@@ -186,7 +190,7 @@ class FieldDefinition(
     override fun initialize() {
         resolve()
         if (kind == Definition.Kind.STATIC) {
-            currentValue = resolvedInitializer!!.eval(RuntimeContext(mutableListOf()))
+            currentValue = resolvedInitializer!!.eval(LocalRuntimeContext(GlobalRuntimeContext()))
         }
         super.initialize()
     }

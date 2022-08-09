@@ -10,7 +10,7 @@ open class NativeStructDefinition(
     parent: Scope,
     name: String,
     val ctorParams: List<Parameter> = emptyList(),
-    val ctor: (RuntimeContext) -> Any? = { throw UnsupportedOperationException() },
+    val ctor: (LocalRuntimeContext) -> Any? = { throw UnsupportedOperationException() },
     docString: String = "",
 ) : StructDefinition(parent, name, docString) {
 
@@ -23,7 +23,7 @@ open class NativeStructDefinition(
     override val type: FunctionType
         get() = StructMetaType(this, ctorParams)
 
-    override fun eval(context: RuntimeContext) = ctor(context)
+    override fun eval(context: LocalRuntimeContext) = ctor(context)
 
 
     fun defineMethod(
@@ -31,7 +31,7 @@ open class NativeStructDefinition(
         docString: String,
         returnType: Type,
         vararg parameter: Parameter,
-        operation: (RuntimeContext) -> Any?) {
+        operation: (LocalRuntimeContext) -> Any?) {
         val type = FunctionType.Impl(returnType, listOf(Parameter("self", this)) + parameter.toList())
         add(
             NativeFunctionDefinition(

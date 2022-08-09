@@ -2,15 +2,15 @@ package org.kobjects.tantilla2.core.node
 
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.tantilla2.core.CodeWriter
-import org.kobjects.tantilla2.core.RuntimeContext
+import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.runtime.Void
 
 class ErrorEvaluable(val errorMessage: String) : TantillaNode {
-    override fun children(): List<Evaluable<RuntimeContext>> = emptyList()
+    override fun children(): List<Evaluable<LocalRuntimeContext>> = emptyList()
 
-    override fun eval(ctx: RuntimeContext) = throw RuntimeException(errorMessage)
+    override fun eval(ctx: LocalRuntimeContext) = throw RuntimeException(errorMessage)
 
-    override fun reconstruct(newChildren: List<Evaluable<RuntimeContext>>) = this
+    override fun reconstruct(newChildren: List<Evaluable<LocalRuntimeContext>>) = this
 
     override fun toString() = "Error: $errorMessage"
 

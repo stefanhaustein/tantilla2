@@ -8,13 +8,13 @@ class NativeFunctionDefinition(
     override val name: String,
     override var docString: String,
     override val type: FunctionType,
-    val body: (RuntimeContext) -> Any?,
+    val body: (LocalRuntimeContext) -> Any?,
 ) : Callable, Definition {
 
     /*override val name: String
         get() = "(${type.parameters}) -> ${type.returnType}"
 */
-    override fun eval(context: RuntimeContext) = body(context)
+    override fun eval(context: LocalRuntimeContext) = body(context)
 
     override fun getValue(self: Any?): NativeFunctionDefinition = this
 

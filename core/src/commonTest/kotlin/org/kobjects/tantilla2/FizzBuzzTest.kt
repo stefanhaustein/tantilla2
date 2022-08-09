@@ -35,7 +35,7 @@ class FizzBuzzTest {
     fun testFizzBuzz() {
         val output = mutableListOf<String>()
 
-        val context = UserScope(RootScope)
+        val context = UserRootScope(RootScope)
 
         context.defineNativeFunction(
             "print", "internal",
@@ -54,7 +54,7 @@ class FizzBuzzTest {
 
         // assertEquals("", impl.toString())
 
-        val runtimeContext = RuntimeContext(mutableListOf(null))
+        val runtimeContext = LocalRuntimeContext(mutableListOf(null))
         (impl.value()!! as Callable).eval(runtimeContext)
 
         assertEquals(listOf(

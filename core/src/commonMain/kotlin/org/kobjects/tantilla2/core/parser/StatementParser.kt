@@ -15,7 +15,7 @@ object StatementParser {
     fun parseStatement(
         tokenizer: TantillaTokenizer,
         context: ParsingContext,
-    ) : Evaluable<RuntimeContext> =
+    ) : Evaluable<LocalRuntimeContext> =
         when (tokenizer.current.text) {
             "for" -> parseFor(tokenizer, context)
             "if" -> parseIf(tokenizer, context)
@@ -39,7 +39,7 @@ object StatementParser {
             }
         }
 
-    fun parseLet(tokenizer: TantillaTokenizer, context: ParsingContext): Evaluable<RuntimeContext> {
+    fun parseLet(tokenizer: TantillaTokenizer, context: ParsingContext): Evaluable<LocalRuntimeContext> {
         tokenizer.consume("let")
 
         val mutable = tokenizer.tryConsume("mut")
@@ -60,7 +60,7 @@ object StatementParser {
 
 
 
-    fun parseReturn(tokenizer: TantillaTokenizer, context: ParsingContext): Evaluable<RuntimeContext> {
+    fun parseReturn(tokenizer: TantillaTokenizer, context: ParsingContext): Evaluable<LocalRuntimeContext> {
         tokenizer.consume("return")
         if (context.scope !is FunctionDefinition) {
             throw tokenizer.exception("Function scope expected for 'return'")
@@ -72,7 +72,7 @@ object StatementParser {
         return FlowControl(Control.FlowSignal.Kind.RETURN, expression)
     }
 
-    fun parseWhile(tokenizer: TantillaTokenizer, context: ParsingContext): Control.While<RuntimeContext> {
+    fun parseWhile(tokenizer: TantillaTokenizer, context: ParsingContext): Control.While<LocalRuntimeContext> {
         tokenizer.consume("while")
         val condition = ExpressionParser.parseExpression(tokenizer, context)
         tokenizer.consume(":")
@@ -98,9 +98,9 @@ object StatementParser {
         return For(iteratorName, iteratorIndex, iterableExpression, body)
     }
 
-    fun parseIf(tokenizer: TantillaTokenizer, context: ParsingContext): Control.If<RuntimeContext> {
+    fun parseIf(tokenizer: TantillaTokenizer, context: ParsingContext): Control.If<LocalRuntimeContext> {
         tokenizer.consume("if")
-        val expressions = mutableListOf<Evaluable<RuntimeContext>>()
+        val expressions = mutableListOf<Evaluable<LocalRuntimeContext>>()
         do {
             val condition = ExpressionParser.parseExpression(tokenizer, context)
             expressions.add(condition)

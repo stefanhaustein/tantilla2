@@ -37,7 +37,7 @@ class VectorTest {
 
     @Test
     fun testVector() {
-        val parsingContext = UserScope(RootScope)
+        val parsingContext = UserRootScope(RootScope)
 
         val result = Parser.parse(VECTOR, parsingContext)
 
@@ -52,7 +52,7 @@ class VectorTest {
 
       //  assertEquals("", parsingContext.toString())
 
-        val runtimeContext = RuntimeContext(mutableListOf())
+        val runtimeContext = LocalRuntimeContext(mutableListOf())
         assertEquals(3.7416573867739413, result.eval(runtimeContext))
     }
 

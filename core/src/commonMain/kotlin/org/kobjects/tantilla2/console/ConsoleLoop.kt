@@ -1,11 +1,8 @@
 package org.kobjects.tantilla2.console
 
 import org.kobjects.konsole.Konsole
-import org.kobjects.tantilla2.core.CompilationResults
+import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.runtime.RootScope
-import org.kobjects.tantilla2.core.RuntimeContext
-import org.kobjects.tantilla2.core.TantillaRuntimeException
-import org.kobjects.tantilla2.core.UserScope
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.parser.Parser
 import org.kobjects.tantilla2.core.runtime.Str
@@ -13,18 +10,19 @@ import org.kobjects.tantilla2.core.runtime.Void
 
 class ConsoleLoop(
     val konsole: Konsole,
-    var scope: UserScope = UserScope(RootScope),
+    var scope: UserRootScope = UserRootScope(RootScope),
     var errorListener: (TantillaRuntimeException?) -> Unit = {}
 ) {
-    var runtimeContext = RuntimeContext(mutableListOf<Any?>())
+    var globalRuntimeContext = GlobalRuntimeContext()
+    var runtimeContext = LocalRuntimeContext(globalRuntimeContext)
 
     init {
         declareNatives()
     }
 
-    fun setUserScope(scope: UserScope) {
+    fun setUserScope(scope: UserRootScope) {
         this.scope = scope;
-        runtimeContext = RuntimeContext(mutableListOf<Any?>())
+        runtimeContext = LocalRuntimeContext(globalRuntimeContext)
         declareNatives()
     }
 

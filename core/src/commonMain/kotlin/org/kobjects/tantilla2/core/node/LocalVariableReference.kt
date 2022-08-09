@@ -2,7 +2,7 @@ package org.kobjects.tantilla2.core.node
 
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.tantilla2.core.CodeWriter
-import org.kobjects.tantilla2.core.RuntimeContext
+import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.SerializableCode
 import org.kobjects.tantilla2.core.Type
 
@@ -13,9 +13,9 @@ class LocalVariableReference(
     val index: Int,
     val mutable: Boolean,
 ) : Assignable, SerializableCode {
-    override fun children(): List<Evaluable<RuntimeContext>> = emptyList()
+    override fun children(): List<Evaluable<LocalRuntimeContext>> = emptyList()
 
-    override fun eval(ctx: RuntimeContext): Any? {
+    override fun eval(ctx: LocalRuntimeContext): Any? {
         //        println("Evaluating $name")
 
         var varCtx = ctx
@@ -28,10 +28,10 @@ class LocalVariableReference(
         return result
     }
 
-    override fun reconstruct(newChildren: List<Evaluable<RuntimeContext>>): Evaluable<RuntimeContext> =
+    override fun reconstruct(newChildren: List<Evaluable<LocalRuntimeContext>>): Evaluable<LocalRuntimeContext> =
         this
 
-    override fun assign(context: RuntimeContext, value: Any?) {
+    override fun assign(context: LocalRuntimeContext, value: Any?) {
         if (index >= context.variables.size) {
             throw IllegalStateException("Variable $name index $index not found!")
         }

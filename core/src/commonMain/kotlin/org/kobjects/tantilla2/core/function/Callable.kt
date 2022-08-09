@@ -1,13 +1,13 @@
 package org.kobjects.tantilla2.core.function
 
-import org.kobjects.tantilla2.core.RuntimeContext
+import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.Typed
 
 interface Callable : Typed {
     override val type: FunctionType
-    fun eval(context: RuntimeContext): Any?
+    fun eval(context: LocalRuntimeContext): Any?
     val scopeSize: Int
         get() = type.parameters.size
-    val closure: RuntimeContext?
+    val closure: LocalRuntimeContext?
         get() = null
 }

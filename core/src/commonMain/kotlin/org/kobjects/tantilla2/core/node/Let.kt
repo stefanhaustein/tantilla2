@@ -5,20 +5,20 @@ import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.function.LocalVariableDefinition
 import org.kobjects.tantilla2.core.runtime.Void
 
-class Let(val definition: LocalVariableDefinition, val type: Type, val typeIsExplicit: Boolean, val initializer: Evaluable<RuntimeContext>?) : TantillaNode {
+class Let(val definition: LocalVariableDefinition, val type: Type, val typeIsExplicit: Boolean, val initializer: Evaluable<LocalRuntimeContext>?) : TantillaNode {
     override val returnType: Type
         get() = Void
 
     override fun children() = if (initializer == null) emptyList() else listOf(initializer)
 
-    override fun eval(context: RuntimeContext): Any? {
+    override fun eval(context: LocalRuntimeContext): Any? {
         if (initializer != null) {
             context.variables[definition.index] = initializer.eval(context)
         }
         return null
     }
 
-    override fun reconstruct(newChildren: List<Evaluable<RuntimeContext>>) =
+    override fun reconstruct(newChildren: List<Evaluable<LocalRuntimeContext>>) =
         Let(definition, type, typeIsExplicit, if (newChildren.isEmpty()) null else newChildren[0])
 
 

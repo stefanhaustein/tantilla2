@@ -93,21 +93,6 @@ class MainActivity : AppCompatActivity() {
 
 
     inner class AndroidPlatform : Platform {
-        val taskQueue = LinkedBlockingQueue<Runnable>()
-
-        init {
-
-            Thread {
-                while (true) {
-                    try {
-                        taskQueue.take().run()
-                    } catch (e: Throwable) {
-                        println("Error in task queue")
-                        e.printStackTrace()
-                    }
-                }
-            }.start()
-        }
 
         override val rootDirectory: File
             get() = filesDir
@@ -121,8 +106,6 @@ class MainActivity : AppCompatActivity() {
 
         override fun runAsync(task: Runnable) {
             Handler(Looper.getMainLooper()).postDelayed(task, 1)
-    //        taskQueue.add(runnable)
-
         }
 
     }

@@ -3,20 +3,20 @@ package org.kobjects.tantilla2.core.function
 import org.kobjects.greenspun.core.Control
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.tantilla2.core.CodeWriter
-import org.kobjects.tantilla2.core.RuntimeContext
+import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.SerializableCode
 
 class CallableImpl(
     override val type: FunctionType,
     override val scopeSize: Int,
-    val body: Evaluable<RuntimeContext>,
-    override val closure: RuntimeContext? = null
+    val body: Evaluable<LocalRuntimeContext>,
+    override val closure: LocalRuntimeContext? = null
     ) : Callable, SerializableCode {
 
 
     // get() = "(${type.parameters}) -> ${type.returnType}"
 
-    override fun eval(context: RuntimeContext): Any? {
+    override fun eval(context: LocalRuntimeContext): Any? {
 
         if (closure != context.closure) {
             throw RuntimeException("closure mismatch")

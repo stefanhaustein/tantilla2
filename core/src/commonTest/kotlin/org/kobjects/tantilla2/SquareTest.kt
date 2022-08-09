@@ -16,14 +16,14 @@ class SquareTest {
 
     @Test
     fun testSquare() {
-        val context = UserScope(RootScope)
+        val context = UserRootScope(RootScope)
         Parser.parse(SQUARE, context)
 
         val squareImpl = context["square"]!!
 
         // assertEquals("def square (x: float):\n  x * x", squareImpl.toString())
 
-        val runtimeContext = RuntimeContext(mutableListOf(4.0))
+        val runtimeContext = LocalRuntimeContext(mutableListOf(4.0))
         val result = (squareImpl.value()!! as Callable).eval(runtimeContext)
 
         assertEquals(16.0, result)

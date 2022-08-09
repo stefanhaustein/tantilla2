@@ -6,7 +6,7 @@ import org.kobjects.konsole.Ansi
 class CodeWriter(
     indent: String = "",
     val highlighting: Map<Kind, Pair<String, String>> = emptyMap(),
-    val errorMap: Map<Evaluable<RuntimeContext>, TantillaRuntimeException> = emptyMap()
+    val errorMap: Map<Evaluable<LocalRuntimeContext>, TantillaRuntimeException> = emptyMap()
 ) : Appendable {
     val sb = StringBuilder()
     val indent = StringBuilder(indent)
@@ -91,9 +91,9 @@ class CodeWriter(
             is F64.Div<*> -> appendInfix(code, parentPrecedence, "/", 5)
             is F64.Mod<*> -> appendInfix(code, parentPrecedence, "%", 5)
             is F64.Pow<*> -> appendInfix(code, parentPrecedence, "**", 6)
-            is Control.If<*> -> appendIf(code as Control.If<RuntimeContext>)
-            is Control.Block<*> -> appendBlock(code as Control.Block<RuntimeContext>)
-            is Control.While<*> -> appendWhile(code as Control.While<RuntimeContext>)
+            is Control.If<*> -> appendIf(code as Control.If<LocalRuntimeContext>)
+            is Control.Block<*> -> appendBlock(code as Control.Block<LocalRuntimeContext>)
+            is Control.While<*> -> appendWhile(code as Control.While<LocalRuntimeContext>)
             is Str.Const<*> -> appendWrapped(Kind.STRING, code.toString())
             else -> append(code.toString())
         }
@@ -120,7 +120,7 @@ class CodeWriter(
         }
     }
 
-    fun appendIf(expr: Control.If<RuntimeContext>): CodeWriter {
+    fun appendIf(expr: Control.If<LocalRuntimeContext>): CodeWriter {
         append("if ")
         appendCode(expr.ifThenElse[0])
         append(':').indent().newline()
@@ -142,7 +142,7 @@ class CodeWriter(
         return this
     }
 
-    fun appendWhile(expr: Control.While<RuntimeContext>): CodeWriter {
+    fun appendWhile(expr: Control.While<LocalRuntimeContext>): CodeWriter {
         append("while ")
         appendCode(expr.condition)
         append(':').indent().newline()
@@ -151,7 +151,7 @@ class CodeWriter(
         return this
     }
 
-    fun appendBlock(block: Control.Block<RuntimeContext>): CodeWriter {
+    fun appendBlock(block: Control.Block<LocalRuntimeContext>): CodeWriter {
         if (block.statements.size > 0) {
             appendCode(block.statements[0])
             for (i in 1 until block.statements.size) {

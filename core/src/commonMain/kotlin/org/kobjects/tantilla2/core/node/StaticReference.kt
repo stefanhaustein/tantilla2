@@ -6,11 +6,11 @@ import org.kobjects.tantilla2.core.runtime.RootScope
 
 
 data class StaticReference(val definition: Definition, val qualified: Boolean) : TantillaNode, Assignable {
-    override fun children() = emptyList<Evaluable<RuntimeContext>>()
+    override fun children() = emptyList<Evaluable<LocalRuntimeContext>>()
 
-    override fun eval(ctx: RuntimeContext): Any? = definition.getValue(null)
+    override fun eval(ctx: LocalRuntimeContext): Any? = definition.getValue(null)
 
-    override fun reconstruct(newChildren: List<Evaluable<RuntimeContext>>) = this
+    override fun reconstruct(newChildren: List<Evaluable<LocalRuntimeContext>>) = this
 
     override fun serializeCode(writer: CodeWriter, precedence: Int) {
         val parent = definition.parentScope
@@ -21,7 +21,7 @@ data class StaticReference(val definition: Definition, val qualified: Boolean) :
         writer.append(definition.name)
     }
 
-    override fun assign(context: RuntimeContext, value: Any?) = definition.setValue(null, value)
+    override fun assign(context: LocalRuntimeContext, value: Any?) = definition.setValue(null, value)
 
     override val returnType: Type
         get() = definition.type

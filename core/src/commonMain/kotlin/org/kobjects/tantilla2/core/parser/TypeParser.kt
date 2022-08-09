@@ -1,7 +1,7 @@
 package org.kobjects.tantilla2.core.parser
 
 import org.kobjects.greenspun.core.Evaluable
-import org.kobjects.tantilla2.core.RuntimeContext
+import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.Type
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
@@ -39,7 +39,7 @@ object TypeParser {
         tokenizer.consume(":", "Colon expected, separating the parameter type from the parameter name.")
         val rawType = TypeParser.parseType(tokenizer, context)
         val type = if (isVararg) ListType(rawType) else rawType
-        val defaultValue: Evaluable<RuntimeContext>? = if (tokenizer.tryConsume("="))
+        val defaultValue: Evaluable<LocalRuntimeContext>? = if (tokenizer.tryConsume("="))
             ExpressionParser.matchType(context.scope,
                 ExpressionParser.parseExpression(tokenizer, context), type)
         else null
