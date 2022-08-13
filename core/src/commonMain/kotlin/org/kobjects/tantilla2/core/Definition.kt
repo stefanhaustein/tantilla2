@@ -58,12 +58,6 @@ interface Definition : SerializableCode, Comparable<Definition> {
     }
 
     /**
-     * Initialize all static values
-     */
-    fun initialize() {
-    }
-
-    /**
      * Reset the compilation state
      */
     fun reset() {

@@ -108,9 +108,8 @@ class FieldDefinition(
             } else {
                 resolvedInitializer = resolved.third
                 if (kind == Definition.Kind.STATIC) {
-                    currentValue = resolvedInitializer!!.eval(LocalRuntimeContext(
-                        GlobalRuntimeContext()
-                    ))
+                    currentValue = resolvedInitializer!!.eval(
+                        LocalRuntimeContext(GlobalRuntimeContext()))
                     parentScope.registerStatic(this)
                 }
                 resolutionState = ResolutionState.RESOLVED
@@ -187,12 +186,11 @@ class FieldDefinition(
         super.reset()
     }
 
-    override fun initialize() {
+    fun initialize(globalRuntimeContext: GlobalRuntimeContext) {
         resolve()
         if (kind == Definition.Kind.STATIC) {
-            currentValue = resolvedInitializer!!.eval(LocalRuntimeContext(GlobalRuntimeContext()))
+            currentValue = resolvedInitializer!!.eval(LocalRuntimeContext(globalRuntimeContext))
         }
-        super.initialize()
     }
 
 

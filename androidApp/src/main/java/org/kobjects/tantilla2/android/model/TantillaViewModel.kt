@@ -42,7 +42,7 @@ class TantillaViewModel(
     var editing = mutableStateOf(false)
     val mode = mutableStateOf(Mode.SHELL)
     var fileName = mutableStateOf(platform.fileName)
-    val userScope = mutableStateOf<Scope>(console.scope)
+    val userScope = mutableStateOf<UserRootScope>(console.scope)
     val builtinScope = mutableStateOf<Scope>(console.scope.parentScope)
     val definition = mutableStateOf<Definition?>(null)
     val currentText = mutableStateOf(TextFieldValue())
@@ -138,7 +138,7 @@ class TantillaViewModel(
     }
 
 
-    fun scope(): MutableState<Scope> = if (mode.value == Mode.HELP) builtinScope else userScope
+    fun scope(): MutableState<Scope> = if (mode.value == Mode.HELP) builtinScope else userScope as MutableState<Scope>
 
     fun findLineRange(s: AnnotatedString, lineNumber: Int): IntRange {
         var pos = 0
@@ -196,14 +196,7 @@ class TantillaViewModel(
         mode.value = Mode.SHELL
             try {
                 globalRuntimeContext.value.activeThreads++
-                val definition = userScope.value["main"]
-                    ?: throw RuntimeException("main() undefined.")
-                if (definition.type !is FunctionType) {
-                    throw RuntimeException("main is not a function.")
-                }
-                val function = definition.getValue(null) as Callable
-                userScope.value.initialize()
-                function.eval(LocalRuntimeContext(globalRuntimeContext.value, function.scopeSize))
+                userScope.value.run(globalRuntimeContext.value)
             } catch (e: Exception) {
                 e.printStackTrace()
                 console.konsole.write(e.message ?: e.toString())

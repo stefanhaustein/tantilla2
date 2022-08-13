@@ -232,12 +232,6 @@ abstract class Scope(
         return null
     }
 
-    override fun initialize() {
-        for (definition in this) {
-            definition.initialize()
-        }
-    }
-
     override fun reset() {
         error = null
         for (definition in this) {
