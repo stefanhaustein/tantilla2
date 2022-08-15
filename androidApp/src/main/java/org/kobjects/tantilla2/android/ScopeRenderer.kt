@@ -49,9 +49,9 @@ fun RenderScope(viewModel: TantillaViewModel) {
                 if (kind == null) {
                     title = "IMPL (defined elsewhere)"
                     if (scope is StructDefinition) {
-                        list = viewModel.compilationResults.value.classToTrait[scope]?.values?.toList() ?: emptyList()
+                        list = viewModel.userScope.value.classToTrait[scope]?.values?.toList() ?: emptyList()
                     } else if (scope is TraitDefinition) {
-                        list = viewModel.compilationResults.value.traitToClass[scope]?.values?.toList() ?: emptyList()
+                        list = viewModel.userScope.value.traitToClass[scope]?.values?.toList() ?: emptyList()
                     } else {
                         continue
                     }
@@ -82,7 +82,7 @@ fun RenderScope(viewModel: TantillaViewModel) {
 @Composable
 fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
     Card(
-        backgroundColor = if (viewModel.compilationResults.value.definitionsWithErrors.contains(definition)
+        backgroundColor = if (viewModel.userScope.value.definitionsWithErrors.contains(definition)
             || viewModel.withRuntimeException.containsKey(definition)) Color(0xffff8888L) else Color(0xffeeeeee),
         modifier = Modifier
             .fillMaxWidth()

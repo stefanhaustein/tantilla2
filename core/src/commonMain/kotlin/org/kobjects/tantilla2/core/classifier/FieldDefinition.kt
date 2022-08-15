@@ -10,14 +10,24 @@ class FieldDefinition(
     override val parentScope: Scope,
     override val kind: Definition.Kind,
     override val name: String,
-    val definitionText: String = "",
+    definitionText: String = "",
     override val mutable: Boolean = false,
     override var docString: String = "",
-) : Definition {
+) : Definition, Updatable {
     private var resolvedType: Type? = null
     override var index: Int = -1
     private var resolutionState: ResolutionState = ResolutionState.UNRESOLVED
     var error: ParsingException? = null
+
+    private var _definitionText = definitionText
+
+    override var definitionText
+        get() = _definitionText
+        set(value) {
+            resolutionState = ResolutionState.RESOLVED
+            _definitionText = value
+        }
+
 
     private var currentValue: Any? = null
 

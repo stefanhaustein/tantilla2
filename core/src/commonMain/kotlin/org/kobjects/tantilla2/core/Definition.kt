@@ -42,12 +42,6 @@ interface Definition : SerializableCode, Comparable<Definition> {
     fun isScope(): Boolean = false
 
 
-    fun rebuild(): CompilationResults {
-        reset()
-        val results = CompilationResults()
-        resolveAll(results)
-        return results
-    }
 
     fun resolveAll(compilationResults: CompilationResults): Boolean {
         val ok = errors.isEmpty()

@@ -5,6 +5,7 @@ import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
+import org.kobjects.tantilla2.core.classifier.Updatable
 import org.kobjects.tantilla2.core.node.containsNode
 import org.kobjects.tantilla2.core.parser.*
 
@@ -12,13 +13,21 @@ class FunctionDefinition (
     override val parentScope: Scope,
     override val kind: Definition.Kind,
     override val name: String,
-    val definitionText: String,
-) : Scope(), Callable {
+    definitionText: String,
+) : Scope(), Callable, Updatable {
     override var docString: String = ""
 
     private var resolutionState: ResolutionState = ResolutionState.UNRESOLVED
     private var resolvedType: FunctionType? = null
     internal var resolvedBody: Evaluable<LocalRuntimeContext>? = null
+
+    var _definitionText = definitionText
+    override var definitionText: String
+        get() = _definitionText
+        set(value) {
+            resolutionState = ResolutionState.UNRESOLVED
+            _definitionText = value
+        }
 
     init {
         if (kind != Definition.Kind.FUNCTION && kind != Definition.Kind.METHOD) {

@@ -5,6 +5,7 @@ import org.kobjects.tantilla2.Unparseable
 import org.kobjects.tantilla2.core.classifier.FieldDefinition
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
 import org.kobjects.tantilla2.core.classifier.NativePropertyDefinition
+import org.kobjects.tantilla2.core.classifier.Updatable
 import org.kobjects.tantilla2.core.function.*
 import org.kobjects.tantilla2.core.parser.Parser
 import org.kobjects.tantilla2.core.parser.ParsingContext
@@ -51,21 +52,31 @@ abstract class Scope(
     fun sorted() = definitions.values.toList().sorted()
 
     fun update(newContent: String, oldDefinition: Definition? = null): Definition {
-        if (oldDefinition != null) {
-            definitions.remove(oldDefinition.name)
-        }
         val tokenizer = TantillaTokenizer(newContent)
         tokenizer.next()
-        var replacement: Definition
-        try {
-            replacement = Parser.parseDefinition(tokenizer, ParsingContext(this, 0))
+        var replacement = try {
+            Parser.parseDefinition(tokenizer, ParsingContext(this, 0))
         } catch (e: Exception) {
             e.printStackTrace()
             //            val name = oldDefinition?.name ?: "[error]"
-            replacement = Unparseable(
+            Unparseable(
                 this,
                 definitionText = newContent
             )
+        }
+        if (oldDefinition != null) {
+            try {
+                if (oldDefinition is Updatable && replacement is Updatable
+                    && oldDefinition.type == replacement.type
+                    && oldDefinition.kind == replacement.kind
+                ) {
+                    oldDefinition.definitionText = replacement.definitionText
+                    return oldDefinition
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+            definitions.remove(oldDefinition.name)
         }
         definitions[replacement.name] = replacement
 
@@ -238,6 +249,8 @@ abstract class Scope(
             definition.reset()
         }
     }
+
+
 
 
 }

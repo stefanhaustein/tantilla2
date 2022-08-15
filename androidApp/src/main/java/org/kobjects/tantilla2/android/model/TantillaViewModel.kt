@@ -49,7 +49,6 @@ class TantillaViewModel(
     var editorParentScope: Scope = console.scope
     val expanded = mutableStateOf(setOf<Definition>())
     var withRuntimeException = mutableStateMapOf<Definition, TantillaRuntimeException>()
-    var compilationResults = mutableStateOf(CompilationResults())
     val dialogManager = DialogManager()
     val globalRuntimeContext = mutableStateOf(GlobalRuntimeContext())
 
@@ -206,8 +205,7 @@ class TantillaViewModel(
     }
 
     private fun rebuild() {
-        val result = userScope.value.rebuild()
-        compilationResults.value = result
+        userScope.value.rebuild()
     }
 
     fun load(file: File) {

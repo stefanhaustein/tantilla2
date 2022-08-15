@@ -1,6 +1,7 @@
 package org.kobjects.tantilla2.core
 
 import org.kobjects.tantilla2.core.classifier.FieldDefinition
+import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.FunctionType
 
@@ -8,7 +9,11 @@ class UserRootScope(
     override val parentScope: Scope,
 ) : Scope() {
     val staticFields = mutableListOf<FieldDefinition?>()
+
     var initializedTo = 0
+    var classToTrait = emptyMap<Scope, MutableMap<TraitDefinition, Definition>>()
+    var traitToClass = emptyMap<TraitDefinition, MutableMap<Scope, Definition>>()
+    var definitionsWithErrors = emptySet<Definition>()
 
     override val kind: Definition.Kind
         get() = Definition.Kind.UNIT
@@ -51,6 +56,17 @@ class UserRootScope(
         val function = definition.getValue(null) as Callable
         initialize(globalRuntimeContext)
         function.eval(LocalRuntimeContext(globalRuntimeContext, function.scopeSize))
+    }
+
+
+    fun rebuild() {
+        reset()
+        val results = CompilationResults()
+        resolveAll(results)
+
+        classToTrait = results.classToTrait.toMap()
+        traitToClass = results.traitToClass.toMap()
+        definitionsWithErrors = results.definitionsWithErrors.toSet()
     }
 
 }
