@@ -1,6 +1,7 @@
 package org.kobjects.tantilla2.android
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
@@ -10,6 +11,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -42,7 +44,8 @@ fun RenderScope(viewModel: TantillaViewModel) {
                 RenderAppBar(viewModel, if (scope.parentScope == RootScope) viewModel.fileName.value else  scope.name, "Add" to {viewModel.edit(scope, null)})
             } },
     ) {
-        LazyColumn(Modifier.fillMaxWidth(), contentPadding = PaddingValues(8.dp)) {
+        LazyColumn(Modifier.fillMaxWidth(), contentPadding = PaddingValues(8.dp),
+        ) {
             for (kind in Definition.Kind.values().toList() /* + listOf(null) */) {
                 val list: List<Definition>
                 val title: String
@@ -83,6 +86,7 @@ fun RenderScope(viewModel: TantillaViewModel) {
 fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
     Card(
         backgroundColor = if (viewModel.userScope.value.definitionsWithErrors.contains(definition)
+            || definition.errors.isNotEmpty()
             || viewModel.withRuntimeException.containsKey(definition)) Color(0xffff8888L) else Color(0xffeeeeee),
         modifier = Modifier
             .fillMaxWidth()
@@ -119,7 +123,7 @@ fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
                 } else {
                     definition.serializeSummary(writer)
                 }
-                Text(AnsiConverter.ansiToAnnotatedString(writer.toString()))
+               Text(AnsiConverter.ansiToAnnotatedString(writer.toString()))
             }
             Row(modifier = Modifier
                 .align(Alignment.TopEnd)

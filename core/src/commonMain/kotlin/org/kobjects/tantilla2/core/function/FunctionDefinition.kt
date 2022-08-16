@@ -147,7 +147,7 @@ class FunctionDefinition (
 
 
     override fun serializeCode(writer: CodeWriter, precedence: Int) {
-        if (resolvedBody == null) {
+        if (resolutionState != ResolutionState.RESOLVED) {
             writer.append(definitionText)
         } else {
             if (parentScope.supportsMethods && !isDynamic()) {

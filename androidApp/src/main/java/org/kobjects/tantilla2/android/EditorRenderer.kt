@@ -27,8 +27,10 @@ fun RenderEditor(viewModel: TantillaViewModel) {
                 actions = {
                     IconButton(onClick = {
                         scope.update(viewModel.currentText.value.text, definition)
+                        println("Updating to : " + viewModel.currentText.value.text)
                         viewModel.editing.value = false
                         viewModel.save()
+                        viewModel.forceUpdate.value++
                     }) {
                         Icon(Icons.Default.Check, contentDescription = "Save")
                     }

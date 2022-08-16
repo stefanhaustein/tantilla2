@@ -51,6 +51,7 @@ class TantillaViewModel(
     var withRuntimeException = mutableStateMapOf<Definition, TantillaRuntimeException>()
     val dialogManager = DialogManager()
     val globalRuntimeContext = mutableStateOf(GlobalRuntimeContext())
+    val forceUpdate = mutableStateOf(0)
 
     init {
         defineNatives()
