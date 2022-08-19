@@ -3,10 +3,11 @@ package org.kobjects.tantilla2.android
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import androidx.compose.runtime.MutableState
 import org.kobjects.tantilla2.core.Type
 import org.kobjects.tantilla2.stdlib.Pen
 
-class PenImpl(override val type: Type, val canvas: Canvas): Pen {
+class PenImpl(override val type: Type, val canvas: Canvas, val updateTrigger: MutableState<Int>): Pen {
     val strokePaint = Paint()
     val fillPaint = Paint()
 
@@ -32,6 +33,7 @@ class PenImpl(override val type: Type, val canvas: Canvas): Pen {
 
     override fun line(startX: Double, startY: Double, endX: Double, endY: Double) {
         canvas.drawLine(startX.toFloat(), startY.toFloat(), endX.toFloat(), endY.toFloat(), strokePaint)
+        updateTrigger.value++
     }
 
     override fun rect(x: Double, y: Double, width: Double, height: Double) {
@@ -42,6 +44,7 @@ class PenImpl(override val type: Type, val canvas: Canvas): Pen {
         if (strokePaint.color shr 24 != 0) {
             canvas.drawRect(x.toFloat(), y.toFloat(), (x+width).toFloat(), (y+height).toFloat(), strokePaint)
         }
+        updateTrigger.value++
     }
 
 }

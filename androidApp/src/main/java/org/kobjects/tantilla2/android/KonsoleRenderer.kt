@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
@@ -15,12 +16,14 @@ import org.kobjects.tantilla2.android.model.TantillaViewModel
 @Composable
 fun RenderKonsole(viewModel: TantillaViewModel) {
     Box() {
-        Image(
-            bitmap = viewModel.bitmap.asImageBitmap(),
-            contentDescription = "Canvas",
-            modifier = Modifier.fillMaxWidth(),
-            contentScale = ContentScale.FillWidth
-        )
+        key(viewModel.graphicsUpdateTrigger.value) {
+            Image(
+                bitmap = viewModel.bitmap.asImageBitmap(),
+                contentDescription = "Canvas",
+                modifier = Modifier.fillMaxWidth(),
+                contentScale = ContentScale.FillWidth
+            )
+        }
         Column() {
             RenderAppBar(
                 viewModel,

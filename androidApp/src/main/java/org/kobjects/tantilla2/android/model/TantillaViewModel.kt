@@ -52,6 +52,7 @@ class TantillaViewModel(
     val dialogManager = DialogManager()
     val globalRuntimeContext = mutableStateOf(GlobalRuntimeContext())
     val forceUpdate = mutableStateOf(0)
+    val graphicsUpdateTrigger = mutableStateOf(0)
 
     init {
         defineNatives()
@@ -89,7 +90,7 @@ class TantillaViewModel(
         val canvas = Canvas(bitmap)
         canvas.translate(bitmap.width / 2f, bitmap.height / 2f)
         canvas.scale(1f, -1f)
-        val penImpl = PenImpl(PenDefinition, canvas)
+        val penImpl = PenImpl(PenDefinition, canvas, graphicsUpdateTrigger)
         RootScope.add(
             NativePropertyDefinition(
             RootScope,

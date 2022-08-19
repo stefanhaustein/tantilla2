@@ -1,5 +1,6 @@
 package org.kobjects.tantilla2.android
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.*
@@ -11,9 +12,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import org.kobjects.konsole.compose.AnsiConverter.ansiToAnnotatedString
 import org.kobjects.tantilla2.android.model.TantillaViewModel
+import org.kobjects.tantilla2.core.CodeWriter
+import org.kobjects.tantilla2.core.highlightSyntax
 
 
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun RenderEditor(viewModel: TantillaViewModel) {
     var showMenu = remember { mutableStateOf(false) }
@@ -70,7 +75,8 @@ fun RenderEditor(viewModel: TantillaViewModel) {
             TextField(
                 value = viewModel.currentText.value,
                 onValueChange = {
-                    viewModel.currentText.value = it
+                    val annotated = ansiToAnnotatedString(highlightSyntax(it.text, CodeWriter.defaultHighlighting))
+                    viewModel.currentText.value = it.copy(annotatedString = annotated)
                     /*
                     viewModel.definition.value = scope.update(viewModel.currentText.value.text, viewModel.definition.value)
                     if (viewModel.definition.value.toString() == viewModel.currentText.value.text) {
