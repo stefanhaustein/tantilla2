@@ -141,40 +141,14 @@ class TantillaViewModel(
 
     fun scope(): MutableState<Scope> = if (mode.value == Mode.HELP) builtinScope else userScope as MutableState<Scope>
 
-    fun findLineRange(s: AnnotatedString, lineNumber: Int): IntRange {
-        var pos = 0
-        var i = 0
-        while (pos < s.length && i < lineNumber) {
-            val newPos = s.indexOf('\n', pos)
-            if (newPos == -1) {
-                break
-            }
-            pos = newPos + 1
-            i++
-        }
-        var end = s.indexOf('\n', pos)
-        if (end == -1) {
-            end = s.length
-        }
-        return IntRange(pos, end)
-    }
-
-    fun AnnotatedString.withError(exception: Exception?): AnnotatedString {
-        if (exception is ParsingException) {
-            val range = findLineRange(this, exception.token.line)
-            val builder = AnnotatedString.Builder(this)
-            builder.addStyle(SpanStyle(background = Color.Yellow), range.start, range.endInclusive)
-            return builder.toAnnotatedString()
-        }
-        return this
-    }
 
     fun edit(parent: Scope, definition: Definition?) {
         editorParentScope = parent
         this.definition.value = definition
-        val writer = CodeWriter(highlighting = CodeWriter.defaultHighlighting)
+        val writer = CodeWriter()
         definition?.serializeCode(writer)
-        currentText.value = currentText.value.copy(annotatedString = ansiToAnnotatedString(writer.toString()).withError(definition?.errors?.firstOrNull()))
+        currentText.value = currentText.value.copy(
+            annotatedString = annotatedCode(writer.toString(), definition?.errors ?: emptyList()))
         editing.value = true
     }
 
@@ -272,4 +246,39 @@ class TantillaViewModel(
         HELP, HIERARCHY, SHELL
     }
 
+    companion object {
+        fun annotatedCode(code: String, errors: List<Exception>) =
+            ansiToAnnotatedString(highlightSyntax(code, errors.filterIsInstance<ParsingException>(), CodeWriter.defaultHighlighting))
+
+
+        fun findLineRange(s: AnnotatedString, lineNumber: Int): IntRange {
+            var pos = 0
+            var i = 0
+            while (pos < s.length && i < lineNumber) {
+                val newPos = s.indexOf('\n', pos)
+                if (newPos == -1) {
+                    break
+                }
+                pos = newPos + 1
+                i++
+            }
+            var end = s.indexOf('\n', pos)
+            if (end == -1) {
+                end = s.length
+            }
+            return IntRange(pos, end)
+        }
+
+        fun AnnotatedString.withError(exception: Exception?): AnnotatedString {
+            if (exception is ParsingException) {
+                val range = findLineRange(this, exception.token.line)
+                val builder = AnnotatedString.Builder(this)
+                builder.addStyle(SpanStyle(background = Color.Yellow), range.start, range.endInclusive)
+                return builder.toAnnotatedString()
+            }
+            return this
+        }
+
+
+    }
 }

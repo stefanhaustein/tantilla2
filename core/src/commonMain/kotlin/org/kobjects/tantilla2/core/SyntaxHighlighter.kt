@@ -1,47 +1,64 @@
 package org.kobjects.tantilla2.core
 
+import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.core.parser.TantillaTokenizer
 import org.kobjects.tantilla2.core.parser.TokenType
 
 
-fun highlightSyntax(code: String, highlighting: Map<CodeWriter.Kind, Pair<String, String>> ): String {
-    try {
+fun highlightSyntax(
+    code: String,
+    errors: List<ParsingException>,
+    highlighting: Map<CodeWriter.Kind, Pair<String, String>>
+): String {
+
+    val errorMap = errors.associateBy { it.token.pos }
+
+
         val writer = CodeWriter(highlighting = highlighting)
         val tokenizer = TantillaTokenizer(code)
         var wasDecl = false
         var lastPos = 0
 
         while (tokenizer.hasNext()) {
-            val token = tokenizer.next()
-
+            val token = try {
+                tokenizer.next()
+            } catch (e: Exception) {
+                writer.append(code.substring(lastPos))
+                return writer.toString()
+            }
             if (token.pos > lastPos) {
                 writer.append(code.subSequence(lastPos, token.pos))
             }
 
-            when (token.type) {
-                TokenType.EOF,
-                TokenType.BOF -> {}
-                TokenType.MULTILINE_STRING,
-                TokenType.STRING ->
-                    writer.appendWrapped(CodeWriter.Kind.STRING, token.text)
-                TokenType.IDENTIFIER ->
-                    when (token.text) {
-                        "def", "var", "mut", "struct", "impl" -> {
-                            writer.appendKeyword(token.text)
-                            wasDecl = true
-                        }
-                        else -> {
-                            if (wasDecl) {
-                                writer.appendDeclaration(token.text)
-                                wasDecl = false
-                            } else {
-                                writer.append(token.text)
+            if (errorMap.containsKey(token.pos)) {
+                writer.appendWrapped(CodeWriter.Kind.ERROR, token.text)
+            } else {
+
+                when (token.type) {
+                    TokenType.EOF,
+                    TokenType.BOF -> {
+                    }
+                    TokenType.MULTILINE_STRING,
+                    TokenType.STRING ->
+                        writer.appendWrapped(CodeWriter.Kind.STRING, token.text)
+                    TokenType.IDENTIFIER ->
+                        when (token.text) {
+                            "def", "var", "mut", "struct", "impl" -> {
+                                writer.appendKeyword(token.text)
+                                wasDecl = true
+                            }
+                            else -> {
+                                if (wasDecl) {
+                                    writer.appendDeclaration(token.text)
+                                    wasDecl = false
+                                } else {
+                                    writer.append(token.text)
+                                }
                             }
                         }
-                    }
-                else -> writer.append(token.text)
+                    else -> writer.append(token.text)
+                }
             }
-
             lastPos = token.pos + token.text.length
         }
         if (lastPos < code.length) {
@@ -49,8 +66,5 @@ fun highlightSyntax(code: String, highlighting: Map<CodeWriter.Kind, Pair<String
         }
         println(writer.toString())
         return writer.toString()
-    } catch (e: Exception) {
-        e.printStackTrace()
-        return code
-    }
+
 }

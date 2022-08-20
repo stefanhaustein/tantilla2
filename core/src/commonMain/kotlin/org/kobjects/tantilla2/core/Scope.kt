@@ -1,6 +1,7 @@
 package org.kobjects.tantilla2.core
 
 import org.kobjects.greenspun.core.Evaluable
+import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.Unparseable
 import org.kobjects.tantilla2.core.classifier.FieldDefinition
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
@@ -10,6 +11,7 @@ import org.kobjects.tantilla2.core.function.*
 import org.kobjects.tantilla2.core.parser.Parser
 import org.kobjects.tantilla2.core.parser.ParsingContext
 import org.kobjects.tantilla2.core.parser.TantillaTokenizer
+import org.kobjects.tantilla2.core.parser.TokenType
 
 abstract class Scope(
 ): Definition, Iterable<Definition> {
@@ -50,6 +52,26 @@ abstract class Scope(
     override fun iterator(): Iterator<Definition> = definitions.values.iterator()
 
     fun sorted() = definitions.values.toList().sorted()
+
+    fun checkErrors(newProperty: String): List<Exception> {
+        val tokenizer = TantillaTokenizer(newProperty)
+        tokenizer.next()
+        var replacement = try {
+            Parser.parseDefinition(tokenizer, ParsingContext(this, 0))
+        } catch (e: Exception) {
+            return listOf(e)
+        }
+        if (replacement.errors.isNotEmpty()) {
+            return replacement.errors
+        }
+        while (tokenizer.current.type == TokenType.LINE_BREAK) {
+            tokenizer.next()
+        }
+        if (tokenizer.current.type != TokenType.EOF) {
+            return listOf(tokenizer.exception("End of input expected"))
+        }
+        return emptyList()
+    }
 
     fun update(newContent: String, oldDefinition: Definition? = null): Definition {
         val tokenizer = TantillaTokenizer(newContent)
