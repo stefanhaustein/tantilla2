@@ -45,9 +45,7 @@ abstract class Scope(
         return definition.index
     }
 
-
     operator fun get(name: String): Definition? = definitions[name]
-
 
     override fun iterator(): Iterator<Definition> = definitions.values.iterator()
 
@@ -240,7 +238,7 @@ abstract class Scope(
         writer.append(":")
         if(docString.isNotEmpty()) {
             writer.newline()
-            writer.appendWrapped(CodeWriter.Kind.STRING, docString)
+            writer.appendWrapped(CodeWriter.Kind.STRING, docString.split("\n").first())
         }
         writer.indent()
         val scope = getValue(null) as Scope

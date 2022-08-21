@@ -19,7 +19,6 @@ open class NativeStructDefinition(
         parent.add(this)
     }
 
-
     override val type: FunctionType
         get() = StructMetaType(this, ctorParams)
 

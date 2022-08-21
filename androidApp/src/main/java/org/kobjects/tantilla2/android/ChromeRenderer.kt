@@ -8,10 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Forum
-import androidx.compose.material.icons.filled.Help
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.ViewList
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -53,11 +50,12 @@ fun RenderAppBar(
             }
         },
         actions = {
-            for (mode in TantillaViewModel.Mode.values()) {
+            for (mode in listOf(TantillaViewModel.Mode.HELP, TantillaViewModel.Mode.HIERARCHY, TantillaViewModel.Mode.SHELL)) {
                 val icon = when (mode) {
                     TantillaViewModel.Mode.HELP -> Icons.Default.Help
                     TantillaViewModel.Mode.HIERARCHY -> Icons.Default.ViewList // Article
                     TantillaViewModel.Mode.SHELL -> Icons.Default.Forum
+                    else -> Icons.Default.Cancel // Other modes
                 }
                 if (mode == viewModel.mode.value) {
                     Column() {

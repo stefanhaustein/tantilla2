@@ -12,6 +12,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -46,15 +48,20 @@ fun RenderScope(viewModel: TantillaViewModel) {
     ) {
         LazyColumn(Modifier.fillMaxWidth(), contentPadding = PaddingValues(8.dp),
         ) {
+           if (viewModel.mode.value == TantillaViewModel.Mode.HIERARCHY || scope.docString.isNotEmpty()) {
+               item {
+                   RenderDocumentation(viewModel, scope)
+               }
+           }
             for (kind in Definition.Kind.values().toList() /* + listOf(null) */) {
                 val list: List<Definition>
                 val title: String
                 if (kind == null) {
                     title = "IMPL (defined elsewhere)"
                     if (scope is StructDefinition) {
-                        list = viewModel.userScope.value.classToTrait[scope]?.values?.toList() ?: emptyList()
+                        list = viewModel.userRootScope.classToTrait[scope]?.values?.toList() ?: emptyList()
                     } else if (scope is TraitDefinition) {
-                        list = viewModel.userScope.value.traitToClass[scope]?.values?.toList() ?: emptyList()
+                        list = viewModel.userRootScope.traitToClass[scope]?.values?.toList() ?: emptyList()
                     } else {
                         continue
                     }
@@ -85,7 +92,7 @@ fun RenderScope(viewModel: TantillaViewModel) {
 @Composable
 fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
     Card(
-        backgroundColor = if (viewModel.userScope.value.definitionsWithErrors.contains(definition)
+        backgroundColor = if (viewModel.userRootScope.definitionsWithErrors.contains(definition)
             || definition.errors.isNotEmpty()
             || viewModel.withRuntimeException.containsKey(definition)) Color(0xffff8888L) else Color(0xffeeeeee),
         modifier = Modifier
@@ -138,6 +145,63 @@ fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
                             } else {
                                 viewModel.edit(definition.parentScope!!, definition)
                             }
+                        })
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun RenderDocumentation(viewModel: TantillaViewModel, scope: Scope) {
+    val expanded = remember {
+        mutableStateOf(false)
+    }
+    Card(
+        backgroundColor = Color(0xffeeeeee),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(4.dp))
+            .padding(4.dp)
+            .pointerInput(Unit) {
+                val editable = viewModel.mode.value == TantillaViewModel.Mode.HIERARCHY
+                detectTapGestures(
+                    onLongPress = {
+                        viewModel.editDocumentation()
+                    },
+                    onTap = {
+                        expanded.value = !expanded.value
+                    }
+                )
+            }
+    ) {
+        Box(Modifier.padding(8.dp)) {
+            val help = viewModel.mode.value == TantillaViewModel.Mode.HELP
+            Column() {
+                if (scope.docString.isBlank()) {
+                    Text("(Undocumented)", color = Color.LightGray)
+                } else {
+                    val writer = CodeWriter(highlighting = CodeWriter.defaultHighlighting)
+                    if (expanded.value) {
+                        writer.appendWrapped(CodeWriter.Kind.STRING, scope.docString)
+                    } else {
+                        writer.appendWrapped(
+                            CodeWriter.Kind.STRING,
+                            scope.docString.split("\n").first()
+                        )
+                    }
+                    Text(AnsiConverter.ansiToAnnotatedString(writer.toString()))
+                }
+            }
+            Row(modifier = Modifier
+                .align(Alignment.TopEnd)
+                .alpha(0.2f)) {
+                if (!help) {
+                    Icon(
+                        Icons.Default.Fullscreen,
+                        contentDescription = "Open",
+                        modifier = Modifier.clickable {
+                            viewModel.editDocumentation()
                         })
                 }
             }

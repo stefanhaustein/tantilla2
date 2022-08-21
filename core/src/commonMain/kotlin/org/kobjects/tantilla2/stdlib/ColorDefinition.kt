@@ -10,6 +10,7 @@ import org.kobjects.tantilla2.core.runtime.RootScope
 object ColorDefinition : NativeStructDefinition(
     RootScope,
     "Color",
+    docString = "Color representation with support for RGB and HSL formats.",
     ctorParams = listOf(
         Parameter("r", F64),
         Parameter("g", F64),

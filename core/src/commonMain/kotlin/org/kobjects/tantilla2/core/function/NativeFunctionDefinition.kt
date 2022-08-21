@@ -30,6 +30,9 @@ class NativeFunctionDefinition(
     }
 
     override fun serializeTitle(writer: CodeWriter, abbreviated: Boolean) {
+        if (parentScope.supportsMethods && kind == Definition.Kind.FUNCTION) {
+            writer.appendKeyword("static ")
+        }
         writer.appendKeyword("def ")
         writer.appendDeclaration(name)
         if (abbreviated) {

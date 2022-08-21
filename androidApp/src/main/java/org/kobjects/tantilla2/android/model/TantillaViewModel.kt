@@ -11,7 +11,6 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.*
 import org.kobjects.dialog.DialogManager
 import org.kobjects.konsole.compose.AnsiConverter.ansiToAnnotatedString
 import org.kobjects.konsole.compose.ComposeKonsole
@@ -29,9 +28,7 @@ import org.kobjects.tantilla2.core.classifier.NativePropertyDefinition
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Callable
 import java.io.File
-import java.lang.Runnable
 import java.nio.charset.StandardCharsets
-import java.util.concurrent.LinkedBlockingQueue
 import kotlin.Exception
 
 class TantillaViewModel(
@@ -39,20 +36,20 @@ class TantillaViewModel(
     val bitmap: Bitmap,
     val platform: Platform
 ) : ViewModel() {
-    var editing = mutableStateOf(false)
     val mode = mutableStateOf(Mode.SHELL)
     var fileName = mutableStateOf(platform.fileName)
-    val userScope = mutableStateOf<UserRootScope>(console.scope)
-    val builtinScope = mutableStateOf<Scope>(console.scope.parentScope)
-    val definition = mutableStateOf<Definition?>(null)
+    val userScope = mutableStateOf<Scope>(console.scope)
+    val helpScope = mutableStateOf<Scope>(console.scope.parentScope)
+    val editingDefinition = mutableStateOf<Definition?>(null)
     val currentText = mutableStateOf(TextFieldValue())
-    var editorParentScope: Scope = console.scope
     val expanded = mutableStateOf(setOf<Definition>())
     var withRuntimeException = mutableStateMapOf<Definition, TantillaRuntimeException>()
     val dialogManager = DialogManager()
     val globalRuntimeContext = mutableStateOf(GlobalRuntimeContext())
     val forceUpdate = mutableStateOf(0)
     val graphicsUpdateTrigger = mutableStateOf(0)
+    val userRootScope
+        get() = console.scope
 
     init {
         defineNatives()
@@ -139,18 +136,24 @@ class TantillaViewModel(
     }
 
 
-    fun scope(): MutableState<Scope> = if (mode.value == Mode.HELP) builtinScope else userScope as MutableState<Scope>
+    fun scope(): MutableState<Scope> = if (mode.value == Mode.HELP) helpScope else userScope as MutableState<Scope>
 
 
     fun edit(parent: Scope, definition: Definition?) {
-        editorParentScope = parent
-        this.definition.value = definition
+        this.editingDefinition.value = definition
         val writer = CodeWriter()
         definition?.serializeCode(writer)
         currentText.value = currentText.value.copy(
             annotatedString = annotatedCode(writer.toString(), definition?.errors ?: emptyList()))
-        editing.value = true
+        mode.value = Mode.DEFINITION_EDITOR
     }
+
+
+    fun editDocumentation() {
+        currentText.value = currentText.value.copy(text = userScope.value.docString)
+        mode.value = Mode.DOCUMENTATION_EDITOR
+    }
+
 
     fun reset() {
         clearBitmap()
@@ -158,7 +161,7 @@ class TantillaViewModel(
         console.setUserScope(UserRootScope(RootScope))
         defineNatives()
         userScope.value = console.scope
-        builtinScope.value = console.scope.parentScope!!
+        helpScope.value = console.scope.parentScope!!
         saveAs("Scratch.kt")
     }
 
@@ -171,7 +174,7 @@ class TantillaViewModel(
         mode.value = Mode.SHELL
             try {
                 globalRuntimeContext.value.activeThreads++
-                userScope.value.run(globalRuntimeContext.value)
+                userRootScope.run(globalRuntimeContext.value)
             } catch (e: Exception) {
                 e.printStackTrace()
                 console.konsole.write(e.message ?: e.toString())
@@ -181,7 +184,7 @@ class TantillaViewModel(
     }
 
     private fun rebuild() {
-        userScope.value.rebuild()
+        userRootScope.rebuild()
     }
 
     fun load(file: File) {
@@ -243,7 +246,7 @@ class TantillaViewModel(
 
 
     enum class Mode {
-        HELP, HIERARCHY, SHELL
+        HELP, HIERARCHY, SHELL, DEFINITION_EDITOR, DOCUMENTATION_EDITOR
     }
 
     companion object {

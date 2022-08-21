@@ -25,7 +25,7 @@ class FunctionDefinition (
     override var definitionText: String
         get() = _definitionText
         set(value) {
-            resolutionState = ResolutionState.UNRESOLVED
+            reset()
             _definitionText = value
         }
 
@@ -185,6 +185,7 @@ class FunctionDefinition (
         resolutionState = ResolutionState.UNRESOLVED
         resolvedType = null
         resolvedBody = null
+        locals.clear()
         super.reset()
     }
 

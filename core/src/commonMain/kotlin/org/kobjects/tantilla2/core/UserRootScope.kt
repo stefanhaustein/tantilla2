@@ -7,6 +7,7 @@ import org.kobjects.tantilla2.core.function.FunctionType
 
 class UserRootScope(
     override val parentScope: Scope,
+    override var docString: String = "",
 ) : Scope() {
     val staticFields = mutableListOf<FieldDefinition?>()
 
@@ -20,10 +21,6 @@ class UserRootScope(
 
     override val name: String
         get() = "<UserScope>"
-
-    override var docString: String
-        get() = ""
-        set(_) = throw UnsupportedOperationException()
 
     override fun serializeCode(writer: CodeWriter, precedence: Int) {
         serializeBody(writer)
