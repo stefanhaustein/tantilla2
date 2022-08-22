@@ -1,7 +1,6 @@
 package org.kobjects.tantilla2.android
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
@@ -11,7 +10,6 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -40,11 +38,14 @@ fun RenderScope(viewModel: TantillaViewModel) {
     Scaffold(
         backgroundColor = Color.Transparent,
         topBar = {
-            if (viewModel.mode.value == TantillaViewModel.Mode.HELP) {
-                RenderAppBar(viewModel, if (scope.parentScope == null) viewModel.fileName.value else scope.name)
-            } else {
-                RenderAppBar(viewModel, if (scope.parentScope == RootScope) viewModel.fileName.value else  scope.name, "Add" to {viewModel.edit(scope, null)})
-            } },
+            RenderAppBar(
+                viewModel, when (scope.parentScope) {
+                    null,
+                    RootScope -> viewModel.fileName.value
+                    else -> scope.name
+                }
+            )
+        }
     ) {
         LazyColumn(Modifier.fillMaxWidth(), contentPadding = PaddingValues(8.dp),
         ) {
@@ -107,7 +108,7 @@ fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
                         if (definition.isScope()) {
                             viewModel.scope().value = definition.getValue(null) as Scope
                         } else if (editable) {
-                            viewModel.edit(definition.parentScope!!, definition)
+                            viewModel.edit(definition)
                         }
                     },
                     onTap = {
@@ -143,7 +144,7 @@ fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
                             if (definition.isScope()) {
                                 viewModel.scope().value = definition.getValue(null) as Scope
                             } else {
-                                viewModel.edit(definition.parentScope!!, definition)
+                                viewModel.edit(definition)
                             }
                         })
                 }

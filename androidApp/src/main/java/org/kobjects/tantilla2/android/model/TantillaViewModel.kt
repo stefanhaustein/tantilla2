@@ -12,6 +12,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import org.kobjects.dialog.DialogManager
+import org.kobjects.dialog.InputLine
 import org.kobjects.konsole.compose.AnsiConverter.ansiToAnnotatedString
 import org.kobjects.konsole.compose.ComposeKonsole
 import org.kobjects.tantilla2.console.ConsoleLoop
@@ -138,8 +139,56 @@ class TantillaViewModel(
 
     fun scope(): MutableState<Scope> = if (mode.value == Mode.HELP) helpScope else userScope as MutableState<Scope>
 
+    fun add(kind: Definition.Kind) {
 
-    fun edit(parent: Scope, definition: Definition?) {
+        when (kind) {
+            Definition.Kind.FUNCTION -> {
+                if (userScope.value.supportsMethods) {
+                    dialogManager.showCustom(
+                        "Add Function",
+                        "",
+                        listOf(InputLine("Static", false), InputLine("Name", ""))
+                    ) {
+                        add("${if (it[0] == true) "static " else "" }def ${it[1]}():") }
+                } else {
+                    dialogManager.showPrompt("Add Function", "Name", "") {
+                        add("def $it():")
+                    }
+                }
+            }
+            Definition.Kind.PROPERTY -> {
+                if (userScope.value.supportsLocalVariables) {
+                    dialogManager.showCustom(
+                        "Add Field",
+                        "",
+                        listOf(InputLine("Static", false), InputLine("Name", ""))
+                    ) {
+                        add("${if (it[0] == true) "static " else "" }${it[1]} =") }
+                } else {
+                    dialogManager.showPrompt("Add Field", "Name", "") {
+                        add("$it = ")
+                    }
+                }
+            }
+            Definition.Kind.IMPL -> add("impl ")
+            else -> {
+                val lowercase = kind.toString().lowercase()
+                dialogManager.showPrompt("Add $lowercase", "Name", "") {
+                    add("$lowercase $it:")
+                }
+            }
+        }
+
+    }
+
+    fun add(text: String) {
+        this.editingDefinition.value = null
+        currentText.value = currentText.value.copy(text)
+        mode.value = Mode.DEFINITION_EDITOR
+    }
+
+
+    fun edit(definition: Definition?) {
         this.editingDefinition.value = definition
         val writer = CodeWriter()
         definition?.serializeCode(writer)

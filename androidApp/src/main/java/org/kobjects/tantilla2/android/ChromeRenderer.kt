@@ -16,20 +16,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import org.kobjects.konsole.compose.ComposeKonsole
 import org.kobjects.tantilla2.android.model.TantillaViewModel
+import org.kobjects.tantilla2.core.Definition
 import org.kobjects.tantilla2.core.UserRootScope
 import org.kobjects.tantilla2.core.runtime.RootScope
-import java.io.File
-import kotlin.math.exp
 
 @Composable
 fun RenderAppBar(
     viewModel: TantillaViewModel,
-    title: String,
-    vararg extraMenuItems: Pair<String, () -> Unit>) {
+    title: String) {
 
     val showMenu = remember { mutableStateOf(false) }
+    val showAddMenu = remember { mutableStateOf(false) }
     val showExamplesMenu = remember { mutableStateOf(false) }
     val showClearMenu = remember { mutableStateOf(false) }
     val showFileMenu = remember { mutableStateOf(false) }
@@ -85,26 +83,39 @@ fun RenderAppBar(
                 onClick = { showMenu.value = !showMenu.value }
             ) {
                 Icon(Icons.Default.MoreVert, contentDescription = "More")
-                var menuItems = arrayOf(
+                var menuItems = buildList {
                     if (viewModel.globalRuntimeContext.value.activeThreads == 0)
-                    "Run main()" to {
-                        viewModel.runMain() } else "Stop" to {
-                            viewModel.stop()
-                         },
-                    "Clear ▶" to { showClearMenu.value = true },
-                    "File \u25B6" to { showFileMenu.value = true },
-                )
-
-                if (!extraMenuItems.isEmpty()) {
-                    menuItems = arrayOf(*extraMenuItems, "" to {}, *menuItems)
+                        add("Run main()" to { viewModel.runMain() })
+                    else add("Stop" to { viewModel.stop() })
+                    when (viewModel.mode.value) {
+                        TantillaViewModel.Mode.HIERARCHY -> {
+                            add("Add  ▶" to { showAddMenu.value = true })
+                        }
+                        TantillaViewModel.Mode.SHELL -> {
+                            add("Clear ▶" to { showClearMenu.value = true })
+                        }
+                    }
+                    add("File \u25B6" to { showFileMenu.value = true })
                 }
 
-                RenderDropDownMenu(showMenu, *menuItems)
+                RenderDropDownMenu(showMenu, *menuItems.toTypedArray())
+                RenderDropDownMenu(
+                    showAddMenu,
+                    "Field" to { viewModel.add(Definition.Kind.PROPERTY) },
+                    "Function" to { viewModel.add(Definition.Kind.FUNCTION) },
+                    "" to { },
+                    "Struct" to { viewModel.add(Definition.Kind.STRUCT) },
+                    "Trait" to { viewModel.add(Definition.Kind.TRAIT) },
+                    "Impl" to { viewModel.add(Definition.Kind.IMPL) },
+                    "Unit" to { viewModel.add(Definition.Kind.UNIT) }
+                )
+
                 RenderDropDownMenu(
                     showFileMenu,
                     "Save as..." to { viewModel.saveAs() },
                     "Load..." to { showLoadMenu.value = true },
                     "Examples \u25B6" to { showExamplesMenu.value = true },
+                    "Full reset" to { viewModel.reset() }
                     )
                 RenderDropDownMenu(
                     showExamplesMenu,
@@ -115,7 +126,7 @@ fun RenderAppBar(
                     showClearMenu,
                     "Clear text output" to { (viewModel.clearConsole()) },
                             "Clear bitmap" to { viewModel.clearBitmap() },
-                            "Full reset" to { viewModel.reset() }
+
                 )
                 RenderFileSelector(viewModel, showLoadMenu)
             }
