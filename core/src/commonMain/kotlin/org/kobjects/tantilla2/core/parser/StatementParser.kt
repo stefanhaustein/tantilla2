@@ -76,7 +76,7 @@ object StatementParser {
         tokenizer.consume("while")
         val condition = ExpressionParser.parseExpression(tokenizer, context)
         tokenizer.consume(":")
-        return Control.While(condition, Parser.parse(tokenizer, context.indent()))
+        return Control.While(condition, Parser.parseStatements(tokenizer, context.indent()))
     }
 
     fun parseFor(tokenizer: TantillaTokenizer, context: ParsingContext): For {
@@ -94,7 +94,7 @@ object StatementParser {
 
         val iteratorIndex = context.scope.declareLocalVariable(
             iteratorName, iteratorType, false)
-        val body = Parser.parse(tokenizer, context.indent())
+        val body = Parser.parseStatements(tokenizer, context.indent())
         return For(iteratorName, iteratorIndex, iterableExpression, body)
     }
 
@@ -105,14 +105,14 @@ object StatementParser {
             val condition = ExpressionParser.parseExpression(tokenizer, context)
             expressions.add(condition)
             tokenizer.consume(":")
-            val block = Parser.parse(tokenizer, context.indent())
+            val block = Parser.parseStatements(tokenizer, context.indent())
             expressions.add(block)
             Parser.skipLineBreaks(tokenizer, context.depth)
         } while (tokenizer.tryConsume("elif"))
 
         if (tokenizer.tryConsume("else")) {
             tokenizer.consume(":")
-            val otherwise = Parser.parse(tokenizer, context.indent())
+            val otherwise = Parser.parseStatements(tokenizer, context.indent())
             expressions.add(otherwise)
         }
 

@@ -159,7 +159,7 @@ object ExpressionParser {
                 closureIndices.add(definition.index)
             }
         } */
-        val body = Parser.parse(tokenizer, ParsingContext(functionScope, context.depth + 1))
+        val body = Parser.parseStatements(tokenizer, ParsingContext(functionScope, context.depth + 1))
 
         return LambdaReference(type, functionScope.locals.size, body)
     }

@@ -51,7 +51,7 @@ fun RenderScope(viewModel: TantillaViewModel) {
         ) {
            if (viewModel.mode.value == TantillaViewModel.Mode.HIERARCHY || scope.docString.isNotEmpty()) {
                item {
-                   RenderDocumentation(viewModel, scope)
+                   RenderDocumentation(viewModel)
                }
            }
             for (kind in Definition.Kind.values().toList() /* + listOf(null) */) {
@@ -154,30 +154,30 @@ fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
 }
 
 @Composable
-fun RenderDocumentation(viewModel: TantillaViewModel, scope: Scope) {
+fun RenderDocumentation(viewModel: TantillaViewModel) {
     val expanded = remember {
         mutableStateOf(false)
     }
-    Card(
-        backgroundColor = Color(0xffeeeeee),
-        modifier = Modifier
+    val editable = viewModel.mode.value == TantillaViewModel.Mode.HIERARCHY
+    val scope = viewModel.scope().value
+    val docString = scope.docString
+
+        Box(Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(4.dp))
-            .padding(4.dp)
             .pointerInput(Unit) {
-                val editable = viewModel.mode.value == TantillaViewModel.Mode.HIERARCHY
+
                 detectTapGestures(
                     onLongPress = {
-                        viewModel.editDocumentation()
+                        if (editable) {
+                            viewModel.editDocumentation()
+                        }
                     },
                     onTap = {
                         expanded.value = !expanded.value
                     }
                 )
-            }
-    ) {
-        Box(Modifier.padding(8.dp)) {
-            val help = viewModel.mode.value == TantillaViewModel.Mode.HELP
+            }) {
+
             Column() {
                 if (scope.docString.isBlank()) {
                     Text("(Undocumented)", color = Color.LightGray)
@@ -191,21 +191,28 @@ fun RenderDocumentation(viewModel: TantillaViewModel, scope: Scope) {
                             scope.docString.split("\n").first()
                         )
                     }
-                    Text(AnsiConverter.ansiToAnnotatedString(writer.toString()))
+                    Text(
+                        AnsiConverter.ansiToAnnotatedString(writer.toString()),
+                        Modifier.padding(bottom = 6.dp))
                 }
             }
-            Row(modifier = Modifier
-                .align(Alignment.TopEnd)
-                .alpha(0.2f)) {
-                if (!help) {
-                    Icon(
-                        Icons.Default.Fullscreen,
-                        contentDescription = "Open",
-                        modifier = Modifier.clickable {
-                            viewModel.editDocumentation()
-                        })
+            if (editable) {
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .alpha(0.2f)
+                        .padding(end = 12.dp)
+                ) {
+
+                        Icon(
+                            Icons.Default.Fullscreen,
+                            contentDescription = "Open",
+                            modifier = Modifier.clickable {
+                                viewModel.editDocumentation()
+                            })
+
                 }
             }
         }
     }
-}
+

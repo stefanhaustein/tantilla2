@@ -23,13 +23,14 @@ object Parser {
 
     fun parse(s: String, context: Scope): Evaluable<LocalRuntimeContext> {
         val tokenizer = TantillaTokenizer(s)
-        tokenizer.consume(TokenType.BOF);
-        val result = parse(tokenizer, ParsingContext(context, 0))
+        tokenizer.consume(TokenType.BOF)
+        context.docString = readDocString(tokenizer)
+        val result = parseStatements(tokenizer, ParsingContext(context, 0))
         tokenizer.consume(TokenType.EOF)
         return result
     }
 
-    fun parse(
+    fun parseStatements(
         tokenizer: TantillaTokenizer,
         context: ParsingContext,
     ): Evaluable<LocalRuntimeContext> {
@@ -63,7 +64,7 @@ object Parser {
 
     fun readDocString(tokenizer: TantillaTokenizer): String {
         if (tokenizer.current.type == TokenType.STRING || tokenizer.current.type == TokenType.MULTILINE_STRING) {
-            return tokenizer.next().text
+            return unquote(tokenizer.next().text)
         }
         return ""
     }
@@ -123,7 +124,7 @@ object Parser {
     }
 
     fun parseScopeBody(tokenizer: TantillaTokenizer, parsingContext: ParsingContext): Scope {
-        parse(tokenizer, parsingContext)
+        parseStatements(tokenizer, parsingContext)
         return parsingContext.scope
     }
 

@@ -1,3 +1,6 @@
+"Raytracer implementation based on Microsoft's corresponding TypeScript demo"
+
+
 struct Vector:
   x: float
   y: float

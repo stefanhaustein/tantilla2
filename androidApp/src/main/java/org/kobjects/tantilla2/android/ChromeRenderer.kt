@@ -90,6 +90,19 @@ fun RenderAppBar(
                     when (viewModel.mode.value) {
                         TantillaViewModel.Mode.HIERARCHY -> {
                             add("Add  ▶" to { showAddMenu.value = true })
+                            val scope = viewModel.userScope.value
+                            val parent = scope.parentScope
+                            if (parent != RootScope && parent != null) {
+                                add("Delete" to {
+                                    viewModel.dialogManager.showConfirmation(
+                                        "Confirm",
+                                        "Delete '$scope'?"
+                                    ) {
+                                        parent.remove(scope.toString())
+                                        viewModel.userScope.value = parent
+                                    }
+                                })
+                            }
                         }
                         TantillaViewModel.Mode.SHELL -> {
                             add("Clear ▶" to { showClearMenu.value = true })
@@ -115,7 +128,7 @@ fun RenderAppBar(
                     "Save as..." to { viewModel.saveAs() },
                     "Load..." to { showLoadMenu.value = true },
                     "Examples \u25B6" to { showExamplesMenu.value = true },
-                    "Full reset" to { viewModel.reset() }
+                    "Full reset" to { viewModel.confirmReset() }
                     )
                 RenderDropDownMenu(
                     showExamplesMenu,

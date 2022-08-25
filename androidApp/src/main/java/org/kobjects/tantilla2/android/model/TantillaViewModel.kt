@@ -183,7 +183,7 @@ class TantillaViewModel(
 
     fun add(text: String) {
         this.editingDefinition.value = null
-        currentText.value = currentText.value.copy(text)
+        currentText.value = currentText.value.copy(annotatedCode(text, emptyList()))
         mode.value = Mode.DEFINITION_EDITOR
     }
 
@@ -203,6 +203,12 @@ class TantillaViewModel(
         mode.value = Mode.DOCUMENTATION_EDITOR
     }
 
+
+    fun confirmReset() {
+        dialogManager.showConfirmation("Full Reset", "Delete the current program completely?") {
+            reset()
+        }
+    }
 
     fun reset() {
         clearBitmap()

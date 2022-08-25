@@ -7,6 +7,15 @@ enum class TokenType {
     BOF, IDENTIFIER, NUMBER, SYMBOL, EOF, LINE_BREAK, STRING, MULTILINE_STRING
 }
 
+fun unquote(s: String): String {
+    if (s.startsWith("\"\"\"")) {
+        return s.substring(3, s.length -3)
+    }
+
+    return s.substring(1, s.length - 1)
+
+}
+
 class TantillaTokenizer(input: String) : Tokenizer<TokenType>(
     input,
     TokenType.BOF,
