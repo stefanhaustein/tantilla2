@@ -1,4 +1,4 @@
-"Raytracer implementation based on Microsoft's corresponding TypeScript demo"
+"""Raytracer implementation based on Microsoft's corresponding TypeScript demo"""
 
 
 struct Vector:
