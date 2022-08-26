@@ -214,6 +214,10 @@ abstract class Scope(
     }
 
     fun serializeBody(writer: CodeWriter) {
+        if (docString.isNotEmpty()) {
+            writer.appendTripleQuoted(docString)
+            writer.newline()
+        }
         for (definition in this) {
             writer.appendCode(definition)
             writer.newline()
@@ -225,10 +229,7 @@ abstract class Scope(
         writer.appendKeyword(kind.name.lowercase()).append(' ').appendDeclaration(name).append(":")
         writer.indent()
         writer.newline()
-        if (docString.isNotEmpty()) {
-            writer.appendTripleQuoted(docString)
-            writer.newline()
-        }
+
         serializeBody(writer)
         writer.outdent()
     }
