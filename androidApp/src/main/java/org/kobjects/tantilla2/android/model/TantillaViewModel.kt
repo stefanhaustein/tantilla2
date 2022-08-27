@@ -1,8 +1,6 @@
 package org.kobjects.tantilla2.android.model
 
 import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.view.Choreographer
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -17,17 +15,10 @@ import org.kobjects.konsole.compose.AnsiConverter.ansiToAnnotatedString
 import org.kobjects.konsole.compose.ComposeKonsole
 import org.kobjects.tantilla2.console.ConsoleLoop
 import org.kobjects.tantilla2.core.*
-import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.parser.Parser
-import org.kobjects.tantilla2.core.runtime.F64
 import org.kobjects.tantilla2.core.runtime.RootScope
-import org.kobjects.tantilla2.core.runtime.Void
-import org.kobjects.tantilla2.stdlib.PenDefinition
 import org.kobjects.parserlib.tokenizer.ParsingException
-import org.kobjects.tantilla2.android.PenImpl
-import org.kobjects.tantilla2.core.classifier.NativePropertyDefinition
-import org.kobjects.tantilla2.core.function.FunctionType
-import org.kobjects.tantilla2.core.function.Callable
+import org.kobjects.tantilla2.core.function.FunctionDefinition
 import java.io.File
 import java.nio.charset.StandardCharsets
 import kotlin.Exception
@@ -53,12 +44,16 @@ class TantillaViewModel(
         get() = console.scope
 
     init {
-        defineNatives()
+        defineNatives(bitmap, graphicsUpdateTrigger)
         console.errorCallback = ::highlightRuntimeException
 
         val file = File(platform.rootDirectory, platform.fileName)
         if (file.exists()) {
             load(file)
+        } else if (platform.fileName == "Scratch.tt") {
+            reset(true)
+        } else {
+            reset(false)
         }
     }
 
@@ -69,59 +64,7 @@ class TantillaViewModel(
         }
     }
 
-    fun defineNatives() {
-        RootScope.defineNativeFunction(
-            "setPixel",
-            "Sets the pixel at the given x/y coordinate to the given 32bit color value in ARGB format.",
-            Void,
-            Parameter("x", F64),
-            Parameter("y", F64),
-            Parameter("color", F64)
-        ) {
-            bitmap.setPixel(
-                (it.variables[0] as Double).toInt(),
-                (it.variables[1] as Double).toInt(),
-                (it.variables[2] as Double).toInt())
-        }
 
-
-        val canvas = Canvas(bitmap)
-        canvas.translate(bitmap.width / 2f, bitmap.height / 2f)
-        canvas.scale(1f, -1f)
-        val penImpl = PenImpl(PenDefinition, canvas, graphicsUpdateTrigger)
-        RootScope.add(
-            NativePropertyDefinition(
-            RootScope,
-            Definition.Kind.STATIC,
-            "pen",
-            type = PenDefinition,
-            getter = {penImpl}
-        )
-        )
-
-        RootScope.defineNativeFunction(
-            "requestAnimationFrame",
-            "Calls the given function before refreshing the screen.",
-            Void,
-            Parameter("callback", FunctionType.Impl(Void, emptyList()))
-        ) { context ->
-            if (!context.globalRuntimeContext.stopRequested) {
-                Choreographer.getInstance().postFrameCallback {
-                    try {
-                        val fn = context[0] as Callable
-                        val functionContext = LocalRuntimeContext(
-                            context.globalRuntimeContext,
-                            fn.scopeSize,
-                            closure = fn.closure
-                        )
-                        fn.eval(functionContext)
-                    } finally {
-                        context.globalRuntimeContext.activeThreads--
-                    }
-                }
-            }
-        }
-    }
 
     fun saveAs() {
         dialogManager.showPrompt("Save As", "File Name", fileName.value) {
@@ -205,19 +148,31 @@ class TantillaViewModel(
 
 
     fun confirmReset() {
-        dialogManager.showConfirmation("Full Reset", "Delete the current program completely?") {
-            reset()
+        dialogManager.showConfirmation("Full Reset", "Start from scratch? The current program will be deleted.") {
+            reset(addHello = true)
         }
     }
 
-    fun reset() {
+    fun reset(addHello: Boolean = false) {
         clearBitmap()
         clearConsole()
-        console.setUserScope(UserRootScope(RootScope))
-        defineNatives()
-        userScope.value = console.scope
-        helpScope.value = console.scope.parentScope!!
-        saveAs("Scratch.kt")
+        val newRoot = UserRootScope(RootScope)
+        console.setUserScope(newRoot)
+        defineNatives(bitmap, graphicsUpdateTrigger)
+        userScope.value = newRoot
+        helpScope.value = newRoot.parentScope!!
+
+        if (addHello) {
+            newRoot.add(
+                FunctionDefinition(
+                    newRoot,
+                    Definition.Kind.FUNCTION,
+                    "main",
+                    "def main():\n  print(\"Hello World!\")"
+                )
+            )
+            saveAs("Scratch.tt")
+        }
     }
 
     fun stop() {
@@ -246,6 +201,7 @@ class TantillaViewModel(
         platform.runAsync {
             reset()
             this.fileName.value = file.name
+            platform.fileName = file.name
             loadCode(file.readText())
         }
     }
@@ -254,6 +210,7 @@ class TantillaViewModel(
         platform.runAsync {
             reset()
             this.fileName.value = name
+            platform.fileName = name
             loadCode(platform.loadExample(name))
         }
     }

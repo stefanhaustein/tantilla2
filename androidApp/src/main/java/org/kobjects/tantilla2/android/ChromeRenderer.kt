@@ -132,7 +132,7 @@ fun RenderAppBar(
                     )
                 RenderDropDownMenu(
                     showExamplesMenu,
-                    "HelloWorld" to  { viewModel.loadExample("HelloWorld.tt") },
+                    "FizzBuzz" to  { viewModel.loadExample("FizzBuzz.tt") },
                     "RayTracer" to  { viewModel.loadExample("RayTracer.tt") }
                 )
                 RenderDropDownMenu(

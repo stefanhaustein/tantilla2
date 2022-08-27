@@ -23,6 +23,12 @@ data class Color(
     val argb = (clamp255(a) shl 24) or (clamp255(r) shl 16) or (clamp255(g) shl 8) or clamp255(b)
 
     companion object {
+        fun argb(argb: Int): Color = Color(
+            ((argb shr 16) and 255) / 255.0,
+            ((argb shr 8) and 255) / 255.0,
+            ((argb) and 255) / 255.0,
+            ((argb shr 24) and 255) / 255.0,
+        )
 
         fun hsl(h: Double, s: Double, l: Double, a: Double = 1.0): Color {
             val c = (1.0 - abs(2*l - 1)) * s

@@ -17,7 +17,11 @@ class LocalVariableDefinition (
 
                 val existingIndex = parentScope.locals.indexOf(name)
                 if (index != existingIndex) {
-                    throw IllegalArgumentException("local variable inconsistency new index: $index; existing: $existingIndex")
+                    if (index == -1) {
+                        index = existingIndex
+                    } else {
+                        throw IllegalArgumentException("local variable inconsistency new index: $index; existing: $existingIndex")
+                    }
                 }
 
     }

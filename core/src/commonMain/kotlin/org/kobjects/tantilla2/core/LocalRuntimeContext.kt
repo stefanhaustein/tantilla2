@@ -11,6 +11,7 @@ class LocalRuntimeContext(
     operator fun get(i: Int) = variables[i]
 
     fun f64(i: Int) = (variables[i] as Number).toDouble()
-    fun i64(i: Int) = variables[i] as Long
+    fun i64(i: Int) = (variables[i] as Number).toLong()
+    fun i32(i: Int) = (variables[i] as Number).toInt()
     fun str(i: Int) = variables[i] as String
 }

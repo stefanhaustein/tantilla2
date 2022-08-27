@@ -1,4 +1,4 @@
-package org.kobjects.tantilla2.android
+package org.kobjects.tantilla2.android.stdlib
 
 import android.graphics.Canvas
 import android.graphics.Color

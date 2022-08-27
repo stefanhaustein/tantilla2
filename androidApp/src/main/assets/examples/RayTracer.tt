@@ -228,21 +228,21 @@ struct RayTracer:
   def getPoint(x: float, y: float, cam: Camera) -> Vector:
     cam.forward.plus(cam.right.times(x / 200)).plus(cam.up.times(y / 200)).norm()
 
-  def render(s: Scene, p: Pen, screenWidth: float, screenHeight: float):
-    p.stroke_color = Color.TRANSPARENT
-    renderRow(s, p, screenWidth, screenHeight, 0)
+  def render(s: Scene, b: BitmapImage):
+    renderRow(s, b, 0)
 
-  def renderRow(s: Scene, p: Pen, screenWidth: float, screenHeight: float, y: float):
-    for x in range(-screenWidth / 2, screenWidth / 2):
+  def renderRow(s: Scene, b: BitmapImage, y: float):
+    let scale = 150 / min(b.width, b.height)
+    for x in range(0, b.width):
       let mut yy = math.floor(y / 2)
       if y % 2 == 0:
         yy = -yy-1
 
-      p.fill_color = traceRay(Ray(s.camera.pos, getPoint(x, yy, s.camera)), s, 0)
-      p.rect(x, yy, 1, 1)
+      let color = traceRay(Ray(s.camera.pos, getPoint((x - b.width/2) * scale, yy * scale, s.camera)), s, 0)
+      b.set(x, b.height / 2 - yy, color)
 
-    if (y < screenHeight):
-      requestAnimationFrame(lambda: renderRow(s, p, screenWidth, screenHeight, y + 1))
+    if (y < b.height - 2):
+      requestAnimationFrame(lambda: renderRow(s, b, y + 1))
 
 
 defaultThings = [Plane(Vector(0,1,0), 0, Checkerboard) as Thing, Sphere(Vector(0,1,-0.25), 1, Shiny) as Thing, Sphere(Vector(-1,0.5,1.5),0.5, Shiny) as Thing]
@@ -252,4 +252,4 @@ defaultScene = Scene(defaultThings, defaultLights, defaultCamera, Color.BLACK)
 
 def main():
   let rayTracer = RayTracer()
-  rayTracer.render(defaultScene, pen, 320, 320)
+  rayTracer.render(defaultScene, screen)
