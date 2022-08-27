@@ -21,18 +21,45 @@ object Parser {
         return s.length - lastBreak - 1
     }
 
-    fun parse(s: String, context: Scope): Evaluable<LocalRuntimeContext> {
-        val tokenizer = TantillaTokenizer(s)
+    fun parseShellInput(s: String, scope: UserRootScope): Evaluable<LocalRuntimeContext> {
+        return parse(s, scope, definitionsAllowed = true, statementsAllowed = true)
+    }
+
+    fun parseProgram(s: String, scope: UserRootScope) {
+        parse(s, scope, definitionsAllowed = true, statementsAllowed = false)
+    }
+
+    fun parse(
+        source: String,
+        scope: Scope,
+        definitionsAllowed: Boolean = true,
+        statementsAllowed: Boolean = true
+    ): Evaluable<LocalRuntimeContext> {
+        val tokenizer = TantillaTokenizer(source)
         tokenizer.consume(TokenType.BOF)
-        context.docString = readDocString(tokenizer)
-        val result = parseStatements(tokenizer, ParsingContext(context, 0))
+        scope.docString = readDocString(tokenizer)
+        val result = parseDefinitionsAndStatements(
+            tokenizer,
+            ParsingContext(scope, 0),
+            definitionsAllowed = definitionsAllowed,
+            statementsAllowed = statementsAllowed
+        )
         tokenizer.consume(TokenType.EOF)
         return result
     }
 
-    fun parseStatements(
+    fun parseStatements(tokenizer: TantillaTokenizer, context: ParsingContext) =
+        parseDefinitionsAndStatements(tokenizer, context, definitionsAllowed = false)
+
+    fun parseDefinitions(tokenizer: TantillaTokenizer, context: ParsingContext) {
+        parseDefinitionsAndStatements(tokenizer, context, statementsAllowed = false)
+    }
+
+    fun parseDefinitionsAndStatements(
         tokenizer: TantillaTokenizer,
         context: ParsingContext,
+        statementsAllowed: Boolean = true,
+        definitionsAllowed: Boolean = true
     ): Evaluable<LocalRuntimeContext> {
         val statements = mutableListOf<Evaluable<LocalRuntimeContext>>()
         val scope = context.scope
@@ -48,14 +75,19 @@ object Parser {
                 }
                 tokenizer.next()
             } else if (DECLARATION_KEYWORDS.contains(tokenizer.current.text) ||
-                (context.scope !is FunctionDefinition
+                (!statementsAllowed
                         && tokenizer.current.type == TokenType.IDENTIFIER
                         && (tokenizer.lookAhead(1).text == ":" || tokenizer.lookAhead(1).text == "="))) {
-                    val definition = parseDefinition(tokenizer, ParsingContext(scope, localDepth))
-                    scope.add(definition)
-                } else {
-                    val statement = StatementParser.parseStatement(tokenizer, ParsingContext(scope, localDepth))
-                    statements.add(statement)
+                if (!definitionsAllowed) {
+                    throw tokenizer.exception("Definitions are not allowed here.")
+                }
+                val definition = parseDefinition(tokenizer, ParsingContext(scope, localDepth))
+                scope.add(definition)
+            } else if (statementsAllowed) {
+                val statement = StatementParser.parseStatement(tokenizer, ParsingContext(scope, localDepth))
+                statements.add(statement)
+            } else {
+                throw tokenizer.exception("Statements are not allowed here.")
             }
         }
         return if (statements.size == 1) statements[0]
@@ -101,7 +133,7 @@ object Parser {
                 val definition = if (kind == "struct") StructDefinition(context.scope, name, docString = docString)
                 else if (kind == "unit") UnitScope(context.scope, name, docString = docString)
                 else TraitDefinition(context.scope, name, docString = docString)
-                parseScopeBody(tokenizer, ParsingContext(definition, context.depth + 1))
+                parseDefinitions(tokenizer, ParsingContext(definition, context.depth + 1))
                 definition
             }
             "impl" -> {
@@ -121,11 +153,6 @@ object Parser {
             }
             else -> throw tokenizer.exception("Declaration expected.")
         }
-    }
-
-    fun parseScopeBody(tokenizer: TantillaTokenizer, parsingContext: ParsingContext): Scope {
-        parseStatements(tokenizer, parsingContext)
-        return parsingContext.scope
     }
 
     fun consumeLine(tokenizer: TantillaTokenizer, startPos: Int): String {

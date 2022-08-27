@@ -76,7 +76,7 @@ class ImplDefinition(
                 tokenizer.consume("for")
                 tokenizer.consume(className)
                 tokenizer.consume(":")
-                Parser.parseStatements(tokenizer, ParsingContext(this, 0))
+                Parser.parseDefinitionsAndStatements(tokenizer, ParsingContext(this, 0))
                 println("Impl successfully resolved!")
             }
             return this

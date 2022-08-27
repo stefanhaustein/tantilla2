@@ -103,7 +103,7 @@ class FunctionDefinition (
            } else {
                tokenizer.consume(":")
                docString = Parser.readDocString(tokenizer)
-               resolvedBody = Parser.parseStatements(tokenizer, ParsingContext(this, 1))
+               resolvedBody = Parser.parseDefinitionsAndStatements(tokenizer, ParsingContext(this, 1))
            }
 
            resolutionState = ResolutionState.RESOLVED

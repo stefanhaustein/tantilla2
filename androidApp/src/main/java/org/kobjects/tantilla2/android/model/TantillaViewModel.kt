@@ -54,7 +54,7 @@ class TantillaViewModel(
 
     init {
         defineNatives()
-        console.errorListener = ::highlightRuntimeException
+        console.errorCallback = ::highlightRuntimeException
 
         val file = File(platform.rootDirectory, platform.fileName)
         if (file.exists()) {
@@ -260,7 +260,7 @@ class TantillaViewModel(
 
     private fun loadCode(code: String) {
             try {
-                Parser.parse(code, console.scope)
+                Parser.parseProgram(code, console.scope)
             } catch (e: Exception) {
                 dialogManager.showError(e.toString())
             }

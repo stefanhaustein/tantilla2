@@ -76,7 +76,7 @@ object StatementParser {
         tokenizer.consume("while")
         val condition = ExpressionParser.parseExpression(tokenizer, context)
         tokenizer.consume(":")
-        return Control.While(condition, Parser.parseStatements(tokenizer, context.indent()))
+        return Control.While(condition, Parser.parseDefinitionsAndStatements(tokenizer, context.indent()))
     }
 
     fun parseFor(tokenizer: TantillaTokenizer, context: ParsingContext): For {
