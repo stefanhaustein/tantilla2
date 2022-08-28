@@ -9,7 +9,9 @@ object Str : NativeStructDefinition(
     "str",
     "A character String. Use the constructor to convert a value to its string representation.",
     ctorParams = listOf(Parameter("value", AnyType, defaultValueExpression = org.kobjects.greenspun.core.Str.Const(""))),
-    ctor = { it[0].toString() }
+    ctor = {
+        it[0].toString()
+    }
 )  {
 
 

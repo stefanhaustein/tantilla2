@@ -22,11 +22,4 @@ interface TantillaNode : Evaluable<LocalRuntimeContext>, SerializableCode {
 
     val returnType: Type
 
-    override fun evalF64(context: LocalRuntimeContext): Double {
-        val result = eval(context) as Number
-    /*    if (result !is Double) {
-            println("Double expected for $this")
-        } */
-        return result.toDouble()
-    }
 }

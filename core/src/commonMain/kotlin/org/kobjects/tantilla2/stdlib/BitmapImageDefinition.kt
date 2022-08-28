@@ -3,6 +3,7 @@ package org.kobjects.tantilla2.stdlib
 import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.runtime.F64
+import org.kobjects.tantilla2.core.runtime.I64
 import org.kobjects.tantilla2.core.runtime.RootScope
 import org.kobjects.tantilla2.core.runtime.Void
 
@@ -16,14 +17,14 @@ object BitmapImageDefinition : NativeStructDefinition(
         defineNativeProperty(
             "width",
             "The width of the image in pixels.",
-            F64,
-             { (it as BitmapImage).width.toDouble() })
+            I64,
+             { (it as BitmapImage).width.toLong() })
 
         defineNativeProperty(
             "height",
             "The height of the image in pixels.",
-            F64,
-            { (it as BitmapImage).height.toDouble() })
+            I64,
+            { (it as BitmapImage).height.toLong() })
 
         defineNativeFunction(
             "set",

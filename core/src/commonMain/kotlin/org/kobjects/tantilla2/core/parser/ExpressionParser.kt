@@ -2,6 +2,7 @@ package org.kobjects.tantilla2.core.parser
 
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.greenspun.core.F64
+import org.kobjects.greenspun.core.I64
 import org.kobjects.greenspun.core.Str
 import org.kobjects.tantilla2.core.*
 import org.kobjects.parserlib.expressionparser.ExpressionParser as GreenspunExpressionParser
@@ -13,6 +14,10 @@ import org.kobjects.tantilla2.core.function.LambdaScope
 import org.kobjects.tantilla2.core.node.*
 
 object ExpressionParser {
+
+    fun bothInt(l: Evaluable<LocalRuntimeContext>, r: Evaluable<LocalRuntimeContext>) =
+         l.returnType == org.kobjects.tantilla2.core.runtime.I64
+                 && r.returnType == org.kobjects.tantilla2.core.runtime.I64
 
     fun parseExpression(tokenizer: TantillaTokenizer, context: ParsingContext, expectedType: Type? = null): Evaluable<LocalRuntimeContext> {
         if (expectedType is FunctionType && tokenizer.current.text == "lambda") {
@@ -164,10 +169,13 @@ object ExpressionParser {
         return LambdaReference(type, functionScope.locals.size, body)
     }
 
+    fun createNumberLiteral(s: String): Evaluable<LocalRuntimeContext> =
+        if (s.contains('.') || s.contains('e') || s.contains('E'))
+            F64.Const(s.toDouble()) else I64.Const(s.toLong())
 
     fun parsePrimary(tokenizer: TantillaTokenizer, context: ParsingContext): Evaluable<LocalRuntimeContext> =
         when (tokenizer.current.type) {
-            TokenType.NUMBER -> F64.Const(tokenizer.next().text.toDouble())
+            TokenType.NUMBER -> createNumberLiteral(tokenizer.next().text);
             TokenType.STRING -> Str.Const(tokenizer.next().text.unquote())
             TokenType.IDENTIFIER ->  if (tokenizer.current.text == "lambda")
                 parseLambda(tokenizer, context) else parseFreeIdentifier(tokenizer, context)
@@ -302,7 +310,7 @@ object ExpressionParser {
                 } else if (nameRequired) {
                     throw tokenizer.exception("Named parameter required here.")
                 } else if (index >= expectedParameters.size) {
-                    throw tokenizer.exception("Too many parameters.")
+                    throw tokenizer.exception("Expected parameters $expectedParameters exceeded; index: $index")
                 }
                 val expectedParameter = expectedParameters[index]
                 val expression = parseExpression(tokenizer, context, expectedParameter.type)
@@ -353,19 +361,22 @@ object ExpressionParser {
             GreenspunExpressionParser.suffix(7, "as") {
                 tokenizer, context, _, base -> parseAs(tokenizer, context, base) },
             GreenspunExpressionParser.infix(6, "**") { _, _, _, l, r -> F64.Pow(l, r)},
-            GreenspunExpressionParser.infix(5, "*") { _, _, _, l, r -> F64.Mul(l, r)},
+            GreenspunExpressionParser.infix(5, "*") { _, _, _, l, r -> if (bothInt(l, r)) I64.Mul(l, r) else F64.Mul(l, r)},
+            GreenspunExpressionParser.infix(5, "//") { _, _, _, l, r -> I64.Div(l, r)},
             GreenspunExpressionParser.infix(5, "/") { _, _, _, l, r -> F64.Div(l, r)},
-            GreenspunExpressionParser.infix(5, "%") { _, _, _, l, r -> F64.Mod(l, r)},
-            GreenspunExpressionParser.prefix(4, "-") { _, _, _, expr -> F64.Sub(F64.Const<LocalRuntimeContext>(0.0), expr)},
-            GreenspunExpressionParser.infix(3, "+") { _, _, _, l, r -> F64.Add(l, r)},
-            GreenspunExpressionParser.infix(3, "-") { _, _, _, l, r -> F64.Sub(l, r)},
-            GreenspunExpressionParser.infix(2, "==") { _, _, _, l, r -> F64.Eq(l, r)},
-            GreenspunExpressionParser.infix(2, "!=") { _, _, _, l, r -> F64.Ne(l, r)},
-            GreenspunExpressionParser.infix(1, "<") { _, _, _, l, r -> F64.Lt(l, r)},
-            GreenspunExpressionParser.infix(1, ">") { _, _, _, l, r -> F64.Gt(l, r)},
-            GreenspunExpressionParser.infix(1, "<=") { _, _, _, l, r -> F64.Le(l, r)},
-            GreenspunExpressionParser.infix(1, ">=") { _, _, _, l, r -> F64.Ge(l, r)},
+            GreenspunExpressionParser.infix(5, "%") { _, _, _, l, r -> if (bothInt(l, r)) I64.Mod(l, r) else F64.Mod(l, r)},
+            GreenspunExpressionParser.prefix(4, "-") { _, _, _, expr -> if (expr.returnType == org.kobjects.tantilla2.core.runtime.I64) I64.Neg(expr) else F64.Neg(expr)},
+            GreenspunExpressionParser.infix(3, "+") { _, _, _, l, r -> if (bothInt(l, r)) I64.Add(l, r) else F64.Add(l, r)},
+            GreenspunExpressionParser.infix(3, "-") { _, _, _, l, r ->  if (bothInt(l, r)) I64.Sub(l, r) else F64.Sub(l, r)},
+            GreenspunExpressionParser.infix(2, "==") { _, _, _, l, r ->  if (bothInt(l, r)) I64.Eq(l, r) else F64.Eq(l, r)},
+            GreenspunExpressionParser.infix(2, "!=") { _, _, _, l, r ->  if (bothInt(l, r)) I64.Ne(l, r) else F64.Ne(l, r)},
+            GreenspunExpressionParser.infix(1, "<") { _, _, _, l, r ->  if (bothInt(l, r)) I64.Lt(l, r) else F64.Lt(l, r)},
+            GreenspunExpressionParser.infix(1, ">") { _, _, _, l, r ->  if (bothInt(l, r)) I64.Gt(l, r) else F64.Gt(l, r)},
+            GreenspunExpressionParser.infix(1, "<=") { _, _, _, l, r ->  if (bothInt(l, r)) I64.Le(l, r) else F64.Le(l, r)},
+            GreenspunExpressionParser.infix(1, ">=") { _, _, _, l, r ->  if (bothInt(l, r)) I64.Ge(l, r) else F64.Ge(l, r)},
         ) {
                 t, c -> parsePrimary(t, c)
         }
+
+
 }

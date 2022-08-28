@@ -87,7 +87,7 @@ object StatementParser {
         tokenizer.consume(":")
         val iterableType = iterableExpression.returnType
         val iteratorType = when (iterableType) {
-            RangeType -> org.kobjects.tantilla2.core.runtime.F64
+            RangeType -> org.kobjects.tantilla2.core.runtime.I64
             is ListType -> iterableType.elementType
             else -> throw RuntimeException("Can't iterate type $iterableType")
         }

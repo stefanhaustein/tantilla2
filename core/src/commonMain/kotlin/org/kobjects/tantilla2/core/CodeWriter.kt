@@ -79,16 +79,28 @@ class CodeWriter(
         }
         when (code) {
             is SerializableCode -> code.serializeCode(this, parentPrecedence)
+            is I64.Neg<*> -> appendPrefix(code, parentPrecedence, "-", 4)
+            is F64.Neg<*> -> appendPrefix(code, parentPrecedence, "-", 4)
+            is I64.Gt<*> -> appendInfix(code, parentPrecedence,">", 2)
             is F64.Gt<*> -> appendInfix(code, parentPrecedence,">", 2)
+            is I64.Ge<*> -> appendInfix(code, parentPrecedence,">=", 2)
             is F64.Ge<*> -> appendInfix(code, parentPrecedence,">=", 2)
+            is I64.Lt<*> -> appendInfix(code, parentPrecedence,"<", 2)
             is F64.Lt<*> -> appendInfix(code, parentPrecedence,"<", 2)
-            is F64.Le<*> -> appendInfix(code, parentPrecedence,"<=", 2)
+            is I64.Le<*> -> appendInfix(code, parentPrecedence,"<=", 2)
             is F64.Eq<*> -> appendInfix(code, parentPrecedence,"==", 2)
+            is I64.Eq<*> -> appendInfix(code, parentPrecedence,"==", 2)
             is F64.Ne<*> -> appendInfix(code, parentPrecedence,"!=", 2)
+            is I64.Ne<*> -> appendInfix(code, parentPrecedence,"!=", 2)
+            is I64.Add<*> -> appendInfix(code, parentPrecedence,  "+", 3)
             is F64.Add<*> -> appendInfix(code, parentPrecedence,  "+", 3)
+            is I64.Sub<*> -> appendInfix(code, parentPrecedence, "-", 3)
             is F64.Sub<*> -> appendInfix(code, parentPrecedence, "-", 3)
+            is I64.Mul<*> -> appendInfix(code, parentPrecedence, "*", 5)
             is F64.Mul<*> -> appendInfix(code, parentPrecedence, "*", 5)
+            is I64.Div<*> -> appendInfix(code, parentPrecedence, "//", 5)
             is F64.Div<*> -> appendInfix(code, parentPrecedence, "/", 5)
+            is I64.Mod<*> -> appendInfix(code, parentPrecedence, "%", 5)
             is F64.Mod<*> -> appendInfix(code, parentPrecedence, "%", 5)
             is F64.Pow<*> -> appendInfix(code, parentPrecedence, "**", 6)
             is Control.If<*> -> appendIf(code as Control.If<LocalRuntimeContext>)
@@ -107,6 +119,18 @@ class CodeWriter(
         appendWrapped(Kind.STRING, tripleQuote(s))
     }
 
+
+    fun appendPrefix(code: Evaluable<*>, parentPrecedence: Int, name: String, precedence: Int) {
+        if (parentPrecedence > precedence) {
+            sb.append('(')
+            append(name)
+            appendCode(code.children()[0], precedence)
+            sb.append(')')
+        } else {
+            append(name)
+            appendCode(code.children()[0], precedence)
+        }
+    }
 
     fun appendInfix(code: Evaluable<*>, parentPrecedence: Int, name: String, precedence: Int) {
         if (parentPrecedence > precedence) {

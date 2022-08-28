@@ -1,22 +1,31 @@
 package org.kobjects.tantilla2.core.runtime
 
+import org.kobjects.tantilla2.core.AnyType
 import org.kobjects.tantilla2.core.Type
 import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
 import org.kobjects.tantilla2.core.function.Parameter
 import kotlin.math.*
 
-object F64 : NativeStructDefinition(RootScope, "float"), Type {
+object F64 : NativeStructDefinition(
+    RootScope,
+    "float",
+    "Floating point number. The constructor is able to parse strings and to convert ints.",
+    ctorParams = listOf(Parameter("value", AnyType, defaultValueExpression = org.kobjects.greenspun.core.F64.Const(0.0))),
+    ctor = {
+        val arg = it[0]
+        when (arg) {
+            is String -> arg.toDouble()
+            is Number -> arg.toDouble()
+            else -> throw IllegalArgumentException("Can't convert $arg to a floating point number.")
+        }
+    }
+), Type {
 
     init {
         defineMethod(
             "abs", "Return the absolute value.",
             F64
         ) { abs(it.f64(0)) }
-
-        defineMethod(
-            "int", "Convert to an integer, truncating towards 0.",
-            F64,
-        ) { it.f64(0).toInt() }
 
         defineMethod(
             "max", "Returns the maximum of two values.",
@@ -49,6 +58,10 @@ object F64 : NativeStructDefinition(RootScope, "float"), Type {
         ) { sqrt(it.f64(0)) }
 
 
+    }
+
+    override fun isAssignableFrom(type: Type): Boolean {
+        return type == F64 || type == I64
     }
 
 

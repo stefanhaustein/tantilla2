@@ -1,13 +1,13 @@
 def fizz_buzz(x: float):
-            if x % 3 == 0:
-              if x % 5 == 0:
-                print("FizzBuzz")
-              else:
-                print("Fizz")
-            elif x % 5 == 0:
-              print("Buzz")
-            else:
-              print(str(x))
+  if x % 3 == 0:
+    if x % 5 == 0:
+      print("FizzBuzz")
+    else:
+      print("Fizz")
+  elif x % 5 == 0:
+    print("Buzz")
+  else:
+    print(str(x))
 
 
 def main():

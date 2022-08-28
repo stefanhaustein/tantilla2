@@ -36,7 +36,7 @@ kotlin {
             dependencies {
                 implementation("org.kobjects.konsole:core:0.2.1")
                 implementation("org.kobjects.parserlib:core:0.3.0")
-                implementation("org.kobjects.greenspun:core:0.3.0")
+                implementation("org.kobjects.greenspun:core:0.3.3")
             }
         }
         val commonTest by getting {
