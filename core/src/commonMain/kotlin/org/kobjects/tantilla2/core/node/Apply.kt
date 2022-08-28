@@ -5,11 +5,13 @@ import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Callable
+import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.returnType
 
 
 class Apply(
     val callable: Evaluable<LocalRuntimeContext>,
+    val parameterDeclarations: List<Parameter>,
     val parameters: List<Evaluable<LocalRuntimeContext>>,
     val implicit: Boolean,
     val asMethod: Boolean,
@@ -37,7 +39,7 @@ class Apply(
     }
 
     override fun reconstruct(newChildren: List<Evaluable<LocalRuntimeContext>>): Evaluable<LocalRuntimeContext> =
-        Apply(newChildren[0], newChildren.subList(1, newChildren.size), implicit, asMethod)
+        Apply(newChildren[0], parameterDeclarations, newChildren.subList(1, newChildren.size), implicit, asMethod)
 
     override val returnType
         get() = (callable.returnType as FunctionType).returnType
@@ -52,10 +54,23 @@ class Apply(
         sb.appendCode(callable)
         if (!implicit) {
             sb.append("(")
-            if (parameters.size > startIndex) {
-                sb.appendCode(parameters[startIndex])
-                for (i in startIndex + 1 until parameters.size) {
-                    sb.append(", ")
+            var first = true
+            for (i in startIndex until parameters.size) {
+                if (parameterDeclarations[i].isVararg) {
+                    for (sub in (parameters[i] as ListLiteral).elements) {
+                        if (first) {
+                            first = false
+                        } else {
+                            sb.append(", ")
+                        }
+                        sb.appendCode(sub)
+                    }
+                } else {
+                    if (first) {
+                        first = false
+                    } else {
+                        sb.append(", ")
+                    }
                     sb.appendCode(parameters[i])
                 }
             }

@@ -332,6 +332,7 @@ object ExpressionParser {
 
         return Apply(
             value,
+            expectedParameters,
             List(parameterExpressions.size) { parameterExpressions[it]!!},
             !hasArgs,
             asMethod
