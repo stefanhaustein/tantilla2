@@ -9,9 +9,9 @@ import org.kobjects.tantilla2.core.runtime.Void
 open class NativeStructDefinition(
     parent: Scope,
     name: String,
+    docString: String = "",
     val ctorParams: List<Parameter> = emptyList(),
     val ctor: (LocalRuntimeContext) -> Any? = { throw UnsupportedOperationException() },
-    docString: String = "",
 ) : StructDefinition(parent, name, docString) {
 
     // TODO: May lead to nondeterminism, remove

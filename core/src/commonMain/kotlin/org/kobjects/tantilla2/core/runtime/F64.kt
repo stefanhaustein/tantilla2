@@ -34,13 +34,6 @@ object F64 : NativeStructDefinition(RootScope, "float"), Type {
             Parameter("exp", F64)
         ) { exp(it.f64(1)  * ln(it.f64(0))) }
 
-        defineMethod(
-            "str",
-            "Converts the given number to a string.",
-            Str
-        ) { it.f64(0).toString() }
-
-
         defineNativeFunction(
             "round", "Return the argument, rounded to the next integer.",
             F64, Parameter("x",

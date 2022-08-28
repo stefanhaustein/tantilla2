@@ -38,14 +38,6 @@ object I64 : NativeStructDefinition(RootScope, "int") {
             "oct", "Convert an integer to an octal string prefixed with \"0o\".",
             Str,
         ) { (it.i64(0).toString(8)) }
-
-        defineMethod(
-            "str",
-            "Converts the given number to a string.",
-            Str
-        ) { it.i64(0).toString() }
-
-
     }
 
 

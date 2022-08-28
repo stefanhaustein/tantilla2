@@ -1,6 +1,5 @@
 package org.kobjects.tantilla2.stdlib
 
-import org.kobjects.tantilla2.core.Definition
 import org.kobjects.tantilla2.core.classifier.NativePropertyDefinition
 import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
 import org.kobjects.tantilla2.core.function.Parameter

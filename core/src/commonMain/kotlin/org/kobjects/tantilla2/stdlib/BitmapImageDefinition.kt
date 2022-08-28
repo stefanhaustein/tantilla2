@@ -9,7 +9,8 @@ import org.kobjects.tantilla2.core.runtime.Void
 object BitmapImageDefinition : NativeStructDefinition(
     RootScope,
     "BitmapImage",
-    docString = "Bitmap image representation") {
+    docString = "Bitmap image representation"
+) {
 
     init {
         defineNativeProperty(

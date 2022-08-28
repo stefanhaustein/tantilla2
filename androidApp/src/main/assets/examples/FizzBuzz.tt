@@ -7,7 +7,7 @@ def fizz_buzz(x: float):
             elif x % 5 == 0:
               print("Buzz")
             else:
-              print("str(x)")
+              print(str(x))
 
 
 def main():
