@@ -2,7 +2,6 @@ package org.kobjects.tantilla2.android.model
 
 import android.graphics.Bitmap
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
@@ -35,17 +34,18 @@ class TantillaViewModel(
     val editingDefinition = mutableStateOf<Definition?>(null)
     val currentText = mutableStateOf(TextFieldValue())
     val expanded = mutableStateOf(setOf<Definition>())
-    var withRuntimeException = mutableStateMapOf<Definition, TantillaRuntimeException>()
+    var runtimeException = mutableStateOf<TantillaRuntimeException?>(null)
     val dialogManager = DialogManager()
-    val globalRuntimeContext = mutableStateOf(GlobalRuntimeContext())
+    val globalRuntimeContext = mutableStateOf(GlobalRuntimeContext(::endCallback))
     val forceUpdate = mutableStateOf(0)
     val graphicsUpdateTrigger = mutableStateOf(0)
     val userRootScope
         get() = console.scope
+    var showDpad = mutableStateOf(false)
+    var runtimeExceptionPosition = IntRange(-1, 0)
 
     init {
         defineNatives(bitmap, graphicsUpdateTrigger)
-        console.errorCallback = ::highlightRuntimeException
 
         val file = File(platform.rootDirectory, platform.fileName)
         if (file.exists()) {
@@ -133,8 +133,10 @@ class TantillaViewModel(
 
     fun edit(definition: Definition?) {
         this.editingDefinition.value = definition
-        val writer = CodeWriter()
+        val errorNode = if (definition == runtimeException.value?.definition) runtimeException.value?.node else null
+        val writer = CodeWriter(errorNode = errorNode)
         definition?.serializeCode(writer)
+        runtimeExceptionPosition = IntRange(writer.errorPosition, writer.errorPosition + writer.errorLength)
         currentText.value = currentText.value.copy(
             annotatedString = annotatedCode(writer.toString(), definition?.errors ?: emptyList()))
         mode.value = Mode.DEFINITION_EDITOR
@@ -177,20 +179,12 @@ class TantillaViewModel(
 
     fun stop() {
         globalRuntimeContext.value.stopRequested = true
-        globalRuntimeContext.value = GlobalRuntimeContext()
+        globalRuntimeContext.value = GlobalRuntimeContext(::endCallback)
     }
 
     fun runMain() {
         mode.value = Mode.SHELL
-            try {
-                globalRuntimeContext.value.activeThreads++
-                userRootScope.run(globalRuntimeContext.value)
-            } catch (e: Exception) {
-                e.printStackTrace()
-                console.konsole.write(e.message ?: e.toString())
-            } finally {
-                globalRuntimeContext.value.activeThreads--
-            }
+        userRootScope.run(globalRuntimeContext.value)
     }
 
     private fun rebuild() {
@@ -230,15 +224,22 @@ class TantillaViewModel(
     }
 
 
-    fun highlightRuntimeException(e: TantillaRuntimeException?) {
-        withRuntimeException.values.clear()
+    fun endCallback(e: TantillaRuntimeException?) {
+        runtimeException.value = e
         if (e == null) {
             return
         }
-        var definition = userScope.value.findNode(e.node)
-        while (definition != null) {
-            withRuntimeException.put(definition, e)
-            definition = definition
+        if (e.definition == null && e.node != null) {
+            e.definition = userScope.value.findNode(e.node!!)
+        }
+        var definition = e.definition
+        if (definition is FunctionDefinition) {
+            edit(definition)
+        } else if (definition?.parentScope != null){
+            userScope.value = definition.parentScope!!
+            mode.value = Mode.HIERARCHY
+        } else {
+            console.konsole.write(e.message ?: e.toString())
         }
     }
 
@@ -261,9 +262,27 @@ class TantillaViewModel(
         HELP, HIERARCHY, SHELL, DEFINITION_EDITOR, DOCUMENTATION_EDITOR
     }
 
+    fun annotatedCode(code: String, errors: List<Exception>): AnnotatedString {
+        val map = mutableMapOf<IntRange, Exception>()
+        for (error in errors) {
+            if (error is ParsingException) {
+                map.put(IntRange(error.token.pos, error.token.pos + error.token.text.length), error)
+            }
+        }
+        if (runtimeException.value != null) {
+            map.put(runtimeExceptionPosition, runtimeException.value!!)
+        }
+
+        return ansiToAnnotatedString(
+            highlightSyntax(
+                code,
+                map.toMap(),
+                CodeWriter.defaultHighlighting
+            )
+        )
+    }
+
     companion object {
-        fun annotatedCode(code: String, errors: List<Exception>) =
-            ansiToAnnotatedString(highlightSyntax(code, errors.filterIsInstance<ParsingException>(), CodeWriter.defaultHighlighting))
 
 
         fun findLineRange(s: AnnotatedString, lineNumber: Int): IntRange {

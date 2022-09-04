@@ -6,10 +6,12 @@ import org.kobjects.konsole.Ansi
 class CodeWriter(
     indent: String = "",
     val highlighting: Map<Kind, Pair<String, String>> = emptyMap(),
-    val errorMap: Map<Evaluable<LocalRuntimeContext>, TantillaRuntimeException> = emptyMap()
+    val errorNode: Evaluable<LocalRuntimeContext>? = null
 ) : Appendable {
     val sb = StringBuilder()
     val indent = StringBuilder(indent)
+    var errorPosition = -1
+    var errorLength = 0
 
     override fun append(value: Char): CodeWriter {
         sb.append(value)
@@ -73,8 +75,9 @@ class CodeWriter(
     }
 
     fun appendCode(code: Any?, parentPrecedence: Int = 0): CodeWriter {
-        val error = code is Evaluable<*> && errorMap.containsKey(code)
+        val error = code == errorNode
         if (error) {
+            errorPosition = sb.length
             appendStart(Kind.ERROR)
         }
         when (code) {
@@ -110,6 +113,7 @@ class CodeWriter(
             else -> append(code.toString())
         }
         if (error) {
+            errorLength = sb.length - errorPosition
             appendEnd(Kind.ERROR)
         }
         return this

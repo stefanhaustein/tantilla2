@@ -11,9 +11,11 @@ import org.kobjects.tantilla2.core.runtime.Void
 class ConsoleLoop(
     val konsole: Konsole,
     var scope: UserRootScope = UserRootScope(RootScope),
-    var errorCallback: (TantillaRuntimeException?) -> Unit = {}
+    var endCallback: (TantillaRuntimeException?) -> Unit = {
+        konsole.write(it.toString())
+    }
 ) {
-    var globalRuntimeContext = GlobalRuntimeContext()
+    var globalRuntimeContext = GlobalRuntimeContext(endCallback)
     var runtimeContext = LocalRuntimeContext(globalRuntimeContext)
 
     init {
@@ -46,12 +48,12 @@ class ConsoleLoop(
 
                 try {
                     val evaluationResult = parsed.eval(runtimeContext)
-                    konsole.write(if (evaluationResult == null) "Ok" else evaluationResult.toString())
-                    errorCallback(null)
+                    konsole.write(if (evaluationResult == null || evaluationResult == Unit) "Ok" else evaluationResult.toString())
+                    endCallback(null)
                 } catch (e: Exception) {
                     val message = e.message ?: e.toString()
                     konsole.write(message)
-                    errorCallback(if (e is TantillaRuntimeException) e else TantillaRuntimeException(parsed, message, e))
+                    endCallback(if (e is TantillaRuntimeException) e else TantillaRuntimeException(null, parsed, message, e))
                 }
             } catch (e: Exception) {
                 val message = e.message ?: e.toString()

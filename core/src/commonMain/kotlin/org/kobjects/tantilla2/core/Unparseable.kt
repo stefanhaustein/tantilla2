@@ -1,4 +1,4 @@
-package org.kobjects.tantilla2
+package org.kobjects.tantilla2.core
 
 import org.kobjects.greenspun.core.Bool
 import org.kobjects.greenspun.core.Evaluable

@@ -38,6 +38,7 @@ fun RenderDefinitionEditor(viewModel: TantillaViewModel) {
                         scope.update(viewModel.currentText.value.text, definition)
                         println("Updating to : " + viewModel.currentText.value.text)
                         viewModel.mode.value = TantillaViewModel.Mode.HIERARCHY
+                        viewModel.runtimeException.value = null
                         viewModel.save()
                         viewModel.forceUpdate.value++
                     }) {
@@ -72,7 +73,7 @@ fun RenderDefinitionEditor(viewModel: TantillaViewModel) {
         },
         bottomBar = {
             Divider()
-            val errors = errors.value
+            val errors = if (viewModel.runtimeException.value?.definition != definition) errors.value else listOf(viewModel.runtimeException.value!!) + errors.value
             Row() {
                 IconButton(
                     enabled = errors.size > 1,
@@ -108,7 +109,7 @@ fun RenderDefinitionEditor(viewModel: TantillaViewModel) {
                         errors.value = scope.checkErrors(it.text)
                     }
                     viewModel.currentText.value = it.copy(
-                        annotatedString = TantillaViewModel.annotatedCode(it.text, errors.value))
+                        annotatedString = viewModel.annotatedCode(it.text, errors.value))
                 },
                 Modifier.fillMaxSize(),
                 colors = TextFieldDefaults.textFieldColors(

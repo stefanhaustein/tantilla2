@@ -10,7 +10,7 @@ fun Evaluable<LocalRuntimeContext>.containsNode(node: Evaluable<LocalRuntimeCont
         return true
     }
     for (child in children()) {
-        if (child == node) {
+        if (child.containsNode(node)) {
             return true
         }
     }

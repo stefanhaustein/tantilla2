@@ -7,11 +7,11 @@ import org.kobjects.tantilla2.core.parser.TokenType
 
 fun highlightSyntax(
     code: String,
-    errors: List<ParsingException>,
+    errors: Map<IntRange, Exception>,
     highlighting: Map<CodeWriter.Kind, Pair<String, String>>
 ): String {
 
-    val errorMap = errors.associateBy { it.token.pos }
+    val errorMap = errors.keys.associateBy { it.first }
 
 
         val writer = CodeWriter(highlighting = highlighting)

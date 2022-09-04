@@ -119,7 +119,7 @@ class FieldDefinition(
                 resolvedInitializer = resolved.third
                 if (kind == Definition.Kind.STATIC) {
                     currentValue = resolvedInitializer!!.eval(
-                        LocalRuntimeContext(GlobalRuntimeContext()))
+                        LocalRuntimeContext(GlobalRuntimeContext({ })))
                     parentScope.registerStatic(this)
                 }
                 resolutionState = ResolutionState.RESOLVED

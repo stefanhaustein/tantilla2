@@ -1,8 +1,6 @@
 package org.kobjects.tantilla2.core
 
 import org.kobjects.greenspun.core.Evaluable
-import org.kobjects.parserlib.tokenizer.ParsingException
-import org.kobjects.tantilla2.Unparseable
 import org.kobjects.tantilla2.core.classifier.FieldDefinition
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
 import org.kobjects.tantilla2.core.classifier.NativePropertyDefinition

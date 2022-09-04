@@ -95,7 +95,7 @@ fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
     Card(
         backgroundColor = if (viewModel.userRootScope.definitionsWithErrors.contains(definition)
             || definition.errors.isNotEmpty()
-            || viewModel.withRuntimeException.containsKey(definition)) Color(0xffff8888L) else Color(0xffeeeeee),
+            || definition == viewModel.runtimeException.value?.definition) Color(0xffff8888L) else Color(0xffeeeeee),
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(4.dp))
