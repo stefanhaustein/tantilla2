@@ -9,10 +9,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -84,9 +81,11 @@ fun RenderAppBar(
             ) {
                 Icon(Icons.Default.MoreVert, contentDescription = "More")
                 var menuItems = buildList {
-                    if (viewModel.globalRuntimeContext.value.activeThreads == 0)
-                        add("Run main()" to { viewModel.runMain() })
-                    else add("Stop" to { viewModel.stop() })
+                    key(viewModel.runstateUpdateTrigger.value) {
+                        if (viewModel.console.globalRuntimeContext.activeThreads == 0)
+                            add("Run main()" to { viewModel.runMain() })
+                        else add("Stop" to { viewModel.stop() })
+                    }
                     when (viewModel.mode.value) {
                         TantillaViewModel.Mode.HIERARCHY -> {
                             add("Add  ▶" to { showAddMenu.value = true })

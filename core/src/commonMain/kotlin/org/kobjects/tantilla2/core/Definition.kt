@@ -77,4 +77,13 @@ interface Definition : SerializableCode, Comparable<Definition> {
         }
         return name.compareTo(other.name)
     }
+
+    fun userRootScope(): UserRootScope {
+        var current = parentScope
+        while (current !is UserRootScope) {
+            current = current?.parentScope ?: throw RuntimeException("User root scope not found.")
+        }
+        return current
+    }
+
 }

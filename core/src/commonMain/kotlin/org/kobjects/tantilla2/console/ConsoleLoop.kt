@@ -11,11 +11,13 @@ import org.kobjects.tantilla2.core.runtime.Void
 class ConsoleLoop(
     val konsole: Konsole,
     var scope: UserRootScope = UserRootScope(RootScope),
-    var endCallback: (TantillaRuntimeException?) -> Unit = {
-        konsole.write(it.toString())
+    var endCallback: (GlobalRuntimeContext) -> Unit = {
+        if (it.exception != null) {
+            konsole.write(it.exception.toString())
+        }
     }
 ) {
-    var globalRuntimeContext = GlobalRuntimeContext(endCallback)
+    var globalRuntimeContext = GlobalRuntimeContext(scope, endCallback)
     var runtimeContext = LocalRuntimeContext(globalRuntimeContext)
 
     init {
@@ -24,6 +26,7 @@ class ConsoleLoop(
 
     fun setUserScope(scope: UserRootScope) {
         this.scope = scope;
+        globalRuntimeContext = GlobalRuntimeContext(scope, endCallback)
         runtimeContext = LocalRuntimeContext(globalRuntimeContext)
         declareNatives()
     }
@@ -49,11 +52,12 @@ class ConsoleLoop(
                 try {
                     val evaluationResult = parsed.eval(runtimeContext)
                     konsole.write(if (evaluationResult == null || evaluationResult == Unit) "Ok" else evaluationResult.toString())
-                    endCallback(null)
+                    endCallback(globalRuntimeContext)
                 } catch (e: Exception) {
                     val message = e.message ?: e.toString()
                     konsole.write(message)
-                    endCallback(if (e is TantillaRuntimeException) e else TantillaRuntimeException(null, parsed, message, e))
+                    globalRuntimeContext.exception = if (e is TantillaRuntimeException) e else TantillaRuntimeException(null, parsed, message, e)
+                    endCallback(globalRuntimeContext)
                 }
             } catch (e: Exception) {
                 val message = e.message ?: e.toString()

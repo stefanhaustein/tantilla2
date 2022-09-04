@@ -36,15 +36,18 @@ class TantillaViewModel(
     val expanded = mutableStateOf(setOf<Definition>())
     var runtimeException = mutableStateOf<TantillaRuntimeException?>(null)
     val dialogManager = DialogManager()
-    val globalRuntimeContext = mutableStateOf(GlobalRuntimeContext(::endCallback))
     val forceUpdate = mutableStateOf(0)
+
     val graphicsUpdateTrigger = mutableStateOf(0)
+    val runstateUpdateTrigger = mutableStateOf(0)
+
     val userRootScope
         get() = console.scope
     var showDpad = mutableStateOf(false)
     var runtimeExceptionPosition = IntRange(-1, 0)
 
     init {
+        console.endCallback = ::runStateCallback
         defineNatives(bitmap, graphicsUpdateTrigger)
 
         val file = File(platform.rootDirectory, platform.fileName)
@@ -178,13 +181,14 @@ class TantillaViewModel(
     }
 
     fun stop() {
-        globalRuntimeContext.value.stopRequested = true
-        globalRuntimeContext.value = GlobalRuntimeContext(::endCallback)
+        console.globalRuntimeContext.stopRequested = true
+        runstateUpdateTrigger.value++
     }
 
     fun runMain() {
         mode.value = Mode.SHELL
-        userRootScope.run(globalRuntimeContext.value)
+        console.globalRuntimeContext.run()
+        runstateUpdateTrigger.value++
     }
 
     private fun rebuild() {
@@ -224,7 +228,9 @@ class TantillaViewModel(
     }
 
 
-    fun endCallback(e: TantillaRuntimeException?) {
+    fun runStateCallback(globalRuntimeContext: GlobalRuntimeContext) {
+        runstateUpdateTrigger.value++
+        val e = globalRuntimeContext.exception
         runtimeException.value = e
         if (e == null) {
             return

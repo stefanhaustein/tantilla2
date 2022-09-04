@@ -44,34 +44,6 @@ class UserRootScope(
         initializedTo = staticFields.size
     }
 
-    fun run(globalRuntimeContext: GlobalRuntimeContext) {
-        val definition = this["main"]
-        if (definition == null) {
-            globalRuntimeContext.endCallback(
-                TantillaRuntimeException(this, null, "main() undefined."))
-            return
-        }
-        if (definition.type !is FunctionType) {
-            globalRuntimeContext.endCallback(
-                TantillaRuntimeException(this, null, "main is not a function."))
-            return
-        }
-        try {
-            val function = definition.getValue(null) as Callable
-            initialize(globalRuntimeContext)
-            globalRuntimeContext.activeThreads++
-            function.eval(LocalRuntimeContext(globalRuntimeContext, function.scopeSize))
-            globalRuntimeContext.activeThreads--
-            if (globalRuntimeContext.activeThreads == 0) {
-                globalRuntimeContext.endCallback(null)
-            }
-        } catch (e: TantillaRuntimeException) {
-            globalRuntimeContext.endCallback(e)
-        } catch (e: RuntimeException) {
-            globalRuntimeContext.endCallback(TantillaRuntimeException(definition, null, e.message ?: e.toString(), e))
-        }
-    }
-
 
     fun rebuild() {
         reset()

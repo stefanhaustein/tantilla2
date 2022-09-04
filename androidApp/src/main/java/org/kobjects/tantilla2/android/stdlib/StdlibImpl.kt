@@ -65,6 +65,7 @@ fun defineNatives(bitmap: android.graphics.Bitmap, graphicsUpdateTrigger: Mutabl
         Parameter("callback", FunctionType.Impl(Void, emptyList()))
     ) { context ->
         if (!context.globalRuntimeContext.stopRequested) {
+            context.globalRuntimeContext.activeThreads++
             Choreographer.getInstance().postFrameCallback {
                 try {
                     val fn = context[0] as Callable
@@ -75,7 +76,9 @@ fun defineNatives(bitmap: android.graphics.Bitmap, graphicsUpdateTrigger: Mutabl
                     )
                     fn.eval(functionContext)
                 } finally {
-                    context.globalRuntimeContext.activeThreads--
+                   if (--context.globalRuntimeContext.activeThreads <= 0) {
+                       context.globalRuntimeContext.runStateCallback(context.globalRuntimeContext)
+                   }
                 }
             }
         }
