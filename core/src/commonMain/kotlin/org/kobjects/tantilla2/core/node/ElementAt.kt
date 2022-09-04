@@ -36,7 +36,7 @@ class ElementAt(
         val list = baseExpr.eval(context) as TypedList
         val index = indexExpr.evalF64(context).toInt()
         if (index < 0 || index >= list.size) {
-            throw TantillaRuntimeException(null, this, "List index $index out of range(0, ${list.size})")
+            throw context.globalRuntimeContext.createException(null, this, "List index $index out of range(0, ${list.size})")
         }
        return list[index]
     }

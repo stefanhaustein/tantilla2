@@ -56,7 +56,7 @@ class ConsoleLoop(
                 } catch (e: Exception) {
                     val message = e.message ?: e.toString()
                     konsole.write(message)
-                    globalRuntimeContext.exception = if (e is TantillaRuntimeException) e else TantillaRuntimeException(null, parsed, message, e)
+                    globalRuntimeContext.exception = if (e is TantillaRuntimeException) e else globalRuntimeContext.createException(null, parsed, message, e)
                     endCallback(globalRuntimeContext)
                 }
             } catch (e: Exception) {

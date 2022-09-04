@@ -1,6 +1,7 @@
 package org.kobjects.tantilla2.android
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -73,7 +74,8 @@ fun RenderDefinitionEditor(viewModel: TantillaViewModel) {
         },
         bottomBar = {
             Divider()
-            val errors = if (viewModel.runtimeException.value?.definition != definition) errors.value else listOf(viewModel.runtimeException.value!!) + errors.value
+            val errors = if (viewModel.runtimeException.value?.definition != definition) errors.value
+                else listOf(viewModel.runtimeException.value!!) + errors.value
             Row() {
                 IconButton(
                     enabled = errors.size > 1,
@@ -84,13 +86,18 @@ fun RenderDefinitionEditor(viewModel: TantillaViewModel) {
                 if (errors.isEmpty()) {
                     Text("(No error)", Modifier.weight(1f)
                         .height(48.dp)
-                        .padding(4.dp, 10.dp, 4.dp, 4.dp))
+                        .padding(4.dp, 10.dp, 4.dp, 4.dp)
+
+                    )
                 } else {
                     val error = errors[errorIndex.value % errors.size]
                     val text = error.message ?: error.toString()
                     Text(text, Modifier.weight(1f)
                         .height(48.dp)
-                        .padding(4.dp))
+                        .padding(4.dp)
+                        .clickable {
+                            viewModel.dialogManager.showError(text)
+                        })
                 }
 
                 IconButton(

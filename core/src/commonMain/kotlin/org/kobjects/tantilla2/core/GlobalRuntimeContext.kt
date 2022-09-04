@@ -1,5 +1,6 @@
 package org.kobjects.tantilla2.core
 
+import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.FunctionType
 
@@ -13,21 +14,31 @@ class GlobalRuntimeContext(
     var exception: TantillaRuntimeException? = null
 
 
+    fun createException(definition: Definition?, node: Evaluable<LocalRuntimeContext>?, message: String?, cause: Exception? = null) =
+        TantillaRuntimeException(
+            if (definition == null && node != null) userRootScope.findNode(node) else definition,
+            node,
+            message,
+            cause)
+
+    fun wrapException(e: Exception): TantillaRuntimeException =
+        if (e is TantillaRuntimeException) e else createException(null, null, null, e)
+
     fun run() {
         if (activeThreads != 0) {
-            exception = TantillaRuntimeException(null, null, "Already running.")
+            exception = createException(null, null, "Already running.")
             return
         }
         stopRequested = false
 
         val definition = userRootScope["main"]
         if (definition == null) {
-            exception = TantillaRuntimeException(null, null, "main() undefined.")
+            exception = createException(null, null, "main() undefined.")
             runStateCallback(this)
             return
         }
         if (definition.type !is FunctionType) {
-            exception = TantillaRuntimeException(null, null, "main is not a function.")
+            exception = createException(null, null, "main is not a function.")
             runStateCallback(this)
             return
         }
@@ -41,15 +52,12 @@ class GlobalRuntimeContext(
             if (activeThreads == 0) {
                 runStateCallback(this)
             }
-        } catch (e: TantillaRuntimeException) {
-            activeThreads--
-            exception = e
-            runStateCallback(this)
         } catch (e: RuntimeException) {
             activeThreads--
-            exception =  TantillaRuntimeException(definition, null, e.message ?: e.toString(), e)
+            exception =  wrapException(e)
             runStateCallback(this)
         }
     }
+
 
 }

@@ -235,9 +235,6 @@ class TantillaViewModel(
         if (e == null) {
             return
         }
-        if (e.definition == null && e.node != null) {
-            e.definition = userScope.value.findNode(e.node!!)
-        }
         var definition = e.definition
         if (definition is FunctionDefinition) {
             edit(definition)
