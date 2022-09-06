@@ -5,9 +5,10 @@ import android.graphics.Color
 import android.graphics.Paint
 import androidx.compose.runtime.MutableState
 import org.kobjects.tantilla2.core.Type
-import org.kobjects.tantilla2.stdlib.Pen
+import org.kobjects.tantilla2.stdlib.graphics.Pen
 
-class PenImpl(override val type: Type, val canvas: Canvas, val updateTrigger: MutableState<Int>): Pen {
+class PenImpl(override val type: Type, val canvas: Canvas, val updateTrigger: MutableState<Int>):
+    Pen {
     val strokePaint = Paint()
     val fillPaint = Paint()
 
@@ -19,13 +20,13 @@ class PenImpl(override val type: Type, val canvas: Canvas, val updateTrigger: Mu
         fillPaint.style = Paint.Style.FILL
     }
 
-    override var fillColor = org.kobjects.tantilla2.stdlib.Color(0.0, 0.0, 0.0, 0.0)
+    override var fillColor = org.kobjects.tantilla2.stdlib.graphics.Color(0.0, 0.0, 0.0, 0.0)
         set(value) {
             field = value
             fillPaint.color = value.argb
         }
 
-    override var strokeColor = org.kobjects.tantilla2.stdlib.Color(0.5, 0.5, 0.5, 1.0)
+    override var strokeColor = org.kobjects.tantilla2.stdlib.graphics.Color(0.5, 0.5, 0.5, 1.0)
         set(value) {
             field = value
             strokePaint.color = value.argb

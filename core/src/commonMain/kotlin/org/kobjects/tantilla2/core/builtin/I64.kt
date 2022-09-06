@@ -1,11 +1,10 @@
-package org.kobjects.tantilla2.core.runtime
+package org.kobjects.tantilla2.core.builtin
 
 import org.kobjects.tantilla2.core.AnyType
 import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
 import org.kobjects.tantilla2.core.function.Parameter
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.reflect.typeOf
 
 object I64 : NativeStructDefinition(
     RootScope,

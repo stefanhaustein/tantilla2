@@ -2,8 +2,8 @@ package org.kobjects.tantilla2.core.node
 
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.tantilla2.core.*
-import org.kobjects.tantilla2.core.runtime.ListType
-import org.kobjects.tantilla2.core.runtime.TypedList
+import org.kobjects.tantilla2.core.builtin.ListType
+import org.kobjects.tantilla2.core.builtin.TypedList
 
 class ListLiteral(
     val elements: List<Evaluable<LocalRuntimeContext>>,

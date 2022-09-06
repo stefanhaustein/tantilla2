@@ -26,7 +26,7 @@ import org.kobjects.tantilla2.core.Definition
 import org.kobjects.tantilla2.core.Scope
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.classifier.StructDefinition
-import org.kobjects.tantilla2.core.runtime.RootScope
+import org.kobjects.tantilla2.core.builtin.RootScope
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable

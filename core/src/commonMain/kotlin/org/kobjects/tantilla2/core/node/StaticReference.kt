@@ -2,7 +2,6 @@ package org.kobjects.tantilla2.core.node
 
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.tantilla2.core.*
-import org.kobjects.tantilla2.core.runtime.RootScope
 
 
 data class StaticReference(val definition: Definition, val qualified: Boolean) : TantillaNode, Assignable {

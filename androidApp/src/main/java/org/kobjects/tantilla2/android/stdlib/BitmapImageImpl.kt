@@ -2,8 +2,8 @@ package org.kobjects.tantilla2.android.stdlib
 
 import android.graphics.Bitmap
 import androidx.compose.runtime.MutableState
-import org.kobjects.tantilla2.stdlib.BitmapImage
-import org.kobjects.tantilla2.stdlib.Color
+import org.kobjects.tantilla2.stdlib.graphics.BitmapImage
+import org.kobjects.tantilla2.stdlib.graphics.Color
 
 class BitmapImageImpl(
     val bitmap: Bitmap,

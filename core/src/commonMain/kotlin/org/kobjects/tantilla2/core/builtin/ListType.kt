@@ -1,4 +1,4 @@
-package org.kobjects.tantilla2.core.runtime
+package org.kobjects.tantilla2.core.builtin
 
 import org.kobjects.tantilla2.core.Type
 import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
@@ -14,7 +14,7 @@ data class ListType(
 
     init {
         defineNativeFunction("len", "Returns the length of the list",
-            org.kobjects.tantilla2.core.runtime.I64, Parameter("self", this)) {
+            org.kobjects.tantilla2.core.builtin.I64, Parameter("self", this)) {
             (it[0] as TypedList).size.toLong()
         }
     }

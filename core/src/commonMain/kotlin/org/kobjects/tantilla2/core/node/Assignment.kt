@@ -4,7 +4,7 @@ import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.Type
-import org.kobjects.tantilla2.core.runtime.Void
+import org.kobjects.tantilla2.core.builtin.Void
 
 class Assignment(
     val target: Assignable,

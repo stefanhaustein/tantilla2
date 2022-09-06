@@ -6,9 +6,9 @@ import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.function.FunctionDefinition
 import org.kobjects.tantilla2.core.function.LocalVariableDefinition
 import org.kobjects.tantilla2.core.node.*
-import org.kobjects.tantilla2.core.runtime.ListType
-import org.kobjects.tantilla2.core.runtime.RangeType
-import org.kobjects.tantilla2.core.runtime.Void
+import org.kobjects.tantilla2.core.builtin.ListType
+import org.kobjects.tantilla2.core.builtin.RangeType
+import org.kobjects.tantilla2.core.builtin.Void
 
 object StatementParser {
 
@@ -87,7 +87,7 @@ object StatementParser {
         tokenizer.consume(":")
         val iterableType = iterableExpression.returnType
         val iteratorType = when (iterableType) {
-            RangeType -> org.kobjects.tantilla2.core.runtime.I64
+            RangeType -> org.kobjects.tantilla2.core.builtin.I64
             is ListType -> iterableType.elementType
             else -> throw RuntimeException("Can't iterate type $iterableType")
         }

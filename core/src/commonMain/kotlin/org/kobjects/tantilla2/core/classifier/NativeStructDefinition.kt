@@ -4,7 +4,6 @@ import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.NativeFunctionDefinition
 import org.kobjects.tantilla2.core.function.Parameter
-import org.kobjects.tantilla2.core.runtime.Void
 
 open class NativeStructDefinition(
     parent: Scope,

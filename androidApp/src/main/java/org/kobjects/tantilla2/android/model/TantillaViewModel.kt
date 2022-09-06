@@ -15,7 +15,7 @@ import org.kobjects.konsole.compose.ComposeKonsole
 import org.kobjects.tantilla2.console.ConsoleLoop
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.parser.Parser
-import org.kobjects.tantilla2.core.runtime.RootScope
+import org.kobjects.tantilla2.core.builtin.RootScope
 import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.core.function.FunctionDefinition
 import java.io.File

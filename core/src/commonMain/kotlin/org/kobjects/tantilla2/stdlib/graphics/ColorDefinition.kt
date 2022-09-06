@@ -1,10 +1,10 @@
-package org.kobjects.tantilla2.stdlib
+package org.kobjects.tantilla2.stdlib.graphics
 
 import org.kobjects.tantilla2.core.classifier.NativePropertyDefinition
 import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
 import org.kobjects.tantilla2.core.function.Parameter
-import org.kobjects.tantilla2.core.runtime.F64
-import org.kobjects.tantilla2.core.runtime.RootScope
+import org.kobjects.tantilla2.core.builtin.F64
+import org.kobjects.tantilla2.core.builtin.RootScope
 
 object ColorDefinition : NativeStructDefinition(
     RootScope,
@@ -41,7 +41,7 @@ object ColorDefinition : NativeStructDefinition(
             Parameter("s", F64),
             Parameter("l", F64),
             Parameter("a", F64, org.kobjects.greenspun.core.F64.Const(1.0)),
-        ) { Color.hsl(it.f64(0), it.f64(1) , it.f64(2) ) }
+        ) { Color.hsl(it.f64(0), it.f64(1), it.f64(2)) }
 
         add(NativePropertyDefinition.constant(this,  "BLACK", docString = "Black", value = Color(0.0, 0.0, 0.0, 1.0)))
         add(NativePropertyDefinition.constant(this, "TRANSPARENT", docString = "Transparent", value  = Color(0.0, 0.0, 0.0, 0.0)))

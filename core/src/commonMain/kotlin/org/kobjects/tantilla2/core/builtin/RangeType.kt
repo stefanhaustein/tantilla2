@@ -1,4 +1,4 @@
-package org.kobjects.tantilla2.core.runtime
+package org.kobjects.tantilla2.core.builtin
 
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.Type

@@ -1,11 +1,11 @@
-package org.kobjects.tantilla2.stdlib
+package org.kobjects.tantilla2.stdlib.graphics
 
 import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
 import org.kobjects.tantilla2.core.function.Parameter
-import org.kobjects.tantilla2.core.runtime.F64
-import org.kobjects.tantilla2.core.runtime.I64
-import org.kobjects.tantilla2.core.runtime.RootScope
-import org.kobjects.tantilla2.core.runtime.Void
+import org.kobjects.tantilla2.core.builtin.F64
+import org.kobjects.tantilla2.core.builtin.I64
+import org.kobjects.tantilla2.core.builtin.RootScope
+import org.kobjects.tantilla2.core.builtin.Void
 
 object BitmapImageDefinition : NativeStructDefinition(
     RootScope,

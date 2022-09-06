@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import org.kobjects.tantilla2.android.model.TantillaViewModel
 import org.kobjects.tantilla2.core.Definition
 import org.kobjects.tantilla2.core.UserRootScope
-import org.kobjects.tantilla2.core.runtime.RootScope
+import org.kobjects.tantilla2.core.builtin.RootScope
 
 @Composable
 fun RenderAppBar(

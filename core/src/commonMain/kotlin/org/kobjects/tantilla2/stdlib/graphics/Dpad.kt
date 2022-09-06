@@ -1,4 +1,4 @@
-package org.kobjects.tantilla2.stdlib
+package org.kobjects.tantilla2.stdlib.graphics
 
 interface Dpad {
     var up: Boolean

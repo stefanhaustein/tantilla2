@@ -1,4 +1,4 @@
-package org.kobjects.tantilla2.core.runtime
+package org.kobjects.tantilla2.core.builtin
 
 import org.kobjects.tantilla2.core.AnyType
 import org.kobjects.tantilla2.core.classifier.NativeStructDefinition

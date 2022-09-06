@@ -3,7 +3,7 @@ package org.kobjects.tantilla2.core.node
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.function.LocalVariableDefinition
-import org.kobjects.tantilla2.core.runtime.Void
+import org.kobjects.tantilla2.core.builtin.Void
 
 class Let(val definition: LocalVariableDefinition, val type: Type, val typeIsExplicit: Boolean, val initializer: Evaluable<LocalRuntimeContext>?) : TantillaNode {
     override val returnType: Type

@@ -16,8 +16,8 @@ import org.kobjects.tantilla2.core.node.*
 object ExpressionParser {
 
     fun bothInt(l: Evaluable<LocalRuntimeContext>, r: Evaluable<LocalRuntimeContext>) =
-         l.returnType == org.kobjects.tantilla2.core.runtime.I64
-                 && r.returnType == org.kobjects.tantilla2.core.runtime.I64
+         l.returnType == org.kobjects.tantilla2.core.builtin.I64
+                 && r.returnType == org.kobjects.tantilla2.core.builtin.I64
 
     fun parseExpression(tokenizer: TantillaTokenizer, context: ParsingContext, expectedType: Type? = null): Evaluable<LocalRuntimeContext> {
         if (expectedType is FunctionType && tokenizer.current.text == "lambda") {
@@ -365,7 +365,7 @@ object ExpressionParser {
             GreenspunExpressionParser.infix(5, "//") { _, _, _, l, r -> I64.Div(l, r)},
             GreenspunExpressionParser.infix(5, "/") { _, _, _, l, r -> F64.Div(l, r)},
             GreenspunExpressionParser.infix(5, "%") { _, _, _, l, r -> if (bothInt(l, r)) I64.Mod(l, r) else F64.Mod(l, r)},
-            GreenspunExpressionParser.prefix(4, "-") { _, _, _, expr -> if (expr.returnType == org.kobjects.tantilla2.core.runtime.I64) I64.Neg(expr) else F64.Neg(expr)},
+            GreenspunExpressionParser.prefix(4, "-") { _, _, _, expr -> if (expr.returnType == org.kobjects.tantilla2.core.builtin.I64) I64.Neg(expr) else F64.Neg(expr)},
             GreenspunExpressionParser.infix(3, "+") { _, _, _, l, r -> if (bothInt(l, r)) I64.Add(l, r) else F64.Add(l, r)},
             GreenspunExpressionParser.infix(3, "-") { _, _, _, l, r ->  if (bothInt(l, r)) I64.Sub(l, r) else F64.Sub(l, r)},
             GreenspunExpressionParser.infix(2, "==") { _, _, _, l, r ->  if (bothInt(l, r)) I64.Eq(l, r) else F64.Eq(l, r)},

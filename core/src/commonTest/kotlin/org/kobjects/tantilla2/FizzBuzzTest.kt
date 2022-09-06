@@ -4,9 +4,9 @@ import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.parser.Parser
-import org.kobjects.tantilla2.core.runtime.RootScope
-import org.kobjects.tantilla2.core.runtime.Str
-import org.kobjects.tantilla2.core.runtime.Void
+import org.kobjects.tantilla2.core.builtin.RootScope
+import org.kobjects.tantilla2.core.builtin.Str
+import org.kobjects.tantilla2.core.builtin.Void
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull

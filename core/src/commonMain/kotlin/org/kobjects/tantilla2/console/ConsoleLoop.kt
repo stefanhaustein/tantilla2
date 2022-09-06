@@ -2,11 +2,11 @@ package org.kobjects.tantilla2.console
 
 import org.kobjects.konsole.Konsole
 import org.kobjects.tantilla2.core.*
-import org.kobjects.tantilla2.core.runtime.RootScope
+import org.kobjects.tantilla2.core.builtin.RootScope
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.parser.Parser
-import org.kobjects.tantilla2.core.runtime.Str
-import org.kobjects.tantilla2.core.runtime.Void
+import org.kobjects.tantilla2.core.builtin.Void
+import org.kobjects.tantilla2.stdlib.math.MathScope
 
 class ConsoleLoop(
     val konsole: Konsole,
@@ -32,6 +32,7 @@ class ConsoleLoop(
     }
 
     fun declareNatives() {
+        RootScope.add(MathScope)
         RootScope.defineNativeFunction("print",
             "Print the value of the text parameter to the console.",
             Void, Parameter("value", AnyType, isVararg = true)) {

@@ -1,6 +1,8 @@
-package org.kobjects.tantilla2.core.runtime
+package org.kobjects.tantilla2.stdlib.math
 
 import org.kobjects.tantilla2.core.*
+import org.kobjects.tantilla2.core.builtin.F64
+import org.kobjects.tantilla2.core.builtin.RootScope
 import org.kobjects.tantilla2.core.function.Parameter
 import kotlin.math.ceil
 import kotlin.math.floor

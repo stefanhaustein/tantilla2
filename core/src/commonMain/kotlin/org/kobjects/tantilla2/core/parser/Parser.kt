@@ -9,7 +9,7 @@ import org.kobjects.tantilla2.core.function.*
 fun String.unquote() = this.substring(1, this.length - 1)
 
 object Parser {
-    val DECLARATION_KEYWORDS = setOf("def", "struct", "trait", "unit", "impl", "static", "mut")
+    val DECLARATION_KEYWORDS = setOf("def", "import", "struct", "trait", "unit", "impl", "static", "mut")
 
     val VALID_AFTER_STATEMENT = setOf(")", ",", "]", "}", "<|")
 
@@ -122,6 +122,14 @@ object Parser {
                 println("consuming def $name")
                 val text = consumeBody(tokenizer, startPos, context.depth)
                 FunctionDefinition(context.scope, if (isMethod) Definition.Kind.METHOD else Definition.Kind.FUNCTION, name, definitionText = text)
+            }
+            "import" -> {
+                tokenizer.consume(kind)
+                val path = mutableListOf<String>()
+                do {
+                    path.add(tokenizer.consume(TokenType.IDENTIFIER))
+                } while (tokenizer.tryConsume("."))
+                ImportDefinition(context.scope, path)
             }
             "unit",
             "struct",

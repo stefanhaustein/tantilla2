@@ -1,9 +1,8 @@
-package org.kobjects.tantilla2.stdlib
+package org.kobjects.tantilla2.stdlib.graphics
 
 import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
-import org.kobjects.tantilla2.core.runtime.Bool
-import org.kobjects.tantilla2.core.runtime.I64
-import org.kobjects.tantilla2.core.runtime.RootScope
+import org.kobjects.tantilla2.core.builtin.Bool
+import org.kobjects.tantilla2.core.builtin.RootScope
 
 object DpadDefinition : NativeStructDefinition(
     RootScope,

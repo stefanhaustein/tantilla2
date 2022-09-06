@@ -2,7 +2,7 @@ package org.kobjects.tantilla2.core.function
 
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.Type
-import org.kobjects.tantilla2.core.runtime.Void
+import org.kobjects.tantilla2.core.builtin.Void
 
 interface FunctionType :Type {
     val returnType: Type

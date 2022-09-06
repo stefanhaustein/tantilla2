@@ -8,8 +8,8 @@ import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.classifier.StructDefinition
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Parameter
-import org.kobjects.tantilla2.core.runtime.ListType
-import org.kobjects.tantilla2.core.runtime.Void
+import org.kobjects.tantilla2.core.builtin.ListType
+import org.kobjects.tantilla2.core.builtin.Void
 
 object TypeParser {
 
@@ -17,10 +17,10 @@ object TypeParser {
 
     fun parseType(tokenizer: TantillaTokenizer, context: ParsingContext): Type {
         if (tokenizer.tryConsume("float")) {
-            return org.kobjects.tantilla2.core.runtime.F64
+            return org.kobjects.tantilla2.core.builtin.F64
         }
         if (tokenizer.tryConsume("str")) {
-            return org.kobjects.tantilla2.core.runtime.Str
+            return org.kobjects.tantilla2.core.builtin.Str
         }
         val name = tokenizer.consume(TokenType.IDENTIFIER)
         if (name.equals("List")) {

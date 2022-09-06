@@ -11,12 +11,11 @@ import org.kobjects.tantilla2.core.classifier.NativePropertyDefinition
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Parameter
-import org.kobjects.tantilla2.core.runtime.F64
-import org.kobjects.tantilla2.core.runtime.RootScope
-import org.kobjects.tantilla2.core.runtime.Void
-import org.kobjects.tantilla2.stdlib.BitmapImage
-import org.kobjects.tantilla2.stdlib.BitmapImageDefinition
-import org.kobjects.tantilla2.stdlib.PenDefinition
+import org.kobjects.tantilla2.core.builtin.F64
+import org.kobjects.tantilla2.core.builtin.RootScope
+import org.kobjects.tantilla2.core.builtin.Void
+import org.kobjects.tantilla2.stdlib.graphics.BitmapImageDefinition
+import org.kobjects.tantilla2.stdlib.graphics.PenDefinition
 
 fun defineNatives(bitmap: android.graphics.Bitmap, graphicsUpdateTrigger: MutableState<Int>) {
     RootScope.defineNativeFunction(

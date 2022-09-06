@@ -1,9 +1,7 @@
-package org.kobjects.tantilla2.core.runtime
+package org.kobjects.tantilla2.core.builtin
 
 import org.kobjects.tantilla2.core.Definition
 import org.kobjects.tantilla2.core.Scope
-import org.kobjects.tantilla2.core.UnitScope
-import org.kobjects.tantilla2.core.function.Parameter
 
 object RootScope : Scope() {
 
@@ -12,14 +10,6 @@ object RootScope : Scope() {
 
     override val name: String
         get() = "Root Scope"
-
-    init {
-
-
-
-        add(MathScope)
-
-    }
 
     override val kind: Definition.Kind
         get() = Definition.Kind.UNIT
