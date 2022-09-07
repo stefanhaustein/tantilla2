@@ -64,10 +64,10 @@ class ImplDefinition(
             if (resolvedTrait == null) {
                 val traitName = name.substring(0, name.indexOf(' '))
                 resolvedTrait =
-                    parentScope.resolveStatic(traitName, true)!!.getValue(null) as TraitDefinition
+                    parentScope.resolveStaticOrError(traitName, true).getValue(null) as TraitDefinition
                 val className = name.substring(name.lastIndexOf(' ') + 1)
                 resolvedScope =
-                    parentScope.resolveStatic(className, true)!!.getValue(null) as Scope
+                    parentScope.resolveStaticOrError(className, true).getValue(null) as Scope
 
                 val tokenizer = TantillaTokenizer(definitionText)
                 tokenizer.consume(TokenType.BOF)

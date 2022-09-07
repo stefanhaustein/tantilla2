@@ -1,5 +1,6 @@
 """Raytracer implementation based on Microsoft's corresponding TypeScript demo"""
 
+import graphics.Color
 
 struct Vector:
   x: float
@@ -228,10 +229,10 @@ struct RayTracer:
   def getPoint(x: float, y: float, cam: Camera) -> Vector:
     cam.forward.plus(cam.right.times(x / 200)).plus(cam.up.times(y / 200)).norm()
 
-  def render(s: Scene, b: BitmapImage):
+  def render(s: Scene, b: graphics.BitmapImage):
     renderRow(s, b, 0)
 
-  def renderRow(s: Scene, b: BitmapImage, y: int):
+  def renderRow(s: Scene, b: graphics.BitmapImage, y: int):
     let scale = 150.0 / min(b.width, b.height)
     let mut yy = y // 2
     if y % 2 == 0:

@@ -7,7 +7,7 @@ import org.kobjects.tantilla2.core.builtin.F64
 import org.kobjects.tantilla2.core.builtin.RootScope
 
 object ColorDefinition : NativeStructDefinition(
-    RootScope,
+    GraphicsScope,
     "Color",
     docString = "Color representation with support for RGB and HSL formats.",
     ctorParams = listOf(

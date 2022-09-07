@@ -2,6 +2,7 @@ package org.kobjects.tantilla2.core.parser
 
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.tantilla2.core.LocalRuntimeContext
+import org.kobjects.tantilla2.core.Scope
 import org.kobjects.tantilla2.core.Type
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
@@ -22,14 +23,20 @@ object TypeParser {
         if (tokenizer.tryConsume("str")) {
             return org.kobjects.tantilla2.core.builtin.Str
         }
-        val name = tokenizer.consume(TokenType.IDENTIFIER)
+        var name = tokenizer.consume(TokenType.IDENTIFIER)
         if (name.equals("List")) {
             tokenizer.consume("[")
             val elementType = parseType(tokenizer, context)
             tokenizer.consume("]")
             return ListType(elementType)
         }
-        return context.scope.resolveStatic(name, true)!!.getValue(null) as Type
+        var scope = context.scope
+        while (tokenizer.tryConsume(".")) {
+            scope = scope.resolveStaticOrError(name, scope == context.scope).getValue(null) as Scope
+            name = tokenizer.consume(TokenType.IDENTIFIER)
+        }
+
+        return scope.resolveStaticOrError(name, scope == context.scope).getValue(null) as Type
     }
 
 

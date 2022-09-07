@@ -12,7 +12,7 @@ class ImportDefinition(
     override val kind: Definition.Kind
         get() = Definition.Kind.IMPORT
 
-    override fun getValue(self: Any?): Any? = resolve()
+    override fun getValue(self: Any?): Definition = resolve()
 
     fun resolve(): Definition {
         if (resolved == null) {

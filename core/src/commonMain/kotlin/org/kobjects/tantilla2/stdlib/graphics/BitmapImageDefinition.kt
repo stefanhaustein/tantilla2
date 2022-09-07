@@ -8,7 +8,7 @@ import org.kobjects.tantilla2.core.builtin.RootScope
 import org.kobjects.tantilla2.core.builtin.Void
 
 object BitmapImageDefinition : NativeStructDefinition(
-    RootScope,
+    GraphicsScope,
     "BitmapImage",
     docString = "Bitmap image representation"
 ) {

@@ -15,9 +15,12 @@ import org.kobjects.tantilla2.core.builtin.F64
 import org.kobjects.tantilla2.core.builtin.RootScope
 import org.kobjects.tantilla2.core.builtin.Void
 import org.kobjects.tantilla2.stdlib.graphics.BitmapImageDefinition
+import org.kobjects.tantilla2.stdlib.graphics.GraphicsScope
 import org.kobjects.tantilla2.stdlib.graphics.PenDefinition
 
 fun defineNatives(bitmap: android.graphics.Bitmap, graphicsUpdateTrigger: MutableState<Int>) {
+    RootScope.add(GraphicsScope)
+    GraphicsScope.register()
     RootScope.defineNativeFunction(
         "setPixel",
         "Sets the pixel at the given x/y coordinate to the given 32bit color value in ARGB format.",

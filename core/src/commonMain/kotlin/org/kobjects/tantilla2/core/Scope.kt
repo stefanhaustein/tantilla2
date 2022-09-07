@@ -147,6 +147,9 @@ abstract class Scope(
         return null
     }
 
+    fun resolveStaticOrError(name: String, fallBackToParent: Boolean = false): Definition {
+        return resolveStatic(name, fallBackToParent) ?: throw RuntimeException("$name not found in $this")
+    }
 
     fun defineNativeFunction(
         name: String,

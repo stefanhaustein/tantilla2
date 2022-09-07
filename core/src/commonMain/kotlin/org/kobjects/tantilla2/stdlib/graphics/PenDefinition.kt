@@ -7,7 +7,7 @@ import org.kobjects.tantilla2.core.builtin.F64
 import org.kobjects.tantilla2.core.builtin.RootScope
 import org.kobjects.tantilla2.core.builtin.Void
 
-object PenDefinition : NativeStructDefinition(RootScope, "Pen"), Type {
+object PenDefinition : NativeStructDefinition(GraphicsScope, "Pen"), Type {
 
     init {
         defineNativeFunction(
