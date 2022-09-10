@@ -5,6 +5,7 @@ import android.view.Choreographer
 import androidx.compose.runtime.MutableState
 import org.kobjects.tantilla2.android.stdlib.BitmapImageImpl
 import org.kobjects.tantilla2.android.stdlib.PenImpl
+import org.kobjects.tantilla2.core.AnyType
 import org.kobjects.tantilla2.core.Definition
 import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.classifier.NativePropertyDefinition
@@ -12,6 +13,7 @@ import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.builtin.F64
+import org.kobjects.tantilla2.core.builtin.ListType
 import org.kobjects.tantilla2.core.builtin.RootScope
 import org.kobjects.tantilla2.core.builtin.Void
 import org.kobjects.tantilla2.stdlib.graphics.BitmapImageDefinition

@@ -13,11 +13,6 @@ open class NativeStructDefinition(
     val ctor: (LocalRuntimeContext) -> Any? = { throw UnsupportedOperationException() },
 ) : StructDefinition(parent, name, docString) {
 
-    // TODO: May lead to nondeterminism, remove
-    init {
-        parent.add(this)
-    }
-
     override val type: FunctionType
         get() = StructMetaType(this, ctorParams)
 
