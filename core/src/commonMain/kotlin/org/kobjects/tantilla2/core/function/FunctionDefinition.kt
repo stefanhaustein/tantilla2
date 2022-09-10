@@ -141,7 +141,7 @@ class FunctionDefinition (
         if (abbreviated) {
             type.serializeAbbreviatedType(writer)
         } else {
-            type.serializeType(writer)
+            type.serializeType(writer, parentScope)
         }
     }
 
@@ -153,7 +153,7 @@ class FunctionDefinition (
             if (parentScope.supportsMethods && !isDynamic()) {
                 writer.appendKeyword("static ")
             }
-            writer.appendKeyword("def ").appendDeclaration(name).appendType(type)
+            writer.appendKeyword("def ").appendDeclaration(name).appendType(type, parentScope)
             if (resolvedBody !is TraitMethodBody) {
                 writer.append(":")
                 writer.indent()

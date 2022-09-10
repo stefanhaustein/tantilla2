@@ -68,7 +68,7 @@ fun RenderScope(viewModel: TantillaViewModel) {
                     }
                 } else {
                     title = kind.name
-                    list = (if (kind == Definition.Kind.PROPERTY)
+                    list = (if (kind == Definition.Kind.PROPERTY && viewModel.mode.value == TantillaViewModel.Mode.HIERARCHY)
                         scope.locals.map { scope[it]!! }
                     else
                         definitions).filter { it.kind == kind }
@@ -160,7 +160,6 @@ fun RenderDocumentation(viewModel: TantillaViewModel) {
     }
     val editable = viewModel.mode.value == TantillaViewModel.Mode.HIERARCHY
     val scope = viewModel.scope().value
-    val docString = scope.docString
 
         Box(Modifier
             .fillMaxWidth()

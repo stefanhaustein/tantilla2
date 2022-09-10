@@ -4,6 +4,7 @@ import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.Type
+import org.kobjects.tantilla2.core.builtin.RootScope
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.CallableImpl
@@ -26,7 +27,7 @@ class LambdaReference(
 
     override fun serializeCode(writer: CodeWriter, precedence: Int) {
         writer.append("lambda ")
-        writer.appendType(type)
+        writer.appendType(type, RootScope)
         writer.append(":")
         writer.indent()
         writer.newline()

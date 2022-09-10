@@ -2,6 +2,7 @@ package org.kobjects.tantilla2.core
 
 import org.kobjects.greenspun.core.*
 import org.kobjects.konsole.Ansi
+import org.kobjects.tantilla2.core.builtin.RootScope
 
 class CodeWriter(
     indent: String = "",
@@ -69,8 +70,8 @@ class CodeWriter(
         return this
     }
 
-    fun appendType(type: Type): CodeWriter {
-        type.serializeType(this)
+    fun appendType(type: Type, scope: Scope): CodeWriter {
+        type.serializeType(this, scope)
         return this
     }
 

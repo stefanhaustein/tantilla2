@@ -45,7 +45,7 @@ class LocalVariableDefinition (
         }
         writer.appendDeclaration(name)
         writer.append(": ")
-        writer.appendType(type)
+        writer.appendType(type, parentScope)
     }
 
 

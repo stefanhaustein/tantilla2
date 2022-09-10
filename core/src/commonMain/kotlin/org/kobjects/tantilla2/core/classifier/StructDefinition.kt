@@ -27,8 +27,8 @@ open class StructDefinition(
 
     override fun eval(context: LocalRuntimeContext): Any? = context
 
-    override fun serializeType(writer: CodeWriter) {
-        writer.append(this.name)
+    override fun serializeType(writer: CodeWriter, scope: Scope) {
+        writer.append(scope.typeName(this))
     }
 
     override fun resolve(name: String) = resolveDynamic(name, false)

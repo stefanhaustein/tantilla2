@@ -1,6 +1,7 @@
 package org.kobjects.tantilla2.core
 
 import org.kobjects.greenspun.core.Evaluable
+import org.kobjects.tantilla2.core.builtin.RootScope
 import org.kobjects.tantilla2.core.classifier.FieldDefinition
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
 import org.kobjects.tantilla2.core.classifier.NativePropertyDefinition
@@ -272,6 +273,18 @@ abstract class Scope(
         }
     }
 
+    fun typeName(type: Definition): String {
+        // TODO: Check imports here!
+        val sb = StringBuilder()
+        var scope = type.parentScope
+        while (scope != null && scope != RootScope && scope !is UserRootScope) {
+            sb.insert(0, '.')
+            sb.insert(0, scope.name)
+            scope = scope.parentScope
+        }
+        sb.append(type.name)
+        return sb.toString()
+    }
 
 
 }

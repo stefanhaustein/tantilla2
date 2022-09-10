@@ -5,6 +5,7 @@ import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.SerializableCode
+import org.kobjects.tantilla2.core.builtin.RootScope
 
 class CallableImpl(
     override val type: FunctionType,
@@ -33,7 +34,7 @@ class CallableImpl(
     }
 
     override fun serializeCode(writer: CodeWriter, precedence: Int) {
-        writer.appendType(type)
+        writer.appendType(type, RootScope)
         writer.append(":").indent().newline()
         writer.appendCode(body)
         writer.outdent()

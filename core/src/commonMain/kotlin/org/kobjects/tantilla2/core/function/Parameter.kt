@@ -1,19 +1,17 @@
 package org.kobjects.tantilla2.core.function
 
 import org.kobjects.greenspun.core.Evaluable
-import org.kobjects.tantilla2.core.CodeWriter
-import org.kobjects.tantilla2.core.LocalRuntimeContext
-import org.kobjects.tantilla2.core.SerializableCode
-import org.kobjects.tantilla2.core.Type
+import org.kobjects.tantilla2.core.*
+import org.kobjects.tantilla2.core.builtin.RootScope
 
 data class Parameter(
     val name: String,
     val type: Type,
     val defaultValueExpression: Evaluable<LocalRuntimeContext>? = null,
     val isVararg: Boolean = false,
-): SerializableCode {
+) {
 
-    override fun serializeCode(writer: CodeWriter, precedence: Int) {
+    fun serialize(writer: CodeWriter, scope: Scope) {
         if (name == "self") {
             writer.append(name)
         } else {
@@ -22,7 +20,7 @@ data class Parameter(
             }
             writer.append(name)
             writer.append(": ")
-            writer.appendType(type)
+            writer.appendType(type, scope)
             if (defaultValueExpression != null) {
                 writer.append(" = ")
                 writer.appendCode(defaultValueExpression)
@@ -30,5 +28,9 @@ data class Parameter(
         }
     }
 
-    override fun toString() = CodeWriter().appendCode(this).toString()
+    override fun toString(): String {
+        val writer = CodeWriter()
+        serialize(writer, RootScope)
+        return writer.toString()
+    }
 }

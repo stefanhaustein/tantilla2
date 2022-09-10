@@ -38,7 +38,7 @@ class NativeFunctionDefinition(
         if (abbreviated) {
             type.serializeAbbreviatedType(writer)
         } else {
-            type.serializeType(writer)
+            type.serializeType(writer, parentScope)
         }
     }
 
