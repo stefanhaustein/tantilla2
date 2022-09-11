@@ -31,6 +31,13 @@ fun RenderAppBar(
     val showLoadMenu = remember { mutableStateOf(false) }
 
     TopAppBar(
+      /*  backgroundColor = when(viewModel.mode.value) {
+                                                     TantillaViewModel.Mode.SHELL -> Color(0xff54aeef)
+            TantillaViewModel.Mode.HIERARCHY -> if(viewModel.userRootScope.errors.isEmpty()) Color.Green else Color.Red
+            TantillaViewModel.Mode.HELP -> Color.Yellow
+            TantillaViewModel.Mode.DEFINITION_EDITOR,
+            TantillaViewModel.Mode.DOCUMENTATION_EDITOR-> Color.Blue
+                                                     }, */
         title = {
             if (viewModel.mode.value != TantillaViewModel.Mode.SHELL
                 && viewModel.scope().value !is RootScope && viewModel.scope().value !is UserRootScope
@@ -71,7 +78,9 @@ fun RenderAppBar(
                     IconButton(
                         onClick = { viewModel.mode.value = mode }
                     ) {
-                        Icon(icon, contentDescription = mode.toString())
+                        Icon(icon,
+             //               tint = Color.White,
+                            contentDescription = mode.toString())
                     }
                 }
             }

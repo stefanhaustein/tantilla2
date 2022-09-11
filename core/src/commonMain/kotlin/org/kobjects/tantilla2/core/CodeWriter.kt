@@ -2,7 +2,6 @@ package org.kobjects.tantilla2.core
 
 import org.kobjects.greenspun.core.*
 import org.kobjects.konsole.Ansi
-import org.kobjects.tantilla2.core.builtin.RootScope
 
 class CodeWriter(
     indent: String = "",
@@ -92,6 +91,7 @@ class CodeWriter(
             is I64.Lt<*> -> appendInfix(code, parentPrecedence,"<", 2)
             is F64.Lt<*> -> appendInfix(code, parentPrecedence,"<", 2)
             is I64.Le<*> -> appendInfix(code, parentPrecedence,"<=", 2)
+            is F64.Le<*> -> appendInfix(code, parentPrecedence,"<=", 2)
             is F64.Eq<*> -> appendInfix(code, parentPrecedence,"==", 2)
             is I64.Eq<*> -> appendInfix(code, parentPrecedence,"==", 2)
             is F64.Ne<*> -> appendInfix(code, parentPrecedence,"!=", 2)
@@ -200,10 +200,10 @@ class CodeWriter(
 
 
         val defaultHighlighting = mapOf(
-            Kind.KEYWORD to Pair(Ansi.rgbForeground(0xdc7900), Ansi.FOREGROUND_DEFAULT),
-            Kind.DECLARATION to Pair(Ansi.rgbForeground(0x3889c4), Ansi.FOREGROUND_DEFAULT),
-            Kind.ERROR to Pair(Ansi.rgbBackground(0xeb586e), Ansi.BACKGROUND_DEFAULT),
-            Kind.STRING to Pair(Ansi.rgbForeground(0x5c9238), Ansi.FOREGROUND_DEFAULT)
+            Kind.KEYWORD to Pair(Ansi.rgbForeground(Palette.DARK_ORANGE.toInt()), Ansi.FOREGROUND_DEFAULT),
+            Kind.DECLARATION to Pair(Ansi.rgbForeground(Palette.DARK_BLUE.toInt()), Ansi.FOREGROUND_DEFAULT),
+            Kind.ERROR to Pair(Ansi.rgbBackground(Palette.BRIGHT_RED.toInt()), Ansi.BACKGROUND_DEFAULT),
+            Kind.STRING to Pair(Ansi.rgbForeground(Palette.BRIGHT_GREEN.toInt()), Ansi.FOREGROUND_DEFAULT)
         )
         val darkThemeHighlighting = mapOf(
             Kind.KEYWORD to Pair(Ansi.rgbForeground(0xffae30), Ansi.FOREGROUND_DEFAULT),

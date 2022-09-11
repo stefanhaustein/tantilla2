@@ -17,14 +17,11 @@ import org.kobjects.konsole.compose.ComposeKonsole
 import org.kobjects.tantilla2.android.model.Platform
 import org.kobjects.tantilla2.android.model.TantillaViewModel
 import org.kobjects.tantilla2.console.ConsoleLoop
+import org.kobjects.tantilla2.core.Palette
 import java.io.File
 import java.lang.Math.abs
-import java.util.concurrent.LinkedBlockingQueue
 
 
-fun greet(): String {
-    return "test"
-}
 
 class MainActivity : AppCompatActivity() {
 
@@ -112,13 +109,13 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         val LIGHT_COLORS = Colors(
-            primary = Color(0xff46a0ff),
+            primary = Color(Palette.BLUE),
             primaryVariant = Color(0xff0072cb),
-            secondary = Color(0xffffa546),
-            secondaryVariant = Color(0xffc77612),
+            secondary = Color(0xfff49200),
+            secondaryVariant = Color(0xffb06000),
             background = Color(0xffffffff),
-            surface = Color(0xffeeeeee),
-            error = Color(0xffff0000),
+            surface = Color(0xffe8e9ea),
+            error = Color(0xffeb586e),
             onPrimary = Color(0xffffffff),
             onSecondary = Color(0xffffffff),
             onBackground = Color(0xff000000),
