@@ -5,8 +5,8 @@ import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.parser.Parser
 import org.kobjects.tantilla2.core.builtin.RootScope
-import org.kobjects.tantilla2.core.builtin.Str
-import org.kobjects.tantilla2.core.builtin.Void
+import org.kobjects.tantilla2.core.builtin.StrType
+import org.kobjects.tantilla2.core.builtin.VoidType
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -39,8 +39,8 @@ class FizzBuzzTest {
 
         context.defineNativeFunction(
             "print", "internal",
-            Void,
-            Parameter("text", Str)) { try {
+            VoidType,
+            Parameter("text", StrType)) { try {
                 output.add(it.variables[0].toString())
             } catch (e: Exception) {
                 throw RuntimeException("Issue with context $it", e)

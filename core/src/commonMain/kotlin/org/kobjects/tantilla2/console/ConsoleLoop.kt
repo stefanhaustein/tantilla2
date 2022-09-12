@@ -5,7 +5,7 @@ import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.builtin.RootScope
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.parser.Parser
-import org.kobjects.tantilla2.core.builtin.Void
+import org.kobjects.tantilla2.core.builtin.VoidType
 import org.kobjects.tantilla2.stdlib.math.MathScope
 
 class ConsoleLoop(
@@ -35,7 +35,7 @@ class ConsoleLoop(
         RootScope.add(MathScope)
         RootScope.defineNativeFunction("print",
             "Print the value of the text parameter to the console.",
-            Void, Parameter("value", AnyType, isVararg = true)) {
+            VoidType, Parameter("value", AnyType, isVararg = true)) {
             val list = it[0] as List<Any?>
             konsole.write(list.joinToString(" "))
         }

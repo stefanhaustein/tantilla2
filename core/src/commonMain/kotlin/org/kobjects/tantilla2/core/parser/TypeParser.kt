@@ -10,7 +10,7 @@ import org.kobjects.tantilla2.core.classifier.StructDefinition
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.builtin.ListType
-import org.kobjects.tantilla2.core.builtin.Void
+import org.kobjects.tantilla2.core.builtin.VoidType
 
 object TypeParser {
 
@@ -18,10 +18,10 @@ object TypeParser {
 
     fun parseType(tokenizer: TantillaTokenizer, context: ParsingContext): Type {
         if (tokenizer.tryConsume("float")) {
-            return org.kobjects.tantilla2.core.builtin.F64
+            return org.kobjects.tantilla2.core.builtin.FloatType
         }
         if (tokenizer.tryConsume("str")) {
-            return org.kobjects.tantilla2.core.builtin.Str
+            return org.kobjects.tantilla2.core.builtin.StrType
         }
         var name = tokenizer.consume(TokenType.IDENTIFIER)
         if (name.equals("List")) {
@@ -83,7 +83,7 @@ object TypeParser {
 
             tokenizer.consume(")", ", or ) expected here while parsing the parameter list.")
         }
-        val returnType = if (tokenizer.tryConsume("->")) parseType(tokenizer, context) else Void
+        val returnType = if (tokenizer.tryConsume("->")) parseType(tokenizer, context) else VoidType
         return FunctionType.Impl(returnType, parameters)
     }
 }

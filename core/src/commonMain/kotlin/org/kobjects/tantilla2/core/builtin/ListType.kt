@@ -14,7 +14,7 @@ data class ListType(
 
     init {
         defineNativeFunction("len", "Returns the length of the list",
-            org.kobjects.tantilla2.core.builtin.I64, Parameter("self", this)) {
+            org.kobjects.tantilla2.core.builtin.IntType, Parameter("self", this)) {
             (it[0] as TypedList).size.toLong()
         }
     }

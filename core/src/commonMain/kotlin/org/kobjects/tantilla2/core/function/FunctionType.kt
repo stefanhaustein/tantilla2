@@ -4,7 +4,7 @@ import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.Scope
 import org.kobjects.tantilla2.core.Type
 import org.kobjects.tantilla2.core.builtin.RootScope
-import org.kobjects.tantilla2.core.builtin.Void
+import org.kobjects.tantilla2.core.builtin.VoidType
 
 interface FunctionType :Type {
     val returnType: Type
@@ -23,7 +23,7 @@ interface FunctionType :Type {
             }
         }
         writer.append(")")
-        if (returnType != Void) {
+        if (returnType != VoidType) {
             writer.append(" -> ")
             writer.appendType(returnType, scope)
         }
@@ -40,7 +40,7 @@ interface FunctionType :Type {
             }
         }
         writer.append(")")
-        if (returnType != Void) {
+        if (returnType != VoidType) {
             writer.append(" -> ")
             writer.appendType(returnType, RootScope)
         }

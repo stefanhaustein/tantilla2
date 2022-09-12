@@ -2,6 +2,8 @@ package org.kobjects.tantilla2.android
 
 import android.widget.ImageButton
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -15,6 +17,7 @@ import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import org.kobjects.konsole.compose.ComposeKonsole
@@ -38,23 +41,12 @@ fun RenderKonsole(viewModel: TantillaViewModel) {
                 viewModel.fileName.value,
 
             )
-            Box {
+            Box(Modifier.pointerInput(Unit) {
+                detectTapGestures(onTap = {
+                    viewModel.onTap(it.x.toDouble(), it.y.toDouble())
+                })
+            }) {
                 org.kobjects.konsole.compose.RenderKonsole(konsole = viewModel.console.konsole as ComposeKonsole)
-                if (viewModel.showDpad.value) {
-                    Row(
-                        Modifier
-                            .align(Alignment.BottomCenter)
-                            .fillMaxWidth()
-                    ) {
-                        Icon(
-                            Icons.Default.ArrowLeft, "Left",
-                            Modifier.size(48.dp)
-                        )
-                        Icon(Icons.Default.ArrowRight, "Right")
-                        Spacer(Modifier.weight(1f))
-                        Icon(Icons.Default.SmartButton, "Fire")
-                    }
-                }
             }
         }
     }

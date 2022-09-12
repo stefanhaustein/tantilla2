@@ -66,12 +66,13 @@ class NativePropertyDefinition(
             parentScope: Scope,
             name: String,
             value: Any,
+            type: Type = value.dynamicType,
             docString: String = "",
         ) = NativePropertyDefinition(
             parentScope,
             Definition.Kind.STATIC,
             name,
-            type = value.dynamicType,
+            type = type,
             getter = { value },
             docString = docString
         )

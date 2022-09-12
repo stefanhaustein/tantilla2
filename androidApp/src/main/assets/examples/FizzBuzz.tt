@@ -1,4 +1,4 @@
-def fizz_buzz(x: float):
+def fizz_buzz(x: int):
   if x % 3 == 0:
     if x % 5 == 0:
       print("FizzBuzz")

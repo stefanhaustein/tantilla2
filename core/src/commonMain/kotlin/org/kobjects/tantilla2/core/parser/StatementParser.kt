@@ -8,7 +8,7 @@ import org.kobjects.tantilla2.core.function.LocalVariableDefinition
 import org.kobjects.tantilla2.core.node.*
 import org.kobjects.tantilla2.core.builtin.ListType
 import org.kobjects.tantilla2.core.builtin.RangeType
-import org.kobjects.tantilla2.core.builtin.Void
+import org.kobjects.tantilla2.core.builtin.VoidType
 
 object StatementParser {
 
@@ -65,7 +65,7 @@ object StatementParser {
         if (context.scope !is FunctionDefinition) {
             throw tokenizer.exception("Function scope expected for 'return'")
         }
-        if (context.scope.type.returnType == Void) {
+        if (context.scope.type.returnType == VoidType) {
             return FlowControl(Control.FlowSignal.Kind.RETURN)
         }
         val expression = ExpressionParser.parseExpression(tokenizer, context)
@@ -87,7 +87,7 @@ object StatementParser {
         tokenizer.consume(":")
         val iterableType = iterableExpression.returnType
         val iteratorType = when (iterableType) {
-            RangeType -> org.kobjects.tantilla2.core.builtin.I64
+            RangeType -> org.kobjects.tantilla2.core.builtin.IntType
             is ListType -> iterableType.elementType
             else -> throw RuntimeException("Can't iterate type $iterableType")
         }

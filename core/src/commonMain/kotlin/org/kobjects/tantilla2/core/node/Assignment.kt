@@ -4,7 +4,7 @@ import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.Type
-import org.kobjects.tantilla2.core.builtin.Void
+import org.kobjects.tantilla2.core.builtin.VoidType
 
 class Assignment(
     val target: Assignable,
@@ -12,7 +12,7 @@ class Assignment(
 ) : TantillaNode {
 
     override val returnType: Type
-        get() = Void
+        get() = VoidType
 
     override fun children() = listOf(target, source)
 

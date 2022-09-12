@@ -6,7 +6,7 @@ import org.kobjects.tantilla2.core.function.Parameter
 import kotlin.math.max
 import kotlin.math.min
 
-object I64 : NativeStructDefinition(
+object IntType : NativeStructDefinition(
     RootScope,
     "int",
     "64 bit signed integer.",
@@ -23,40 +23,40 @@ object I64 : NativeStructDefinition(
     init {
         defineMethod(
             "bin", "Convert an integer to a binary string prefixed with \"0b\".",
-            Str
+            StrType
         ) { it.i64(0).toString(2) }
 
         defineMethod(
             "chr", "Return the string representing the character with the given Unicode code point.",
-            Str
+            StrType
         ) { it.i64(0).toInt().toChar() }
 
         defineMethod(
             "hex", "Convert an integer to a hexadeximal string prefixed with \"0x\".",
-            Str
+            StrType
         ) { it.i64(0).toString(2) }
 
         defineMethod(
             "max", "Returns the maximum of two values.",
-            I64, Parameter("other", I64)
+            IntType, Parameter("other", IntType)
         ) { max(it.i64(0), it.i64(1)) }
 
         defineMethod(
             "min", "Returns the minimum of two values.",
-            I64,
-            Parameter("other", I64)
+            IntType,
+            Parameter("other", IntType)
         ) { min(it.i64(0), it.i64(1)) }
 
         defineMethod(
             "oct", "Convert an integer to an octal string prefixed with \"0o\".",
-            Str,
+            StrType,
         ) { (it.i64(0).toString(8)) }
 
         defineNativeFunction(
             "range", "Creates a range from start (inclusive) to end (exclusive)",
             RangeType,
-            Parameter("start", I64),
-            Parameter("end", I64)
+            Parameter("start", IntType),
+            Parameter("end", IntType)
         ) { Range(it.i64(0), it.i64(1)) }
     }
 

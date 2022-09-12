@@ -4,7 +4,7 @@ import org.kobjects.tantilla2.core.AnyType
 import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
 import org.kobjects.tantilla2.core.function.Parameter
 
-object Str : NativeStructDefinition(
+object StrType : NativeStructDefinition(
     RootScope,
     "str",
     "A character String. Use the constructor to convert a value to its string representation.",

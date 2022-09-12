@@ -43,8 +43,10 @@ class TantillaViewModel(
 
     val userRootScope
         get() = console.scope
-    var showDpad = mutableStateOf(false)
+
     var runtimeExceptionPosition = IntRange(-1, 0)
+
+    val graphicsSystem = defineNatives(bitmap, graphicsUpdateTrigger)
 
     init {
         console.endCallback = ::runStateCallback
@@ -163,7 +165,6 @@ class TantillaViewModel(
         clearConsole()
         val newRoot = UserRootScope(RootScope)
         console.setUserScope(newRoot)
-        defineNatives(bitmap, graphicsUpdateTrigger)
         userScope.value = newRoot
         helpScope.value = newRoot.parentScope!!
 
@@ -284,6 +285,9 @@ class TantillaViewModel(
             )
         )
     }
+
+    fun onTap(x: Double, y: Double) = graphicsSystem.onTap(x, y)
+
 
     companion object {
 

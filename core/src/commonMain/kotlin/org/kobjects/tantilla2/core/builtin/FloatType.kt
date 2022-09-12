@@ -6,7 +6,7 @@ import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
 import org.kobjects.tantilla2.core.function.Parameter
 import kotlin.math.*
 
-object F64 : NativeStructDefinition(
+object FloatType : NativeStructDefinition(
     RootScope,
     "float",
     "Floating point number. The constructor is able to parse strings and to convert ints.",
@@ -24,36 +24,36 @@ object F64 : NativeStructDefinition(
     init {
         defineMethod(
             "abs", "Return the absolute value.",
-            F64
+            FloatType
         ) { abs(it.f64(0)) }
 
         defineMethod(
             "max", "Returns the maximum of two values.",
-            F64, Parameter("other", F64)
+            FloatType, Parameter("other", FloatType)
         ) { max(it.f64(0), it.f64(1)) }
 
         defineMethod(
             "min", "Returns the minimum of two values.",
-            F64, Parameter("other", F64)
+            FloatType, Parameter("other", FloatType)
         ) { min(it.f64(0), it.f64(1)) }
 
         defineMethod(
             "pow", "Calculates the powet ot the given exponent.",
-            F64,
-            Parameter("exp", F64)
+            FloatType,
+            Parameter("exp", FloatType)
         ) { exp(it.f64(1)  * ln(it.f64(0))) }
 
         defineNativeFunction(
             "round", "Return the argument, rounded to the next integer.",
-            F64, Parameter("x",
-                F64
-            ), Parameter("exp", F64)
+            FloatType, Parameter("x",
+                FloatType
+            ), Parameter("exp", FloatType)
         ) { round(it.f64(0)) }
 
         defineNativeFunction(
             "sqrt", "Calculates the square root of the argument",
-            F64, Parameter("x",
-                F64
+            FloatType, Parameter("x",
+                FloatType
             )
         ) { sqrt(it.f64(0)) }
 
@@ -61,7 +61,7 @@ object F64 : NativeStructDefinition(
     }
 
     override fun isAssignableFrom(type: Type): Boolean {
-        return type == F64 || type == I64
+        return type == FloatType || type == IntType
     }
 
 

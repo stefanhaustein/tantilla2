@@ -3,11 +3,20 @@ package org.kobjects.tantilla2.stdlib.graphics
 import org.kobjects.tantilla2.core.UnitScope
 import org.kobjects.tantilla2.core.builtin.RootScope
 
-object GraphicsScope: UnitScope(RootScope, "graphics") {
+class GraphicsScope(val graphicsSystem: GraphicsSystem): UnitScope(RootScope, "graphics") {
 
-    fun register() {
-        add(PenDefinition)
-        add(ColorDefinition)
-        add(BitmapImageDefinition)
+    // Doesn't depend on others
+    val colorDefinition = ColorDefinition(this)
+
+    val penDefinition = PenDefinition(this)
+
+    val bitmapImageDefinition = BitmapImageDefinition(this)
+
+    init {
+        add(penDefinition)
+        add(colorDefinition)
+        add(bitmapImageDefinition)
+
+        RootScope.add(ScreenDefinition(this))
     }
 }

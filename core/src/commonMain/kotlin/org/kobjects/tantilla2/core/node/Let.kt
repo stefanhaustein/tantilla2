@@ -4,11 +4,11 @@ import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.builtin.RootScope
 import org.kobjects.tantilla2.core.function.LocalVariableDefinition
-import org.kobjects.tantilla2.core.builtin.Void
+import org.kobjects.tantilla2.core.builtin.VoidType
 
 class Let(val definition: LocalVariableDefinition, val type: Type, val typeIsExplicit: Boolean, val initializer: Evaluable<LocalRuntimeContext>?) : TantillaNode {
     override val returnType: Type
-        get() = Void
+        get() = VoidType
 
     override fun children() = if (initializer == null) emptyList() else listOf(initializer)
 

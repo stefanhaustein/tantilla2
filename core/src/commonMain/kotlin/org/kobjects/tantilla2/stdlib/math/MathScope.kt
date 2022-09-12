@@ -1,7 +1,7 @@
 package org.kobjects.tantilla2.stdlib.math
 
 import org.kobjects.tantilla2.core.*
-import org.kobjects.tantilla2.core.builtin.F64
+import org.kobjects.tantilla2.core.builtin.FloatType
 import org.kobjects.tantilla2.core.builtin.RootScope
 import org.kobjects.tantilla2.core.function.Parameter
 import kotlin.math.ceil
@@ -13,15 +13,15 @@ object MathScope : UnitScope(RootScope, "math") {
         defineNativeFunction(
             "floor",
             "Rounds the argument down to the nearest integer.",
-            F64,
-            Parameter("x", F64)) {
+            FloatType,
+            Parameter("x", FloatType)) {
                 floor(it.f64(0))
             }
         defineNativeFunction(
             "ceil",
             "Rounds the argument up to the nearest integer.",
-            F64,
-            Parameter("x", F64)) {
+            FloatType,
+            Parameter("x", FloatType)) {
             ceil(it.f64(0))
         }
     }

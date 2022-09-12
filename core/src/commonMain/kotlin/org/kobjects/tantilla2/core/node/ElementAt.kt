@@ -2,7 +2,7 @@ package org.kobjects.tantilla2.core.node
 
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.tantilla2.core.*
-import org.kobjects.tantilla2.core.builtin.I64
+import org.kobjects.tantilla2.core.builtin.IntType
 import org.kobjects.tantilla2.core.builtin.ListType
 import org.kobjects.tantilla2.core.builtin.TypedList
 
@@ -14,7 +14,7 @@ class ElementAt(
         if (baseExpr.returnType !is ListType) {
             throw IllegalArgumentException("Base expression must be of list type")
         }
-        if (indexExpr.returnType != I64) {
+        if (indexExpr.returnType != IntType) {
             throw IllegalArgumentException("Index expression must be int.")
         }
     }

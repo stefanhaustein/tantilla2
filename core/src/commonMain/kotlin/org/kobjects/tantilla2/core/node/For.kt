@@ -5,7 +5,7 @@ import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.Type
-import org.kobjects.tantilla2.core.builtin.Void
+import org.kobjects.tantilla2.core.builtin.VoidType
 
 class For(
     val iteratorName: String,
@@ -14,7 +14,7 @@ class For(
     val bodyExpression: Evaluable<LocalRuntimeContext>,
 ) : TantillaNode {
     override val returnType: Type
-        get() = Void
+        get() = VoidType
 
     override fun children() = listOf(rangeExpression, bodyExpression)
 

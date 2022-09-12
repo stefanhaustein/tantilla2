@@ -7,7 +7,7 @@ import androidx.compose.runtime.MutableState
 import org.kobjects.tantilla2.core.Type
 import org.kobjects.tantilla2.stdlib.graphics.Pen
 
-class PenImpl(override val type: Type, val canvas: Canvas, val updateTrigger: MutableState<Int>):
+class PenImpl(val canvas: Canvas, val updateTrigger: MutableState<Int>):
     Pen {
     val strokePaint = Paint()
     val fillPaint = Paint()
