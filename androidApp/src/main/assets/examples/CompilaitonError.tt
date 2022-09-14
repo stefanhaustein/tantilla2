@@ -1,2 +1,4 @@
 def main():
   undefined_function()
+
+  screen.on_tap(lambda(x: float, y: float): print(x, y))
