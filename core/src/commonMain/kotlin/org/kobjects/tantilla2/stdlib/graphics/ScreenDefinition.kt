@@ -26,7 +26,7 @@ class ScreenDefinition(graphicsScope: GraphicsScope) : UnitScope(RootScope, "scr
         )
 
         defineNativeFunction(
-            "on_tap",
+            "add_tap_listener",
             "Called when the user taps on the screen.",
             VoidType,
             Parameter("callback", FunctionType.Impl(VoidType, listOf(Parameter("x", FloatType), Parameter("y", FloatType))))
@@ -57,7 +57,7 @@ class ScreenDefinition(graphicsScope: GraphicsScope) : UnitScope(RootScope, "scr
 
 
         defineNativeFunction(
-            "requestAnimationFrame",
+            "request_animation_frame",
             "Calls the given function before refreshing the screen.",
             VoidType,
             Parameter("callback", FunctionType.Impl(VoidType, emptyList()))
