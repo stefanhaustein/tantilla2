@@ -274,9 +274,19 @@ abstract class Scope(
     }
 
     fun typeName(type: Definition): String {
-        // TODO: Check imports here!
+        // Check for imports
+        var scope: Scope? = this
+        while (scope != null) {
+            for (definition in scope.definitions.values) {
+                if (definition is ImportDefinition && definition.getValue(null) == type) {
+                    return definition.name
+                }
+            }
+            scope = scope.parentScope
+        }
+        // Construct the fully qualified name.
         val sb = StringBuilder()
-        var scope = type.parentScope
+        scope = type.parentScope
         while (scope != null && scope != RootScope && scope !is UserRootScope) {
             sb.insert(0, '.')
             sb.insert(0, scope.name)

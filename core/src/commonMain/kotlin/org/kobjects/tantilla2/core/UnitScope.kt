@@ -9,7 +9,7 @@ open class UnitScope(
     override val kind: Definition.Kind
         get() = Definition.Kind.UNIT
 
-    override fun serializeType(writer: CodeWriter, scope: Scope) {
+    override fun serializeType(writer: CodeWriter, scope: Scope?) {
         writer.append(name)
     }
 }

@@ -35,11 +35,7 @@ class NativeFunctionDefinition(
         }
         writer.appendKeyword("def ")
         writer.appendDeclaration(name)
-        if (abbreviated) {
-            type.serializeAbbreviatedType(writer)
-        } else {
-            type.serializeType(writer, parentScope)
-        }
+        type.serializeType(writer, if (abbreviated) null else parentScope)
     }
 
     override fun serializeCode(writer: CodeWriter, precedence: Int) = throw UnsupportedOperationException()

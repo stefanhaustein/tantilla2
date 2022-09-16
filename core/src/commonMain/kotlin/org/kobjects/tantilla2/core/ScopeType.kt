@@ -1,7 +1,7 @@
 package org.kobjects.tantilla2.core
 
 class ScopeType(val scope: Scope) : Type {
-    override fun serializeType(writer: CodeWriter, scope: Scope) {
+    override fun serializeType(writer: CodeWriter, scope: Scope?) {
         writer.append(this.scope.name)
     }
 

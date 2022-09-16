@@ -6,7 +6,8 @@ interface Type {
 
     fun isAssignableFrom(type: Type) = type == this
 
-    fun serializeType(writer: CodeWriter, scope: Scope)
+    // Set scope to null to get an abbreviated type; use RootScope for fully qualified names.
+    fun serializeType(writer: CodeWriter, scope: Scope?)
 
     val typeName: String
         get() = CodeWriter().appendType(this, RootScope).toString()

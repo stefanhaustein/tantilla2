@@ -153,7 +153,7 @@ class FieldDefinition(
         }
         writer.appendDeclaration(name)
         writer.append(": ")
-        writer.appendType(type, RootScope)
+        writer.appendType(type, parentScope)
     }
 
 

@@ -1,4 +1,4 @@
-package org.kobjects.tantilla2.core.classifier
+package org.kobjects.tantilla2.core.node
 
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.tantilla2.core.CodeWriter

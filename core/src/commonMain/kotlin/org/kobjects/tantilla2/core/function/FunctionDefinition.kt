@@ -138,11 +138,7 @@ class FunctionDefinition (
                     writer.appendKeyword("static ")
                 }
                 writer.appendKeyword("def ").appendDeclaration(name)
-        if (abbreviated) {
-            type.serializeAbbreviatedType(writer)
-        } else {
-            type.serializeType(writer, parentScope)
-        }
+            type.serializeType(writer, if (abbreviated) null else parentScope)
     }
 
 

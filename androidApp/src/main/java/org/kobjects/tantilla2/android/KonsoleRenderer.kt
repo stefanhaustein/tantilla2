@@ -46,7 +46,8 @@ fun RenderKonsole(viewModel: TantillaViewModel) {
                     viewModel.onTap(it.x.toDouble(), it.y.toDouble())
                 })
             }) {
-                org.kobjects.konsole.compose.RenderKonsole(konsole = viewModel.console.konsole as ComposeKonsole)
+                org.kobjects.konsole.compose.RenderKonsole(
+                    konsole = viewModel.console.konsole as ComposeKonsole)
             }
         }
     }

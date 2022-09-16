@@ -69,7 +69,7 @@ class CodeWriter(
         return this
     }
 
-    fun appendType(type: Type, scope: Scope): CodeWriter {
+    fun appendType(type: Type, scope: Scope?): CodeWriter {
         type.serializeType(this, scope)
         return this
     }

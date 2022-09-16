@@ -12,7 +12,7 @@ interface FunctionType :Type {
 
     fun isMethod() = parameters.size > 0 && parameters[0].name == "self"
 
-    override fun serializeType(writer: CodeWriter, scope: Scope) {
+    override fun serializeType(writer: CodeWriter, scope: Scope?) {
         val startIndex = if (isMethod()) 1 else 0
         writer.append("(")
         if (parameters.size > startIndex) {
@@ -26,23 +26,6 @@ interface FunctionType :Type {
         if (returnType != VoidType) {
             writer.append(" -> ")
             writer.appendType(returnType, scope)
-        }
-    }
-
-    fun serializeAbbreviatedType(writer: CodeWriter) {
-        val startIndex = if (isMethod()) 1 else 0
-        writer.append("(")
-        if (parameters.size > startIndex) {
-            writer.append(parameters[startIndex].name)
-            for (i in startIndex + 1 until parameters.size) {
-                writer.append(", ")
-                writer.append(parameters[i].name)
-            }
-        }
-        writer.append(")")
-        if (returnType != VoidType) {
-            writer.append(" -> ")
-            writer.appendType(returnType, RootScope)
         }
     }
 

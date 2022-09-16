@@ -11,7 +11,7 @@ data class Parameter(
     val isVararg: Boolean = false,
 ) {
 
-    fun serialize(writer: CodeWriter, scope: Scope) {
+    fun serialize(writer: CodeWriter, scope: Scope?) {
         if (name == "self") {
             writer.append(name)
         } else {
@@ -19,11 +19,13 @@ data class Parameter(
                 writer.append("*")
             }
             writer.append(name)
-            writer.append(": ")
-            writer.appendType(type, scope)
-            if (defaultValueExpression != null) {
-                writer.append(" = ")
-                writer.appendCode(defaultValueExpression)
+            if (scope != null) {
+                writer.append(": ")
+                writer.appendType(type, scope)
+                if (defaultValueExpression != null) {
+                    writer.append(" = ")
+                    writer.appendCode(defaultValueExpression)
+                }
             }
         }
     }
