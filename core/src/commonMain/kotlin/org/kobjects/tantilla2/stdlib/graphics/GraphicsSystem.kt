@@ -7,4 +7,7 @@ interface GraphicsSystem {
 
     fun requestAnimationFrame(callback: () -> Unit)
 
+    val screenWidth: Int
+
+    val screenHeight: Int
 }

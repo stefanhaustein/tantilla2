@@ -141,6 +141,7 @@ fun RenderAppBar(
                 RenderDropDownMenu(
                     showExamplesMenu,
                     "FizzBuzz" to  { viewModel.loadExample("FizzBuzz.tt") },
+                    "GraphicsDemo" to  { viewModel.loadExample("GraphicsDemo.tt") },
                     "RayTracer" to  { viewModel.loadExample("RayTracer.tt") },
                     "RuntimeError" to  { viewModel.loadExample("RuntimeError.tt") },
                     "CompilationError" to  { viewModel.loadExample("CompilationError.tt") }

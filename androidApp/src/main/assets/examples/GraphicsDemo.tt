@@ -1,0 +1,32 @@
+import graphics.Color
+
+def main():
+  pen.fill_color = Color.GRAY
+  pen.stroke_color = Color.TRANSPARENT
+
+  pen.rect(0, 0, screen.width, screen.height)
+
+  pen.stroke_color = Color.WHITE
+  pen.fill_color = Color.TRANSPARENT
+
+  let cx = screen.width / 2
+  let cy = screen.height / 2
+  for i in range(0, max(screen.width, screen.height) // 50):
+    pen.line(cx + i * 25, 0, cx + i * 25, screen.height)
+    pen.line(cx - i * 25, 0, cx - i * 25, screen.height)
+    pen.line(0, cy + i * 25, screen.width, cy + i * 25)
+    pen.line(0, cy - i * 25, screen.width, cy - i * 25)
+
+  pen.circle(cx, cy, 120)
+
+  pen.fill_color = Color.WHITE
+  pen.stroke_color = Color.TRANSPARENT
+
+  pen.rect(cx-100, cy-100, 200, 200)
+  for i in range(0, 200):
+    let x = cx - 100 + i
+    pen.stroke_color = Color.hsl(i*365/200, 1, 0.5)
+    pen.line(x, cy - 100, x, cy - 33)
+    pen.stroke_color = Color.hsl(0, 0, i/200)
+    pen.line(x, cy - 33, x, cy)
+

@@ -50,13 +50,14 @@ open class NativeStructDefinition(
     ) {
         add(
             NativePropertyDefinition(
-               this,
+                this,
                 Definition.Kind.PROPERTY,
                 name,
                 docString = docString,
                 type = type,
                 getter = getter,
-                setter = setter))
+                setter = setter
+            ))
     }
 
 

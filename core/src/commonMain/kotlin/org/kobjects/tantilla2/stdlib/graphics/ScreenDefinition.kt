@@ -4,6 +4,7 @@ import org.kobjects.tantilla2.core.Definition
 import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.UnitScope
 import org.kobjects.tantilla2.core.builtin.FloatType
+import org.kobjects.tantilla2.core.builtin.IntType
 import org.kobjects.tantilla2.core.builtin.RootScope
 import org.kobjects.tantilla2.core.builtin.VoidType
 import org.kobjects.tantilla2.core.classifier.NativePropertyDefinition
@@ -24,6 +25,23 @@ class ScreenDefinition(graphicsScope: GraphicsScope) : UnitScope(RootScope, "scr
                 getter = {graphicsScope.graphicsSystem.image()}
             )
         )
+
+        add(NativePropertyDefinition(
+            this,
+            Definition.Kind.STATIC,
+            "width",
+            "The full width of the screen in pixels.",
+            IntType,
+            getter = { graphicsScope.graphicsSystem.screenWidth.toLong() }))
+
+        add(NativePropertyDefinition(
+            this,
+            Definition.Kind.STATIC,
+            "height",
+            "The full height of the screen in pixels.",
+            IntType,
+            getter = { graphicsScope.graphicsSystem.screenHeight.toLong() }))
+
 
         defineNativeFunction(
             "add_tap_listener",

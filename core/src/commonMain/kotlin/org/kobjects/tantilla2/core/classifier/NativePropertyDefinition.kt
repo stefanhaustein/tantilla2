@@ -6,10 +6,10 @@ class NativePropertyDefinition(
     override val parentScope: Scope,
     override val kind: Definition.Kind,
     override val name: String,
+    override var docString: String = "",
     override val type: Type,
     private val getter: (self: Any?) -> Any?,
     private val setter: ((self: Any?, newValue: Any?) -> Unit)? = null,
-    override var docString: String = "",
 ) : Definition {
 
     override var index: Int
@@ -72,9 +72,9 @@ class NativePropertyDefinition(
             parentScope,
             Definition.Kind.STATIC,
             name,
+            docString = docString,
             type = type,
-            getter = { value },
-            docString = docString
+            getter = { value }
         )
     }
 }

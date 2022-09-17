@@ -37,6 +37,19 @@ class PenDefinition(graphicsScope: GraphicsScope) : NativeStructDefinition(graph
             pen.rect(it.f64(1), it.f64(2), it.f64(3), it.f64(4))
         }
 
+        defineNativeFunction(
+            "circle",
+            "Draws a circle with the given center (cx, cy) and radius (r).",
+            VoidType,
+            Parameter("self", this),
+            Parameter("cx", FloatType),
+            Parameter("cy", FloatType),
+            Parameter("r", FloatType)
+        ) {
+            val pen = it[0] as Pen
+            pen.circle(it.f64(1), it.f64(2), it.f64(3))
+        }
+
         defineNativeProperty(
             "fill_color",
         "Color value used for filling shapes",

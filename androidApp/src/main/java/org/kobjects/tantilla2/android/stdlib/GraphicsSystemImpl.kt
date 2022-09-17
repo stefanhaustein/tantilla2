@@ -24,4 +24,10 @@ class GraphicsSystemImpl(
         Choreographer.getInstance().postFrameCallback { callback() }
     }
 
+    override val screenWidth: Int
+        get() = bitmapImage.width
+
+    override val screenHeight: Int
+        get() = bitmapImage.height
+
 }

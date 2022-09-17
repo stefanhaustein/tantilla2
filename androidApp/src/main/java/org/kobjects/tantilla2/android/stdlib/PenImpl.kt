@@ -48,4 +48,15 @@ class PenImpl(val canvas: Canvas, val updateTrigger: MutableState<Int>):
         updateTrigger.value++
     }
 
+    override fun circle(cx: Double, cy: Double, r: Double) {
+        if (fillPaint.color shr 24 != 0) {
+            canvas.drawCircle(cx.toFloat(), cy.toFloat(), r.toFloat(), fillPaint)
+        }
+
+        if (strokePaint.color shr 24 != 0) {
+            canvas.drawCircle(cx.toFloat(), cy.toFloat(), r.toFloat(), strokePaint)
+        }
+        updateTrigger.value++
+    }
+
 }
