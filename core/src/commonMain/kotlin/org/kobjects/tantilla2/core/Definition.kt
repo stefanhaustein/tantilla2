@@ -62,7 +62,7 @@ interface Definition : SerializableCode, Comparable<Definition> {
     fun serializeTitle(writer: CodeWriter, abbreviated: Boolean = false)
 
     enum class Kind {
-        IMPORT, STATIC, FUNCTION, PROPERTY, METHOD, TRAIT, STRUCT, UNIT, IMPL, UNPARSEABLE
+        IMPORT, STATIC, FUNCTION, PROPERTY, METHOD, TRAIT, TYPE, STRUCT, UNIT, IMPL, UNPARSEABLE
     }
 
 

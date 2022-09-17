@@ -12,6 +12,8 @@ open class NativeStructDefinition(
     val ctorParams: List<Parameter> = emptyList(),
     val ctor: (LocalRuntimeContext) -> Any? = { throw UnsupportedOperationException() },
 ) : StructDefinition(parent, name, docString) {
+    override val kind: Definition.Kind
+        get() = Definition.Kind.TYPE
 
     override val type: FunctionType
         get() = StructMetaType(this, ctorParams)

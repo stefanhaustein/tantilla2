@@ -10,7 +10,6 @@ class GraphicsSystemImpl(
     bitmap: Bitmap,
     val graphicsUpdateTrigger: MutableState<Int>
 ) : GraphicsSystem {
-    val tapListeners = mutableListOf<(Double, Double) -> Unit>()
 
 
     private val bitmapImage = BitmapImageImpl(bitmap, graphicsUpdateTrigger)
@@ -25,13 +24,4 @@ class GraphicsSystemImpl(
         Choreographer.getInstance().postFrameCallback { callback() }
     }
 
-    fun onTap(x: Double, y: Double) {
-        for (callback in tapListeners) {
-            callback(x, y)
-        }
-    }
-
-    override fun addTapListener(callback: (x: Double, y: Double) -> Unit) {
-        tapListeners.add(callback)
-    }
 }

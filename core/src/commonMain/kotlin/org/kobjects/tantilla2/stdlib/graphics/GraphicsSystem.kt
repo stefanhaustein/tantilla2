@@ -7,5 +7,4 @@ interface GraphicsSystem {
 
     fun requestAnimationFrame(callback: () -> Unit)
 
-    fun addTapListener(callback: (x: Double, y: Double) -> Unit)
 }

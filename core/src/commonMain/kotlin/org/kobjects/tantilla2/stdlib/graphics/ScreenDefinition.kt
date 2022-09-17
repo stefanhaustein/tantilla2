@@ -31,7 +31,7 @@ class ScreenDefinition(graphicsScope: GraphicsScope) : UnitScope(RootScope, "scr
             VoidType,
             Parameter("callback", FunctionType.Impl(VoidType, listOf(Parameter("x", FloatType), Parameter("y", FloatType))))
         ) { context ->
-            graphicsScope.graphicsSystem.addTapListener { x, y ->
+            context.globalRuntimeContext.tapListeners.add { x, y ->
                 context.globalRuntimeContext.activeThreads++
                 try {
                     val fn = context[0] as Callable

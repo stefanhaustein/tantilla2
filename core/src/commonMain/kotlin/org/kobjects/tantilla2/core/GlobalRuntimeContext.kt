@@ -12,6 +12,7 @@ class GlobalRuntimeContext(
     var stopRequested = false
     var activeThreads = 0
     var exception: TantillaRuntimeException? = null
+    val tapListeners = mutableListOf<(Double, Double) -> Unit>()
 
 
     fun createException(definition: Definition?, node: Evaluable<LocalRuntimeContext>?, message: String?, cause: Exception? = null) =
@@ -24,12 +25,21 @@ class GlobalRuntimeContext(
     fun wrapException(e: Exception): TantillaRuntimeException =
         if (e is TantillaRuntimeException) e else createException(null, null, null, e)
 
+
+    fun onTap(x: Double, y: Double) {
+        for (callback in tapListeners) {
+            callback(x, y)
+        }
+    }
+
+
     fun run() {
         if (activeThreads != 0) {
             exception = createException(null, null, "Already running.")
             return
         }
         stopRequested = false
+        tapListeners.clear()
 
         val definition = userRootScope["main"]
         if (definition == null) {

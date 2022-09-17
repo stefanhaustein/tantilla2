@@ -285,7 +285,7 @@ class TantillaViewModel(
         )
     }
 
-    fun onTap(x: Double, y: Double) = graphicsSystem.onTap(x, y)
+    fun onTap(x: Double, y: Double) = console.globalRuntimeContext.onTap(x, y)
 
 
     companion object {

@@ -78,7 +78,7 @@ fun RenderScope(viewModel: TantillaViewModel) {
                             Text(title, Modifier.padding(0.dp, 4.dp, 0.dp, 0.dp))
                         }
                         for (definition in list) {
-                            item(key = scope.name + "::" + definition.name) {
+                            item(key = scope.name + "::" + definition.name + "::" + definition.hashCode()) {
                                 RenderDefinition(viewModel, definition)
                             }
                         }
