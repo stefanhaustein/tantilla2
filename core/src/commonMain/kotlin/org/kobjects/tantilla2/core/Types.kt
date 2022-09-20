@@ -19,6 +19,7 @@ val Evaluable<*>.returnType: Type
         is I64.Const -> org.kobjects.tantilla2.core.builtin.IntType
 
         is Str.Const -> org.kobjects.tantilla2.core.builtin.StrType
+        is Str.Add -> org.kobjects.tantilla2.core.builtin.StrType
 
         else -> throw IllegalArgumentException("Can't determine return type for unrecognized greenspun expression: $this")
     }

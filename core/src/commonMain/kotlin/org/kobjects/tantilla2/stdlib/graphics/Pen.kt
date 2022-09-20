@@ -10,4 +10,5 @@ interface Pen {
     fun line(startX: Double, startY: Double, endX: Double, endY: Double)
     fun rect(x: Double, y: Double, width: Double, height: Double)
     fun circle(cx: Double, cy: Double, r: Double)
+    fun text(x: Double, y: Double, text: String)
 }

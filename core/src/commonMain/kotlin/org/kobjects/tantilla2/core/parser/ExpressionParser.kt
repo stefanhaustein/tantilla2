@@ -5,6 +5,7 @@ import org.kobjects.greenspun.core.F64
 import org.kobjects.greenspun.core.I64
 import org.kobjects.greenspun.core.Str
 import org.kobjects.tantilla2.core.*
+import org.kobjects.tantilla2.core.builtin.StrType
 import org.kobjects.parserlib.expressionparser.ExpressionParser as GreenspunExpressionParser
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
 import org.kobjects.tantilla2.core.classifier.StructMetaType
@@ -365,7 +366,7 @@ object ExpressionParser {
             GreenspunExpressionParser.infix(5, "/") { _, _, _, l, r -> F64.Div(l, r)},
             GreenspunExpressionParser.infix(5, "%") { _, _, _, l, r -> if (bothInt(l, r)) I64.Mod(l, r) else F64.Mod(l, r)},
             GreenspunExpressionParser.prefix(4, "-") { _, _, _, expr -> if (expr.returnType == org.kobjects.tantilla2.core.builtin.IntType) I64.Neg(expr) else F64.Neg(expr)},
-            GreenspunExpressionParser.infix(3, "+") { _, _, _, l, r -> if (bothInt(l, r)) I64.Add(l, r) else F64.Add(l, r)},
+            GreenspunExpressionParser.infix(3, "+") { _, _, _, l, r -> if (l.returnType == StrType) Str.Add(l, r) else if (bothInt(l, r)) I64.Add(l, r) else F64.Add(l, r)},
             GreenspunExpressionParser.infix(3, "-") { _, _, _, l, r ->  if (bothInt(l, r)) I64.Sub(l, r) else F64.Sub(l, r)},
             GreenspunExpressionParser.infix(2, "==") { _, _, _, l, r ->  if (bothInt(l, r)) I64.Eq(l, r) else F64.Eq(l, r)},
             GreenspunExpressionParser.infix(2, "!=") { _, _, _, l, r ->  if (bothInt(l, r)) I64.Ne(l, r) else F64.Ne(l, r)},

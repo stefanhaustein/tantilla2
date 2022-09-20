@@ -59,4 +59,11 @@ class PenImpl(val canvas: Canvas, val updateTrigger: MutableState<Int>):
         updateTrigger.value++
     }
 
+    override fun text(x: Double, y: Double, text: String) {
+        if (fillPaint.color shr 24 != 0) {
+            canvas.drawText(text, x.toFloat(), y.toFloat(), fillPaint)
+            updateTrigger.value++
+        }
+    }
+
 }

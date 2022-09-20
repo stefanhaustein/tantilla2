@@ -98,6 +98,7 @@ class CodeWriter(
             is I64.Ne<*> -> appendInfix(code, parentPrecedence,"!=", 2)
             is I64.Add<*> -> appendInfix(code, parentPrecedence,  "+", 3)
             is F64.Add<*> -> appendInfix(code, parentPrecedence,  "+", 3)
+            is Str.Add<*> -> appendInfix(code, parentPrecedence,  "+", 3)
             is I64.Sub<*> -> appendInfix(code, parentPrecedence, "-", 3)
             is F64.Sub<*> -> appendInfix(code, parentPrecedence, "-", 3)
             is I64.Mul<*> -> appendInfix(code, parentPrecedence, "*", 5)

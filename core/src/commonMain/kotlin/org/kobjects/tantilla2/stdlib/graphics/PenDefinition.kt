@@ -4,6 +4,7 @@ import org.kobjects.tantilla2.core.Type
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
 import org.kobjects.tantilla2.core.builtin.FloatType
+import org.kobjects.tantilla2.core.builtin.StrType
 import org.kobjects.tantilla2.core.builtin.VoidType
 
 class PenDefinition(graphicsScope: GraphicsScope) : NativeStructDefinition(graphicsScope, "Pen"), Type {
@@ -48,6 +49,19 @@ class PenDefinition(graphicsScope: GraphicsScope) : NativeStructDefinition(graph
         ) {
             val pen = it[0] as Pen
             pen.circle(it.f64(1), it.f64(2), it.f64(3))
+        }
+
+        defineNativeFunction(
+            "text",
+            "Draws text at the given baseline position.",
+            VoidType,
+            Parameter("self", this),
+            Parameter("x", FloatType),
+            Parameter("y", FloatType),
+            Parameter("text", StrType)
+        ) {
+            val pen = it[0] as Pen
+            pen.text(it.f64(1), it.f64(2), it.str(3))
         }
 
         defineNativeProperty(

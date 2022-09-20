@@ -30,3 +30,6 @@ def main():
     pen.stroke_color = Color.hsl(0, 0, i/200)
     pen.line(x, cy - 33, x, cy)
 
+  pen.fill_color = Color.BLACK
+  pen.text(cx - 90, cy + 30, "Width: " + str(screen.width))
+  pen.text(cx - 90, cy + 60, "Height: " + str(screen.height))
