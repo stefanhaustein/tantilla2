@@ -57,6 +57,9 @@ interface Definition : SerializableCode, Comparable<Definition> {
     fun reset() {
     }
 
+    fun createWriter(): CodeWriter {
+        return CodeWriter("", )
+    }
 
     fun serializeSummary(writer: CodeWriter)
     fun serializeTitle(writer: CodeWriter, abbreviated: Boolean = false)

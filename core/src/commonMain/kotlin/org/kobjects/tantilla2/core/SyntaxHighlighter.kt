@@ -5,16 +5,30 @@ import org.kobjects.tantilla2.core.parser.TantillaTokenizer
 import org.kobjects.tantilla2.core.parser.TokenType
 
 
+
+
 fun highlightSyntax(
+    writer: CodeWriter,
     code: String,
-    errors: Map<IntRange, Exception>,
-    highlighting: Map<CodeWriter.Kind, Pair<String, String>>
-): String {
+    errors: List<Exception> = listOf(),
+    runtimeException: Exception? = null,
+    runtimeExceptionPosition: IntRange = IntRange.EMPTY,
+) {
+    val map = mutableMapOf<IntRange, Exception>()
+    for (error in errors) {
+        if (error is ParsingException) {
+            map.put(IntRange(error.token.pos, error.token.pos + error.token.text.length), error)
+        }
+    }
+    if (runtimeException != null) {
+        map.put(runtimeExceptionPosition, runtimeException)
+    }
 
-    val errorMap = errors.keys.associateBy { it.first }
+    // Just start positions for now
+    val errorMap = map.keys.associateBy { it.first }
 
 
-        val writer = CodeWriter(highlighting = highlighting)
+
         val tokenizer = TantillaTokenizer(code)
         var wasDecl = false
         var lastPos = 0
@@ -24,7 +38,7 @@ fun highlightSyntax(
                 tokenizer.next()
             } catch (e: Exception) {
                 writer.append(code.substring(lastPos))
-                return writer.toString()
+                return
             }
             if (token.pos > lastPos) {
                 writer.append(code.subSequence(lastPos, token.pos))
@@ -64,7 +78,5 @@ fun highlightSyntax(
         if (lastPos < code.length) {
             writer.append(code.substring(lastPos))
         }
-        println(writer.toString())
-        return writer.toString()
 
 }

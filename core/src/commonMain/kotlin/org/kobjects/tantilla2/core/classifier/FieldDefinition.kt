@@ -3,7 +3,6 @@ package org.kobjects.tantilla2.core.classifier
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.core.*
-import org.kobjects.tantilla2.core.builtin.RootScope
 import org.kobjects.tantilla2.core.node.containsNode
 import org.kobjects.tantilla2.core.parser.*
 
@@ -165,7 +164,7 @@ class FieldDefinition(
                 writer.appendCode(resolvedInitializer)
             }
         } else {
-            writer.append(definitionText)
+            highlightSyntax(writer, definitionText, errors)
         }
     }
 

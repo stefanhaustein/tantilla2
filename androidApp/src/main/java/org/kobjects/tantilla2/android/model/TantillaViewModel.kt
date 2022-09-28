@@ -266,23 +266,11 @@ class TantillaViewModel(
     }
 
     fun annotatedCode(code: String, errors: List<Exception>): AnnotatedString {
-        val map = mutableMapOf<IntRange, Exception>()
-        for (error in errors) {
-            if (error is ParsingException) {
-                map.put(IntRange(error.token.pos, error.token.pos + error.token.text.length), error)
-            }
-        }
-        if (runtimeException.value != null) {
-            map.put(runtimeExceptionPosition, runtimeException.value!!)
-        }
 
-        return ansiToAnnotatedString(
-            highlightSyntax(
-                code,
-                map.toMap(),
-                CodeWriter.defaultHighlighting
-            )
-        )
+        val writer = CodeWriter("", CodeWriter.defaultHighlighting)
+        highlightSyntax(writer, code, errors, runtimeException.value, runtimeExceptionPosition)
+
+        return ansiToAnnotatedString(writer.toString())
     }
 
     fun onTap(x: Double, y: Double) = console.globalRuntimeContext.onTap(x, y)

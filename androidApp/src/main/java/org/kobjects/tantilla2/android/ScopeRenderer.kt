@@ -23,6 +23,7 @@ import org.kobjects.konsole.compose.AnsiConverter
 import org.kobjects.tantilla2.android.model.TantillaViewModel
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.Definition
+import org.kobjects.tantilla2.core.Palette
 import org.kobjects.tantilla2.core.Scope
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.classifier.StructDefinition
@@ -92,10 +93,11 @@ fun RenderScope(viewModel: TantillaViewModel) {
 
 @Composable
 fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
+    val expanded = viewModel.expanded.value.contains(definition)
     Card(
-        backgroundColor = if (viewModel.userRootScope.definitionsWithErrors.contains(definition)
+        backgroundColor = if (!expanded && (viewModel.userRootScope.definitionsWithErrors.contains(definition)
             || definition.errors.isNotEmpty()
-            || definition == viewModel.runtimeException.value?.definition) Color(0xffff8888L) else Color(0xffeeeeee),
+            || definition == viewModel.runtimeException.value?.definition)) Color(Palette.BRIGHTEST_RED) else Color(0xffeeeeee),
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(4.dp))
@@ -161,21 +163,22 @@ fun RenderDocumentation(viewModel: TantillaViewModel) {
     val editable = viewModel.mode.value == TantillaViewModel.Mode.HIERARCHY
     val scope = viewModel.scope().value
 
-        Box(Modifier
-            .fillMaxWidth()
-            .pointerInput(Unit) {
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .pointerInput(Unit) {
 
-                detectTapGestures(
-                    onLongPress = {
-                        if (editable) {
-                            viewModel.editDocumentation()
+                    detectTapGestures(
+                        onLongPress = {
+                            if (editable) {
+                                viewModel.editDocumentation()
+                            }
+                        },
+                        onTap = {
+                            expanded.value = !expanded.value
                         }
-                    },
-                    onTap = {
-                        expanded.value = !expanded.value
-                    }
-                )
-            }) {
+                    )
+                }) {
 
             Column() {
                 if (scope.docString.isBlank()) {
