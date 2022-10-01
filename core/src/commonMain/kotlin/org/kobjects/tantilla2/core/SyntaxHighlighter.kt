@@ -14,18 +14,15 @@ fun highlightSyntax(
     runtimeException: Exception? = null,
     runtimeExceptionPosition: IntRange = IntRange.EMPTY,
 ) {
-    val map = mutableMapOf<IntRange, Exception>()
     for (error in errors) {
         if (error is ParsingException) {
-            map.put(IntRange(error.token.pos, error.token.pos + error.token.text.length), error)
+            writer.addError(IntRange(error.token.pos, error.token.pos + error.token.text.length - 1), error)
         }
     }
     if (runtimeException != null) {
-        map.put(runtimeExceptionPosition, runtimeException)
+        writer.addError(runtimeExceptionPosition, runtimeException)
     }
 
-    // Just start positions for now
-    val errorMap = map.keys.associateBy { it.first }
 
 
 
@@ -44,9 +41,6 @@ fun highlightSyntax(
                 writer.append(code.subSequence(lastPos, token.pos))
             }
 
-            if (errorMap.containsKey(token.pos)) {
-                writer.appendWrapped(CodeWriter.Kind.ERROR, token.text)
-            } else {
 
                 when (token.type) {
                     TokenType.EOF,
@@ -72,9 +66,10 @@ fun highlightSyntax(
                         }
                     else -> writer.append(token.text)
                 }
-            }
+
             lastPos = token.pos + token.text.length
         }
+
         if (lastPos < code.length) {
             writer.append(code.substring(lastPos))
         }

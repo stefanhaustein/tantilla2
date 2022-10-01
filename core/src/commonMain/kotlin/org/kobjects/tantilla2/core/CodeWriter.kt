@@ -6,25 +6,40 @@ import org.kobjects.konsole.Ansi
 class CodeWriter(
     indent: String = "",
     val highlighting: Map<Kind, Pair<String, String>> = emptyMap(),
-    val errorNode: Evaluable<LocalRuntimeContext>? = null
+    val errorNode: Evaluable<LocalRuntimeContext>? = null,
+    val errors: List<Pair<IntRange, Exception>> = emptyList()
 ) : Appendable {
     val sb = StringBuilder()
     val indent = StringBuilder(indent)
     var errorPosition = -1
     var errorLength = 0
+    var pos = 0
+    val startIndices = mutableMapOf<Int, Exception>()
+    val endIndices = mutableSetOf<Int>()
+
+    fun addError(position: IntRange, error: Exception) {
+        startIndices.put(pos + position.start, error)
+        endIndices.add(pos + position.endInclusive + 1)
+    }
 
     override fun append(value: Char): CodeWriter {
+        if (startIndices.containsKey(pos)) {
+            appendStart(Kind.ERROR)
+        }
         sb.append(value)
+        pos++
+        if (endIndices.contains(pos)) {
+            appendEnd(Kind.ERROR)
+        }
         return this
     }
 
-    override fun append(value: CharSequence?): CodeWriter {
-        sb.append(value)
-        return this
-    }
+    override fun append(value: CharSequence?): CodeWriter = append(value, 0, value?.length ?: 0)
 
-    override fun append(value: CharSequence?, startIndex: Int, endIndex: Int): Appendable {
-        sb.append(value, startIndex, endIndex)
+    override fun append(value: CharSequence?, startIndex: Int, endIndex: Int): CodeWriter {
+        for (i in startIndex until endIndex) {
+            append(value!![i])
+        }
         return this
     }
 
@@ -64,10 +79,7 @@ class CodeWriter(
 
     fun stringLiteral(text: String) = appendWrapped(Kind.STRING, text)
 
-    fun newline(): CodeWriter {
-        sb.append('\n').append(indent)
-        return this
-    }
+    fun newline(): CodeWriter = append("\n").append(indent)
 
     fun appendType(type: Type, scope: Scope?): CodeWriter {
         type.serializeType(this, scope)
@@ -77,7 +89,7 @@ class CodeWriter(
     fun appendCode(code: Any?, parentPrecedence: Int = 0): CodeWriter {
         val error = code == errorNode
         if (error) {
-            errorPosition = sb.length
+            errorPosition = pos
             appendStart(Kind.ERROR)
         }
         when (code) {
@@ -115,7 +127,7 @@ class CodeWriter(
             else -> append(code.toString())
         }
         if (error) {
-            errorLength = sb.length - errorPosition
+            errorLength = pos - errorPosition
             appendEnd(Kind.ERROR)
         }
         return this
@@ -128,10 +140,10 @@ class CodeWriter(
 
     fun appendPrefix(code: Evaluable<*>, parentPrecedence: Int, name: String, precedence: Int) {
         if (parentPrecedence > precedence) {
-            sb.append('(')
+            append('(')
             append(name)
             appendCode(code.children()[0], precedence)
-            sb.append(')')
+            append(')')
         } else {
             append(name)
             appendCode(code.children()[0], precedence)
@@ -140,9 +152,9 @@ class CodeWriter(
 
     fun appendInfix(code: Evaluable<*>, parentPrecedence: Int, name: String, precedence: Int) {
         if (parentPrecedence > precedence) {
-            sb.append('(')
+            append('(')
             appendInfix(code, precedence, name, precedence)
-            sb.append(')')
+            append(')')
         } else {
             appendCode(code.children()[0], precedence)
             append(" $name ")
@@ -203,7 +215,7 @@ class CodeWriter(
         val defaultHighlighting = mapOf(
             Kind.KEYWORD to Pair(Ansi.rgbForeground(Palette.DARK_ORANGE.toInt()), Ansi.FOREGROUND_DEFAULT),
             Kind.DECLARATION to Pair(Ansi.rgbForeground(Palette.DARK_BLUE.toInt()), Ansi.FOREGROUND_DEFAULT),
-            Kind.ERROR to Pair(Ansi.rgbBackground(Palette.BRIGHT_RED.toInt()), Ansi.BACKGROUND_DEFAULT),
+            Kind.ERROR to Pair(Ansi.rgbBackground(Palette.BRIGHTEST_RED.toInt()), Ansi.BACKGROUND_DEFAULT),
             Kind.STRING to Pair(Ansi.rgbForeground(Palette.BRIGHT_GREEN.toInt()), Ansi.FOREGROUND_DEFAULT)
         )
         val darkThemeHighlighting = mapOf(
