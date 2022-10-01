@@ -10,6 +10,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -80,7 +81,9 @@ fun RenderScope(viewModel: TantillaViewModel) {
                         }
                         for (definition in list) {
                             item(key = scope.name + "::" + definition.name + "::" + definition.hashCode()) {
-                                RenderDefinition(viewModel, definition)
+                                key(viewModel.codeUpdateTrigger.value) {
+                                    RenderDefinition(viewModel, definition)
+                                }
                             }
                         }
                     }
@@ -89,132 +92,4 @@ fun RenderScope(viewModel: TantillaViewModel) {
         }
     }
 }
-
-
-@Composable
-fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
-    val expanded = viewModel.expanded.value.contains(definition)
-    Card(
-        backgroundColor = if (!expanded && (viewModel.userRootScope.definitionsWithErrors.contains(definition)
-            || definition.errors.isNotEmpty()
-            || definition == viewModel.runtimeException.value?.definition)) Color(Palette.BRIGHTEST_RED) else Color(0xffeeeeee),
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(4.dp))
-            .padding(4.dp)
-            .pointerInput(Unit) {
-                val editable =
-                    !definition.isScope() && viewModel.mode.value == TantillaViewModel.Mode.HIERARCHY
-                detectTapGestures(
-                    onLongPress = {
-                        if (definition.isScope()) {
-                            viewModel.scope().value = definition.getValue(null) as Scope
-                        } else if (editable) {
-                            viewModel.edit(definition)
-                        }
-                    },
-                    onTap = {
-                        if (viewModel.expanded.value.contains(definition)) {
-                            viewModel.expanded.value -= definition
-                        } else {
-                            viewModel.expanded.value += definition
-                        }
-                    }
-                )
-            }
-    ) {
-        Box(Modifier.padding(8.dp)) {
-            val expanded = viewModel.expanded.value.contains(definition)
-            val help = viewModel.mode.value == TantillaViewModel.Mode.HELP
-            Column() {
-                val writer = CodeWriter(highlighting = CodeWriter.defaultHighlighting)
-                if (!expanded) {
-                    definition.serializeTitle(writer)
-                } else {
-                    definition.serializeSummary(writer)
-                }
-               Text(AnsiConverter.ansiToAnnotatedString(writer.toString()))
-            }
-            Row(modifier = Modifier
-                .align(Alignment.TopEnd)
-                .alpha(0.2f)) {
-                if (definition.isScope() || !help) {
-                    Icon(
-                        Icons.Default.Fullscreen,
-                        contentDescription = "Open",
-                        modifier = Modifier.clickable {
-                            if (definition.isScope()) {
-                                viewModel.scope().value = definition.getValue(null) as Scope
-                            } else {
-                                viewModel.edit(definition)
-                            }
-                        })
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun RenderDocumentation(viewModel: TantillaViewModel) {
-    val expanded = remember {
-        mutableStateOf(false)
-    }
-    val editable = viewModel.mode.value == TantillaViewModel.Mode.HIERARCHY
-    val scope = viewModel.scope().value
-
-        Box(
-            Modifier
-                .fillMaxWidth()
-                .pointerInput(Unit) {
-
-                    detectTapGestures(
-                        onLongPress = {
-                            if (editable) {
-                                viewModel.editDocumentation()
-                            }
-                        },
-                        onTap = {
-                            expanded.value = !expanded.value
-                        }
-                    )
-                }) {
-
-            Column() {
-                if (scope.docString.isBlank()) {
-                    Text("(Undocumented)", color = Color.LightGray)
-                } else {
-                    val writer = CodeWriter(highlighting = CodeWriter.defaultHighlighting)
-                    if (expanded.value) {
-                        writer.appendWrapped(CodeWriter.Kind.STRING, scope.docString)
-                    } else {
-                        writer.appendWrapped(
-                            CodeWriter.Kind.STRING,
-                            scope.docString.split("\n").first()
-                        )
-                    }
-                    Text(
-                        AnsiConverter.ansiToAnnotatedString(writer.toString()),
-                        Modifier.padding(bottom = 6.dp))
-                }
-            }
-            if (editable) {
-                Row(
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .alpha(0.2f)
-                        .padding(end = 12.dp)
-                ) {
-
-                        Icon(
-                            Icons.Default.Fullscreen,
-                            contentDescription = "Open",
-                            modifier = Modifier.clickable {
-                                viewModel.editDocumentation()
-                            })
-
-                }
-            }
-        }
-    }
 

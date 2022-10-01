@@ -40,8 +40,7 @@ fun RenderDefinitionEditor(viewModel: TantillaViewModel) {
                         println("Updating to : " + viewModel.currentText.value.text)
                         viewModel.mode.value = TantillaViewModel.Mode.HIERARCHY
                         viewModel.runtimeException.value = null
-                        viewModel.save()
-                        viewModel.forceUpdate.value++
+                        viewModel.notifyCodeChangedAndSave()
                     }) {
                         Icon(Icons.Default.Check, contentDescription = "Save")
                     }

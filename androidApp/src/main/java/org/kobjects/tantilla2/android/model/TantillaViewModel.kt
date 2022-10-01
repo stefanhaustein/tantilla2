@@ -36,10 +36,10 @@ class TantillaViewModel(
     val expanded = mutableStateOf(setOf<Definition>())
     var runtimeException = mutableStateOf<TantillaRuntimeException?>(null)
     val dialogManager = DialogManager()
-    val forceUpdate = mutableStateOf(0)
 
     val graphicsUpdateTrigger = mutableStateOf(0)
     val runstateUpdateTrigger = mutableStateOf(0)
+    val codeUpdateTrigger = mutableStateOf(0)
 
     val userRootScope
         get() = console.scope
@@ -80,7 +80,7 @@ class TantillaViewModel(
     fun saveAs(newName: String) {
         fileName.value = newName
         platform.fileName = newName
-        save()
+        notifyCodeChangedAndSave()
     }
 
 
@@ -246,7 +246,7 @@ class TantillaViewModel(
         }
     }
 
-    fun save() {
+    fun notifyCodeChangedAndSave() {
         val code = CodeWriter().appendCode(userScope.value).toString()
         val file = File(platform.rootDirectory, fileName.value)
         println("Saving code to $file:")
@@ -254,6 +254,8 @@ class TantillaViewModel(
         val writer = file.writer(StandardCharsets.UTF_8)
         writer.write(code)
         writer.close()
+        codeUpdateTrigger.value++
+        runtimeException.value = null
     }
 
     fun clearConsole() {
