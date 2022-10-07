@@ -3,11 +3,12 @@ package org.kobjects.tantilla2.core
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.FunctionType
+import org.kobjects.tantilla2.core.parser.Parser
 
 class GlobalRuntimeContext(
     val userRootScope: UserRootScope,
     // Call with null to clear errors.
-    val runStateCallback: (GlobalRuntimeContext) -> Unit
+    val runStateCallback: (GlobalRuntimeContext) -> Unit = {}
 ) {
     var stopRequested = false
     var activeThreads = 0
@@ -66,6 +67,30 @@ class GlobalRuntimeContext(
             activeThreads--
             exception =  wrapException(e)
             runStateCallback(this)
+        }
+    }
+
+    fun processShellInput(line: String, endCallback: (GlobalRuntimeContext) -> Unit) {
+        try {
+            var parsed = Parser.parseShellInput(line, userRootScope)
+            println("parsed: $parsed")
+            userRootScope.resolveAll(CompilationResults())
+            println("resolved: $parsed")
+
+            try {
+                val runtimeContext = LocalRuntimeContext(this)
+                val evaluationResult = parsed.eval(runtimeContext)
+                userRootScope.systemAbstraction.write(if (evaluationResult == null || evaluationResult == Unit) "Ok" else evaluationResult.toString())
+                endCallback(this)
+            } catch (e: Exception) {
+                val message = e.message ?: e.toString()
+                userRootScope.systemAbstraction.write(message)
+                exception = if (e is TantillaRuntimeException) e else createException(null, parsed, message, e)
+                endCallback(this)
+            }
+        } catch (e: Exception) {
+            val message = e.message ?: e.toString()
+            userRootScope.systemAbstraction.write(message)
         }
     }
 

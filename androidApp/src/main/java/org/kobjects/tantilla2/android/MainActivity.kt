@@ -17,6 +17,7 @@ import org.kobjects.konsole.compose.ComposeKonsole
 import org.kobjects.tantilla2.android.model.Platform
 import org.kobjects.tantilla2.android.model.TantillaViewModel
 import org.kobjects.tantilla2.console.ConsoleLoop
+import org.kobjects.tantilla2.core.Lock
 import org.kobjects.tantilla2.core.Palette
 import java.io.File
 import java.lang.Math.abs
@@ -29,7 +30,11 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val console = ConsoleLoop(ComposeKonsole())
+        val console = ComposeKonsole()
+        val platform = AndroidPlatform {
+            console.write(it)
+        }
+        val consoleLoop = ConsoleLoop(platform, console)
 
         val config = resources.configuration
 
@@ -53,13 +58,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         val viewModel = TantillaViewModel(
-            console,
+            consoleLoop,
             bitmap,
-            AndroidPlatform()
+            platform,
         )
 
         lifecycle.coroutineScope.launchWhenCreated {
-            console.run()
+            consoleLoop.run()
         }
 
 
@@ -89,7 +94,7 @@ class MainActivity : AppCompatActivity() {
 
 
 
-    inner class AndroidPlatform : Platform {
+    inner class AndroidPlatform(val printImpl: (String) -> Unit) : Platform {
 
         override val rootDirectory: File
             get() = filesDir
@@ -103,6 +108,18 @@ class MainActivity : AppCompatActivity() {
 
         override fun runAsync(task: Runnable) {
             Handler(Looper.getMainLooper()).postDelayed(task, 1)
+        }
+
+        override fun print(s: String) {
+            printImpl(s)
+        }
+
+        override fun launch(task: () -> Unit) {
+            TODO("Not yet implemented")
+        }
+
+        override fun createLock(): Lock {
+            TODO("Not yet implemented")
         }
 
     }

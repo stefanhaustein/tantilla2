@@ -162,7 +162,7 @@ class TantillaViewModel(
     fun reset(addHello: Boolean = false) {
         clearBitmap()
         clearConsole()
-        val newRoot = UserRootScope(RootScope)
+        val newRoot = UserRootScope(platform)
         console.setUserScope(newRoot)
         userScope.value = newRoot
         helpScope.value = newRoot.parentScope!!

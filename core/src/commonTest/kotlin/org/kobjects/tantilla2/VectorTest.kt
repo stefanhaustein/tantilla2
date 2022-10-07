@@ -37,7 +37,7 @@ class VectorTest {
 
     @Test
     fun testVector() {
-        val parsingContext = UserRootScope(RootScope)
+        val parsingContext = UserRootScope(TestSystem)
 
         val result = Parser.parse(VECTOR, parsingContext)
 
@@ -46,13 +46,13 @@ class VectorTest {
         assertEquals("mag(Vector(1.0, 2.0, 3.0))", result.serializeCode())
     //    assertEquals("", parsingContext.serialize())
 
-        val vectorImpl = parsingContext["Vector"]!!.value() as Scope
+        val vectorImpl = parsingContext["Vector"]!!.getValue(null) as Scope
         assertEquals(setOf("x", "y", "z", "times", "minus", "plus", "dot", "mag", "norm"),
-            vectorImpl.definitions.iterator().asSequence().map { it.name }.toSet())
+            vectorImpl.iterator().asSequence().map { it.name }.toSet())
 
       //  assertEquals("", parsingContext.toString())
 
-        val runtimeContext = LocalRuntimeContext(mutableListOf())
+        val runtimeContext = LocalRuntimeContext(GlobalRuntimeContext(parsingContext))
         assertEquals(3.7416573867739413, result.eval(runtimeContext))
     }
 

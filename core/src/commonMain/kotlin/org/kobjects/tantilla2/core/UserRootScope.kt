@@ -1,14 +1,16 @@
 package org.kobjects.tantilla2.core
 
+import org.kobjects.tantilla2.core.builtin.RootScope
 import org.kobjects.tantilla2.core.classifier.FieldDefinition
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.FunctionType
 
 class UserRootScope(
-    override val parentScope: Scope,
-    override var docString: String = "",
+    val systemAbstraction: SystemAbstraction
 ) : Scope() {
+    override val parentScope = RootScope
+    override var docString = ""
     val staticFields = mutableListOf<FieldDefinition?>()
 
     var initializedTo = 0

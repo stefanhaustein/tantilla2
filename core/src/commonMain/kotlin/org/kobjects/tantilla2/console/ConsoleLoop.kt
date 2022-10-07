@@ -9,14 +9,15 @@ import org.kobjects.tantilla2.core.builtin.VoidType
 import org.kobjects.tantilla2.stdlib.math.MathScope
 
 class ConsoleLoop(
+    val systemAbstraction: SystemAbstraction,
     val konsole: Konsole,
-    var scope: UserRootScope = UserRootScope(RootScope),
     var endCallback: (GlobalRuntimeContext) -> Unit = {
         if (it.exception != null) {
             konsole.write(it.exception.toString())
         }
     }
 ) {
+    var scope: UserRootScope = UserRootScope(systemAbstraction)
     var globalRuntimeContext = GlobalRuntimeContext(scope, endCallback)
     var runtimeContext = LocalRuntimeContext(globalRuntimeContext)
 
@@ -44,26 +45,7 @@ class ConsoleLoop(
     suspend fun run() {
         while (true) {
             val line = konsole.read()
-            try {
-                var parsed = Parser.parseShellInput(line, scope)
-                println("parsed: $parsed")
-                scope.resolveAll(CompilationResults())
-                println("resolved: $parsed")
-
-                try {
-                    val evaluationResult = parsed.eval(runtimeContext)
-                    konsole.write(if (evaluationResult == null || evaluationResult == Unit) "Ok" else evaluationResult.toString())
-                    endCallback(globalRuntimeContext)
-                } catch (e: Exception) {
-                    val message = e.message ?: e.toString()
-                    konsole.write(message)
-                    globalRuntimeContext.exception = if (e is TantillaRuntimeException) e else globalRuntimeContext.createException(null, parsed, message, e)
-                    endCallback(globalRuntimeContext)
-                }
-            } catch (e: Exception) {
-                val message = e.message ?: e.toString()
-                konsole.write(message)
-            }
+            globalRuntimeContext.processShellInput(line, endCallback)
         }
     }
 

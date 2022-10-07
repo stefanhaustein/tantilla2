@@ -15,7 +15,7 @@ class FizzBuzzTest {
 
     val FIZZ_BUZZ = """
         def fizz_buzz(): 
-          var x = 1
+          let x = 1
           while x <= 20:
             if x % 3 == 0:
               if x % 5 == 0:
@@ -35,7 +35,7 @@ class FizzBuzzTest {
     fun testFizzBuzz() {
         val output = mutableListOf<String>()
 
-        val context = UserRootScope(RootScope)
+        val context = UserRootScope(TestSystem)
 
         context.defineNativeFunction(
             "print", "internal",
@@ -50,18 +50,18 @@ class FizzBuzzTest {
 
         val impl = context["fizz_buzz"]!!
 
-        assertNotNull(impl.value())
+        assertNotNull(impl.getValue(null))
 
         // assertEquals("", impl.toString())
 
-        val runtimeContext = LocalRuntimeContext(mutableListOf(null))
-        (impl.value()!! as Callable).eval(runtimeContext)
+        val runtimeContext = LocalRuntimeContext(GlobalRuntimeContext(context), 1)
+        (impl.getValue(null)!! as Callable).eval(runtimeContext)
 
         assertEquals(listOf(
-            "1.0", "2.0", "Fizz", "4.0", "Buzz",
-            "Fizz", "7.0", "8.0", "Fizz", "Buzz",
-            "11.0", "Fizz", "13.0", "14.0", "FizzBuzz",
-            "16.0", "17.0", "Fizz", "19.0", "Buzz"), output)
+            "1", "2", "Fizz", "4", "Buzz",
+            "Fizz", "7", "8", "Fizz", "Buzz",
+            "11", "Fizz", "13", "14", "FizzBuzz",
+            "16", "17", "Fizz", "19", "Buzz"), output)
     }
 
 }

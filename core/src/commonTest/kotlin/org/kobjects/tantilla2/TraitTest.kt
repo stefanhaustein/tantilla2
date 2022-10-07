@@ -6,6 +6,7 @@ import org.kobjects.tantilla2.core.builtin.RootScope
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class TraitTest {
     val TEST = """
@@ -23,7 +24,7 @@ class TraitTest {
 
     @Test
     fun testTrait() {
-        val parsingContext = UserRootScope(RootScope)
+        val parsingContext = UserRootScope(TestSystem)
 
         val result = Parser.parse(TEST, parsingContext)
 
@@ -32,15 +33,15 @@ class TraitTest {
         // assertEquals("mag(Vector(1.0, 2.0, 3.0))", result.serialize())
         //    assertEquals("", parsingContext.serialize())
 
-        val animal = parsingContext["Animal"]!!.value() as Scope
+        val animal = parsingContext["Animal"]!!.getValue(null) as Scope
         assertEquals(setOf("noise"),
-            animal.definitions.iterator().asSequence().map { it.name }.toSet())
+            animal.iterator().asSequence().map { it.name }.toSet())
 
         //  assertEquals("", parsingContext.toString())
 
-        assertFalse(parsingContext.hasError())
+        assertTrue(parsingContext.errors.isEmpty())
 
-        val runtimeContext = LocalRuntimeContext(mutableListOf())
+        val runtimeContext = LocalRuntimeContext(GlobalRuntimeContext(parsingContext))
         assertEquals("Woof", result.eval(runtimeContext))
     }
 
