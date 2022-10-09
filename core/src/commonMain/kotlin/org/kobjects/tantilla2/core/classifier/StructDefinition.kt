@@ -6,7 +6,7 @@ import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.Parameter
 
 open class StructDefinition(
-    override val parentScope: Scope,
+    override val parentScope: Scope?,
     override val name: String,
     override var docString: String,
 ) : Scope(), Type, Typed, Callable {

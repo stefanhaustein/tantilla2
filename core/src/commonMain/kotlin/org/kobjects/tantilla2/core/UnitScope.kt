@@ -1,7 +1,7 @@
 package org.kobjects.tantilla2.core
 
 open class UnitScope(
-    override val parentScope: Scope,
+    override val parentScope: Scope?,
     override val name: String = "",
     override var docString: String = "",
 ) : Scope(), Typed, Type {

@@ -12,7 +12,6 @@ import org.kobjects.dialog.DialogManager
 import org.kobjects.dialog.InputLine
 import org.kobjects.konsole.compose.AnsiConverter.ansiToAnnotatedString
 import org.kobjects.konsole.compose.ComposeKonsole
-import org.kobjects.tantilla2.console.ConsoleLoop
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.parser.Parser
 import org.kobjects.tantilla2.core.builtin.RootScope
@@ -23,14 +22,18 @@ import java.nio.charset.StandardCharsets
 import kotlin.Exception
 
 class TantillaViewModel(
-    val console: ConsoleLoop,
+    val konsole: ComposeKonsole,
     val bitmap: Bitmap,
     val platform: Platform
 ) : ViewModel() {
+    val rootScope = RootScope(platform)
+    var userRootScope = UserRootScope(rootScope)
+    var globalRuntimeContext = GlobalRuntimeContext(userRootScope, ::runStateCallback)
+
     val mode = mutableStateOf(Mode.SHELL)
     var fileName = mutableStateOf(platform.fileName)
-    val userScope = mutableStateOf<Scope>(console.scope)
-    val helpScope = mutableStateOf<Scope>(console.scope.parentScope)
+    val userScope = mutableStateOf<Scope>(userRootScope)
+    val helpScope = mutableStateOf<Scope>(rootScope)
     val editingDefinition = mutableStateOf<Definition?>(null)
     val currentText = mutableStateOf(TextFieldValue())
     val expanded = mutableStateOf(setOf<Definition>())
@@ -41,12 +44,10 @@ class TantillaViewModel(
     val runstateUpdateTrigger = mutableStateOf(0)
     val codeUpdateTrigger = mutableStateOf(0)
 
-    val userRootScope
-        get() = console.scope
 
     var runtimeExceptionPosition = IntRange(-1, 0)
 
-    val graphicsSystem = defineNatives(bitmap, graphicsUpdateTrigger)
+    val graphicsSystem = defineNatives(rootScope, bitmap, graphicsUpdateTrigger)
 
     init {
         val file = File(platform.rootDirectory, platform.fileName)
@@ -160,15 +161,16 @@ class TantillaViewModel(
     fun reset(addHello: Boolean = false) {
         clearBitmap()
         clearConsole()
-        val newRoot = UserRootScope(platform)
-        console.setUserScope(newRoot)
-        userScope.value = newRoot
-        helpScope.value = newRoot.parentScope!!
+        userRootScope = UserRootScope(rootScope)
+        globalRuntimeContext = GlobalRuntimeContext(userRootScope, ::runStateCallback)
+
+        userScope.value = userRootScope
+        helpScope.value = rootScope
 
         if (addHello) {
-            newRoot.add(
+            userRootScope.add(
                 FunctionDefinition(
-                    newRoot,
+                    userRootScope,
                     Definition.Kind.FUNCTION,
                     "main",
                     "def main():\n  print(\"Hello World!\")"
@@ -179,13 +181,13 @@ class TantillaViewModel(
     }
 
     fun stop() {
-        console.globalRuntimeContext.stopRequested = true
+        globalRuntimeContext.stopRequested = true
         runstateUpdateTrigger.value++
     }
 
     fun runMain() {
         mode.value = Mode.SHELL
-        console.globalRuntimeContext.run()
+        globalRuntimeContext.run()
         runstateUpdateTrigger.value++
     }
 
@@ -213,7 +215,7 @@ class TantillaViewModel(
 
     private fun loadCode(code: String) {
             try {
-                Parser.parseProgram(code, console.scope)
+                Parser.parseProgram(code, userRootScope)
             } catch (e: Exception) {
                 dialogManager.showError(e.toString())
             }
@@ -240,7 +242,7 @@ class TantillaViewModel(
             userScope.value = definition.parentScope!!
             mode.value = Mode.HIERARCHY
         } else {
-            console.konsole.write(e.message ?: e.toString())
+            konsole.write(e.message ?: e.toString())
         }
     }
 
@@ -257,7 +259,7 @@ class TantillaViewModel(
     }
 
     fun clearConsole() {
-       (console.konsole as ComposeKonsole).entries.clear()
+       konsole.entries.clear()
     }
 
 
@@ -273,7 +275,15 @@ class TantillaViewModel(
         return ansiToAnnotatedString(writer.toString())
     }
 
-    fun onTap(x: Double, y: Double) = console.globalRuntimeContext.onTap(x, y)
+    fun onTap(x: Double, y: Double) = globalRuntimeContext.onTap(x, y)
+
+
+    suspend fun consoleLoop() {
+        while (true) {
+            val input = konsole.read()
+            globalRuntimeContext.processShellInput(input)
+        }
+    }
 
 
     companion object {

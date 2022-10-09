@@ -7,7 +7,7 @@ import org.kobjects.tantilla2.core.function.Parameter
 import kotlin.math.*
 
 object FloatType : NativeStructDefinition(
-    RootScope,
+    null,
     "float",
     "Floating point number. The constructor is able to parse strings and to convert ints.",
     ctorParams = listOf(Parameter("value", AnyType, defaultValueExpression = org.kobjects.greenspun.core.F64.Const(0.0))),

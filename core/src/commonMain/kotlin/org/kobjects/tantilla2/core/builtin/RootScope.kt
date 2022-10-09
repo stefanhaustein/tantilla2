@@ -3,8 +3,12 @@ package org.kobjects.tantilla2.core.builtin
 import org.kobjects.tantilla2.core.AnyType
 import org.kobjects.tantilla2.core.Definition
 import org.kobjects.tantilla2.core.Scope
+import org.kobjects.tantilla2.core.SystemAbstraction
+import org.kobjects.tantilla2.core.function.Parameter
 
-object RootScope : Scope() {
+class RootScope(
+    val systemAbstraction: SystemAbstraction,
+) : Scope() {
 
     init {
         add(BoolType)
@@ -12,6 +16,18 @@ object RootScope : Scope() {
         add(IntType)
         add(ListType(AnyType))
         add(StrType)
+
+        add(MathScope)
+
+        defineNativeFunction("print",
+                "Print the value of the text parameter to the console.",
+                VoidType, Parameter("value", AnyType, isVararg = true)
+            ) {
+                val list = it[0] as List<Any?>
+                systemAbstraction.write(list.joinToString(" "))
+            }
+
+
     }
 
 

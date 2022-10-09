@@ -6,7 +6,7 @@ import org.kobjects.tantilla2.core.function.Parameter
 
 data class ListType(
     val elementType: Type,
-) : NativeStructDefinition(RootScope, "List[${elementType.typeName}]") {
+) : NativeStructDefinition(null, "List[${elementType.typeName}]") {
 
     fun empty() = TypedList(this)
 

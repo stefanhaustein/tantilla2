@@ -6,7 +6,7 @@ import org.kobjects.tantilla2.core.function.NativeFunctionDefinition
 import org.kobjects.tantilla2.core.function.Parameter
 
 open class NativeStructDefinition(
-    parent: Scope,
+    parent: Scope?,
     name: String,
     docString: String = "",
     val ctorParams: List<Parameter> = emptyList(),

@@ -5,7 +5,7 @@ import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
 import org.kobjects.tantilla2.core.function.Parameter
 
 object StrType : NativeStructDefinition(
-    RootScope,
+    null,
     "str",
     "A character String. Use the constructor to convert a value to its string representation.",
     ctorParams = listOf(Parameter("value", AnyType, defaultValueExpression = org.kobjects.greenspun.core.Str.Const(""))),

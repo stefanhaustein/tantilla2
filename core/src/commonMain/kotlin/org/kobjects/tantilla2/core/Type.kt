@@ -10,7 +10,7 @@ interface Type {
     fun serializeType(writer: CodeWriter, scope: Scope?)
 
     val typeName: String
-        get() = CodeWriter().appendType(this, RootScope).toString()
+        get() = CodeWriter().appendType(this, null).toString()
 
     fun resolve(name: String): Definition? = throw UnsupportedOperationException("Can't resolve '$name' for '$typeName'")
 }

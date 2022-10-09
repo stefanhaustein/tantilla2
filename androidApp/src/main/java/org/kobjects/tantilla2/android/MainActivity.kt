@@ -3,8 +3,6 @@ package org.kobjects.tantilla2.android
 import android.graphics.Bitmap
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.Colors
@@ -16,7 +14,6 @@ import androidx.lifecycle.coroutineScope
 import org.kobjects.konsole.compose.ComposeKonsole
 import org.kobjects.tantilla2.android.model.Platform
 import org.kobjects.tantilla2.android.model.TantillaViewModel
-import org.kobjects.tantilla2.console.ConsoleLoop
 import org.kobjects.tantilla2.core.Lock
 import org.kobjects.tantilla2.core.Palette
 import java.io.File
@@ -34,7 +31,6 @@ class MainActivity : AppCompatActivity() {
         val platform = AndroidPlatform {
             console.write(it)
         }
-        val consoleLoop = ConsoleLoop(platform, console)
 
         val config = resources.configuration
 
@@ -58,13 +54,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         val viewModel = TantillaViewModel(
-            consoleLoop,
+            console,
             bitmap,
             platform,
         )
 
         lifecycle.coroutineScope.launchWhenCreated {
-            consoleLoop.run()
+            viewModel.consoleLoop()
         }
 
 

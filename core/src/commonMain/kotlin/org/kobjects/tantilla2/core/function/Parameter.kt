@@ -32,7 +32,7 @@ data class Parameter(
 
     override fun toString(): String {
         val writer = CodeWriter()
-        serialize(writer, RootScope)
+        serialize(writer, null)
         return writer.toString()
     }
 }

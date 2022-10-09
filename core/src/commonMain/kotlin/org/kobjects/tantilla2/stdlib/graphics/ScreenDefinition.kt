@@ -12,7 +12,7 @@ import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Parameter
 
-class ScreenDefinition(graphicsScope: GraphicsScope) : UnitScope(RootScope, "screen") {
+class ScreenDefinition(graphicsScope: GraphicsScope) : UnitScope(null, "screen") {
 
     init {
         add(

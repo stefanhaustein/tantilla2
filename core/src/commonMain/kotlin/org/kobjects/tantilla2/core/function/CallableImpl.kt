@@ -34,7 +34,7 @@ class CallableImpl(
     }
 
     override fun serializeCode(writer: CodeWriter, precedence: Int) {
-        writer.appendType(type, RootScope)
+        writer.appendType(type, null)
         writer.append(":").indent().newline()
         writer.appendCode(body)
         writer.outdent()

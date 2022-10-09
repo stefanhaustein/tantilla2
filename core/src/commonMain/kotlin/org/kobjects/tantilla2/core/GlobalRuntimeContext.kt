@@ -66,7 +66,7 @@ class GlobalRuntimeContext(
     }
 
     private fun launch(task: () -> Unit) {
-        userRootScope.systemAbstraction.launch {
+        userRootScope.parentScope.systemAbstraction.launch {
             activeThreads++
             try {
                 task()
@@ -93,10 +93,10 @@ class GlobalRuntimeContext(
             launch {
                 try {
                     val evaluationResult = parsed.eval(runtimeContext)
-                    userRootScope.systemAbstraction.write(if (evaluationResult == null || evaluationResult == Unit) "Ok" else evaluationResult.toString())
+                    userRootScope.parentScope.systemAbstraction.write(if (evaluationResult == null || evaluationResult == Unit) "Ok" else evaluationResult.toString())
                 } catch (e: Exception) {
                     val message = e.message ?: e.toString()
-                    userRootScope.systemAbstraction.write(message)
+                    userRootScope.parentScope.systemAbstraction.write(message)
                     exception = if (e is TantillaRuntimeException) e else createException(
                         null,
                         parsed,
@@ -107,7 +107,7 @@ class GlobalRuntimeContext(
             }
         } catch (e: Exception) {
             val message = e.message ?: e.toString()
-            userRootScope.systemAbstraction.write(message)
+            userRootScope.parentScope.systemAbstraction.write(message)
         }
     }
 

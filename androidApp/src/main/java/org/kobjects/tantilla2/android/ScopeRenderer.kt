@@ -43,7 +43,7 @@ fun RenderScope(viewModel: TantillaViewModel) {
             RenderAppBar(
                 viewModel, when (scope.parentScope) {
                     null,
-                    RootScope -> viewModel.fileName.value
+                    is RootScope -> viewModel.fileName.value
                     else -> scope.name
                 }
             )

@@ -287,7 +287,7 @@ abstract class Scope(
         // Construct the fully qualified name.
         val sb = StringBuilder()
         scope = type.parentScope
-        while (scope != null && scope != RootScope && scope !is UserRootScope) {
+        while (scope != null && scope !is RootScope && scope !is UserRootScope) {
             sb.insert(0, '.')
             sb.insert(0, scope.name)
             scope = scope.parentScope

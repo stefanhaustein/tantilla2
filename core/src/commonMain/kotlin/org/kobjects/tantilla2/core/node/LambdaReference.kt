@@ -27,7 +27,7 @@ class LambdaReference(
 
     override fun serializeCode(writer: CodeWriter, precedence: Int) {
         writer.append("lambda ")
-        writer.appendType(type, RootScope)
+        writer.appendType(type, null)
         writer.append(":")
         writer.indent()
         writer.newline()

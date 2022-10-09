@@ -32,7 +32,7 @@ interface FunctionType :Type {
 
     open class Impl(override val returnType: Type, override val parameters: List<Parameter>) : FunctionType {
 
-        override fun toString() = CodeWriter().appendType(this, RootScope).toString()
+        override fun toString() = CodeWriter().appendType(this, null).toString()
 
         override fun equals(other: Any?) =
             other is FunctionType

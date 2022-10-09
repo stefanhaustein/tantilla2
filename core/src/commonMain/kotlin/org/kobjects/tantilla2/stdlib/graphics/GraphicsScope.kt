@@ -3,7 +3,7 @@ package org.kobjects.tantilla2.stdlib.graphics
 import org.kobjects.tantilla2.core.UnitScope
 import org.kobjects.tantilla2.core.builtin.RootScope
 
-class GraphicsScope(val graphicsSystem: GraphicsSystem): UnitScope(RootScope, "graphics") {
+class GraphicsScope(val graphicsSystem: GraphicsSystem): UnitScope(null, "graphics") {
 
     // Doesn't depend on others
     val colorDefinition = ColorDefinition(this)
@@ -17,6 +17,5 @@ class GraphicsScope(val graphicsSystem: GraphicsSystem): UnitScope(RootScope, "g
         add(colorDefinition)
         add(bitmapImageDefinition)
 
-        RootScope.add(ScreenDefinition(this))
     }
 }

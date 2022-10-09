@@ -1,4 +1,4 @@
-package org.kobjects.tantilla2.stdlib.math
+package org.kobjects.tantilla2.core.builtin
 
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.builtin.FloatType
@@ -7,7 +7,7 @@ import org.kobjects.tantilla2.core.function.Parameter
 import kotlin.math.ceil
 import kotlin.math.floor
 
-object MathScope : UnitScope(RootScope, "math") {
+object MathScope : UnitScope(null, "math") {
 
     init {
         defineNativeFunction(

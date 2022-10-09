@@ -7,9 +7,8 @@ import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.FunctionType
 
 class UserRootScope(
-    val systemAbstraction: SystemAbstraction
+    override val parentScope: RootScope,
 ) : Scope() {
-    override val parentScope = RootScope
     override var docString = ""
     val staticFields = mutableListOf<FieldDefinition?>()
 

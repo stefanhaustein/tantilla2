@@ -7,7 +7,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 object IntType : NativeStructDefinition(
-    RootScope,
+    null,
     "int",
     "64 bit signed integer.",
     ctorParams = listOf(Parameter("value", AnyType, defaultValueExpression = org.kobjects.greenspun.core.I64.Const(0))),

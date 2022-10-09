@@ -44,7 +44,7 @@ fun RenderAppBar(
                     Text(
                         text = "❮ $title",
                         Modifier.clickable {
-                            viewModel.scope().value = viewModel.scope().value.parentScope!!
+                            viewModel.scope().value = viewModel.scope().value.parentScope ?: viewModel.rootScope
                         })
                 } else {
                     Text(text = title)
@@ -97,7 +97,7 @@ fun RenderAppBar(
                     Icon(Icons.Default.MoreVert, contentDescription = "More")
                     var menuItems = buildList {
                         key(viewModel.runstateUpdateTrigger.value) {
-                            if (viewModel.console.globalRuntimeContext.activeThreads == 0)
+                            if (viewModel.globalRuntimeContext.activeThreads == 0)
                                 add("Run main()" to { viewModel.runMain() })
                             else add("Stop" to { viewModel.stop() })
                         }
@@ -106,7 +106,7 @@ fun RenderAppBar(
                                 add("Add  ▶" to { showAddMenu.value = true })
                                 val scope = viewModel.userScope.value
                                 val parent = scope.parentScope
-                                if (parent != RootScope && parent != null) {
+                                if (parent !is RootScope && parent != null) {
                                     add("Delete" to {
                                         viewModel.dialogManager.showConfirmation(
                                             "Confirm",
