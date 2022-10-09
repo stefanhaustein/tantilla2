@@ -56,37 +56,54 @@ class GlobalRuntimeContext(
         exception = null
         try {
             val function = definition.getValue(null) as Callable
-            userRootScope.initialize(this)
-            activeThreads++
-            function.eval(LocalRuntimeContext(this, function.scopeSize))
-            activeThreads--
-            if (activeThreads == 0) {
-                runStateCallback(this)
+            launch {
+                userRootScope.initialize(this)
+                function.eval(LocalRuntimeContext(this, function.scopeSize))
             }
         } catch (e: RuntimeException) {
-            activeThreads--
-            exception =  wrapException(e)
-            runStateCallback(this)
+            exception = wrapException(e)
         }
     }
 
-    fun processShellInput(line: String, endCallback: (GlobalRuntimeContext) -> Unit) {
+    private fun launch(task: () -> Unit) {
+        userRootScope.systemAbstraction.launch {
+            activeThreads++
+            try {
+                task()
+            } catch (e: Exception) {
+                exception = wrapException(e)
+            } finally {
+                activeThreads--
+                if (activeThreads == 0) {
+                    runStateCallback(this)
+                }
+            }
+        }
+    }
+
+
+    fun processShellInput(line: String) {
         try {
             var parsed = Parser.parseShellInput(line, userRootScope)
             println("parsed: $parsed")
             userRootScope.resolveAll(CompilationResults())
             println("resolved: $parsed")
 
-            try {
-                val runtimeContext = LocalRuntimeContext(this)
-                val evaluationResult = parsed.eval(runtimeContext)
-                userRootScope.systemAbstraction.write(if (evaluationResult == null || evaluationResult == Unit) "Ok" else evaluationResult.toString())
-                endCallback(this)
-            } catch (e: Exception) {
-                val message = e.message ?: e.toString()
-                userRootScope.systemAbstraction.write(message)
-                exception = if (e is TantillaRuntimeException) e else createException(null, parsed, message, e)
-                endCallback(this)
+            val runtimeContext = LocalRuntimeContext(this)
+            launch {
+                try {
+                    val evaluationResult = parsed.eval(runtimeContext)
+                    userRootScope.systemAbstraction.write(if (evaluationResult == null || evaluationResult == Unit) "Ok" else evaluationResult.toString())
+                } catch (e: Exception) {
+                    val message = e.message ?: e.toString()
+                    userRootScope.systemAbstraction.write(message)
+                    exception = if (e is TantillaRuntimeException) e else createException(
+                        null,
+                        parsed,
+                        message,
+                        e
+                    )
+                }
             }
         } catch (e: Exception) {
             val message = e.message ?: e.toString()

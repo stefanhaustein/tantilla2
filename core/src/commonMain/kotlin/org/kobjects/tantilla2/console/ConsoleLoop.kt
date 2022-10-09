@@ -11,12 +11,13 @@ import org.kobjects.tantilla2.stdlib.math.MathScope
 class ConsoleLoop(
     val systemAbstraction: SystemAbstraction,
     val konsole: Konsole,
+
+) {
     var endCallback: (GlobalRuntimeContext) -> Unit = {
         if (it.exception != null) {
             konsole.write(it.exception.toString())
         }
     }
-) {
     var scope: UserRootScope = UserRootScope(systemAbstraction)
     var globalRuntimeContext = GlobalRuntimeContext(scope, endCallback)
     var runtimeContext = LocalRuntimeContext(globalRuntimeContext)
@@ -45,7 +46,7 @@ class ConsoleLoop(
     suspend fun run() {
         while (true) {
             val line = konsole.read()
-            globalRuntimeContext.processShellInput(line, endCallback)
+            globalRuntimeContext.processShellInput(line)
         }
     }
 

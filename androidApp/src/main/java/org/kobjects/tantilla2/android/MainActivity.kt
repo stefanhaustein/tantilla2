@@ -107,15 +107,16 @@ class MainActivity : AppCompatActivity() {
             set(value) = getPreferences(0).edit().putString("filename", value).apply()
 
         override fun runAsync(task: Runnable) {
-            Handler(Looper.getMainLooper()).postDelayed(task, 1)
+            Thread(task).start()
+//            Handler(Looper.getMainLooper()).postDelayed(task, 1)
         }
 
-        override fun print(s: String) {
+        override fun write(s: String) {
             printImpl(s)
         }
 
         override fun launch(task: () -> Unit) {
-            TODO("Not yet implemented")
+            runAsync(task)
         }
 
         override fun createLock(): Lock {

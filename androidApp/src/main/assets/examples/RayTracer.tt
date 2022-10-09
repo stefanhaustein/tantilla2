@@ -243,7 +243,8 @@ struct RayTracer:
       b.set(x, b.height / 2 - yy, color)
 
     if (y < b.height - 2):
-      screen.request_animation_frame(lambda: renderRow(s, b, y + 1))
+      renderRow(s, b, y + 1)
+      print("screen.request_animation_frame(lambda: renderRow(s, b, y + 1))")
 
 
 defaultThings = [Plane(Vector(0,1,0), 0, Checkerboard) as Thing, Sphere(Vector(0,1,-0.25), 1, Shiny) as Thing, Sphere(Vector(-1,0.5,1.5),0.5, Shiny) as Thing]

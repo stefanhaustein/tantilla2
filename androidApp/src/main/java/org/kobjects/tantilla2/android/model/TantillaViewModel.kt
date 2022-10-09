@@ -49,8 +49,6 @@ class TantillaViewModel(
     val graphicsSystem = defineNatives(bitmap, graphicsUpdateTrigger)
 
     init {
-        console.endCallback = ::runStateCallback
-
         val file = File(platform.rootDirectory, platform.fileName)
         if (file.exists()) {
             load(file)
