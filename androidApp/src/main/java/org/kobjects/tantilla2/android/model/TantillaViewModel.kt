@@ -26,9 +26,9 @@ class TantillaViewModel(
     val bitmap: Bitmap,
     val platform: Platform
 ) : ViewModel() {
-    val rootScope = RootScope(platform)
+    val rootScope = RootScope(platform, ::runStateCallback)
     var userRootScope = UserRootScope(rootScope)
-    var globalRuntimeContext = GlobalRuntimeContext(userRootScope, ::runStateCallback)
+    var globalRuntimeContext = GlobalRuntimeContext(userRootScope)
 
     val mode = mutableStateOf(Mode.SHELL)
     var fileName = mutableStateOf(platform.fileName)
@@ -162,7 +162,7 @@ class TantillaViewModel(
         clearBitmap()
         clearConsole()
         userRootScope = UserRootScope(rootScope)
-        globalRuntimeContext = GlobalRuntimeContext(userRootScope, ::runStateCallback)
+        globalRuntimeContext = GlobalRuntimeContext(userRootScope)
 
         userScope.value = userRootScope
         helpScope.value = rootScope

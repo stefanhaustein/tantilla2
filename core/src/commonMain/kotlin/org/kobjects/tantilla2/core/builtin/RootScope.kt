@@ -1,13 +1,11 @@
 package org.kobjects.tantilla2.core.builtin
 
-import org.kobjects.tantilla2.core.AnyType
-import org.kobjects.tantilla2.core.Definition
-import org.kobjects.tantilla2.core.Scope
-import org.kobjects.tantilla2.core.SystemAbstraction
+import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.function.Parameter
 
 class RootScope(
     val systemAbstraction: SystemAbstraction,
+    val runStateCallback: (GlobalRuntimeContext) -> Unit = {}
 ) : Scope() {
 
     init {

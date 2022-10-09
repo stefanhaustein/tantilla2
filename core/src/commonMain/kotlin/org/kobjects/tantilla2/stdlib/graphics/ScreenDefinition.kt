@@ -66,7 +66,7 @@ class ScreenDefinition(graphicsScope: GraphicsScope) : UnitScope(null, "screen")
                     fn.eval(functionContext)
                 } finally {
                     if (--context.globalRuntimeContext.activeThreads <= 0) {
-                        context.globalRuntimeContext.runStateCallback(context.globalRuntimeContext)
+                        context.globalRuntimeContext.userRootScope.parentScope.runStateCallback(context.globalRuntimeContext)
                     }
                 }
 
@@ -93,7 +93,7 @@ class ScreenDefinition(graphicsScope: GraphicsScope) : UnitScope(null, "screen")
                         fn.eval(functionContext)
                     } finally {
                         if (--context.globalRuntimeContext.activeThreads <= 0) {
-                            context.globalRuntimeContext.runStateCallback(context.globalRuntimeContext)
+                            context.globalRuntimeContext.userRootScope.parentScope.runStateCallback(context.globalRuntimeContext)
                         }
                     }
                 }

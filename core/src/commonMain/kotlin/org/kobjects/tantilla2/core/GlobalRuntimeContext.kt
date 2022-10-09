@@ -8,7 +8,7 @@ import org.kobjects.tantilla2.core.parser.Parser
 class GlobalRuntimeContext(
     val userRootScope: UserRootScope,
     // Call with null to clear errors.
-    val runStateCallback: (GlobalRuntimeContext) -> Unit = {}
+
 ) {
     var stopRequested = false
     var activeThreads = 0
@@ -45,12 +45,12 @@ class GlobalRuntimeContext(
         val definition = userRootScope["main"]
         if (definition == null) {
             exception = createException(null, null, "main() undefined.")
-            runStateCallback(this)
+            userRootScope.parentScope.runStateCallback(this)
             return
         }
         if (definition.type !is FunctionType) {
             exception = createException(null, null, "main is not a function.")
-            runStateCallback(this)
+            userRootScope.parentScope.runStateCallback(this)
             return
         }
         exception = null
@@ -75,7 +75,7 @@ class GlobalRuntimeContext(
             } finally {
                 activeThreads--
                 if (activeThreads == 0) {
-                    runStateCallback(this)
+                    userRootScope.parentScope.runStateCallback(this)
                 }
             }
         }
