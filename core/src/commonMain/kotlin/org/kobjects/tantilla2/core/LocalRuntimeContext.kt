@@ -1,5 +1,7 @@
 package org.kobjects.tantilla2.core
 
+import org.kobjects.greenspun.core.Evaluable
+
 class LocalRuntimeContext(
     val globalRuntimeContext: GlobalRuntimeContext,
     count: Int = 0,
@@ -14,4 +16,11 @@ class LocalRuntimeContext(
     fun i64(i: Int) = (variables[i] as Number).toLong()
     fun i32(i: Int) = (variables[i] as Number).toInt()
     fun str(i: Int) = variables[i] as String
+
+    fun checkState(node: Evaluable<LocalRuntimeContext>) {
+        if (globalRuntimeContext.stopRequested) {
+            throw ProgramStoppedException(node)
+        }
+    }
+
 }

@@ -2,7 +2,7 @@ package org.kobjects.tantilla2.core
 
 import org.kobjects.greenspun.core.Evaluable
 
-class TantillaRuntimeException(
+open class TantillaRuntimeException(
     val definition: Definition?,
     val node: Evaluable<LocalRuntimeContext>?,
     message: String?,
@@ -10,6 +10,6 @@ class TantillaRuntimeException(
 ) : RuntimeException(message, cause) {
 
     // TODO: Make sure this renders all exceptions nicely.
-    override fun toString() = if (message.isNullOrBlank()) super.toString() else message
+    override fun toString() = if (message.isNullOrBlank()) super.toString() else message ?: ""
 
 }

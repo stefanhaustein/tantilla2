@@ -3,6 +3,8 @@ package org.kobjects.tantilla2.android
 import android.graphics.Bitmap
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.Colors
@@ -102,17 +104,14 @@ class MainActivity : AppCompatActivity() {
             get() = getPreferences(0).getString("filename", "Scratch.tt")!!
             set(value) = getPreferences(0).edit().putString("filename", value).apply()
 
-        override fun runAsync(task: Runnable) {
-            Thread(task).start()
-//            Handler(Looper.getMainLooper()).postDelayed(task, 1)
-        }
+
 
         override fun write(s: String) {
             printImpl(s)
         }
 
         override fun launch(task: () -> Unit) {
-            runAsync(task)
+            Thread(task).start()
         }
 
         override fun createLock(): Lock {

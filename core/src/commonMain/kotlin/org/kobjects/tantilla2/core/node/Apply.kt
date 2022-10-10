@@ -17,6 +17,7 @@ class Apply(
     val asMethod: Boolean,
 ) : TantillaNode {
     override fun eval(context: LocalRuntimeContext): Any? {
+        context.checkState(this)
         val shouldBeLambda = callable.eval(context)
         if (shouldBeLambda !is Callable) {
             throw IllegalStateException("Lambda expected; got $shouldBeLambda")

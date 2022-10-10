@@ -48,6 +48,13 @@ class GlobalRuntimeContext(
             userRootScope.parentScope.runStateCallback(this)
             return
         }
+
+        if (definition.errors.isNotEmpty()) {
+            exception = wrapException(definition.errors[0])
+            userRootScope.parentScope.runStateCallback(this)
+            return
+        }
+
         if (definition.type !is FunctionType) {
             exception = createException(null, null, "main is not a function.")
             userRootScope.parentScope.runStateCallback(this)

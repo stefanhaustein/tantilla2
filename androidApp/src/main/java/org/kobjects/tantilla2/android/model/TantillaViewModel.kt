@@ -196,7 +196,7 @@ class TantillaViewModel(
     }
 
     fun load(file: File) {
-        platform.runAsync {
+        platform.launch {
             reset()
             this.fileName.value = file.name
             platform.fileName = file.name
@@ -205,7 +205,7 @@ class TantillaViewModel(
     }
 
     fun loadExample(name: String) {
-        platform.runAsync {
+        platform.launch {
             reset()
             this.fileName.value = name
             platform.fileName = name
@@ -225,6 +225,8 @@ class TantillaViewModel(
             println(CodeWriter().appendCode(userScope.value).toString())
 
             mode.value = Mode.HIERARCHY
+
+        codeUpdateTrigger.value++
     }
 
 

@@ -21,6 +21,7 @@ class For(
     override fun eval(ctx: LocalRuntimeContext): Any? {
         val iterable = rangeExpression.eval(ctx) as Iterable<*>
         for (i in iterable) {
+            ctx.checkState(this)
             ctx.variables[iteratorIndex] = i
             val value = bodyExpression.eval(ctx)
             if (value is Control.FlowSignal) {

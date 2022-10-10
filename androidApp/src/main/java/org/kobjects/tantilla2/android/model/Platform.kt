@@ -7,5 +7,4 @@ interface Platform : SystemAbstraction {
     val rootDirectory: File
     var fileName: String
     fun loadExample(name: String): String
-    fun runAsync(runnable: Runnable)
 }
