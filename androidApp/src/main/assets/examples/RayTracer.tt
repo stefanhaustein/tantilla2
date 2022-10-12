@@ -243,7 +243,7 @@ struct RayTracer:
       b.set(x, b.height / 2 - yy, color)
 
     if (y < b.height - 2):
-      print("screen.request_animation_frame(lambda: renderRow(s, b, y + 1))")
+      # screen.request_animation_frame(lambda: renderRow(s, b, y + 1))
       renderRow(s, b, y + 1)
 
 

@@ -77,8 +77,6 @@ class CodeWriter(
 
     fun appendDeclaration(name: String) = appendWrapped(Kind.DECLARATION, name)
 
-    fun stringLiteral(text: String) = appendWrapped(Kind.STRING, text)
-
     fun newline(): CodeWriter = append("\n").append(indent)
 
     fun appendType(type: Type, scope: Scope?): CodeWriter {
@@ -137,6 +135,9 @@ class CodeWriter(
         appendWrapped(Kind.STRING, tripleQuote(s))
     }
 
+    fun appendComment(s: String) {
+        appendWrapped(Kind.COMMENT, s)
+    }
 
     fun appendPrefix(code: Evaluable<*>, parentPrecedence: Int, name: String, precedence: Int) {
         if (parentPrecedence > precedence) {
@@ -205,7 +206,7 @@ class CodeWriter(
     }
 
     enum class Kind {
-        KEYWORD, DECLARATION, ERROR, STRING
+        KEYWORD, DECLARATION, ERROR, STRING, COMMENT
     }
 
     companion object {
@@ -213,6 +214,7 @@ class CodeWriter(
 
 
         val defaultHighlighting = mapOf(
+            Kind.COMMENT to Pair(Ansi.rgbForeground(0x777777), Ansi.FOREGROUND_DEFAULT),
             Kind.KEYWORD to Pair(Ansi.rgbForeground(Palette.DARK_ORANGE.toInt()), Ansi.FOREGROUND_DEFAULT),
             Kind.DECLARATION to Pair(Ansi.rgbForeground(Palette.DARK_BLUE.toInt()), Ansi.FOREGROUND_DEFAULT),
             Kind.ERROR to Pair(Ansi.rgbBackground(Palette.BRIGHTEST_RED.toInt()), Ansi.BACKGROUND_DEFAULT),

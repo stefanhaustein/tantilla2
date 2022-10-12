@@ -23,19 +23,27 @@ object StatementParser {
             "return" -> parseReturn(tokenizer, context)
             "while" -> parseWhile(tokenizer, context)
             else -> {
-                var expr = ExpressionParser.parseExpression(tokenizer, context)
-                if (tokenizer.tryConsume("=")) {
-                    if (expr !is Assignable) {
-                        tokenizer.exception("Target is not assignable")
+                if (tokenizer.current.type == TokenType.COMMENT) {
+                    Comment(tokenizer.consume(TokenType.COMMENT))
+                } else {
+                    var expr = ExpressionParser.parseExpression(tokenizer, context)
+                    if (tokenizer.tryConsume("=")) {
+                        if (expr !is Assignable) {
+                            tokenizer.exception("Target is not assignable")
+                        }
+                        expr = Assignment(
+                            expr as Assignable,
+                            ExpressionParser.parseExpression(tokenizer, context)
+                        )
                     }
-                    expr = Assignment(expr as Assignable, ExpressionParser.parseExpression(tokenizer, context))
+                    if (tokenizer.current.type != TokenType.EOF
+                        && tokenizer.current.type != TokenType.LINE_BREAK
+                        && !Parser.VALID_AFTER_STATEMENT.contains(tokenizer.current.text)
+                    ) {
+                        throw tokenizer.exception("Unexpected token ${tokenizer.current} after end of statement.")
+                    }
+                    expr
                 }
-                if (tokenizer.current.type != TokenType.EOF
-                    && tokenizer.current.type != TokenType.LINE_BREAK
-                    && !Parser.VALID_AFTER_STATEMENT.contains(tokenizer.current.text)) {
-                    throw tokenizer.exception("Unexpected token ${tokenizer.current} after end of statement.")
-                }
-                expr
             }
         }
 
