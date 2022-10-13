@@ -37,44 +37,49 @@ fun RenderScope(viewModel: TantillaViewModel) {
 
     val definitions = scope.sorted()
 
-    Scaffold(
-        backgroundColor = Color.Transparent,
-        topBar = {
-            RenderAppBar(
-                viewModel, when (scope.parentScope) {
-                    null,
-                    is RootScope -> viewModel.fileName.value
-                    else -> scope.name
-                }
-            )
-        }
-    ) {
-        LazyColumn(Modifier.fillMaxWidth(), contentPadding = PaddingValues(8.dp),
-        ) {
-           if (viewModel.mode.value == TantillaViewModel.Mode.HIERARCHY || scope.docString.isNotEmpty()) {
-               item {
-                   RenderDocumentation(viewModel)
-               }
-           }
-            for (kind in Definition.Kind.values().toList() /* + listOf(null) */) {
-                val list: List<Definition>
-                val title: String
-                if (kind == null) {
-                    title = "IMPL (defined elsewhere)"
-                    if (scope is StructDefinition) {
-                        list = viewModel.userRootScope.classToTrait[scope]?.values?.toList() ?: emptyList()
-                    } else if (scope is TraitDefinition) {
-                        list = viewModel.userRootScope.traitToClass[scope]?.values?.toList() ?: emptyList()
-                    } else {
-                        continue
+    key(viewModel.codeUpdateTrigger.value) {
+        Scaffold(
+            backgroundColor = Color.Transparent,
+            topBar = {
+                RenderAppBar(
+                    viewModel, when (scope.parentScope) {
+                        null,
+                        is RootScope -> viewModel.fileName.value
+                        else -> scope.name
                     }
-                } else {
-                    title = kind.name
-                    list = (if (kind == Definition.Kind.PROPERTY && viewModel.mode.value == TantillaViewModel.Mode.HIERARCHY)
-                        scope.locals.map { scope[it]!! }
-                    else
-                        definitions).filter { it.kind == kind }
+                )
+            }
+        ) {
+            LazyColumn(
+                Modifier.fillMaxWidth(), contentPadding = PaddingValues(8.dp),
+            ) {
+                if (viewModel.mode.value == TantillaViewModel.Mode.HIERARCHY || scope.docString.isNotEmpty()) {
+                    item {
+                        RenderDocumentation(viewModel)
+                    }
                 }
+                for (kind in Definition.Kind.values().toList() /* + listOf(null) */) {
+                    val list: List<Definition>
+                    val title: String
+                    if (kind == null) {
+                        title = "IMPL (defined elsewhere)"
+                        if (scope is StructDefinition) {
+                            list = viewModel.userRootScope.classToTrait[scope]?.values?.toList()
+                                ?: emptyList()
+                        } else if (scope is TraitDefinition) {
+                            list = viewModel.userRootScope.traitToClass[scope]?.values?.toList()
+                                ?: emptyList()
+                        } else {
+                            continue
+                        }
+                    } else {
+                        title = kind.name
+                        list =
+                            (if (kind == Definition.Kind.PROPERTY && viewModel.mode.value == TantillaViewModel.Mode.HIERARCHY)
+                                scope.locals.map { scope[it]!! }
+                            else
+                                definitions).filter { it.kind == kind }
+                    }
                     if (list.isNotEmpty()) {
                         item {
                             Text(title, Modifier.padding(0.dp, 4.dp, 0.dp, 0.dp))
@@ -88,6 +93,7 @@ fun RenderScope(viewModel: TantillaViewModel) {
                         }
                     }
 
+                }
             }
         }
     }
