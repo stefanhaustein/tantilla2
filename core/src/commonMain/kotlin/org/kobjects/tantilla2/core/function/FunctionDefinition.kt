@@ -144,7 +144,7 @@ class FunctionDefinition (
 
     override fun serializeCode(writer: CodeWriter, precedence: Int) {
         if (resolutionState != ResolutionState.RESOLVED) {
-            highlightSyntax(writer, definitionText, errors)
+            writer.appendUnparsed(definitionText, errors)
         } else {
             if (parentScope.supportsMethods && !isDynamic()) {
                 writer.appendKeyword("static ")

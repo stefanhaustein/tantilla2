@@ -164,7 +164,7 @@ class FieldDefinition(
                 writer.appendCode(resolvedInitializer)
             }
         } else {
-            highlightSyntax(writer, definitionText, errors)
+            writer.appendUnparsed(definitionText, errors)
         }
     }
 

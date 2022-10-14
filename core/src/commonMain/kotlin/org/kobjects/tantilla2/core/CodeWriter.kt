@@ -205,6 +205,18 @@ class CodeWriter(
         return this
     }
 
+
+    fun appendUnparsed(code: String, errors: List<Exception> = emptyList()): CodeWriter {
+        if (highlighting.isEmpty()) {
+            append("### ")
+            append(code.replace("###", "## "))
+            append(" ###")
+        } else {
+            highlightSyntax(this, code, errors)
+        }
+        return this
+    }
+
     enum class Kind {
         KEYWORD, DECLARATION, ERROR, STRING, COMMENT
     }
