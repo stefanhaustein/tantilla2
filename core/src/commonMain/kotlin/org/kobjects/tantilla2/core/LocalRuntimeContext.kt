@@ -23,4 +23,13 @@ class LocalRuntimeContext(
         }
     }
 
+    fun setSize(size: Int) {
+        while (variables.size > size) {
+            variables.removeAt(variables.size - 1)
+        }
+        while (variables.size < size) {
+            variables.add(null)
+        }
+    }
+
 }

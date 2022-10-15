@@ -203,9 +203,8 @@ abstract class Scope(
         return !childError
     }
 
-    open fun registerStatic(fieldDefinition: FieldDefinition) {
+    open fun registerStatic(fieldDefinition: FieldDefinition): Int =
         parentScope!!.registerStatic(fieldDefinition)
-    }
 
     override fun getValue(self: Any?) = this
 

@@ -14,6 +14,7 @@ class GlobalRuntimeContext(
     var activeThreads = 0
     var exception: TantillaRuntimeException? = null
     val tapListeners = mutableListOf<(Double, Double) -> Unit>()
+    val staticVariableValues = LocalRuntimeContext(this, userRootScope.count())
 
 
     fun createException(definition: Definition?, node: Evaluable<LocalRuntimeContext>?, message: String?, cause: Exception? = null) =

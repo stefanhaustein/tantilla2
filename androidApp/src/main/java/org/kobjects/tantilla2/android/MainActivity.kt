@@ -122,7 +122,7 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         val LIGHT_COLORS = Colors(
-            primary = Color(Palette.BLUE),
+            primary = Color(0xff555555), // Palette.BLUE),
             primaryVariant = Color(0xff0072cb),
             secondary = Color(0xfff49200),
             secondaryVariant = Color(0xffb06000),

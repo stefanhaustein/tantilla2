@@ -28,9 +28,6 @@ class FieldDefinition(
             _definitionText = value
         }
 
-
-    private var currentValue: Any? = null
-
     private var resolvedInitializer: Evaluable<LocalRuntimeContext>? = null
 
     init {
@@ -70,17 +67,13 @@ class FieldDefinition(
 
     override fun getValue(self: Any?): Any? {
         resolve()
-        return if (index == -1) currentValue else (self as LocalRuntimeContext)[index]
+        return (self as LocalRuntimeContext)[index]
     }
 
 
     override fun setValue(self: Any?, newValue: Any?) {
         resolve()
-        if (index == -1) {
-            currentValue = newValue
-        } else {
-            (self as LocalRuntimeContext).variables[index] = newValue
-        }
+        (self as LocalRuntimeContext).variables[index] = newValue
     }
 
     fun initializer(): Evaluable<LocalRuntimeContext>? {
@@ -118,7 +111,7 @@ class FieldDefinition(
             } else {
                 resolvedInitializer = resolved.third
                 if (kind == Definition.Kind.STATIC) {
-                    parentScope.registerStatic(this)
+                    index = parentScope.registerStatic(this)
                 }
                 resolutionState = ResolutionState.RESOLVED
             }
@@ -188,16 +181,15 @@ class FieldDefinition(
     override fun reset() {
         resolutionState = ResolutionState.UNRESOLVED
         resolvedInitializer = null
-        currentValue = null
         resolvedType = null
 
         super.reset()
     }
 
-    fun initialize(globalRuntimeContext: GlobalRuntimeContext) {
+    fun initialize(staticVariableContext: LocalRuntimeContext) {
         resolve()
         if (kind == Definition.Kind.STATIC) {
-            currentValue = resolvedInitializer!!.eval(LocalRuntimeContext(globalRuntimeContext))
+           staticVariableContext.variables[index] = resolvedInitializer!!.eval(staticVariableContext)
         }
     }
 

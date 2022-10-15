@@ -3,14 +3,12 @@ package org.kobjects.tantilla2.core
 import org.kobjects.tantilla2.core.builtin.RootScope
 import org.kobjects.tantilla2.core.classifier.FieldDefinition
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
-import org.kobjects.tantilla2.core.function.Callable
-import org.kobjects.tantilla2.core.function.FunctionType
 
 class UserRootScope(
     override val parentScope: RootScope,
 ) : Scope() {
     override var docString = ""
-    val staticFields = mutableListOf<FieldDefinition?>()
+    val staticFieldDefinitions = mutableListOf<FieldDefinition?>()
 
     var initializedTo = 0
     var classToTrait = emptyMap<Scope, MutableMap<TraitDefinition, Definition>>()
@@ -27,22 +25,24 @@ class UserRootScope(
         serializeBody(writer)
     }
 
-    override fun registerStatic(fieldDefinition: FieldDefinition) {
-        staticFields.add(fieldDefinition)
+    override fun registerStatic(fieldDefinition: FieldDefinition): Int {
+        staticFieldDefinitions.add(fieldDefinition)
+        return staticFieldDefinitions.size - 1
     }
 
     override fun reset() {
         super.reset()
-        staticFields.clear()
+        staticFieldDefinitions.clear()
         initializedTo = 0
     }
 
     fun initialize(globalRuntimeContext: GlobalRuntimeContext, incremental: Boolean = false) {
         val startIndex = if (incremental) initializedTo else 0
-        for (index in startIndex until staticFields.size) {
-            staticFields[index]?.initialize(globalRuntimeContext)
+        globalRuntimeContext.staticVariableValues.setSize(staticFieldDefinitions.size)
+        for (index in startIndex until staticFieldDefinitions.size) {
+            staticFieldDefinitions[index]?.initialize(globalRuntimeContext.staticVariableValues)
         }
-        initializedTo = staticFields.size
+        initializedTo = staticFieldDefinitions.size
     }
 
 
