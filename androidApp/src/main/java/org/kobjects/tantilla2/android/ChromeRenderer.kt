@@ -15,7 +15,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import org.kobjects.tantilla2.android.model.TantillaViewModel
 import org.kobjects.tantilla2.core.Definition
-import org.kobjects.tantilla2.core.Palette
 import org.kobjects.tantilla2.core.UserRootScope
 import org.kobjects.tantilla2.core.builtin.RootScope
 
@@ -104,7 +103,7 @@ fun RenderAppBar(
                         when (viewModel.mode.value) {
                             TantillaViewModel.Mode.HIERARCHY -> {
                                 add("Add  ▶" to { showAddMenu.value = true })
-                                val scope = viewModel.userScope.value
+                                val scope = viewModel.currentUserScope.value
                                 val parent = scope.parentScope
                                 if (parent !is RootScope && parent != null) {
                                     add("Delete" to {
@@ -113,7 +112,7 @@ fun RenderAppBar(
                                             "Delete '$scope'?"
                                         ) {
                                             parent.remove(scope.toString())
-                                            viewModel.userScope.value = parent
+                                            viewModel.currentUserScope.value = parent
                                         }
                                     })
                                 }

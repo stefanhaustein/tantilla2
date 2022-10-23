@@ -332,9 +332,14 @@ object ExpressionParser {
             val expectedParameter = expectedParameters[i]
             if (parameterExpressions[i] == null) {
                 if (expectedParameter.defaultValueExpression == null) {
-                    throw tokenizer.exception("Parameter ${expectedParameter.name} is missing.")
+                    if (expectedParameter.isVararg) {
+                        parameterExpressions[i] = ListLiteral(varargs)
+                    } else {
+                        throw tokenizer.exception("Parameter '${expectedParameter.name}' is missing.")
+                    }
+                } else {
+                    parameterExpressions[i] = expectedParameter.defaultValueExpression
                 }
-                parameterExpressions[i] = expectedParameter.defaultValueExpression
             }
         }
 

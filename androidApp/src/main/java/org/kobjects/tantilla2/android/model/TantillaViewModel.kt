@@ -32,8 +32,8 @@ class TantillaViewModel(
 
     val mode = mutableStateOf(Mode.SHELL)
     var fileName = mutableStateOf(platform.fileName)
-    val userScope = mutableStateOf<Scope>(userRootScope)
-    val helpScope = mutableStateOf<Scope>(rootScope)
+    val currentUserScope = mutableStateOf<Scope>(userRootScope)
+    val currentHelpScope = mutableStateOf<Scope>(rootScope)
     val editingDefinition = mutableStateOf<Definition?>(null)
     val currentText = mutableStateOf(TextFieldValue())
     val expanded = mutableStateOf(setOf<Definition>())
@@ -83,13 +83,13 @@ class TantillaViewModel(
     }
 
 
-    fun scope(): MutableState<Scope> = if (mode.value == Mode.HELP) helpScope else userScope as MutableState<Scope>
+    fun scope(): MutableState<Scope> = if (mode.value == Mode.HELP) currentHelpScope else currentUserScope as MutableState<Scope>
 
     fun add(kind: Definition.Kind) {
 
         when (kind) {
             Definition.Kind.FUNCTION -> {
-                if (userScope.value.supportsMethods) {
+                if (currentUserScope.value.supportsMethods) {
                     dialogManager.showCustom(
                         "Add Function",
                         "",
@@ -103,7 +103,7 @@ class TantillaViewModel(
                 }
             }
             Definition.Kind.PROPERTY -> {
-                if (userScope.value.supportsLocalVariables) {
+                if (currentUserScope.value.supportsLocalVariables) {
                     dialogManager.showCustom(
                         "Add Field",
                         "",
@@ -137,7 +137,7 @@ class TantillaViewModel(
     fun edit(definition: Definition?) {
         this.editingDefinition.value = definition
         val errorNode = if (definition == runtimeException.value?.definition) runtimeException.value?.node else null
-        val writer = CodeWriter(errorNode = errorNode)
+        val writer = CodeWriter(errorNode = errorNode, highlighting = mapOf(CodeWriter.Kind.ERROR to Pair("", "")))
         definition?.serializeCode(writer)
         runtimeExceptionPosition = IntRange(writer.errorPosition, writer.errorPosition + writer.errorLength)
         currentText.value = currentText.value.copy(
@@ -147,7 +147,7 @@ class TantillaViewModel(
 
 
     fun editDocumentation() {
-        currentText.value = currentText.value.copy(text = userScope.value.docString)
+        currentText.value = currentText.value.copy(text = currentUserScope.value.docString)
         mode.value = Mode.DOCUMENTATION_EDITOR
     }
 
@@ -164,8 +164,8 @@ class TantillaViewModel(
         userRootScope = UserRootScope(rootScope)
         globalRuntimeContext = GlobalRuntimeContext(userRootScope)
 
-        userScope.value = userRootScope
-        helpScope.value = rootScope
+        currentUserScope.value = userRootScope
+        currentHelpScope.value = rootScope
 
         if (addHello) {
             userRootScope.add(
@@ -222,7 +222,7 @@ class TantillaViewModel(
             rebuild()
 
             println("Rebuilt and re-serialized code:")
-            println(CodeWriter().appendCode(userScope.value).toString())
+            println(CodeWriter().appendCode(userRootScope).toString())
 
             mode.value = Mode.HIERARCHY
 
@@ -241,7 +241,7 @@ class TantillaViewModel(
         if (definition is FunctionDefinition) {
             edit(definition)
         } else if (definition?.parentScope != null){
-            userScope.value = definition.parentScope!!
+            currentUserScope.value = definition.parentScope!!
             mode.value = Mode.HIERARCHY
         } else {
             konsole.write(e.message ?: e.toString())
@@ -249,7 +249,7 @@ class TantillaViewModel(
     }
 
     fun notifyCodeChangedAndSave() {
-        val code = CodeWriter().appendCode(userScope.value).toString()
+        val code = CodeWriter().appendCode(userRootScope).toString()
         val file = File(platform.rootDirectory, fileName.value)
         println("Saving code to $file:")
         println(code)

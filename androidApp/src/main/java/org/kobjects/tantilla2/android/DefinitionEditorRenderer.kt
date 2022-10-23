@@ -22,7 +22,7 @@ import org.kobjects.tantilla2.android.model.TantillaViewModel
 @Composable
 fun RenderDefinitionEditor(viewModel: TantillaViewModel) {
     var showMenu = remember { mutableStateOf(false) }
-    val scope = viewModel.userScope.value
+    val scope = viewModel.currentUserScope.value
     val definition = viewModel.editingDefinition.value
     val errors = remember {
         mutableStateOf(viewModel.editingDefinition.value?.errors ?: emptyList())

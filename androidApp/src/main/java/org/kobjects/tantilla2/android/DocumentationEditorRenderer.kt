@@ -18,7 +18,7 @@ import org.kobjects.tantilla2.android.model.TantillaViewModel
 @Composable
 fun RenderDocumentationEditor(viewModel: TantillaViewModel) {
     var showMenu = remember { mutableStateOf(false) }
-    val scope = viewModel.userScope.value
+    val scope = viewModel.currentUserScope.value
 
     Scaffold(
         backgroundColor = Color.Transparent,
