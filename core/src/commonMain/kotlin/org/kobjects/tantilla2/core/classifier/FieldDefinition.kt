@@ -53,6 +53,7 @@ class FieldDefinition(
             try {
                 resolve()
             } catch (e: Exception) {
+                e.printStackTrace()
                 listOf(e)
             }
             return emptyList()
@@ -118,6 +119,7 @@ class FieldDefinition(
 
 
         } catch (e: Exception) {
+            e.printStackTrace()
             resolutionState = ResolutionState.ERROR
             if (e is ParsingException) {
                 error = e

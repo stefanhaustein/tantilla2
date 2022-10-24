@@ -217,6 +217,7 @@ class TantillaViewModel(
             try {
                 Parser.parseProgram(code, userRootScope)
             } catch (e: Exception) {
+                e.printStackTrace()
                 dialogManager.showError(e.toString())
             }
             rebuild()

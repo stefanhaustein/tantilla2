@@ -47,6 +47,7 @@ class FunctionDefinition (
             try {
                 resolve()
             } catch (e: Exception) {
+                e.printStackTrace()
                 return listOf(e)
             }
             return emptyList()
@@ -108,6 +109,7 @@ class FunctionDefinition (
 
            resolutionState = ResolutionState.RESOLVED
        } catch (e: Exception) {
+           e.printStackTrace()
            if (e is ParsingException) {
                error = e
            } else {

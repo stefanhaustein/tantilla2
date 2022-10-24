@@ -74,6 +74,12 @@ object Parser {
                     break
                 }
                 tokenizer.next()
+            } else if (tokenizer.current.type == TokenType.DISABLED_CODE) {
+                if (!definitionsAllowed) {
+                    throw tokenizer.exception("Definitions are not allowed here.")
+                }
+                scope.add(Unparseable.fromDisabledCode(scope, tokenizer.current.text))
+                tokenizer.next()
             } else if (DECLARATION_KEYWORDS.contains(tokenizer.current.text) ||
                 (!statementsAllowed
                         && tokenizer.current.type == TokenType.IDENTIFIER

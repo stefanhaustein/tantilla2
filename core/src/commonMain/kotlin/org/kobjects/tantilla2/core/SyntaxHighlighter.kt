@@ -34,6 +34,7 @@ fun highlightSyntax(
             val token = try {
                 tokenizer.next()
             } catch (e: Exception) {
+                e.printStackTrace()
                 writer.append(code.substring(lastPos))
                 return
             }

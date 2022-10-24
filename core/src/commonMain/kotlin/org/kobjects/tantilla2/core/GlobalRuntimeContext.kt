@@ -69,6 +69,7 @@ class GlobalRuntimeContext(
                 function.eval(LocalRuntimeContext(this, function.scopeSize))
             }
         } catch (e: RuntimeException) {
+            e.printStackTrace()
             exception = wrapException(e)
         }
     }
@@ -79,6 +80,7 @@ class GlobalRuntimeContext(
             try {
                 task()
             } catch (e: Exception) {
+                e.printStackTrace()
                 exception = wrapException(e)
             } finally {
                 activeThreads--
@@ -103,6 +105,7 @@ class GlobalRuntimeContext(
                     val evaluationResult = parsed.eval(runtimeContext)
                     userRootScope.parentScope.systemAbstraction.write(if (evaluationResult == null || evaluationResult == Unit) "Ok" else evaluationResult.toString())
                 } catch (e: Exception) {
+                    e.printStackTrace()
                     val message = e.message ?: e.toString()
                     userRootScope.parentScope.systemAbstraction.write(message)
                     exception = if (e is TantillaRuntimeException) e else createException(
@@ -114,6 +117,7 @@ class GlobalRuntimeContext(
                 }
             }
         } catch (e: Exception) {
+            e.printStackTrace()
             val message = e.message ?: e.toString()
             userRootScope.parentScope.systemAbstraction.write(message)
         }

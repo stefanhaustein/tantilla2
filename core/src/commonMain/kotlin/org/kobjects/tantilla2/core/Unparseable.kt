@@ -3,6 +3,8 @@ package org.kobjects.tantilla2.core
 import org.kobjects.greenspun.core.Bool
 import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.tantilla2.core.*
+import org.kobjects.tantilla2.core.parser.TantillaTokenizer
+import org.kobjects.tantilla2.core.parser.TokenType
 
 class Unparseable(
     override val parentScope: Scope?,
@@ -30,5 +32,22 @@ class Unparseable(
 
     override fun serializeCode(writer: CodeWriter, precedence: Int) {
         writer.append(definitionText)
+    }
+
+    companion object {
+        fun fromDisabledCode(parentScope: Scope?, code: String): Unparseable {
+            val content = code.substring(4, code.length - 4)
+            val tokenizer = TantillaTokenizer(content)
+            tokenizer.consume(TokenType.BOF)
+            var name = "Error #${parentScope?.count() ?: 1}"
+            if (tokenizer.current.type == TokenType.IDENTIFIER) {
+                // TODO: Parse definition and check for leftovers...
+                tokenizer.next()
+                if (tokenizer.current.type == TokenType.IDENTIFIER) {
+                    name = tokenizer.current.text
+                }
+            }
+            return Unparseable(parentScope, name, content)
+        }
     }
 }

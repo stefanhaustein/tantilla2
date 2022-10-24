@@ -27,7 +27,7 @@ class TantillaTokenizer(input: String) : Tokenizer<TokenType>(
     Regex("\"\"\".*\"\"\"") to TokenType.MULTILINE_STRING,
     RegularExpressions.DOUBLE_QUOTED_STRING to TokenType.STRING,
     Regex("\\+|->|-|\\*\\*|\\*|%|//|/|<=|<\\||>=|==|=|<|>|\\^|!=|!|\\(|\\)|\\[|]|:|,|\\.") to TokenType.SYMBOL,
-    Regex("###.*###") to TokenType.DISABLED_CODE,
+    Regex("###(.|\\n)*###") to TokenType.DISABLED_CODE,
     Regex("#[^\\n]*") to TokenType.COMMENT,
 )
 

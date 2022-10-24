@@ -56,6 +56,7 @@ abstract class Scope(
         var replacement = try {
             Parser.parseDefinition(tokenizer, ParsingContext(this, 0))
         } catch (e: Exception) {
+            e.printStackTrace()
             return listOf(e)
         }
         if (replacement.errors.isNotEmpty()) {
