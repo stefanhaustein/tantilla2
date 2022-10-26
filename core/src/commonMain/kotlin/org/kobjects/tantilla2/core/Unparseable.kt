@@ -8,7 +8,7 @@ import org.kobjects.tantilla2.core.parser.TokenType
 
 class Unparseable(
     override val parentScope: Scope?,
-    override val name: String = "(unparseable)",
+    override val name: String = "<Unparseable ${parentScope?.count() ?: 1}>",
     val definitionText: String
 ) : Definition {
 
@@ -23,31 +23,16 @@ class Unparseable(
     override fun resolveAll(compilationResults: CompilationResults) = false
 
     override fun serializeSummary(writer: CodeWriter) {
-        serializeCode(writer)
+       serializeCode(writer)
     }
 
     override fun serializeTitle(writer: CodeWriter, abbreviated: Boolean) {
-        writer.append("(error: $name)")
+       val cut = definitionText.indexOf('\n')
+        writer.appendUnparsed(if (!abbreviated || cut == -1) definitionText else definitionText.substring(0, cut))
     }
 
     override fun serializeCode(writer: CodeWriter, precedence: Int) {
-        writer.append(definitionText)
+        writer.appendUnparsed(definitionText)
     }
 
-    companion object {
-        fun fromDisabledCode(parentScope: Scope?, code: String): Unparseable {
-            val content = code.substring(4, code.length - 4)
-            val tokenizer = TantillaTokenizer(content)
-            tokenizer.consume(TokenType.BOF)
-            var name = "Error #${parentScope?.count() ?: 1}"
-            if (tokenizer.current.type == TokenType.IDENTIFIER) {
-                // TODO: Parse definition and check for leftovers...
-                tokenizer.next()
-                if (tokenizer.current.type == TokenType.IDENTIFIER) {
-                    name = tokenizer.current.text
-                }
-            }
-            return Unparseable(parentScope, name, content)
-        }
-    }
 }

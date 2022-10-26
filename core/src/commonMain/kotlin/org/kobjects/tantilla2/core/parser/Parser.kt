@@ -78,7 +78,8 @@ object Parser {
                 if (!definitionsAllowed) {
                     throw tokenizer.exception("Definitions are not allowed here.")
                 }
-                scope.add(Unparseable.fromDisabledCode(scope, tokenizer.current.text))
+                val code = tokenizer.current.text
+                scope.add(parseFailsafe(scope, code.substring(4, code.length - 4)))
                 tokenizer.next()
             } else if (DECLARATION_KEYWORDS.contains(tokenizer.current.text) ||
                 (!statementsAllowed
@@ -251,6 +252,29 @@ object Parser {
         return FieldDefinition(context.scope, kind, name, definitionText = text)
     }
 
+    fun parseFailsafe(parentScope: Scope, code: String): Definition {
+        val tokenizer = TantillaTokenizer(code)
+        tokenizer.next()
+        var result: Definition
+        try {
+            result = parseDefinition(tokenizer, ParsingContext(parentScope, -1))
 
+            while (tokenizer.current.type == TokenType.LINE_BREAK) {
+                tokenizer.next()
+            }
+
+            if (tokenizer.current.type != TokenType.EOF) {
+                result = Unparseable(parentScope, result.name, code)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            //            val name = oldDefinition?.name ?: "[error]"
+            result = Unparseable(
+                parentScope,
+                definitionText = code
+            )
+        }
+        return result
+    }
 
 }

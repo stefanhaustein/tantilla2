@@ -72,18 +72,7 @@ abstract class Scope(
     }
 
     fun update(newContent: String, oldDefinition: Definition? = null): Definition {
-        val tokenizer = TantillaTokenizer(newContent)
-        tokenizer.next()
-        var replacement = try {
-            Parser.parseDefinition(tokenizer, ParsingContext(this, 0))
-        } catch (e: Exception) {
-            e.printStackTrace()
-            //            val name = oldDefinition?.name ?: "[error]"
-            Unparseable(
-                this,
-                definitionText = newContent
-            )
-        }
+        var replacement = Parser.parseFailsafe(this, newContent)
         if (oldDefinition != null) {
             try {
                 if (oldDefinition is Updatable && replacement is Updatable
