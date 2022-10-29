@@ -127,13 +127,13 @@ fun RenderAppBar(
                     RenderDropDownMenu(showMenu, *menuItems.toTypedArray())
                     RenderDropDownMenu(
                         showAddMenu,
-                        "Field" to { viewModel.add(Definition.Kind.PROPERTY) },
-                        "Function" to { viewModel.add(Definition.Kind.FUNCTION) },
+                        "Field" to { viewModel.addDefinition(Definition.Kind.PROPERTY) },
+                        "Function" to { viewModel.addDefinition(Definition.Kind.FUNCTION) },
                         "" to { },
-                        "Struct" to { viewModel.add(Definition.Kind.STRUCT) },
-                        "Trait" to { viewModel.add(Definition.Kind.TRAIT) },
-                        "Impl" to { viewModel.add(Definition.Kind.IMPL) },
-                        "Unit" to { viewModel.add(Definition.Kind.UNIT) }
+                        "Struct" to { viewModel.addDefinition(Definition.Kind.STRUCT) },
+                        "Trait" to { viewModel.addDefinition(Definition.Kind.TRAIT) },
+                        "Impl" to { viewModel.addDefinition(Definition.Kind.IMPL) },
+                        "Unit" to { viewModel.addDefinition(Definition.Kind.UNIT) }
                     )
 
                     RenderDropDownMenu(

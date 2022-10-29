@@ -44,6 +44,8 @@ class TantillaViewModel(
     val runstateUpdateTrigger = mutableStateOf(0)
     val codeUpdateTrigger = mutableStateOf(0)
 
+    var initialEditorText: String = ""
+    var scratchFileModified = false
 
     var runtimeExceptionPosition = IntRange(-1, 0)
 
@@ -53,7 +55,7 @@ class TantillaViewModel(
         val file = File(platform.rootDirectory, platform.fileName)
         if (file.exists()) {
             load(file)
-        } else if (platform.fileName == "Scratch.tt") {
+        } else if (platform.fileName == SCRATCH_FILE_NAME) {
             reset(true)
         } else {
             reset(false)
@@ -67,14 +69,11 @@ class TantillaViewModel(
         }
     }
 
-
-
     fun saveAs() {
         dialogManager.showPrompt("Save As", "File Name", fileName.value) {
             saveAs(it)
         }
     }
-
 
     fun saveAs(newName: String) {
         fileName.value = newName
@@ -82,11 +81,9 @@ class TantillaViewModel(
         notifyCodeChangedAndSave()
     }
 
-
     fun scope(): MutableState<Scope> = if (mode.value == Mode.HELP) currentHelpScope else currentUserScope as MutableState<Scope>
 
-    fun add(kind: Definition.Kind) {
-
+    fun addDefinition(kind: Definition.Kind) {
         when (kind) {
             Definition.Kind.FUNCTION -> {
                 if (currentUserScope.value.supportsMethods) {
@@ -95,10 +92,10 @@ class TantillaViewModel(
                         "",
                         listOf(InputLine("Static", false), InputLine("Name", ""))
                     ) {
-                        add("${if (it[0] == true) "static " else "" }def ${it[1]}():") }
+                        editNewDefinition("${if (it[0] == true) "static " else "" }def ${it[1]}():") }
                 } else {
                     dialogManager.showPrompt("Add Function", "Name", "") {
-                        add("def $it():")
+                        editNewDefinition("def $it():")
                     }
                 }
             }
@@ -109,46 +106,60 @@ class TantillaViewModel(
                         "",
                         listOf(InputLine("Static", false), InputLine("Name", ""))
                     ) {
-                        add("${if (it[0] == true) "static " else "" }${it[1]} =") }
+                        editNewDefinition("${if (it[0] == true) "static " else "" }${it[1]} =") }
                 } else {
                     dialogManager.showPrompt("Add Field", "Name", "") {
-                        add("$it = ")
+                        editNewDefinition("$it = ")
                     }
                 }
             }
-            Definition.Kind.IMPL -> add("impl ")
+            Definition.Kind.IMPL -> editNewDefinition("impl ")
             else -> {
                 val lowercase = kind.toString().lowercase()
                 dialogManager.showPrompt("Add $lowercase", "Name", "") {
-                    add("$lowercase $it:")
+                    editNewDefinition("$lowercase $it:")
                 }
             }
         }
-
     }
 
-    fun add(text: String) {
+    fun editNewDefinition(text: String) {
         this.editingDefinition.value = null
+        initialEditorText = "" // Ensures change detection even if there is no text change
         currentText.value = currentText.value.copy(annotatedCode(text, emptyList()))
         mode.value = Mode.DEFINITION_EDITOR
     }
 
-
-    fun edit(definition: Definition?) {
+    fun editDefinition(definition: Definition?) {
         this.editingDefinition.value = definition
         val errorNode = if (definition == runtimeException.value?.definition) runtimeException.value?.node else null
         val writer = CodeWriter(errorNode = errorNode, highlighting = mapOf(CodeWriter.Kind.ERROR to Pair("", "")))
         definition?.serializeCode(writer)
         runtimeExceptionPosition = IntRange(writer.errorPosition, writer.errorPosition + writer.errorLength)
+        initialEditorText = writer.toString()
         currentText.value = currentText.value.copy(
-            annotatedString = annotatedCode(writer.toString(), definition?.errors ?: emptyList()))
+            annotatedString = annotatedCode(initialEditorText, definition?.errors ?: emptyList()))
         mode.value = Mode.DEFINITION_EDITOR
     }
 
-
     fun editDocumentation() {
-        currentText.value = currentText.value.copy(text = currentUserScope.value.docString)
+        initialEditorText = currentUserScope.value.docString
+        currentText.value = currentText.value.copy(text = initialEditorText)
         mode.value = Mode.DOCUMENTATION_EDITOR
+    }
+
+    fun closeEditorAndSave() {
+        val changed = currentText.value.text.trimEnd() != initialEditorText.trimEnd()
+        println("Close editor; changed: $changed; new text: ${currentText.value.text}")
+        if (changed) {
+            if (mode.value == Mode.DEFINITION_EDITOR) {
+                currentUserScope.value.update(currentText.value.text, this.editingDefinition.value)
+            } else {
+                currentUserScope.value.docString = currentText.value.text
+            }
+            notifyCodeChangedAndSave()
+        }
+        mode.value = Mode.HIERARCHY
     }
 
 
@@ -158,7 +169,19 @@ class TantillaViewModel(
         }
     }
 
+    fun confirmOverwrite(replacement: () -> Unit) {
+        if (scratchFileModified) {
+            dialogManager.showConfirmation("Overwrite Code", "Overwrite the current program code?") {
+                replacement()
+            }
+        } else {
+            replacement()
+        }
+    }
+
+
     fun reset(addHello: Boolean = false) {
+        globalRuntimeContext.stopRequested = true
         clearBitmap()
         clearConsole()
         userRootScope = UserRootScope(rootScope)
@@ -173,10 +196,11 @@ class TantillaViewModel(
                     userRootScope,
                     Definition.Kind.FUNCTION,
                     "main",
-                    "def main():\n  print(\"Hello World!\")"
+                    DEFAULT_SCRATCH
                 )
             )
             saveAs("Scratch.tt")
+            scratchFileModified = false
         }
     }
 
@@ -196,20 +220,28 @@ class TantillaViewModel(
     }
 
     fun load(file: File) {
-        platform.launch {
-            reset()
-            this.fileName.value = file.name
-            platform.fileName = file.name
-            loadCode(file.readText())
+        confirmOverwrite {
+            platform.launch {
+                reset()
+                this.fileName.value = file.name
+                platform.fileName = file.name
+                val code = file.readText()
+                loadCode(code)
+                scratchFileModified = file.name == SCRATCH_FILE_NAME
+                        && code.trimEnd() != DEFAULT_SCRATCH
+                        && code.trimEnd() != "### $DEFAULT_SCRATCH ###"
+            }
         }
     }
 
     fun loadExample(name: String) {
-        platform.launch {
-            reset()
-            this.fileName.value = name
-            platform.fileName = name
-            loadCode(platform.loadExample(name))
+        confirmOverwrite {
+            platform.launch {
+                reset()
+                loadCode(platform.loadExample(name))
+                saveAs(SCRATCH_FILE_NAME)
+                scratchFileModified = false
+            }
         }
     }
 
@@ -240,7 +272,7 @@ class TantillaViewModel(
         }
         var definition = e.definition
         if (definition is FunctionDefinition) {
-            edit(definition)
+            editDefinition(definition)
         } else if (definition?.parentScope != null){
             currentUserScope.value = definition.parentScope!!
             mode.value = Mode.HIERARCHY
@@ -259,6 +291,9 @@ class TantillaViewModel(
         writer.close()
         codeUpdateTrigger.value++
         runtimeException.value = null
+        if (fileName.value == SCRATCH_FILE_NAME) {
+            scratchFileModified = true
+        }
     }
 
     fun clearConsole() {
@@ -290,7 +325,8 @@ class TantillaViewModel(
 
 
     companion object {
-
+        const val SCRATCH_FILE_NAME = "Scratch.tt"
+        const val DEFAULT_SCRATCH = "def main():\n  print(\"Hello World!\")"
 
         fun findLineRange(s: AnnotatedString, lineNumber: Int): IntRange {
             var pos = 0

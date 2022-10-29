@@ -43,7 +43,7 @@ fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
                         if (definition.isScope()) {
                             viewModel.scope().value = definition.getValue(null) as Scope
                         } else if (editable) {
-                            viewModel.edit(definition)
+                            viewModel.editDefinition(definition)
                         }
                     },
                     onTap = {
@@ -79,7 +79,7 @@ fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
                             if (definition.isScope()) {
                                 viewModel.scope().value = definition.getValue(null) as Scope
                             } else {
-                                viewModel.edit(definition)
+                                viewModel.editDefinition(definition)
                             }
                         })
                 }

@@ -36,11 +36,7 @@ fun RenderDefinitionEditor(viewModel: TantillaViewModel) {
                 title = { Text(text = definition?.name ?: "New Property") },
                 actions = {
                     IconButton(onClick = {
-                        scope.update(viewModel.currentText.value.text, definition)
-                        println("Updating to : " + viewModel.currentText.value.text)
-                        viewModel.mode.value = TantillaViewModel.Mode.HIERARCHY
-                        viewModel.runtimeException.value = null
-                        viewModel.notifyCodeChangedAndSave()
+                        viewModel.closeEditorAndSave()
                     }) {
                         Icon(Icons.Default.Check, contentDescription = "Save")
                     }

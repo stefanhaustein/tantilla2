@@ -27,10 +27,7 @@ fun RenderDocumentationEditor(viewModel: TantillaViewModel) {
                 title = { Text(text = scope.name ) },
                 actions = {
                     IconButton(onClick = {
-                        scope.docString = viewModel.currentText.value.text
-                        viewModel.mode.value = TantillaViewModel.Mode.HIERARCHY
-                        viewModel.notifyCodeChangedAndSave()
-                        viewModel.codeUpdateTrigger.value++
+                        viewModel.closeEditorAndSave()
                     }) {
                         Icon(Icons.Default.Check, contentDescription = "Save")
                     }
