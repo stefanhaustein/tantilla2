@@ -60,7 +60,7 @@ fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
         //    val expanded = viewModel.expanded.value.contains(definition)
             val help = viewModel.mode.value == TantillaViewModel.Mode.HELP
             Column() {
-                val writer = CodeWriter(highlighting = CodeWriter.defaultHighlighting)
+                val writer = CodeWriter(highlighting = CodeWriter.defaultHighlighting, errorNode = viewModel.runtimeException.value?.node)
                 if (!expanded) {
                     definition.serializeTitle(writer)
                 } else {
