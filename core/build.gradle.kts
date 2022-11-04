@@ -85,4 +85,5 @@ android {
         minSdk = 21
         targetSdk = 32
     }
+    namespace = "org.kobjects.tantilla2"
 }
