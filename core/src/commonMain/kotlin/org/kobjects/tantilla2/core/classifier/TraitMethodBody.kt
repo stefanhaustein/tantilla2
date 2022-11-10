@@ -1,9 +1,13 @@
 package org.kobjects.tantilla2.core
 
+import org.kobjects.tantilla2.core.builtin.StrType
 import org.kobjects.tantilla2.core.node.Evaluable
 import org.kobjects.tantilla2.core.classifier.Adapter
 
 class TraitMethodBody(val index: Int): Evaluable {
+    override val returnType: Type
+        get() = throw UnsupportedOperationException()
+
     override fun eval(context: LocalRuntimeContext): Any? {
       val self = context.variables[0] as Adapter
       val methodImpl = self.vmt[index]

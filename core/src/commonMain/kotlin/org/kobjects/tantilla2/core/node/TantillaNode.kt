@@ -19,6 +19,5 @@ fun Evaluable.containsNode(node: Evaluable): Boolean {
 
 interface TantillaNode : Evaluable, SerializableCode {
 
-    val returnType: Type
 
 }

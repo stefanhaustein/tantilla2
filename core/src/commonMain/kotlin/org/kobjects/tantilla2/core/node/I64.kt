@@ -1,6 +1,9 @@
 package org.kobjects.tantilla2.core.node
 
 import org.kobjects.tantilla2.core.LocalRuntimeContext
+import org.kobjects.tantilla2.core.Type
+import org.kobjects.tantilla2.core.builtin.BoolType
+import org.kobjects.tantilla2.core.builtin.IntType
 
 /**
  * Operations.
@@ -10,6 +13,9 @@ object I64 {
     class Const(
         val value: Long
     ): Evaluable {
+        override val returnType: Type
+            get() = IntType
+
         override fun eval(ctx: LocalRuntimeContext) = value
 
         override fun evalI64(ctx: LocalRuntimeContext) = value
@@ -27,6 +33,8 @@ object I64 {
         private val right: Evaluable,
         private val op: (Long, Long) -> Long
     ) : Evaluable {
+        override val returnType: Type
+            get() = IntType
 
         override fun eval(context: LocalRuntimeContext): Long =
             op(left.evalI64(context), right.evalI64(context))
@@ -62,6 +70,9 @@ object I64 {
         private val arg: Evaluable,
         private val op: (Long) -> Long
     ) : Evaluable {
+        override val returnType: Type
+            get() = IntType
+
         override fun eval(ctx: LocalRuntimeContext): Long =
             op(arg.evalI64(ctx))
 
@@ -80,6 +91,9 @@ object I64 {
         val left: Evaluable,
         val right: Evaluable,
     ): Evaluable {
+        override val returnType: Type
+            get() = BoolType
+
         override fun eval(context: LocalRuntimeContext): Boolean {
             return (left.evalI64(context) == right.evalI64(context))
         }
@@ -96,6 +110,9 @@ object I64 {
         val left: Evaluable,
         val right: Evaluable,
     ): Evaluable {
+        override val returnType: Type
+            get() = BoolType
+
         override fun eval(context: LocalRuntimeContext): Boolean {
             return (left.evalI64(context) == right.evalI64(context))
         }
@@ -114,6 +131,9 @@ object I64 {
         val right: Evaluable,
         val op: (Long, Long) -> Boolean,
     ) : Evaluable {
+        override val returnType: Type
+            get() = BoolType
+
         override fun eval(env: LocalRuntimeContext): Boolean =
             op(left.evalI64(env), right.evalI64(env))
 

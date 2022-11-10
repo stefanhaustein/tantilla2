@@ -1,6 +1,9 @@
 package org.kobjects.tantilla2.core.node
 
 import org.kobjects.tantilla2.core.LocalRuntimeContext
+import org.kobjects.tantilla2.core.Type
+import org.kobjects.tantilla2.core.builtin.BoolType
+import org.kobjects.tantilla2.core.builtin.StrType
 
 
 object Str {
@@ -8,6 +11,9 @@ object Str {
     class Const(
         val value: String
     ): Evaluable {
+        override val returnType: Type
+            get() = StrType
+
         override fun eval(ctx: LocalRuntimeContext) = value
 
         override fun children() = listOf<Evaluable>()
@@ -21,6 +27,9 @@ object Str {
         private val left: Evaluable,
         private val right: Evaluable,
     ) : Evaluable {
+        override val returnType: Type
+            get() = StrType
+
         override fun eval(ctx: LocalRuntimeContext) = left.eval(ctx).toString() + right.eval(ctx).toString()
 
         override fun children() = listOf(left, right)

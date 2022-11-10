@@ -1,6 +1,9 @@
 package org.kobjects.tantilla2.core.node
 
 import org.kobjects.tantilla2.core.LocalRuntimeContext
+import org.kobjects.tantilla2.core.Type
+import org.kobjects.tantilla2.core.builtin.BoolType
+import org.kobjects.tantilla2.core.builtin.FloatType
 import kotlin.math.exp
 import kotlin.math.ln
 import kotlin.math.pow
@@ -13,6 +16,9 @@ object F64 {
     class Const(
         val value: Double
     ): Evaluable {
+        override val returnType: Type
+            get() = FloatType
+
         override fun eval(ctx: LocalRuntimeContext) = value
 
         override fun evalF64(context: LocalRuntimeContext) = value
@@ -22,6 +28,7 @@ object F64 {
         override fun reconstruct(newChildren: List<Evaluable>) = this
 
         override fun toString() = value.toString()
+
     }
 
     open class Binary(
@@ -30,6 +37,9 @@ object F64 {
         private val right: Evaluable,
         private val op: (Double, Double) -> Double
     ) : Evaluable {
+
+        override val returnType: Type
+            get() = FloatType
 
         override fun eval(context: LocalRuntimeContext): Double =
             op(left.evalF64(context), right.evalF64(context))
@@ -68,6 +78,10 @@ object F64 {
         private val arg: Evaluable,
         private val op: (Double) -> Double
     ) : Evaluable {
+
+        override val returnType: Type
+            get() = FloatType
+
         override fun eval(ctx: LocalRuntimeContext): Double =
             op(arg.evalF64(ctx))
 
@@ -90,6 +104,9 @@ object F64 {
         val left: Evaluable,
         val right: Evaluable,
     ): Evaluable {
+        override val returnType: Type
+            get() = BoolType
+
         override fun eval(context: LocalRuntimeContext): Boolean {
             return (left.evalF64(context) == right.evalF64(context))
         }
@@ -106,6 +123,9 @@ object F64 {
         val left: Evaluable,
         val right: Evaluable,
     ): Evaluable {
+        override val returnType: Type
+            get() = BoolType
+
         override fun eval(context: LocalRuntimeContext): Boolean {
             return (left.evalF64(context) == right.evalF64(context))
         }
@@ -124,6 +144,9 @@ object F64 {
         val right: Evaluable,
         val op: (Double, Double) -> Boolean,
     ) : Evaluable {
+        override val returnType: Type
+            get() = BoolType
+
         override fun eval(env: LocalRuntimeContext): Boolean =
             op(left.evalF64(env), right.evalF64(env))
 

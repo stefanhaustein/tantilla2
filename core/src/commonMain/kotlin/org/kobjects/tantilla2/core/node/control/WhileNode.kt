@@ -1,12 +1,18 @@
 package org.kobjects.tantilla2.core.node.control
 
 import org.kobjects.tantilla2.core.LocalRuntimeContext
+import org.kobjects.tantilla2.core.Type
+import org.kobjects.tantilla2.core.builtin.StrType
+import org.kobjects.tantilla2.core.builtin.VoidType
 import org.kobjects.tantilla2.core.node.Evaluable
 
 class WhileNode(
     val condition: Evaluable,
     val body: Evaluable
 ): Evaluable {
+    override val returnType: Type
+        get() = VoidType
+
     override fun eval(env: LocalRuntimeContext): FlowSignal? {
         while (condition.eval(env) as Boolean) {
             val result = body.eval(env)
