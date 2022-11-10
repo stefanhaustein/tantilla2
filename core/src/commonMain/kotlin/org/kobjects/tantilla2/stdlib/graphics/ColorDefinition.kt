@@ -4,6 +4,7 @@ import org.kobjects.tantilla2.core.classifier.NativePropertyDefinition
 import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.builtin.FloatType
+import org.kobjects.tantilla2.core.node.F64
 
 class ColorDefinition(graphicsScope: GraphicsScope) : NativeStructDefinition(
     graphicsScope,
@@ -13,7 +14,7 @@ class ColorDefinition(graphicsScope: GraphicsScope) : NativeStructDefinition(
         Parameter("r", FloatType),
         Parameter("g", FloatType),
         Parameter("b", FloatType),
-        Parameter("a", FloatType, org.kobjects.greenspun.core.F64.Const(1.0))
+        Parameter("a", FloatType, F64.Const(1.0))
     ),
     ctor = {
         Color(it.f64(0), it.f64(1), it.f64(2), it.f64(3))
@@ -27,7 +28,7 @@ class ColorDefinition(graphicsScope: GraphicsScope) : NativeStructDefinition(
             Parameter("r", FloatType),
             Parameter("g", FloatType),
             Parameter("b", FloatType),
-            Parameter("a", FloatType, org.kobjects.greenspun.core.F64.Const(1.0)),
+            Parameter("a", FloatType, F64.Const(1.0)),
         ) {
             Color(it.f64(0), it.f64(1), it.f64(2), it.f64(3))
         }
@@ -39,7 +40,7 @@ class ColorDefinition(graphicsScope: GraphicsScope) : NativeStructDefinition(
             Parameter("h", FloatType),
             Parameter("s", FloatType),
             Parameter("l", FloatType),
-            Parameter("a", FloatType, org.kobjects.greenspun.core.F64.Const(1.0)),
+            Parameter("a", FloatType, F64.Const(1.0)),
         ) { Color.hsl(it.f64(0), it.f64(1), it.f64(2)) }
 
         add(NativePropertyDefinition.constant(this,  "BLACK", docString = "Black", value = Color(0.0, 0.0, 0.0, 1.0), type = this))

@@ -1,16 +1,15 @@
 package org.kobjects.tantilla2.core.function
 
-import org.kobjects.greenspun.core.Control
-import org.kobjects.greenspun.core.Evaluable
+import org.kobjects.tantilla2.core.node.Evaluable
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.SerializableCode
-import org.kobjects.tantilla2.core.builtin.RootScope
+import org.kobjects.tantilla2.core.node.control.FlowSignal
 
 class CallableImpl(
     override val type: FunctionType,
     override val scopeSize: Int,
-    val body: Evaluable<LocalRuntimeContext>,
+    val body: Evaluable,
     override val closure: LocalRuntimeContext? = null
     ) : Callable, SerializableCode {
 
@@ -24,8 +23,8 @@ class CallableImpl(
         }
 
         val result = body.eval(context)
-        if (result is Control.FlowSignal) {
-            if (result.kind == Control.FlowSignal.Kind.RETURN) {
+        if (result is FlowSignal) {
+            if (result.kind == FlowSignal.Kind.RETURN) {
                 return result.value
             }
             throw IllegalStateException("Unexpected signal: $result")

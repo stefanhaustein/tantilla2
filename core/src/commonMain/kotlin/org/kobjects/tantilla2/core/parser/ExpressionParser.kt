@@ -1,9 +1,9 @@
 package org.kobjects.tantilla2.core.parser
 
-import org.kobjects.greenspun.core.Evaluable
-import org.kobjects.greenspun.core.F64
-import org.kobjects.greenspun.core.I64
-import org.kobjects.greenspun.core.Str
+import org.kobjects.tantilla2.core.node.Evaluable
+import org.kobjects.tantilla2.core.node.F64
+import org.kobjects.tantilla2.core.node.I64
+import org.kobjects.tantilla2.core.node.Str
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.builtin.StrType
 import org.kobjects.parserlib.expressionparser.ExpressionParser as GreenspunExpressionParser
@@ -15,11 +15,11 @@ import org.kobjects.tantilla2.core.node.*
 
 object ExpressionParser {
 
-    fun bothInt(l: Evaluable<LocalRuntimeContext>, r: Evaluable<LocalRuntimeContext>) =
+    fun bothInt(l: Evaluable, r: Evaluable) =
          l.returnType == org.kobjects.tantilla2.core.builtin.IntType
                  && r.returnType == org.kobjects.tantilla2.core.builtin.IntType
 
-    fun parseExpression(tokenizer: TantillaTokenizer, context: ParsingContext, expectedType: Type? = null): Evaluable<LocalRuntimeContext> {
+    fun parseExpression(tokenizer: TantillaTokenizer, context: ParsingContext, expectedType: Type? = null): Evaluable {
         if (expectedType is FunctionType && tokenizer.current.text == "lambda") {
             return parseLambda(tokenizer, context, expectedType)
         }
@@ -28,7 +28,7 @@ object ExpressionParser {
     }
 
 
-    fun matchType(context: Scope, expr: Evaluable<LocalRuntimeContext>, expectedType: Type?): Evaluable<LocalRuntimeContext> {
+    fun matchType(context: Scope, expr: Evaluable, expectedType: Type?): Evaluable {
         if (expectedType == null || expectedType.isAssignableFrom(expr.returnType)) {
             return expr
         }
@@ -41,7 +41,7 @@ object ExpressionParser {
         }
     }
 
-    fun parseElementAt(tokenizer: TantillaTokenizer, context: ParsingContext, base: Evaluable<LocalRuntimeContext>): Evaluable<LocalRuntimeContext> {
+    fun parseElementAt(tokenizer: TantillaTokenizer, context: ParsingContext, base: Evaluable): Evaluable {
         val result = ElementAt(base, parseExpression(tokenizer, context))
         tokenizer.consume("]")
         return result
@@ -56,7 +56,7 @@ object ExpressionParser {
     else StaticReference(definition, qualified)
 
 
-    fun parseFreeIdentifier(tokenizer: TantillaTokenizer, context: ParsingContext): Evaluable<LocalRuntimeContext> {
+    fun parseFreeIdentifier(tokenizer: TantillaTokenizer, context: ParsingContext): Evaluable {
         val name = tokenizer.consume(TokenType.IDENTIFIER)
         val scope = context.scope
 
@@ -119,7 +119,7 @@ object ExpressionParser {
         tokenizer: TantillaTokenizer,
         context: ParsingContext,
         expectedType: FunctionType? = null
-    ): Evaluable<LocalRuntimeContext> {
+    ): Evaluable {
         tokenizer.consume("lambda")
 
         val type: FunctionType
@@ -169,11 +169,11 @@ object ExpressionParser {
         return LambdaReference(type, functionScope.locals.size, body)
     }
 
-    fun createNumberLiteral(s: String): Evaluable<LocalRuntimeContext> =
+    fun createNumberLiteral(s: String): Evaluable =
         if (s.contains('.') || s.contains('e') || s.contains('E'))
             F64.Const(s.toDouble()) else I64.Const(s.toLong())
 
-    fun parsePrimary(tokenizer: TantillaTokenizer, context: ParsingContext): Evaluable<LocalRuntimeContext> =
+    fun parsePrimary(tokenizer: TantillaTokenizer, context: ParsingContext): Evaluable =
         when (tokenizer.current.type) {
             TokenType.NUMBER -> createNumberLiteral(tokenizer.next().text);
             TokenType.STRING -> Str.Const(tokenizer.next().text.unquote())
@@ -199,8 +199,8 @@ object ExpressionParser {
     fun parseList(
         tokenizer: TantillaTokenizer,
         context: ParsingContext,
-        endMarker: String): List<Evaluable<LocalRuntimeContext>> {
-        val result = mutableListOf<Evaluable<LocalRuntimeContext>>()
+        endMarker: String): List<Evaluable> {
+        val result = mutableListOf<Evaluable>()
         if (tokenizer.current.text != endMarker) {
             do {
                 result.add(parseExpression(tokenizer, context))
@@ -213,8 +213,8 @@ object ExpressionParser {
     fun parseAs(
         tokenizer: TantillaTokenizer,
         context: ParsingContext,
-        base: Evaluable<LocalRuntimeContext>,
-    ): Evaluable<LocalRuntimeContext> {
+        base: Evaluable,
+    ): Evaluable {
         val traitName = tokenizer.consume(TokenType.IDENTIFIER)
         val className = base.returnType.typeName
         val impl = context.scope.resolveStaticOrError("$traitName for $className").getValue(null) as ImplDefinition
@@ -225,8 +225,8 @@ object ExpressionParser {
     fun parseProperty(
         tokenizer: TantillaTokenizer,
         context: ParsingContext,
-        base: Evaluable<LocalRuntimeContext>,
-    ): Evaluable<LocalRuntimeContext> {
+        base: Evaluable,
+    ): Evaluable {
         val name = tokenizer.consume(TokenType.IDENTIFIER)
         val baseType = base.returnType
         val definition = baseType.resolve(name)
@@ -237,10 +237,10 @@ object ExpressionParser {
     fun property(
         tokenizer: TantillaTokenizer,
         context: ParsingContext,
-        base: Evaluable<LocalRuntimeContext>,
+        base: Evaluable,
         definition: Definition
-    ): Evaluable<LocalRuntimeContext> {
-        var self: Evaluable<LocalRuntimeContext>? = null
+    ): Evaluable {
+        var self: Evaluable? = null
         val name = definition.name
         val value = when (definition.kind) {
             Definition.Kind.PROPERTY -> PropertyReference(base, definition)
@@ -264,11 +264,11 @@ object ExpressionParser {
     fun parseMaybeApply(
         tokenizer: TantillaTokenizer,
         context: ParsingContext,
-        value: Evaluable<LocalRuntimeContext>,
-        self: Evaluable<LocalRuntimeContext>?,
+        value: Evaluable,
+        self: Evaluable?,
         openingParenConsumed: Boolean,
         asMethod: Boolean
-    ): Evaluable<LocalRuntimeContext> {
+    ): Evaluable {
         val type = value.returnType
 
         if (type !is FunctionType) {
@@ -286,7 +286,7 @@ object ExpressionParser {
         }
 
         val expectedParameters = type.parameters
-        val parameterExpressions = MutableList<Evaluable<LocalRuntimeContext>?>(expectedParameters.size) { null }
+        val parameterExpressions = MutableList<Evaluable?>(expectedParameters.size) { null }
         var index = 0
         if (self != null) {
             parameterExpressions[index++] = self
@@ -297,7 +297,7 @@ object ExpressionParser {
             indexMap[expectedParameters[i].name] = i
         }
 
-        val varargs = mutableListOf<Evaluable<LocalRuntimeContext>>()
+        val varargs = mutableListOf<Evaluable>()
         var varargIndex = -1
         var nameRequired = false
         if (hasArgs && !tokenizer.tryConsume(")")) {
@@ -354,7 +354,7 @@ object ExpressionParser {
 
 
     val expressionParser =
-        GreenspunExpressionParser<TantillaTokenizer, ParsingContext, Evaluable<LocalRuntimeContext>>(
+        GreenspunExpressionParser<TantillaTokenizer, ParsingContext, Evaluable>(
             GreenspunExpressionParser.suffix(9, ".") {
                 tokenizer, context, _, base -> parseProperty(tokenizer, context, base) },
             GreenspunExpressionParser.suffix(8, "[") {

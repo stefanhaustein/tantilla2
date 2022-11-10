@@ -1,6 +1,5 @@
 package org.kobjects.tantilla2.core.node
 
-import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.function.FunctionType
@@ -10,9 +9,9 @@ import org.kobjects.tantilla2.core.returnType
 
 
 class Apply(
-    val callable: Evaluable<LocalRuntimeContext>,
+    val callable: Evaluable,
     val parameterDeclarations: List<Parameter>,
-    val parameters: List<Evaluable<LocalRuntimeContext>>,
+    val parameters: List<Evaluable>,
     val implicit: Boolean,
     val asMethod: Boolean,
 ) : TantillaNode {
@@ -35,11 +34,11 @@ class Apply(
         return function.eval(functionContext)
     }
 
-    override fun children(): List<Evaluable<LocalRuntimeContext>> = List(parameters.size + 1) {
+    override fun children(): List<Evaluable> = List(parameters.size + 1) {
        if (it == 0) callable else parameters[it - 1]
     }
 
-    override fun reconstruct(newChildren: List<Evaluable<LocalRuntimeContext>>): Evaluable<LocalRuntimeContext> =
+    override fun reconstruct(newChildren: List<Evaluable>): Evaluable =
         Apply(newChildren[0], parameterDeclarations, newChildren.subList(1, newChildren.size), implicit, asMethod)
 
     override val returnType

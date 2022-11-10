@@ -1,27 +1,25 @@
 package org.kobjects.tantilla2.core.node
 
-import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.Definition
 import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.Type
-import org.kobjects.tantilla2.core.node.Assignable
 
 class PropertyReference(
-    val base: Evaluable<LocalRuntimeContext>,
+    val base: Evaluable,
     val definition: Definition
 ) : Assignable {
     override val returnType: Type
         get() = definition.type
 
-    override fun children(): List<Evaluable<LocalRuntimeContext>> = emptyList()
+    override fun children(): List<Evaluable> = emptyList()
 
     override fun eval(ctx: LocalRuntimeContext): Any? {
         val self = base.eval(ctx)
         return definition.getValue(self)
     }
 
-    override fun reconstruct(newChildren: List<Evaluable<LocalRuntimeContext>>): Evaluable<LocalRuntimeContext> =
+    override fun reconstruct(newChildren: List<Evaluable>): Evaluable =
         PropertyReference(newChildren[0], definition)
 
     override fun assign(context: LocalRuntimeContext, value: Any?) {

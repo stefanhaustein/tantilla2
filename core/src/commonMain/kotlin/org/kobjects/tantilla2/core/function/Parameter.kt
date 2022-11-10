@@ -1,13 +1,12 @@
 package org.kobjects.tantilla2.core.function
 
-import org.kobjects.greenspun.core.Evaluable
+import org.kobjects.tantilla2.core.node.Evaluable
 import org.kobjects.tantilla2.core.*
-import org.kobjects.tantilla2.core.builtin.RootScope
 
 data class Parameter(
     val name: String,
     val type: Type,
-    val defaultValueExpression: Evaluable<LocalRuntimeContext>? = null,
+    val defaultValueExpression: Evaluable? = null,
     val isVararg: Boolean = false,
 ) {
 

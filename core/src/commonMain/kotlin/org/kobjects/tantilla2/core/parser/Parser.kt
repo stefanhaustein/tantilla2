@@ -1,9 +1,10 @@
 package org.kobjects.tantilla2.core.parser
 
-import org.kobjects.greenspun.core.*
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.classifier.*
 import org.kobjects.tantilla2.core.function.*
+import org.kobjects.tantilla2.core.node.BlockNode
+import org.kobjects.tantilla2.core.node.Evaluable
 
 
 fun String.unquote() = this.substring(1, this.length - 1)
@@ -21,7 +22,7 @@ object Parser {
         return s.length - lastBreak - 1
     }
 
-    fun parseShellInput(s: String, scope: UserRootScope): Evaluable<LocalRuntimeContext> {
+    fun parseShellInput(s: String, scope: UserRootScope): Evaluable {
         return parse(s, scope, definitionsAllowed = true, statementsAllowed = true)
     }
 
@@ -34,7 +35,7 @@ object Parser {
         scope: Scope,
         definitionsAllowed: Boolean = true,
         statementsAllowed: Boolean = true
-    ): Evaluable<LocalRuntimeContext> {
+    ): Evaluable {
         val tokenizer = TantillaTokenizer(source)
         tokenizer.consume(TokenType.BOF)
         scope.docString = readDocString(tokenizer)
@@ -60,8 +61,8 @@ object Parser {
         context: ParsingContext,
         statementsAllowed: Boolean = true,
         definitionsAllowed: Boolean = true
-    ): Evaluable<LocalRuntimeContext> {
-        val statements = mutableListOf<Evaluable<LocalRuntimeContext>>()
+    ): Evaluable {
+        val statements = mutableListOf<Evaluable>()
         val scope = context.scope
         var localDepth = context.depth
         while (tokenizer.current.type != TokenType.EOF
@@ -98,7 +99,7 @@ object Parser {
             }
         }
         return if (statements.size == 1) statements[0]
-            else Control.Block<LocalRuntimeContext>(*statements.toTypedArray())
+            else BlockNode(*statements.toTypedArray())
     }
 
     fun readDocString(tokenizer: TantillaTokenizer): String {
@@ -211,11 +212,11 @@ object Parser {
 
 
     fun resolveVariable(tokenizer: TantillaTokenizer, context: ParsingContext, typeOnly: Boolean = false):
-            Triple<Type, Boolean, Evaluable<LocalRuntimeContext>?> {
+            Triple<Type, Boolean, Evaluable?> {
 
         val scope = context.scope
         var type: Type? = null
-        var initializer: Evaluable<LocalRuntimeContext>? = null
+        var initializer: Evaluable? = null
         var typeIsExplicit = tokenizer.tryConsume(":")
         if (typeIsExplicit) {
             type = TypeParser.parseType(tokenizer, ParsingContext(scope, 0))

@@ -1,6 +1,6 @@
 package org.kobjects.tantilla2.core
 
-import org.kobjects.greenspun.core.Evaluable
+import org.kobjects.tantilla2.core.node.Evaluable
 
 interface Definition : SerializableCode, Comparable<Definition> {
     val parentScope: Scope?
@@ -37,7 +37,7 @@ interface Definition : SerializableCode, Comparable<Definition> {
         return 1 + depth(scope.parentScope!!)
     }
 
-    fun findNode(node: Evaluable<LocalRuntimeContext>): Definition? = null
+    fun findNode(node: Evaluable): Definition? = null
     fun isDynamic() = kind == Kind.METHOD || kind == Kind.PROPERTY
     fun isScope(): Boolean = false
 

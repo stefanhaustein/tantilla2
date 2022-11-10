@@ -1,12 +1,14 @@
 package org.kobjects.tantilla2.core
 
-import org.kobjects.greenspun.core.*
 import org.kobjects.konsole.Ansi
+import org.kobjects.tantilla2.core.node.*
+import org.kobjects.tantilla2.core.node.control.IfNode
+import org.kobjects.tantilla2.core.node.control.WhileNode
 
 class CodeWriter(
     indent: String = "",
     val highlighting: Map<Kind, Pair<String, String>> = emptyMap(),
-    val errorNode: Evaluable<LocalRuntimeContext>? = null,
+    val errorNode: Evaluable? = null,
     val errors: List<Pair<IntRange, Exception>> = emptyList()
 ) : Appendable {
     val sb = StringBuilder()
@@ -92,36 +94,36 @@ class CodeWriter(
         }
         when (code) {
             is SerializableCode -> code.serializeCode(this, parentPrecedence)
-            is I64.Neg<*> -> appendPrefix(code, parentPrecedence, "-", 4)
-            is F64.Neg<*> -> appendPrefix(code, parentPrecedence, "-", 4)
-            is I64.Gt<*> -> appendInfix(code, parentPrecedence,">", 2)
-            is F64.Gt<*> -> appendInfix(code, parentPrecedence,">", 2)
-            is I64.Ge<*> -> appendInfix(code, parentPrecedence,">=", 2)
-            is F64.Ge<*> -> appendInfix(code, parentPrecedence,">=", 2)
-            is I64.Lt<*> -> appendInfix(code, parentPrecedence,"<", 2)
-            is F64.Lt<*> -> appendInfix(code, parentPrecedence,"<", 2)
-            is I64.Le<*> -> appendInfix(code, parentPrecedence,"<=", 2)
-            is F64.Le<*> -> appendInfix(code, parentPrecedence,"<=", 2)
-            is F64.Eq<*> -> appendInfix(code, parentPrecedence,"==", 2)
-            is I64.Eq<*> -> appendInfix(code, parentPrecedence,"==", 2)
-            is F64.Ne<*> -> appendInfix(code, parentPrecedence,"!=", 2)
-            is I64.Ne<*> -> appendInfix(code, parentPrecedence,"!=", 2)
-            is I64.Add<*> -> appendInfix(code, parentPrecedence,  "+", 3)
-            is F64.Add<*> -> appendInfix(code, parentPrecedence,  "+", 3)
-            is Str.Add<*> -> appendInfix(code, parentPrecedence,  "+", 3)
-            is I64.Sub<*> -> appendInfix(code, parentPrecedence, "-", 3)
-            is F64.Sub<*> -> appendInfix(code, parentPrecedence, "-", 3)
-            is I64.Mul<*> -> appendInfix(code, parentPrecedence, "*", 5)
-            is F64.Mul<*> -> appendInfix(code, parentPrecedence, "*", 5)
-            is I64.Div<*> -> appendInfix(code, parentPrecedence, "//", 5)
-            is F64.Div<*> -> appendInfix(code, parentPrecedence, "/", 5)
-            is I64.Mod<*> -> appendInfix(code, parentPrecedence, "%", 5)
-            is F64.Mod<*> -> appendInfix(code, parentPrecedence, "%", 5)
-            is F64.Pow<*> -> appendInfix(code, parentPrecedence, "**", 6)
-            is Control.If<*> -> appendIf(code as Control.If<LocalRuntimeContext>)
-            is Control.Block<*> -> appendBlock(code as Control.Block<LocalRuntimeContext>)
-            is Control.While<*> -> appendWhile(code as Control.While<LocalRuntimeContext>)
-            is Str.Const<*> -> appendWrapped(Kind.STRING, code.toString())
+            is I64.Neg -> appendPrefix(code, parentPrecedence, "-", 4)
+            is F64.Neg -> appendPrefix(code, parentPrecedence, "-", 4)
+            is I64.Gt -> appendInfix(code, parentPrecedence,">", 2)
+            is F64.Gt -> appendInfix(code, parentPrecedence,">", 2)
+            is I64.Ge -> appendInfix(code, parentPrecedence,">=", 2)
+            is F64.Ge -> appendInfix(code, parentPrecedence,">=", 2)
+            is I64.Lt -> appendInfix(code, parentPrecedence,"<", 2)
+            is F64.Lt -> appendInfix(code, parentPrecedence,"<", 2)
+            is I64.Le -> appendInfix(code, parentPrecedence,"<=", 2)
+            is F64.Le -> appendInfix(code, parentPrecedence,"<=", 2)
+            is F64.Eq -> appendInfix(code, parentPrecedence,"==", 2)
+            is I64.Eq -> appendInfix(code, parentPrecedence,"==", 2)
+            is F64.Ne -> appendInfix(code, parentPrecedence,"!=", 2)
+            is I64.Ne -> appendInfix(code, parentPrecedence,"!=", 2)
+            is I64.Add -> appendInfix(code, parentPrecedence,  "+", 3)
+            is F64.Add -> appendInfix(code, parentPrecedence,  "+", 3)
+            is Str.Add -> appendInfix(code, parentPrecedence,  "+", 3)
+            is I64.Sub -> appendInfix(code, parentPrecedence, "-", 3)
+            is F64.Sub -> appendInfix(code, parentPrecedence, "-", 3)
+            is I64.Mul -> appendInfix(code, parentPrecedence, "*", 5)
+            is F64.Mul -> appendInfix(code, parentPrecedence, "*", 5)
+            is I64.Div -> appendInfix(code, parentPrecedence, "//", 5)
+            is F64.Div -> appendInfix(code, parentPrecedence, "/", 5)
+            is I64.Mod -> appendInfix(code, parentPrecedence, "%", 5)
+            is F64.Mod -> appendInfix(code, parentPrecedence, "%", 5)
+            is F64.Pow -> appendInfix(code, parentPrecedence, "**", 6)
+            is IfNode -> appendIf(code as IfNode)
+            is BlockNode -> appendBlock(code as BlockNode)
+            is WhileNode -> appendWhile(code as WhileNode)
+            is Str.Const -> appendWrapped(Kind.STRING, code.toString())
             else -> append(code.toString())
         }
         if (error) {
@@ -139,7 +141,7 @@ class CodeWriter(
         appendWrapped(Kind.COMMENT, s)
     }
 
-    fun appendPrefix(code: Evaluable<*>, parentPrecedence: Int, name: String, precedence: Int) {
+    fun appendPrefix(code: Evaluable, parentPrecedence: Int, name: String, precedence: Int) {
         if (parentPrecedence > precedence) {
             append('(')
             append(name)
@@ -151,7 +153,7 @@ class CodeWriter(
         }
     }
 
-    fun appendInfix(code: Evaluable<*>, parentPrecedence: Int, name: String, precedence: Int) {
+    fun appendInfix(code: Evaluable, parentPrecedence: Int, name: String, precedence: Int) {
         if (parentPrecedence > precedence) {
             append('(')
             appendInfix(code, precedence, name, precedence)
@@ -163,7 +165,7 @@ class CodeWriter(
         }
     }
 
-    fun appendIf(expr: Control.If<LocalRuntimeContext>): CodeWriter {
+    fun appendIf(expr: IfNode): CodeWriter {
         append("if ")
         appendCode(expr.ifThenElse[0])
         append(':').indent().newline()
@@ -185,7 +187,7 @@ class CodeWriter(
         return this
     }
 
-    fun appendWhile(expr: Control.While<LocalRuntimeContext>): CodeWriter {
+    fun appendWhile(expr: WhileNode): CodeWriter {
         append("while ")
         appendCode(expr.condition)
         append(':').indent().newline()
@@ -194,7 +196,7 @@ class CodeWriter(
         return this
     }
 
-    fun appendBlock(block: Control.Block<LocalRuntimeContext>): CodeWriter {
+    fun appendBlock(block: BlockNode): CodeWriter {
         if (block.statements.size > 0) {
             appendCode(block.statements[0])
             for (i in 1 until block.statements.size) {

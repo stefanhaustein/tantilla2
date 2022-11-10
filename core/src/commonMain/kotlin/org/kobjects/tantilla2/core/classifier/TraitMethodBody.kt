@@ -1,11 +1,9 @@
 package org.kobjects.tantilla2.core
 
-import org.kobjects.greenspun.core.Evaluable
+import org.kobjects.tantilla2.core.node.Evaluable
 import org.kobjects.tantilla2.core.classifier.Adapter
-import org.kobjects.tantilla2.core.function.Callable
-import org.kobjects.tantilla2.core.function.FunctionType
 
-class TraitMethodBody(val index: Int):  Evaluable<LocalRuntimeContext> {
+class TraitMethodBody(val index: Int): Evaluable {
     override fun eval(context: LocalRuntimeContext): Any? {
       val self = context.variables[0] as Adapter
       val methodImpl = self.vmt[index]
@@ -19,7 +17,7 @@ class TraitMethodBody(val index: Int):  Evaluable<LocalRuntimeContext> {
       return self.vmt[index].eval(methodContext)
     }
 
-    override fun children(): List<Evaluable<LocalRuntimeContext>> = emptyList()
+    override fun children(): List<Evaluable> = emptyList()
 
-    override fun reconstruct(newChildren: List<Evaluable<LocalRuntimeContext>>) = this
+    override fun reconstruct(newChildren: List<Evaluable>) = this
 }

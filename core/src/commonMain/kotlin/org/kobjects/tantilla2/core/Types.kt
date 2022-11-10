@@ -1,10 +1,9 @@
 package org.kobjects.tantilla2.core
 
-import org.kobjects.greenspun.core.*
-import org.kobjects.tantilla2.core.node.TantillaNode
 import org.kobjects.tantilla2.core.builtin.VoidType
+import org.kobjects.tantilla2.core.node.*
 
-val Evaluable<*>.returnType: Type
+val Evaluable.returnType: Type
     get() = when(this) {
         is TantillaNode -> returnType
 

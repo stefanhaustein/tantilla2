@@ -1,11 +1,5 @@
 package org.kobjects.tantilla2.core
 
-import org.kobjects.greenspun.core.Bool
-import org.kobjects.greenspun.core.Evaluable
-import org.kobjects.tantilla2.core.*
-import org.kobjects.tantilla2.core.parser.TantillaTokenizer
-import org.kobjects.tantilla2.core.parser.TokenType
-
 class Unparseable(
     override val parentScope: Scope?,
     override val name: String = "<Unparseable ${parentScope?.count() ?: 1}>",

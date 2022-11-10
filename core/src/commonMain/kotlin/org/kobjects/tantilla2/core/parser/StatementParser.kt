@@ -1,7 +1,6 @@
 package org.kobjects.tantilla2.core.parser
 
-import org.kobjects.greenspun.core.Control
-import org.kobjects.greenspun.core.Evaluable
+import org.kobjects.tantilla2.core.node.Evaluable
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.function.FunctionDefinition
 import org.kobjects.tantilla2.core.function.LocalVariableDefinition
@@ -9,13 +8,14 @@ import org.kobjects.tantilla2.core.node.*
 import org.kobjects.tantilla2.core.builtin.ListType
 import org.kobjects.tantilla2.core.builtin.RangeType
 import org.kobjects.tantilla2.core.builtin.VoidType
+import org.kobjects.tantilla2.core.node.control.*
 
 object StatementParser {
 
     fun parseStatement(
         tokenizer: TantillaTokenizer,
         context: ParsingContext,
-    ) : Evaluable<LocalRuntimeContext> =
+    ) : Evaluable =
         when (tokenizer.current.text) {
             "for" -> parseFor(tokenizer, context)
             "if" -> parseIf(tokenizer, context)
@@ -47,7 +47,7 @@ object StatementParser {
             }
         }
 
-    fun parseLet(tokenizer: TantillaTokenizer, context: ParsingContext): Evaluable<LocalRuntimeContext> {
+    fun parseLet(tokenizer: TantillaTokenizer, context: ParsingContext): Evaluable {
         tokenizer.consume("let")
 
         val mutable = tokenizer.tryConsume("mut")
@@ -68,26 +68,26 @@ object StatementParser {
 
 
 
-    fun parseReturn(tokenizer: TantillaTokenizer, context: ParsingContext): Evaluable<LocalRuntimeContext> {
+    fun parseReturn(tokenizer: TantillaTokenizer, context: ParsingContext): Evaluable {
         tokenizer.consume("return")
         if (context.scope !is FunctionDefinition) {
             throw tokenizer.exception("Function scope expected for 'return'")
         }
         if (context.scope.type.returnType == VoidType) {
-            return FlowControl(Control.FlowSignal.Kind.RETURN)
+            return FlowControlNode(FlowSignal.Kind.RETURN)
         }
         val expression = ExpressionParser.parseExpression(tokenizer, context)
-        return FlowControl(Control.FlowSignal.Kind.RETURN, expression)
+        return FlowControlNode(FlowSignal.Kind.RETURN, expression)
     }
 
-    fun parseWhile(tokenizer: TantillaTokenizer, context: ParsingContext): Control.While<LocalRuntimeContext> {
+    fun parseWhile(tokenizer: TantillaTokenizer, context: ParsingContext): WhileNode {
         tokenizer.consume("while")
         val condition = ExpressionParser.parseExpression(tokenizer, context)
         tokenizer.consume(":")
-        return Control.While(condition, Parser.parseDefinitionsAndStatements(tokenizer, context.indent()))
+        return WhileNode(condition, Parser.parseDefinitionsAndStatements(tokenizer, context.indent()))
     }
 
-    fun parseFor(tokenizer: TantillaTokenizer, context: ParsingContext): For {
+    fun parseFor(tokenizer: TantillaTokenizer, context: ParsingContext): ForNode {
         tokenizer.consume("for")
         val iteratorName = tokenizer.consume(TokenType.IDENTIFIER, "Loop variable name expected.")
         tokenizer.consume("in")
@@ -103,12 +103,12 @@ object StatementParser {
         val iteratorIndex = context.scope.declareLocalVariable(
             iteratorName, iteratorType, false)
         val body = Parser.parseStatements(tokenizer, context.indent())
-        return For(iteratorName, iteratorIndex, iterableExpression, body)
+        return ForNode(iteratorName, iteratorIndex, iterableExpression, body)
     }
 
-    fun parseIf(tokenizer: TantillaTokenizer, context: ParsingContext): Control.If<LocalRuntimeContext> {
+    fun parseIf(tokenizer: TantillaTokenizer, context: ParsingContext): IfNode {
         tokenizer.consume("if")
-        val expressions = mutableListOf<Evaluable<LocalRuntimeContext>>()
+        val expressions = mutableListOf<Evaluable>()
         do {
             val condition = ExpressionParser.parseExpression(tokenizer, context)
             expressions.add(condition)
@@ -124,7 +124,7 @@ object StatementParser {
             expressions.add(otherwise)
         }
 
-        return Control.If(*expressions.toTypedArray())
+        return IfNode(*expressions.toTypedArray())
     }
 
 }

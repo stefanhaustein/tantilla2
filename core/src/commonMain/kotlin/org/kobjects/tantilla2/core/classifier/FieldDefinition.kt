@@ -1,6 +1,6 @@
 package org.kobjects.tantilla2.core.classifier
 
-import org.kobjects.greenspun.core.Evaluable
+import org.kobjects.tantilla2.core.node.Evaluable
 import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.node.containsNode
@@ -28,7 +28,7 @@ class FieldDefinition(
             _definitionText = value
         }
 
-    private var resolvedInitializer: Evaluable<LocalRuntimeContext>? = null
+    private var resolvedInitializer: Evaluable? = null
 
     init {
         when (kind) {
@@ -77,7 +77,7 @@ class FieldDefinition(
         (self as LocalRuntimeContext).variables[index] = newValue
     }
 
-    fun initializer(): Evaluable<LocalRuntimeContext>? {
+    fun initializer(): Evaluable? {
         resolve()
         return resolvedInitializer
     }
@@ -172,7 +172,7 @@ class FieldDefinition(
 
     override fun isScope() = false
 
-    override fun findNode(node: Evaluable<LocalRuntimeContext>): Definition? {
+    override fun findNode(node: Evaluable): Definition? {
         val rid = resolvedInitializer
         if (rid != null && rid.containsNode(node)) {
             return this

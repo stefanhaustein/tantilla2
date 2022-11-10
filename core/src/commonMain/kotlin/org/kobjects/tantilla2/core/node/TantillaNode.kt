@@ -1,11 +1,10 @@
 package org.kobjects.tantilla2.core.node
 
-import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.SerializableCode
 import org.kobjects.tantilla2.core.Type
 
-fun Evaluable<LocalRuntimeContext>.containsNode(node: Evaluable<LocalRuntimeContext>): Boolean {
+fun Evaluable.containsNode(node: Evaluable): Boolean {
     if (this == node) {
         return true
     }
@@ -18,7 +17,7 @@ fun Evaluable<LocalRuntimeContext>.containsNode(node: Evaluable<LocalRuntimeCont
 }
 
 
-interface TantillaNode : Evaluable<LocalRuntimeContext>, SerializableCode {
+interface TantillaNode : Evaluable, SerializableCode {
 
     val returnType: Type
 

@@ -1,11 +1,11 @@
 package org.kobjects.tantilla2.core.function
 
-import org.kobjects.greenspun.core.Control
-import org.kobjects.greenspun.core.Evaluable
+import org.kobjects.tantilla2.core.node.Evaluable
 import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.classifier.Updatable
+import org.kobjects.tantilla2.core.node.control.FlowSignal
 import org.kobjects.tantilla2.core.node.containsNode
 import org.kobjects.tantilla2.core.parser.*
 
@@ -19,7 +19,7 @@ class FunctionDefinition (
 
     private var resolutionState: ResolutionState = ResolutionState.UNRESOLVED
     private var resolvedType: FunctionType? = null
-    internal var resolvedBody: Evaluable<LocalRuntimeContext>? = null
+    internal var resolvedBody: Evaluable? = null
 
     var _definitionText = definitionText
     override var definitionText: String
@@ -124,8 +124,8 @@ class FunctionDefinition (
     override fun eval(context: LocalRuntimeContext): Any? {
         resolve()
         val result = resolvedBody!!.eval(context)
-        if (result is Control.FlowSignal) {
-            if (result.kind == Control.FlowSignal.Kind.RETURN) {
+        if (result is FlowSignal) {
+            if (result.kind == FlowSignal.Kind.RETURN) {
                 return result.value
             }
             throw IllegalStateException("Unexpected signal: $result")
@@ -176,7 +176,7 @@ class FunctionDefinition (
 
     override fun isScope() = false
 
-    override fun findNode(node: Evaluable<LocalRuntimeContext>): Definition? =
+    override fun findNode(node: Evaluable): Definition? =
         if (resolvedBody?.containsNode(node) ?: false) this else null
 
     override fun reset() {

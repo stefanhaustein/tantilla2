@@ -1,6 +1,6 @@
 package org.kobjects.tantilla2.core
 
-import org.kobjects.greenspun.core.Evaluable
+import org.kobjects.tantilla2.core.node.Evaluable
 import org.kobjects.tantilla2.core.builtin.RootScope
 import org.kobjects.tantilla2.core.classifier.FieldDefinition
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
@@ -245,7 +245,7 @@ abstract class Scope(
 
     override fun isScope() = errors.isEmpty()
 
-    override fun findNode(node: Evaluable<LocalRuntimeContext>): Definition? {
+    override fun findNode(node: Evaluable): Definition? {
         for (definition in this) {
             val result = definition.findNode(node)
             if (result != null) {

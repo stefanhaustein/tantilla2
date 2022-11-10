@@ -1,6 +1,5 @@
 package org.kobjects.tantilla2.core.node
 
-import org.kobjects.greenspun.core.Evaluable
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.SerializableCode
@@ -13,7 +12,7 @@ class LocalVariableReference(
     val index: Int,
     val mutable: Boolean,
 ) : Assignable, SerializableCode {
-    override fun children(): List<Evaluable<LocalRuntimeContext>> = emptyList()
+    override fun children(): List<Evaluable> = emptyList()
 
     override fun eval(ctx: LocalRuntimeContext): Any? {
         //        println("Evaluating $name")
@@ -28,7 +27,7 @@ class LocalVariableReference(
         return result
     }
 
-    override fun reconstruct(newChildren: List<Evaluable<LocalRuntimeContext>>): Evaluable<LocalRuntimeContext> =
+    override fun reconstruct(newChildren: List<Evaluable>): Evaluable =
         this
 
     override fun assign(context: LocalRuntimeContext, value: Any?) {
