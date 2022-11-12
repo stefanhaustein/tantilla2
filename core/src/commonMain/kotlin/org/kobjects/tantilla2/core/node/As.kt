@@ -10,7 +10,7 @@ class As(
     val base: Evaluable,
     val impl: ImplDefinition,
     val implicit: Boolean,
-) : TantillaNode {
+) : Node() {
     override val returnType: Type
         get() = impl.trait
 
@@ -22,7 +22,7 @@ class As(
     override fun reconstruct(newChildren: List<Evaluable>) =
         As(newChildren[0], impl, implicit)
 
-    override fun serializeCode(sb: CodeWriter, precedence: Int) {
+    override fun serializeCode(sb: CodeWriter, parentPrecedence: Int) {
         sb.appendCode(base)
         if (!implicit) {
             sb.append(" as ")

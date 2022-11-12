@@ -5,7 +5,7 @@ import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.Type
 import org.kobjects.tantilla2.core.builtin.VoidType
 
-class Comment(val text: String) : TantillaNode {
+class Comment(val text: String) : Node() {
     override val returnType: Type
         get() = VoidType
 
@@ -15,7 +15,7 @@ class Comment(val text: String) : TantillaNode {
 
     override fun reconstruct(newChildren: List<Evaluable>): Evaluable = this
 
-    override fun serializeCode(writer: CodeWriter, precedence: Int) {
+    override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
         writer.appendComment(text)
     }
 }

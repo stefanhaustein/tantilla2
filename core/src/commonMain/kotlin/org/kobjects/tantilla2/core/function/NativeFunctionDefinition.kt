@@ -38,7 +38,7 @@ class NativeFunctionDefinition(
         type.serializeType(writer, if (abbreviated) null else parentScope)
     }
 
-    override fun serializeCode(writer: CodeWriter, precedence: Int) = throw UnsupportedOperationException()
+    override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) = throw UnsupportedOperationException()
 
     override fun toString() = "def $name$type"
 }

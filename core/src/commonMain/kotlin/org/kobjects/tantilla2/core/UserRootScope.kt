@@ -21,7 +21,7 @@ class UserRootScope(
     override val name: String
         get() = "<UserScope>"
 
-    override fun serializeCode(writer: CodeWriter, precedence: Int) {
+    override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
         serializeBody(writer)
     }
 

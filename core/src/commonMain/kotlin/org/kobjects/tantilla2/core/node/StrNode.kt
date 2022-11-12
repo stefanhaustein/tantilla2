@@ -1,32 +1,31 @@
 package org.kobjects.tantilla2.core.node
 
+import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.LocalRuntimeContext
+import org.kobjects.tantilla2.core.Precedence
 import org.kobjects.tantilla2.core.Type
-import org.kobjects.tantilla2.core.builtin.BoolType
 import org.kobjects.tantilla2.core.builtin.StrType
 
 
-object Str {
+object StrNode {
 
     class Const(
         val value: String
-    ): Evaluable {
+    ): Node() {
         override val returnType: Type
             get() = StrType
 
         override fun eval(ctx: LocalRuntimeContext) = value
 
-        override fun children() = listOf<Evaluable>()
-
-        override fun reconstruct(newChildren: List<Evaluable>) = this
-
-        override fun toString() = "\"$value\""
+        override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
+            writer.appendTripleQuoted(value)
+        }
     }
 
     class Add(
         private val left: Evaluable,
         private val right: Evaluable,
-    ) : Evaluable {
+    ) : Node() {
         override val returnType: Type
             get() = StrType
 
@@ -37,7 +36,9 @@ object Str {
         override fun reconstruct(newChildren: List<Evaluable>) =
             Add(newChildren[0], newChildren[1])
 
-        override fun toString() = "(+ $left $right)"
+        override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
+            writer.appendInfix(this, parentPrecedence, "+", Precedence.PLUSMINUS)
+        }
     }
 
     override fun toString() = "Str"

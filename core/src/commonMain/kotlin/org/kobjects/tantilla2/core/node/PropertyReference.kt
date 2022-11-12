@@ -8,7 +8,7 @@ import org.kobjects.tantilla2.core.Type
 class PropertyReference(
     val base: Evaluable,
     val definition: Definition
-) : Assignable {
+) : Assignable() {
     override val returnType: Type
         get() = definition.type
 
@@ -27,11 +27,10 @@ class PropertyReference(
         definition.setValue(self, value)
     }
 
-    override fun serializeCode(writer: CodeWriter, precedence: Int) {
+    override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
         writer.appendCode(base)
         writer.append('.').append(definition.name)
     }
 
-    override fun toString() = CodeWriter().appendCode(this).toString()
 
 }

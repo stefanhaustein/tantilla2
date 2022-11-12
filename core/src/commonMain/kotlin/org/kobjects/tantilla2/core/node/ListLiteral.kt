@@ -6,7 +6,7 @@ import org.kobjects.tantilla2.core.builtin.TypedList
 
 class ListLiteral(
     val elements: List<Evaluable>,
-) : TantillaNode {
+) : Node() {
 
     override fun eval(context: LocalRuntimeContext): TypedList {
         return returnType.create(elements.size) { elements[it].eval(context) }
@@ -18,7 +18,7 @@ class ListLiteral(
 
     override fun reconstruct(newChildren: List<Evaluable>) = ListLiteral(newChildren)
 
-    override fun serializeCode(writer: CodeWriter, precedence: Int) {
+    override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
         writer.append('[')
         if (elements.isNotEmpty()) {
             writer.appendCode(elements[0])

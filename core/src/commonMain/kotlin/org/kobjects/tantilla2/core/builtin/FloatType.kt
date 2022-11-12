@@ -4,14 +4,14 @@ import org.kobjects.tantilla2.core.AnyType
 import org.kobjects.tantilla2.core.Type
 import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
 import org.kobjects.tantilla2.core.function.Parameter
-import org.kobjects.tantilla2.core.node.F64
+import org.kobjects.tantilla2.core.node.FloatNode
 import kotlin.math.*
 
 object FloatType : NativeStructDefinition(
     null,
     "float",
     "Floating point number. The constructor is able to parse strings and to convert ints.",
-    ctorParams = listOf(Parameter("value", AnyType, defaultValueExpression = F64.Const(0.0))),
+    ctorParams = listOf(Parameter("value", AnyType, defaultValueExpression = FloatNode.Const(0.0))),
     ctor = {
         val arg = it[0]
         when (arg) {

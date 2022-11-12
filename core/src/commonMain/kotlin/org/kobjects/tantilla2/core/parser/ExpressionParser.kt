@@ -1,9 +1,9 @@
 package org.kobjects.tantilla2.core.parser
 
 import org.kobjects.tantilla2.core.node.Evaluable
-import org.kobjects.tantilla2.core.node.F64
-import org.kobjects.tantilla2.core.node.I64
-import org.kobjects.tantilla2.core.node.Str
+import org.kobjects.tantilla2.core.node.FloatNode
+import org.kobjects.tantilla2.core.node.IntNode
+import org.kobjects.tantilla2.core.node.StrNode
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.builtin.StrType
 import org.kobjects.parserlib.expressionparser.ExpressionParser as GreenspunExpressionParser
@@ -171,12 +171,12 @@ object ExpressionParser {
 
     fun createNumberLiteral(s: String): Evaluable =
         if (s.contains('.') || s.contains('e') || s.contains('E'))
-            F64.Const(s.toDouble()) else I64.Const(s.toLong())
+            FloatNode.Const(s.toDouble()) else IntNode.Const(s.toLong())
 
     fun parsePrimary(tokenizer: TantillaTokenizer, context: ParsingContext): Evaluable =
         when (tokenizer.current.type) {
             TokenType.NUMBER -> createNumberLiteral(tokenizer.next().text);
-            TokenType.STRING -> Str.Const(tokenizer.next().text.unquote())
+            TokenType.STRING -> StrNode.Const(tokenizer.next().text.unquote())
             TokenType.IDENTIFIER ->  if (tokenizer.current.text == "lambda")
                 parseLambda(tokenizer, context) else parseFreeIdentifier(tokenizer, context)
             else -> {
@@ -355,30 +355,30 @@ object ExpressionParser {
 
     val expressionParser =
         GreenspunExpressionParser<TantillaTokenizer, ParsingContext, Evaluable>(
-            GreenspunExpressionParser.suffix(9, ".") {
+            GreenspunExpressionParser.suffix(Precedence.DOT, ".") {
                 tokenizer, context, _, base -> parseProperty(tokenizer, context, base) },
-            GreenspunExpressionParser.suffix(8, "[") {
+            GreenspunExpressionParser.suffix(Precedence.BRACKET, "[") {
                 tokenizer, context, _, base -> parseElementAt(tokenizer, context, base)
             },
-            GreenspunExpressionParser.suffix(8, "(") {
+            GreenspunExpressionParser.suffix(Precedence.BRACKET, "(") {
                 tokenizer, context, _, base -> parseMaybeApply(
                 tokenizer, context, base, self =null, openingParenConsumed = true, asMethod = false) },
-            GreenspunExpressionParser.suffix(7, "as") {
+            GreenspunExpressionParser.suffix(Precedence.AS, "as") {
                 tokenizer, context, _, base -> parseAs(tokenizer, context, base) },
-            GreenspunExpressionParser.infix(6, "**") { _, _, _, l, r -> F64.Pow(l, r)},
-            GreenspunExpressionParser.infix(5, "*") { _, _, _, l, r -> if (bothInt(l, r)) I64.Mul(l, r) else F64.Mul(l, r)},
-            GreenspunExpressionParser.infix(5, "//") { _, _, _, l, r -> I64.Div(l, r)},
-            GreenspunExpressionParser.infix(5, "/") { _, _, _, l, r -> F64.Div(l, r)},
-            GreenspunExpressionParser.infix(5, "%") { _, _, _, l, r -> if (bothInt(l, r)) I64.Mod(l, r) else F64.Mod(l, r)},
-            GreenspunExpressionParser.prefix(4, "-") { _, _, _, expr -> if (expr.returnType == org.kobjects.tantilla2.core.builtin.IntType) I64.Neg(expr) else F64.Neg(expr)},
-            GreenspunExpressionParser.infix(3, "+") { _, _, _, l, r -> if (l.returnType == StrType) Str.Add(l, r) else if (bothInt(l, r)) I64.Add(l, r) else F64.Add(l, r)},
-            GreenspunExpressionParser.infix(3, "-") { _, _, _, l, r ->  if (bothInt(l, r)) I64.Sub(l, r) else F64.Sub(l, r)},
-            GreenspunExpressionParser.infix(2, "==") { _, _, _, l, r ->  if (bothInt(l, r)) I64.Eq(l, r) else F64.Eq(l, r)},
-            GreenspunExpressionParser.infix(2, "!=") { _, _, _, l, r ->  if (bothInt(l, r)) I64.Ne(l, r) else F64.Ne(l, r)},
-            GreenspunExpressionParser.infix(1, "<") { _, _, _, l, r ->  if (bothInt(l, r)) I64.Lt(l, r) else F64.Lt(l, r)},
-            GreenspunExpressionParser.infix(1, ">") { _, _, _, l, r ->  if (bothInt(l, r)) I64.Gt(l, r) else F64.Gt(l, r)},
-            GreenspunExpressionParser.infix(1, "<=") { _, _, _, l, r ->  if (bothInt(l, r)) I64.Le(l, r) else F64.Le(l, r)},
-            GreenspunExpressionParser.infix(1, ">=") { _, _, _, l, r ->  if (bothInt(l, r)) I64.Ge(l, r) else F64.Ge(l, r)},
+            GreenspunExpressionParser.infix(Precedence.POW, "**") { _, _, _, l, r -> FloatNode.Pow(l, r)},
+            GreenspunExpressionParser.infix(Precedence.MULDIV, "*") { _, _, _, l, r -> if (bothInt(l, r)) IntNode.Mul(l, r) else FloatNode.Mul(l, r)},
+            GreenspunExpressionParser.infix(Precedence.MULDIV, "//") { _, _, _, l, r -> IntNode.Div(l, r)},
+            GreenspunExpressionParser.infix(Precedence.MULDIV, "/") { _, _, _, l, r -> FloatNode.Div(l, r)},
+            GreenspunExpressionParser.infix(Precedence.MULDIV, "%") { _, _, _, l, r -> if (bothInt(l, r)) IntNode.Mod(l, r) else FloatNode.Mod(l, r)},
+            GreenspunExpressionParser.prefix(Precedence.NEG, "-") { _, _, _, expr -> if (expr.returnType == org.kobjects.tantilla2.core.builtin.IntType) IntNode.Neg(expr) else FloatNode.Neg(expr)},
+            GreenspunExpressionParser.infix(Precedence.PLUSMINUS, "+") { _, _, _, l, r -> if (l.returnType == StrType) StrNode.Add(l, r) else if (bothInt(l, r)) IntNode.Add(l, r) else FloatNode.Add(l, r)},
+            GreenspunExpressionParser.infix(Precedence.PLUSMINUS, "-") { _, _, _, l, r ->  if (bothInt(l, r)) IntNode.Sub(l, r) else FloatNode.Sub(l, r)},
+            GreenspunExpressionParser.infix(Precedence.EQUALITY, "==") { _, _, _, l, r ->  if (bothInt(l, r)) IntNode.Eq(l, r) else FloatNode.Eq(l, r)},
+            GreenspunExpressionParser.infix(Precedence.EQUALITY, "!=") { _, _, _, l, r ->  if (bothInt(l, r)) IntNode.Ne(l, r) else FloatNode.Ne(l, r)},
+            GreenspunExpressionParser.infix(Precedence.RELATIONAL, "<") { _, _, _, l, r ->  if (bothInt(l, r)) IntNode.Lt(l, r) else FloatNode.Lt(l, r)},
+            GreenspunExpressionParser.infix(Precedence.RELATIONAL, ">") { _, _, _, l, r ->  if (bothInt(l, r)) IntNode.Gt(l, r) else FloatNode.Gt(l, r)},
+            GreenspunExpressionParser.infix(Precedence.RELATIONAL, "<=") { _, _, _, l, r ->  if (bothInt(l, r)) IntNode.Le(l, r) else FloatNode.Le(l, r)},
+            GreenspunExpressionParser.infix(Precedence.RELATIONAL, ">=") { _, _, _, l, r ->  if (bothInt(l, r)) IntNode.Ge(l, r) else FloatNode.Ge(l, r)},
         ) {
                 t, c -> parsePrimary(t, c)
         }

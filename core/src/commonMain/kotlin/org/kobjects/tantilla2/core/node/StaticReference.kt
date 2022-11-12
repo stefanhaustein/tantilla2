@@ -3,14 +3,14 @@ package org.kobjects.tantilla2.core.node
 import org.kobjects.tantilla2.core.*
 
 
-data class StaticReference(val definition: Definition, val qualified: Boolean) : TantillaNode, Assignable {
+data class StaticReference(val definition: Definition, val qualified: Boolean) : Assignable() {
     override fun children() = emptyList<Evaluable>()
 
     override fun eval(ctx: LocalRuntimeContext): Any? = definition.getValue(ctx.globalRuntimeContext.staticVariableValues)
 
     override fun reconstruct(newChildren: List<Evaluable>) = this
 
-    override fun serializeCode(writer: CodeWriter, precedence: Int) {
+    override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
         val parent = definition.parentScope
         if (qualified) {
             writer.append(parent!!.name)
@@ -24,5 +24,4 @@ data class StaticReference(val definition: Definition, val qualified: Boolean) :
     override val returnType: Type
         get() = definition.type
 
-    override fun toString(): String = definition.name
 }

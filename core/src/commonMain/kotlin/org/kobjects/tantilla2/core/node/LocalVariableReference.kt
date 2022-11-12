@@ -11,7 +11,7 @@ class LocalVariableReference(
     val depth: Int,
     val index: Int,
     val mutable: Boolean,
-) : Assignable, SerializableCode {
+) : Assignable() {
     override fun children(): List<Evaluable> = emptyList()
 
     override fun eval(ctx: LocalRuntimeContext): Any? {
@@ -37,9 +37,8 @@ class LocalVariableReference(
         context.variables[index] = value
     }
 
-    override fun serializeCode(writer: CodeWriter, precedence: Int) {
+    override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
         writer.append(name)
     }
 
-    override fun toString() = name
 }

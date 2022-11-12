@@ -3,7 +3,7 @@ package org.kobjects.tantilla2.core.builtin
 import org.kobjects.tantilla2.core.AnyType
 import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
 import org.kobjects.tantilla2.core.function.Parameter
-import org.kobjects.tantilla2.core.node.I64
+import org.kobjects.tantilla2.core.node.IntNode
 import kotlin.math.max
 import kotlin.math.min
 
@@ -11,7 +11,7 @@ object IntType : NativeStructDefinition(
     null,
     "int",
     "64 bit signed integer.",
-    ctorParams = listOf(Parameter("value", AnyType, defaultValueExpression = I64.Const(0))),
+    ctorParams = listOf(Parameter("value", AnyType, defaultValueExpression = IntNode.Const(0))),
     ctor = {
         val arg = it[0]
         when (arg) {

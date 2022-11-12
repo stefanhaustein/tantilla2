@@ -216,7 +216,7 @@ abstract class Scope(
         }
     }
 
-    override fun serializeCode(writer: CodeWriter, precedence: Int) {
+    override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
         writer.appendKeyword(kind.name.lowercase()).append(' ').appendDeclaration(name).append(":")
         writer.indent()
         writer.newline()

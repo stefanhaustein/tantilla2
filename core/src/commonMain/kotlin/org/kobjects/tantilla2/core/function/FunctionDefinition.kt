@@ -6,7 +6,6 @@ import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.classifier.Updatable
 import org.kobjects.tantilla2.core.node.control.FlowSignal
-import org.kobjects.tantilla2.core.node.containsNode
 import org.kobjects.tantilla2.core.parser.*
 
 class FunctionDefinition (
@@ -133,7 +132,9 @@ class FunctionDefinition (
         return result
     }
 
-    override fun toString() = serializeCode()
+    // Avoid calling serialization here, as this might lead to recursive crashes in error
+    // reporting.
+    override fun toString() = "def $name"
 
     override fun serializeTitle(writer: CodeWriter, abbreviated: Boolean) {
                 if (parentScope.supportsMethods && kind == Definition.Kind.FUNCTION) {
@@ -144,7 +145,7 @@ class FunctionDefinition (
     }
 
 
-    override fun serializeCode(writer: CodeWriter, precedence: Int) {
+    override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
         if (resolutionState != ResolutionState.RESOLVED) {
             writer.appendUnparsed(definitionText, errors)
         } else {

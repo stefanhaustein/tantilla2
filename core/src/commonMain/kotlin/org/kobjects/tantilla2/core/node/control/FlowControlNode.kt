@@ -4,11 +4,11 @@ import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.Type
 import org.kobjects.tantilla2.core.node.Evaluable
-import org.kobjects.tantilla2.core.node.TantillaNode
+import org.kobjects.tantilla2.core.node.Node
 
 class FlowControlNode(
     val kind: FlowSignal.Kind,
-    val expression: Evaluable? = null) : TantillaNode {
+    val expression: Evaluable? = null) : Node() {
     override val returnType: Type
         get() = TODO("Not yet implemented")
 
@@ -23,7 +23,7 @@ class FlowControlNode(
     override fun reconstruct(newChildren: List<Evaluable>) =
         if (newChildren.size == 0) FlowControlNode(kind) else FlowControlNode(kind, newChildren[0])
 
-    override fun serializeCode(writer: CodeWriter, precedence: Int) {
+    override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
         if (expression == null) {
             writer.append("return")
         } else {

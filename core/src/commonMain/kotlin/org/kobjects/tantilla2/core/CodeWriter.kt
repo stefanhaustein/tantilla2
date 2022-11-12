@@ -94,36 +94,10 @@ class CodeWriter(
         }
         when (code) {
             is SerializableCode -> code.serializeCode(this, parentPrecedence)
-            is I64.Neg -> appendPrefix(code, parentPrecedence, "-", 4)
-            is F64.Neg -> appendPrefix(code, parentPrecedence, "-", 4)
-            is I64.Gt -> appendInfix(code, parentPrecedence,">", 2)
-            is F64.Gt -> appendInfix(code, parentPrecedence,">", 2)
-            is I64.Ge -> appendInfix(code, parentPrecedence,">=", 2)
-            is F64.Ge -> appendInfix(code, parentPrecedence,">=", 2)
-            is I64.Lt -> appendInfix(code, parentPrecedence,"<", 2)
-            is F64.Lt -> appendInfix(code, parentPrecedence,"<", 2)
-            is I64.Le -> appendInfix(code, parentPrecedence,"<=", 2)
-            is F64.Le -> appendInfix(code, parentPrecedence,"<=", 2)
-            is F64.Eq -> appendInfix(code, parentPrecedence,"==", 2)
-            is I64.Eq -> appendInfix(code, parentPrecedence,"==", 2)
-            is F64.Ne -> appendInfix(code, parentPrecedence,"!=", 2)
-            is I64.Ne -> appendInfix(code, parentPrecedence,"!=", 2)
-            is I64.Add -> appendInfix(code, parentPrecedence,  "+", 3)
-            is F64.Add -> appendInfix(code, parentPrecedence,  "+", 3)
-            is Str.Add -> appendInfix(code, parentPrecedence,  "+", 3)
-            is I64.Sub -> appendInfix(code, parentPrecedence, "-", 3)
-            is F64.Sub -> appendInfix(code, parentPrecedence, "-", 3)
-            is I64.Mul -> appendInfix(code, parentPrecedence, "*", 5)
-            is F64.Mul -> appendInfix(code, parentPrecedence, "*", 5)
-            is I64.Div -> appendInfix(code, parentPrecedence, "//", 5)
-            is F64.Div -> appendInfix(code, parentPrecedence, "/", 5)
-            is I64.Mod -> appendInfix(code, parentPrecedence, "%", 5)
-            is F64.Mod -> appendInfix(code, parentPrecedence, "%", 5)
-            is F64.Pow -> appendInfix(code, parentPrecedence, "**", 6)
             is IfNode -> appendIf(code as IfNode)
             is BlockNode -> appendBlock(code as BlockNode)
             is WhileNode -> appendWhile(code as WhileNode)
-            is Str.Const -> appendWrapped(Kind.STRING, code.toString())
+            is StrNode.Const -> appendWrapped(Kind.STRING, code.toString())
             else -> append(code.toString())
         }
         if (error) {
@@ -133,9 +107,14 @@ class CodeWriter(
         return this
     }
 
+    fun appendQuoted(s: String) {
+        appendWrapped(Kind.STRING, quote(s))
+    }
+
     fun appendTripleQuoted(s: String) {
         appendWrapped(Kind.STRING, tripleQuote(s))
     }
+
 
     fun appendComment(s: String) {
         appendWrapped(Kind.COMMENT, s)
@@ -226,6 +205,20 @@ class CodeWriter(
     companion object {
         fun tripleQuote(s: String) = "\"\"\"$s\"\"\""
 
+        fun quote(s: String): String {
+            val sb = StringBuilder()
+            sb.append('"')
+            for (c in s) {
+                when (c) {
+                    '\t' -> sb.append("\\t")
+                    '\n' -> sb.append("\\n")
+                    '"' -> sb.append("\"\"")
+                    else -> sb.append(c)
+                }
+            }
+            sb.append('"')
+            return sb.toString()
+        }
 
         val defaultHighlighting = mapOf(
             Kind.COMMENT to Pair(Ansi.rgbForeground(0x777777), Ansi.FOREGROUND_DEFAULT),

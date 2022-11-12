@@ -11,7 +11,7 @@ class LambdaReference(
     val type: FunctionType,
     val scopeSize: Int,
     val body: Evaluable
-) : TantillaNode {
+) : Node() {
     override val returnType: Type
         get() = type
 
@@ -23,7 +23,7 @@ class LambdaReference(
 
     override fun reconstruct(newChildren: List<Evaluable>) = this
 
-    override fun serializeCode(writer: CodeWriter, precedence: Int) {
+    override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
         writer.append("lambda ")
         writer.appendType(type, null)
         writer.append(":")

@@ -29,7 +29,7 @@ class ImportDefinition(
 
     override fun serializeTitle(writer: CodeWriter, abbreviated: Boolean) = serializeCode(writer)
 
-    override fun serializeCode(writer: CodeWriter, precedence: Int) {
+    override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
         writer.appendKeyword("import ").append(path.joinToString("."))
     }
 }

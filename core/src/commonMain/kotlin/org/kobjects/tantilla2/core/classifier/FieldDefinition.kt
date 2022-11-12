@@ -3,7 +3,6 @@ package org.kobjects.tantilla2.core.classifier
 import org.kobjects.tantilla2.core.node.Evaluable
 import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.core.*
-import org.kobjects.tantilla2.core.node.containsNode
 import org.kobjects.tantilla2.core.parser.*
 
 class FieldDefinition(
@@ -151,7 +150,7 @@ class FieldDefinition(
     }
 
 
-    override fun serializeCode(writer: CodeWriter, precedence: Int) {
+    override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
         if (resolutionState == ResolutionState.RESOLVED) {
             serializeTitle(writer)
             if (resolvedInitializer != null) {

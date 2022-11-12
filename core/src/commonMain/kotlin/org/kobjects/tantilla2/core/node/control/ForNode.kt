@@ -5,14 +5,14 @@ import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.Type
 import org.kobjects.tantilla2.core.builtin.VoidType
 import org.kobjects.tantilla2.core.node.Evaluable
-import org.kobjects.tantilla2.core.node.TantillaNode
+import org.kobjects.tantilla2.core.node.Node
 
 class ForNode(
     val iteratorName: String,
     val iteratorIndex: Int,
     val rangeExpression: Evaluable,
     val bodyExpression: Evaluable,
-) : TantillaNode {
+) : Node() {
     override val returnType: Type
         get() = VoidType
 
@@ -38,7 +38,7 @@ class ForNode(
     override fun reconstruct(newChildren: List<Evaluable>) =
         ForNode(iteratorName, iteratorIndex, newChildren[0], newChildren[1])
 
-    override fun serializeCode(writer: CodeWriter, precedence: Int) {
+    override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
         writer.append("for ").append(iteratorName).append(" in ")
         writer.appendCode(rangeExpression)
         writer.append(':').indent().newline()

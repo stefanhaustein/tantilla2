@@ -4,7 +4,7 @@ import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.function.LocalVariableDefinition
 import org.kobjects.tantilla2.core.builtin.VoidType
 
-class Let(val definition: LocalVariableDefinition, val type: Type, val typeIsExplicit: Boolean, val initializer: Evaluable?) : TantillaNode {
+class Let(val definition: LocalVariableDefinition, val type: Type, val typeIsExplicit: Boolean, val initializer: Evaluable?) : Node() {
     override val returnType: Type
         get() = VoidType
 
@@ -21,7 +21,7 @@ class Let(val definition: LocalVariableDefinition, val type: Type, val typeIsExp
         Let(definition, type, typeIsExplicit, if (newChildren.isEmpty()) null else newChildren[0])
 
 
-    override fun serializeCode(writer: CodeWriter, precedence: Int) {
+    override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
         writer.appendKeyword("let ")
         writer.appendDeclaration(definition.name)
         if (typeIsExplicit) {

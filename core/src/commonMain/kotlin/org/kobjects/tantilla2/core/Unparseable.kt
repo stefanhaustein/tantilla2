@@ -25,7 +25,7 @@ class Unparseable(
         writer.appendUnparsed(if (!abbreviated || cut == -1) definitionText else definitionText.substring(0, cut))
     }
 
-    override fun serializeCode(writer: CodeWriter, precedence: Int) {
+    override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
         writer.appendUnparsed(definitionText)
     }
 

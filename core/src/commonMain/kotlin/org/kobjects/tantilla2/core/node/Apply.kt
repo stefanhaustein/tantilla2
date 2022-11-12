@@ -5,7 +5,6 @@ import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.Parameter
-import org.kobjects.tantilla2.core.returnType
 
 
 class Apply(
@@ -14,7 +13,7 @@ class Apply(
     val parameters: List<Evaluable>,
     val implicit: Boolean,
     val asMethod: Boolean,
-) : TantillaNode {
+) : Node() {
     override fun eval(context: LocalRuntimeContext): Any? {
         context.checkState(this)
         val shouldBeLambda = callable.eval(context)
@@ -78,5 +77,4 @@ class Apply(
         }
     }
 
-    override fun toString(): String = CodeWriter().appendCode(this).toString()
 }

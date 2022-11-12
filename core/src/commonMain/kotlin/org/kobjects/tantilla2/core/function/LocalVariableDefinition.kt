@@ -49,7 +49,7 @@ class LocalVariableDefinition (
     }
 
 
-    override fun serializeCode(writer: CodeWriter, precedence: Int) {
+    override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
 
 
                    serializeTitle(writer)

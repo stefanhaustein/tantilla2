@@ -2,7 +2,7 @@ package org.kobjects.tantilla2.core.node
 
 import org.kobjects.tantilla2.core.LocalRuntimeContext
 
-interface Assignable : TantillaNode {
+abstract class Assignable : Node() {
 
-    fun assign(context: LocalRuntimeContext, value: Any?)
+    abstract fun assign(context: LocalRuntimeContext, value: Any?)
 }

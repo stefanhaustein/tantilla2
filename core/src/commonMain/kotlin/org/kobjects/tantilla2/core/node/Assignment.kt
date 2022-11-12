@@ -8,7 +8,7 @@ import org.kobjects.tantilla2.core.builtin.VoidType
 class Assignment(
     val target: Assignable,
     val source: Evaluable
-) : TantillaNode {
+) : Node() {
 
     override val returnType: Type
         get() = VoidType
@@ -20,7 +20,7 @@ class Assignment(
     override fun reconstruct(newChildren: List<Evaluable>) =
         Assignment(newChildren[0] as Assignable, newChildren[1])
 
-    override fun serializeCode(sb: CodeWriter, precedence: Int) {
+    override fun serializeCode(sb: CodeWriter, parentPrecedence: Int) {
         sb.appendCode(target)
         sb.append(" = ")
         sb.appendCode(source)

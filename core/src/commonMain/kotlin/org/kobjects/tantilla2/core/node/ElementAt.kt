@@ -8,7 +8,7 @@ import org.kobjects.tantilla2.core.builtin.TypedList
 class ElementAt(
     val baseExpr: Evaluable,
     val indexExpr: Evaluable
-) : Assignable {
+) : Assignable() {
 
     init {
         if (baseExpr.returnType !is ListType) {
@@ -43,7 +43,7 @@ class ElementAt(
     override fun reconstruct(newChildren: List<Evaluable>): Evaluable =
         ElementAt(newChildren[0], newChildren[1])
 
-    override fun serializeCode(writer: CodeWriter, precedence: Int) {
+    override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
         writer.appendCode(baseExpr)
         writer.append("[")
         writer.appendCode(indexExpr)

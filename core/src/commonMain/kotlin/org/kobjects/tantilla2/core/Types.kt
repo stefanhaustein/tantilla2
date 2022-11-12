@@ -3,27 +3,6 @@ package org.kobjects.tantilla2.core
 import org.kobjects.tantilla2.core.builtin.VoidType
 import org.kobjects.tantilla2.core.node.*
 
-val Evaluable.returnType: Type
-    get() = when(this) {
-        is TantillaNode -> returnType
-
-        is F64.Cmp -> org.kobjects.tantilla2.core.builtin.BoolType
-        is F64.Binary -> org.kobjects.tantilla2.core.builtin.FloatType
-        is F64.Const -> org.kobjects.tantilla2.core.builtin.FloatType
-        is F64.Unary -> org.kobjects.tantilla2.core.builtin.FloatType
-
-        is I64.Cmp -> org.kobjects.tantilla2.core.builtin.BoolType
-        is I64.Binary -> org.kobjects.tantilla2.core.builtin.IntType
-        is I64.Unary -> org.kobjects.tantilla2.core.builtin.IntType
-        is I64.Const -> org.kobjects.tantilla2.core.builtin.IntType
-
-        is Str.Const -> org.kobjects.tantilla2.core.builtin.StrType
-        is Str.Add -> org.kobjects.tantilla2.core.builtin.StrType
-
-        else -> throw IllegalArgumentException("Can't determine return type for unrecognized greenspun expression: $this")
-    }
-
-
 fun Type.commonType(other: Type): Type =
    if (other.isAssignableFrom(this)) {
        other
@@ -34,7 +13,7 @@ fun Type.commonType(other: Type): Type =
    }
 
 fun commonType(types: List<Type>): Type {
-    if (types.size == 0) {
+    if (types.isEmpty()) {
         return VoidType
     }
     var result = types[0]
