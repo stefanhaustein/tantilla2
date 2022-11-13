@@ -1,12 +1,12 @@
 package org.kobjects.tantilla2
 
 import org.kobjects.tantilla2.core.*
+import org.kobjects.tantilla2.core.definition.UserRootScope
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.parser.Parser
-import org.kobjects.tantilla2.core.builtin.RootScope
-import org.kobjects.tantilla2.core.builtin.StrType
-import org.kobjects.tantilla2.core.builtin.VoidType
+import org.kobjects.tantilla2.core.type.StrType
+import org.kobjects.tantilla2.core.type.VoidType
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull

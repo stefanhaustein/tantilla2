@@ -1,7 +1,5 @@
 package org.kobjects.tantilla2.stdlib.graphics
 
-import org.kobjects.tantilla2.core.Type
-import org.kobjects.tantilla2.core.Typed
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min

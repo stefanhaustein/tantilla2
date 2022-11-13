@@ -1,8 +1,7 @@
 package org.kobjects.tantilla2.core.function
 
-import org.kobjects.tantilla2.core.Definition
-import org.kobjects.tantilla2.core.Scope
-import org.kobjects.tantilla2.core.Type
+import org.kobjects.tantilla2.core.definition.Definition
+import org.kobjects.tantilla2.core.definition.Scope
 
 class LambdaScope(
     override val parentScope: Scope?

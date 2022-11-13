@@ -2,6 +2,8 @@ package org.kobjects.tantilla2.core.function
 
 import org.kobjects.tantilla2.core.node.Evaluable
 import org.kobjects.tantilla2.core.*
+import org.kobjects.tantilla2.core.definition.Scope
+import org.kobjects.tantilla2.core.type.Type
 
 data class Parameter(
     val name: String,

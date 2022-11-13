@@ -1,9 +1,13 @@
 package org.kobjects.tantilla2.core
 
 import org.kobjects.konsole.Ansi
+import org.kobjects.tantilla2.core.definition.Scope
 import org.kobjects.tantilla2.core.node.*
-import org.kobjects.tantilla2.core.node.control.IfNode
-import org.kobjects.tantilla2.core.node.control.WhileNode
+import org.kobjects.tantilla2.core.node.expression.StrNode
+import org.kobjects.tantilla2.core.node.statement.BlockNode
+import org.kobjects.tantilla2.core.node.statement.IfNode
+import org.kobjects.tantilla2.core.node.statement.WhileNode
+import org.kobjects.tantilla2.core.type.Type
 
 class CodeWriter(
     indent: String = "",

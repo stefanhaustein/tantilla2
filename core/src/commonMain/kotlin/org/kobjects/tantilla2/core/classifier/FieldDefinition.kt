@@ -3,7 +3,10 @@ package org.kobjects.tantilla2.core.classifier
 import org.kobjects.tantilla2.core.node.Evaluable
 import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.core.*
+import org.kobjects.tantilla2.core.definition.Definition
+import org.kobjects.tantilla2.core.definition.Scope
 import org.kobjects.tantilla2.core.parser.*
+import org.kobjects.tantilla2.core.type.Type
 
 class FieldDefinition(
     override val parentScope: Scope,

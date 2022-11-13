@@ -20,9 +20,9 @@ import androidx.compose.ui.unit.dp
 import org.kobjects.konsole.compose.AnsiConverter
 import org.kobjects.tantilla2.android.model.TantillaViewModel
 import org.kobjects.tantilla2.core.CodeWriter
-import org.kobjects.tantilla2.core.Definition
+import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.Palette
-import org.kobjects.tantilla2.core.Scope
+import org.kobjects.tantilla2.core.definition.Scope
 
 @Composable
 fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {

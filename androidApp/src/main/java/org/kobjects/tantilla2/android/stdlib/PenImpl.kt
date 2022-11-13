@@ -4,7 +4,6 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import androidx.compose.runtime.MutableState
-import org.kobjects.tantilla2.core.Type
 import org.kobjects.tantilla2.stdlib.graphics.Pen
 
 class PenImpl(val canvas: Canvas, val updateTrigger: MutableState<Int>):

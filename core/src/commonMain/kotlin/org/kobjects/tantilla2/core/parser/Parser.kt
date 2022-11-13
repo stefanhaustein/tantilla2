@@ -1,10 +1,11 @@
 package org.kobjects.tantilla2.core.parser
 
-import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.classifier.*
+import org.kobjects.tantilla2.core.definition.*
 import org.kobjects.tantilla2.core.function.*
-import org.kobjects.tantilla2.core.node.BlockNode
+import org.kobjects.tantilla2.core.node.statement.BlockNode
 import org.kobjects.tantilla2.core.node.Evaluable
+import org.kobjects.tantilla2.core.type.Type
 
 
 fun String.unquote() = this.substring(1, this.length - 1)
@@ -147,7 +148,7 @@ object Parser {
                 tokenizer.consume(":")
                 val docString = readDocString(tokenizer)
                 val definition = if (kind == "struct") StructDefinition(context.scope, name, docString = docString)
-                else if (kind == "unit") UnitScope(context.scope, name, docString = docString)
+                else if (kind == "unit") UnitDefinition(context.scope, name, docString = docString)
                 else TraitDefinition(context.scope, name, docString = docString)
                 parseDefinitions(tokenizer, ParsingContext(definition, context.depth + 1))
                 definition
@@ -265,12 +266,12 @@ object Parser {
             }
 
             if (tokenizer.current.type != TokenType.EOF) {
-                result = Unparseable(parentScope, result.name, code)
+                result = UnparseableDefinition(parentScope, result.name, code)
             }
         } catch (e: Exception) {
             e.printStackTrace()
             //            val name = oldDefinition?.name ?: "[error]"
-            result = Unparseable(
+            result = UnparseableDefinition(
                 parentScope,
                 definitionText = code
             )

@@ -2,9 +2,9 @@ package org.kobjects.tantilla2.stdlib.graphics
 
 import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
 import org.kobjects.tantilla2.core.function.Parameter
-import org.kobjects.tantilla2.core.builtin.FloatType
-import org.kobjects.tantilla2.core.builtin.IntType
-import org.kobjects.tantilla2.core.builtin.VoidType
+import org.kobjects.tantilla2.core.type.FloatType
+import org.kobjects.tantilla2.core.type.IntType
+import org.kobjects.tantilla2.core.type.VoidType
 
 class BitmapImageDefinition(val graphicsScope: GraphicsScope) : NativeStructDefinition(
     graphicsScope,

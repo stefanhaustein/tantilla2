@@ -1,18 +1,17 @@
 package org.kobjects.tantilla2.stdlib.graphics
 
-import org.kobjects.tantilla2.core.Definition
+import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.LocalRuntimeContext
-import org.kobjects.tantilla2.core.UnitScope
-import org.kobjects.tantilla2.core.builtin.FloatType
-import org.kobjects.tantilla2.core.builtin.IntType
-import org.kobjects.tantilla2.core.builtin.RootScope
-import org.kobjects.tantilla2.core.builtin.VoidType
+import org.kobjects.tantilla2.core.definition.UnitDefinition
+import org.kobjects.tantilla2.core.type.FloatType
+import org.kobjects.tantilla2.core.type.IntType
+import org.kobjects.tantilla2.core.type.VoidType
 import org.kobjects.tantilla2.core.classifier.NativePropertyDefinition
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Parameter
 
-class ScreenDefinition(graphicsScope: GraphicsScope) : UnitScope(null, "screen") {
+class ScreenDefinition(graphicsScope: GraphicsScope) : UnitDefinition(null, "screen") {
 
     init {
         add(

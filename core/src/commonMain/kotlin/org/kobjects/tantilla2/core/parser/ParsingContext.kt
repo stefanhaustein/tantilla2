@@ -1,6 +1,6 @@
 package org.kobjects.tantilla2.core.parser
 
-import org.kobjects.tantilla2.core.Scope
+import org.kobjects.tantilla2.core.definition.Scope
 
 data class ParsingContext(
     val scope: Scope,

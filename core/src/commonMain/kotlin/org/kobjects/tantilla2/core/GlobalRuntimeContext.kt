@@ -1,5 +1,7 @@
 package org.kobjects.tantilla2.core
 
+import org.kobjects.tantilla2.core.definition.Definition
+import org.kobjects.tantilla2.core.definition.UserRootScope
 import org.kobjects.tantilla2.core.node.Evaluable
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.FunctionType

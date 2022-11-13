@@ -1,9 +1,13 @@
 package org.kobjects.tantilla2.core.classifier
 
 import org.kobjects.tantilla2.core.*
+import org.kobjects.tantilla2.core.definition.Definition
+import org.kobjects.tantilla2.core.definition.Scope
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.Parameter
+import org.kobjects.tantilla2.core.type.Type
+import org.kobjects.tantilla2.core.type.Typed
 
 open class StructDefinition(
     override val parentScope: Scope?,

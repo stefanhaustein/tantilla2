@@ -1,16 +1,15 @@
 package org.kobjects.tantilla2.core.parser
 
 import org.kobjects.tantilla2.core.node.Evaluable
-import org.kobjects.tantilla2.core.LocalRuntimeContext
-import org.kobjects.tantilla2.core.Scope
-import org.kobjects.tantilla2.core.Type
+import org.kobjects.tantilla2.core.definition.Scope
+import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.classifier.StructDefinition
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Parameter
-import org.kobjects.tantilla2.core.builtin.ListType
-import org.kobjects.tantilla2.core.builtin.VoidType
+import org.kobjects.tantilla2.core.type.ListType
+import org.kobjects.tantilla2.core.type.VoidType
 
 object TypeParser {
 
@@ -18,10 +17,10 @@ object TypeParser {
 
     fun parseType(tokenizer: TantillaTokenizer, context: ParsingContext): Type {
         if (tokenizer.tryConsume("float")) {
-            return org.kobjects.tantilla2.core.builtin.FloatType
+            return org.kobjects.tantilla2.core.type.FloatType
         }
         if (tokenizer.tryConsume("str")) {
-            return org.kobjects.tantilla2.core.builtin.StrType
+            return org.kobjects.tantilla2.core.type.StrType
         }
         var name = tokenizer.consume(TokenType.IDENTIFIER)
         if (name.equals("List")) {

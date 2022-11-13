@@ -1,23 +1,25 @@
 package org.kobjects.tantilla2.core.parser
 
 import org.kobjects.tantilla2.core.node.Evaluable
-import org.kobjects.tantilla2.core.node.FloatNode
-import org.kobjects.tantilla2.core.node.IntNode
-import org.kobjects.tantilla2.core.node.StrNode
+import org.kobjects.tantilla2.core.node.expression.StrNode
 import org.kobjects.tantilla2.core.*
-import org.kobjects.tantilla2.core.builtin.StrType
+import org.kobjects.tantilla2.core.type.StrType
 import org.kobjects.parserlib.expressionparser.ExpressionParser as GreenspunExpressionParser
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
 import org.kobjects.tantilla2.core.classifier.StructMetaType
+import org.kobjects.tantilla2.core.definition.Definition
+import org.kobjects.tantilla2.core.definition.Scope
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.LambdaScope
-import org.kobjects.tantilla2.core.node.*
+import org.kobjects.tantilla2.core.node.expression.*
+import org.kobjects.tantilla2.core.node.statement.Apply
+import org.kobjects.tantilla2.core.type.Type
 
 object ExpressionParser {
 
     fun bothInt(l: Evaluable, r: Evaluable) =
-         l.returnType == org.kobjects.tantilla2.core.builtin.IntType
-                 && r.returnType == org.kobjects.tantilla2.core.builtin.IntType
+         l.returnType == org.kobjects.tantilla2.core.type.IntType
+                 && r.returnType == org.kobjects.tantilla2.core.type.IntType
 
     fun parseExpression(tokenizer: TantillaTokenizer, context: ParsingContext, expectedType: Type? = null): Evaluable {
         if (expectedType is FunctionType && tokenizer.current.text == "lambda") {
@@ -370,7 +372,7 @@ object ExpressionParser {
             GreenspunExpressionParser.infix(Precedence.MULDIV, "//") { _, _, _, l, r -> IntNode.Div(l, r)},
             GreenspunExpressionParser.infix(Precedence.MULDIV, "/") { _, _, _, l, r -> FloatNode.Div(l, r)},
             GreenspunExpressionParser.infix(Precedence.MULDIV, "%") { _, _, _, l, r -> if (bothInt(l, r)) IntNode.Mod(l, r) else FloatNode.Mod(l, r)},
-            GreenspunExpressionParser.prefix(Precedence.NEG, "-") { _, _, _, expr -> if (expr.returnType == org.kobjects.tantilla2.core.builtin.IntType) IntNode.Neg(expr) else FloatNode.Neg(expr)},
+            GreenspunExpressionParser.prefix(Precedence.NEG, "-") { _, _, _, expr -> if (expr.returnType == org.kobjects.tantilla2.core.type.IntType) IntNode.Neg(expr) else FloatNode.Neg(expr)},
             GreenspunExpressionParser.infix(Precedence.PLUSMINUS, "+") { _, _, _, l, r -> if (l.returnType == StrType) StrNode.Add(l, r) else if (bothInt(l, r)) IntNode.Add(l, r) else FloatNode.Add(l, r)},
             GreenspunExpressionParser.infix(Precedence.PLUSMINUS, "-") { _, _, _, l, r ->  if (bothInt(l, r)) IntNode.Sub(l, r) else FloatNode.Sub(l, r)},
             GreenspunExpressionParser.infix(Precedence.EQUALITY, "==") { _, _, _, l, r ->  if (bothInt(l, r)) IntNode.Eq(l, r) else FloatNode.Eq(l, r)},

@@ -3,8 +3,8 @@ package org.kobjects.tantilla2.stdlib.graphics
 import org.kobjects.tantilla2.core.classifier.NativePropertyDefinition
 import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
 import org.kobjects.tantilla2.core.function.Parameter
-import org.kobjects.tantilla2.core.builtin.FloatType
-import org.kobjects.tantilla2.core.node.FloatNode
+import org.kobjects.tantilla2.core.type.FloatType
+import org.kobjects.tantilla2.core.node.expression.FloatNode
 
 class ColorDefinition(graphicsScope: GraphicsScope) : NativeStructDefinition(
     graphicsScope,

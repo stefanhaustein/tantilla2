@@ -1,6 +1,10 @@
 package org.kobjects.tantilla2.core.classifier
 
 import org.kobjects.tantilla2.core.*
+import org.kobjects.tantilla2.core.definition.Definition
+import org.kobjects.tantilla2.core.definition.Scope
+import org.kobjects.tantilla2.core.type.Type
+import org.kobjects.tantilla2.core.type.dynamicType
 
 class NativePropertyDefinition(
     override val parentScope: Scope,

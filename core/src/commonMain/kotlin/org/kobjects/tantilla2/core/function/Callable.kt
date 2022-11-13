@@ -1,7 +1,7 @@
 package org.kobjects.tantilla2.core.function
 
 import org.kobjects.tantilla2.core.LocalRuntimeContext
-import org.kobjects.tantilla2.core.Typed
+import org.kobjects.tantilla2.core.type.Typed
 
 interface Callable : Typed {
     override val type: FunctionType

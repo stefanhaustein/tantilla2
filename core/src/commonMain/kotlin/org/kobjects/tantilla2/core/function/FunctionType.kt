@@ -1,12 +1,11 @@
 package org.kobjects.tantilla2.core.function
 
 import org.kobjects.tantilla2.core.CodeWriter
-import org.kobjects.tantilla2.core.Scope
-import org.kobjects.tantilla2.core.Type
-import org.kobjects.tantilla2.core.builtin.RootScope
-import org.kobjects.tantilla2.core.builtin.VoidType
+import org.kobjects.tantilla2.core.definition.Scope
+import org.kobjects.tantilla2.core.type.Type
+import org.kobjects.tantilla2.core.type.VoidType
 
-interface FunctionType :Type {
+interface FunctionType : Type {
     val returnType: Type
     val parameters: List<Parameter>
 

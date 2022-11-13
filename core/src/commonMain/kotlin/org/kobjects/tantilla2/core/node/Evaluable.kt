@@ -1,9 +1,7 @@
 package org.kobjects.tantilla2.core.node
 
-import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.LocalRuntimeContext
-import org.kobjects.tantilla2.core.SerializableCode
-import org.kobjects.tantilla2.core.Type
+import org.kobjects.tantilla2.core.type.Type
 
 
 interface Evaluable {

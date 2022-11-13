@@ -1,12 +1,9 @@
 package org.kobjects.tantilla2.core.classifier
 
 import org.kobjects.tantilla2.core.CodeWriter
-import org.kobjects.tantilla2.core.Definition
-import org.kobjects.tantilla2.core.Scope
-import org.kobjects.tantilla2.core.Type
-import org.kobjects.tantilla2.core.parser.Parser
-import org.kobjects.tantilla2.core.parser.ParsingContext
-import org.kobjects.tantilla2.core.parser.TantillaTokenizer
+import org.kobjects.tantilla2.core.definition.Definition
+import org.kobjects.tantilla2.core.definition.Scope
+import org.kobjects.tantilla2.core.type.Type
 
 class TraitDefinition(
     override val parentScope: Scope,

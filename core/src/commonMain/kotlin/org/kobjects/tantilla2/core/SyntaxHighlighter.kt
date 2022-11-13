@@ -4,9 +4,6 @@ import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.core.parser.TantillaTokenizer
 import org.kobjects.tantilla2.core.parser.TokenType
 
-
-
-
 fun highlightSyntax(
     writer: CodeWriter,
     code: String,

@@ -1,7 +1,8 @@
 package org.kobjects.tantilla2.core
 
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
-import org.kobjects.tantilla2.core.classifier.StructDefinition
+import org.kobjects.tantilla2.core.definition.Definition
+import org.kobjects.tantilla2.core.definition.Scope
 
 class CompilationResults {
     val traitToClass = mutableMapOf<TraitDefinition, MutableMap<Scope, Definition>>()

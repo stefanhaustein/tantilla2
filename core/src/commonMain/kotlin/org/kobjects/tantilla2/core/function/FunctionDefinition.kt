@@ -5,7 +5,9 @@ import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.classifier.Updatable
-import org.kobjects.tantilla2.core.node.control.FlowSignal
+import org.kobjects.tantilla2.core.definition.Definition
+import org.kobjects.tantilla2.core.definition.Scope
+import org.kobjects.tantilla2.core.node.statement.FlowSignal
 import org.kobjects.tantilla2.core.parser.*
 
 class FunctionDefinition (

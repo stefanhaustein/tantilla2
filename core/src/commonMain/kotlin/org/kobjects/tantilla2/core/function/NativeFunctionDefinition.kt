@@ -1,6 +1,8 @@
 package org.kobjects.tantilla2.core.function
 
 import org.kobjects.tantilla2.core.*
+import org.kobjects.tantilla2.core.definition.Definition
+import org.kobjects.tantilla2.core.definition.Scope
 
 class NativeFunctionDefinition(
     override val parentScope: Scope,

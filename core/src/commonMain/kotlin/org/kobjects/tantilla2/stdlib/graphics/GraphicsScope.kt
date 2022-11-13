@@ -1,9 +1,8 @@
 package org.kobjects.tantilla2.stdlib.graphics
 
-import org.kobjects.tantilla2.core.UnitScope
-import org.kobjects.tantilla2.core.builtin.RootScope
+import org.kobjects.tantilla2.core.definition.UnitDefinition
 
-class GraphicsScope(val graphicsSystem: GraphicsSystem): UnitScope(null, "graphics") {
+class GraphicsScope(val graphicsSystem: GraphicsSystem): UnitDefinition(null, "graphics") {
 
     // Doesn't depend on others
     val colorDefinition = ColorDefinition(this)

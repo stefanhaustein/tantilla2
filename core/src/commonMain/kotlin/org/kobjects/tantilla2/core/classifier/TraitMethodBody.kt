@@ -1,8 +1,8 @@
 package org.kobjects.tantilla2.core
 
-import org.kobjects.tantilla2.core.builtin.StrType
 import org.kobjects.tantilla2.core.node.Evaluable
 import org.kobjects.tantilla2.core.classifier.Adapter
+import org.kobjects.tantilla2.core.type.Type
 
 class TraitMethodBody(val index: Int): Evaluable {
     override val returnType: Type

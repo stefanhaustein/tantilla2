@@ -1,0 +1,31 @@
+package org.kobjects.tantilla2.core.node.expression
+
+import org.kobjects.tantilla2.core.*
+import org.kobjects.tantilla2.core.definition.Definition
+import org.kobjects.tantilla2.core.node.Assignable
+import org.kobjects.tantilla2.core.node.Evaluable
+import org.kobjects.tantilla2.core.type.Type
+
+
+data class StaticReference(val definition: Definition, val qualified: Boolean) : Assignable() {
+    override fun children() = emptyList<Evaluable>()
+
+    override fun eval(ctx: LocalRuntimeContext): Any? = definition.getValue(ctx.globalRuntimeContext.staticVariableValues)
+
+    override fun reconstruct(newChildren: List<Evaluable>) = this
+
+    override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
+        val parent = definition.parentScope
+        if (qualified) {
+            writer.append(parent!!.name)
+            writer.append('.')
+        }
+        writer.append(definition.name)
+    }
+
+    override fun assign(context: LocalRuntimeContext, value: Any?) = definition.setValue(context.globalRuntimeContext.staticVariableValues, value)
+
+    override val returnType: Type
+        get() = definition.type
+
+}
