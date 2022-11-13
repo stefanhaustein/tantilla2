@@ -1,16 +1,19 @@
 package org.kobjects.tantilla2.core.node.statement
 
+import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.type.VoidType
 import org.kobjects.tantilla2.core.node.Evaluable
+import org.kobjects.tantilla2.core.node.Node
 
 class BlockNode(
     vararg val statements: Evaluable
-): Evaluable {
+): Node() {
 
     override val returnType: Type
         get() = if (statements.isEmpty()) VoidType else statements.last().returnType
+
 
     override fun eval(env: LocalRuntimeContext): Any? {
         var result: Any? = null
@@ -28,6 +31,13 @@ class BlockNode(
     override fun reconstruct(newChildren: List<Evaluable>) =
         BlockNode(statements = newChildren.toTypedArray())
 
-    override fun toString() =
-        statements.joinToString(" ", prefix = "(begin ", postfix = ")")
+    override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
+        if (statements.size > 0) {
+            writer.appendCode(statements[0])
+            for (i in 1 until statements.size) {
+               writer.newline()
+                writer.appendCode(statements[i])
+            }
+        }
+    }
 }

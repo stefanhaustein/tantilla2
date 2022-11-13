@@ -1,14 +1,16 @@
 package org.kobjects.tantilla2.core.node.statement
 
+import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.type.VoidType
 import org.kobjects.tantilla2.core.node.Evaluable
+import org.kobjects.tantilla2.core.node.Node
 
 class WhileNode(
     val condition: Evaluable,
     val body: Evaluable
-): Evaluable {
+): Node() {
     override val returnType: Type
         get() = VoidType
 
@@ -31,5 +33,12 @@ class WhileNode(
     override fun reconstruct(newChildren: List<Evaluable>) =
         WhileNode(newChildren[0], newChildren[1])
 
-    override fun toString() = "(while $condition $body)"
+
+    override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
+        writer.append("while ")
+        writer.appendCode(condition)
+        writer.append(':').indent().newline()
+        writer.appendCode(body)
+        writer.outdent()
+    }
 }

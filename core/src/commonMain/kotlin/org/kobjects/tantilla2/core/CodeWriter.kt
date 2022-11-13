@@ -96,13 +96,10 @@ class CodeWriter(
             errorPosition = pos
             appendStart(Kind.ERROR)
         }
-        when (code) {
-            is SerializableCode -> code.serializeCode(this, parentPrecedence)
-            is IfNode -> appendIf(code as IfNode)
-            is BlockNode -> appendBlock(code as BlockNode)
-            is WhileNode -> appendWhile(code as WhileNode)
-            is StrNode.Const -> appendWrapped(Kind.STRING, code.toString())
-            else -> append(code.toString())
+        if (code is SerializableCode) {
+            code.serializeCode(this, parentPrecedence)
+        } else {
+            append(code.toString())
         }
         if (error) {
             errorLength = pos - errorPosition
@@ -148,47 +145,6 @@ class CodeWriter(
         }
     }
 
-    fun appendIf(expr: IfNode): CodeWriter {
-        append("if ")
-        appendCode(expr.ifThenElse[0])
-        append(':').indent().newline()
-        appendCode(expr.ifThenElse[1])
-        outdent()
-
-        for (i in 2 until expr.ifThenElse.size - 1 step 2) {
-            newline().append("elif ").indent()
-            appendCode(expr.ifThenElse[i])
-            append(':').newline()
-            appendCode(expr.ifThenElse[i + 1])
-            outdent()
-        }
-        if (expr.ifThenElse.size % 2 == 1) {
-            newline().append("else:").indent().newline()
-            appendCode(expr.ifThenElse[expr.ifThenElse.size - 1])
-            outdent()
-        }
-        return this
-    }
-
-    fun appendWhile(expr: WhileNode): CodeWriter {
-        append("while ")
-        appendCode(expr.condition)
-        append(':').indent().newline()
-        appendCode(expr.body)
-        outdent()
-        return this
-    }
-
-    fun appendBlock(block: BlockNode): CodeWriter {
-        if (block.statements.size > 0) {
-            appendCode(block.statements[0])
-            for (i in 1 until block.statements.size) {
-                newline()
-                appendCode(block.statements[i])
-            }
-        }
-        return this
-    }
 
 
     fun appendUnparsed(code: String, errors: List<Exception> = emptyList()): CodeWriter {
