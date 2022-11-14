@@ -59,7 +59,6 @@ object IntNode {
         }
     }
 
-
     class Add(left: Evaluable, right: Evaluable) :
         Binary("+", Precedence.PLUSMINUS, left, right, { l, r -> l + r })
 
@@ -70,10 +69,25 @@ object IntNode {
         Binary("*", Precedence.MULDIV, left, right, { l, r -> l * r })
 
     class Div(left: Evaluable, right: Evaluable) :
-        Binary("/", Precedence.MULDIV, left, right, { l, r -> l / r })
+        Binary("//", Precedence.MULDIV, left, right, { l, r -> l / r })
 
     class Mod(left: Evaluable, right: Evaluable) :
         Binary("%", Precedence.MULDIV, left, right, { l, r -> l % r })
+
+    class Shl(left: Evaluable, right: Evaluable) :
+        Binary("<<", Precedence.BITWISE_SHIFT, left, right, { l, r -> l shl r.toInt() })
+
+    class Shr(left: Evaluable, right: Evaluable) :
+        Binary(">>", Precedence.BITWISE_SHIFT, left, right, { l, r -> l shr r.toInt() })
+
+    class And(left: Evaluable, right: Evaluable) :
+        Binary("&", Precedence.BITWISE_AND, left, right, { l, r -> l and r })
+
+    class Or(left: Evaluable, right: Evaluable) :
+        Binary("|", Precedence.BITWISE_OR, left, right, { l, r -> l or r })
+
+    class Xor(left: Evaluable, right: Evaluable) :
+        Binary("^", Precedence.BITWISE_XOR, left, right, { l, r -> l xor r })
 
     open class Unary(
         private val name: String,
@@ -105,7 +119,8 @@ object IntNode {
             }
         }
     }
-    class Neg(arg: Evaluable) : Unary("-", Precedence.NEG, arg, { -it })
+    class Neg(arg: Evaluable) : Unary("-", Precedence.UNARY, arg, { -it })
+    class Not(arg: Evaluable) : Unary("~", Precedence.UNARY, arg, { it.inv() })
 
     class Eq(
         val left: Evaluable,
@@ -123,7 +138,7 @@ object IntNode {
             Eq(newChildren[0], newChildren[1])
 
         override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
-            writer.appendInfix(this, parentPrecedence, "==", Precedence.EQUALITY)
+            writer.appendInfix(this, parentPrecedence, "==", Precedence.RELATIONAL)
         }
     }
 
@@ -144,7 +159,7 @@ object IntNode {
             Ne(newChildren[0], newChildren[1])
 
         override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
-            writer.appendInfix(this, parentPrecedence, "!=", Precedence.EQUALITY)
+            writer.appendInfix(this, parentPrecedence, "!=", Precedence.RELATIONAL)
         }
     }
 

@@ -365,22 +365,31 @@ object ExpressionParser {
             GreenspunExpressionParser.suffix(Precedence.BRACKET, "(") {
                 tokenizer, context, _, base -> parseMaybeApply(
                 tokenizer, context, base, self =null, openingParenConsumed = true, asMethod = false) },
-            GreenspunExpressionParser.suffix(Precedence.AS, "as") {
-                tokenizer, context, _, base -> parseAs(tokenizer, context, base) },
             GreenspunExpressionParser.infix(Precedence.POW, "**") { _, _, _, l, r -> FloatNode.Pow(l, r)},
             GreenspunExpressionParser.infix(Precedence.MULDIV, "*") { _, _, _, l, r -> if (bothInt(l, r)) IntNode.Mul(l, r) else FloatNode.Mul(l, r)},
             GreenspunExpressionParser.infix(Precedence.MULDIV, "//") { _, _, _, l, r -> IntNode.Div(l, r)},
             GreenspunExpressionParser.infix(Precedence.MULDIV, "/") { _, _, _, l, r -> FloatNode.Div(l, r)},
             GreenspunExpressionParser.infix(Precedence.MULDIV, "%") { _, _, _, l, r -> if (bothInt(l, r)) IntNode.Mod(l, r) else FloatNode.Mod(l, r)},
-            GreenspunExpressionParser.prefix(Precedence.NEG, "-") { _, _, _, expr -> if (expr.returnType == org.kobjects.tantilla2.core.type.IntType) IntNode.Neg(expr) else FloatNode.Neg(expr)},
+            GreenspunExpressionParser.prefix(Precedence.UNARY, "~") { _, _, _, expr -> IntNode.Not(expr)},
+            GreenspunExpressionParser.prefix(Precedence.UNARY, "-") { _, _, _, expr -> if (expr.returnType == org.kobjects.tantilla2.core.type.IntType) IntNode.Neg(expr) else FloatNode.Neg(expr)},
             GreenspunExpressionParser.infix(Precedence.PLUSMINUS, "+") { _, _, _, l, r -> if (l.returnType == StrType) StrNode.Add(l, r) else if (bothInt(l, r)) IntNode.Add(l, r) else FloatNode.Add(l, r)},
             GreenspunExpressionParser.infix(Precedence.PLUSMINUS, "-") { _, _, _, l, r ->  if (bothInt(l, r)) IntNode.Sub(l, r) else FloatNode.Sub(l, r)},
-            GreenspunExpressionParser.infix(Precedence.EQUALITY, "==") { _, _, _, l, r ->  if (bothInt(l, r)) IntNode.Eq(l, r) else FloatNode.Eq(l, r)},
-            GreenspunExpressionParser.infix(Precedence.EQUALITY, "!=") { _, _, _, l, r ->  if (bothInt(l, r)) IntNode.Ne(l, r) else FloatNode.Ne(l, r)},
+            GreenspunExpressionParser.infix(Precedence.BITWISE_SHIFT, "<<") { _, _, _, l, r -> IntNode.Shl(l, r)},
+            GreenspunExpressionParser.infix(Precedence.BITWISE_SHIFT, ">>") { _, _, _, l, r -> IntNode.Shr(l, r)},
+            GreenspunExpressionParser.infix(Precedence.BITWISE_AND, "&") { _, _, _, l, r -> IntNode.And(l, r)},
+            GreenspunExpressionParser.infix(Precedence.BITWISE_XOR, "^") { _, _, _, l, r -> IntNode.Xor(l, r)},
+            GreenspunExpressionParser.infix(Precedence.BITWISE_OR, "|") { _, _, _, l, r -> IntNode.Or(l, r)},
+            GreenspunExpressionParser.suffix(Precedence.RELATIONAL, "as") {
+                    tokenizer, context, _, base -> parseAs(tokenizer, context, base) },
+            GreenspunExpressionParser.infix(Precedence.RELATIONAL, "==") { _, _, _, l, r ->  if (bothInt(l, r)) IntNode.Eq(l, r) else FloatNode.Eq(l, r)},
+            GreenspunExpressionParser.infix(Precedence.RELATIONAL, "!=") { _, _, _, l, r ->  if (bothInt(l, r)) IntNode.Ne(l, r) else FloatNode.Ne(l, r)},
             GreenspunExpressionParser.infix(Precedence.RELATIONAL, "<") { _, _, _, l, r ->  if (bothInt(l, r)) IntNode.Lt(l, r) else FloatNode.Lt(l, r)},
             GreenspunExpressionParser.infix(Precedence.RELATIONAL, ">") { _, _, _, l, r ->  if (bothInt(l, r)) IntNode.Gt(l, r) else FloatNode.Gt(l, r)},
             GreenspunExpressionParser.infix(Precedence.RELATIONAL, "<=") { _, _, _, l, r ->  if (bothInt(l, r)) IntNode.Le(l, r) else FloatNode.Le(l, r)},
             GreenspunExpressionParser.infix(Precedence.RELATIONAL, ">=") { _, _, _, l, r ->  if (bothInt(l, r)) IntNode.Ge(l, r) else FloatNode.Ge(l, r)},
+            GreenspunExpressionParser.prefix(Precedence.LOGICAL_NOT, "not") { _, _, _, expr -> BoolNode.Not(expr)},
+            GreenspunExpressionParser.infix(Precedence.LOGICAL_AND, "and") { _, _, _, l, r -> BoolNode.And(l, r)},
+            GreenspunExpressionParser.infix(Precedence.LOGICAL_OR, "or") { _, _, _, l, r -> BoolNode.Or(l, r)},
         ) {
                 t, c -> parsePrimary(t, c)
         }

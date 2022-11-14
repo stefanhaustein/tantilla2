@@ -114,7 +114,7 @@ object FloatNode {
 
     class Ln(arg: Evaluable) : Unary("ln", 0, arg, { ln(it) })
     class Exp(arg: Evaluable) : Unary("exp", 0, arg, { exp(it) })
-    class Neg(arg: Evaluable) : Unary("-", Precedence.NEG, arg, { -it })
+    class Neg(arg: Evaluable) : Unary("-", Precedence.UNARY, arg, { -it })
 
 
     class Eq(
@@ -134,7 +134,7 @@ object FloatNode {
             Eq(newChildren[0], newChildren[1])
 
         override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
-           writer.appendInfix(this, parentPrecedence, "==", Precedence.EQUALITY)
+           writer.appendInfix(this, parentPrecedence, "==", Precedence.RELATIONAL)
         }
     }
 
@@ -155,7 +155,7 @@ object FloatNode {
             Ne(newChildren[0], newChildren[1])
 
         override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
-            writer.appendInfix(this, parentPrecedence, "!=", Precedence.EQUALITY)
+            writer.appendInfix(this, parentPrecedence, "!=", Precedence.RELATIONAL)
         }
     }
 
