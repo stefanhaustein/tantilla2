@@ -3,12 +3,11 @@ package org.kobjects.tantilla2.core.node.expression
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.type.ListType
 import org.kobjects.tantilla2.core.type.TypedList
-import org.kobjects.tantilla2.core.node.Evaluable
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.type.commonType
 
 class ListLiteral(
-    val elements: List<Evaluable>,
+    val elements: List<Node>,
 ) : Node() {
 
     override fun eval(context: LocalRuntimeContext): TypedList {
@@ -17,9 +16,9 @@ class ListLiteral(
 
     override val returnType = ListType(commonType(elements.map { it.returnType }))
 
-    override fun children(): List<Evaluable> = elements
+    override fun children(): List<Node> = elements
 
-    override fun reconstruct(newChildren: List<Evaluable>) = ListLiteral(newChildren)
+    override fun reconstruct(newChildren: List<Node>) = ListLiteral(newChildren)
 
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
         writer.append('[')

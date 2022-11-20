@@ -1,12 +1,16 @@
 package org.kobjects.tantilla2.core
 
-import org.kobjects.tantilla2.core.node.Evaluable
 import org.kobjects.tantilla2.core.classifier.Adapter
+import org.kobjects.tantilla2.core.node.LeafNode
 import org.kobjects.tantilla2.core.type.Type
 
-class TraitMethodBody(val index: Int): Evaluable {
+class TraitMethodBody(val index: Int): LeafNode() {
     override val returnType: Type
         get() = throw UnsupportedOperationException()
+
+    override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
+        writer.append("<TraitMethodBody>")
+    }
 
     override fun eval(context: LocalRuntimeContext): Any? {
       val self = context.variables[0] as Adapter
@@ -20,8 +24,4 @@ class TraitMethodBody(val index: Int): Evaluable {
           }, methodImpl.closure)
       return self.vmt[index].eval(methodContext)
     }
-
-    override fun children(): List<Evaluable> = emptyList()
-
-    override fun reconstruct(newChildren: List<Evaluable>) = this
 }

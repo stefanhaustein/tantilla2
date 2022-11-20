@@ -3,10 +3,6 @@ package org.kobjects.tantilla2.core
 import org.kobjects.konsole.Ansi
 import org.kobjects.tantilla2.core.definition.Scope
 import org.kobjects.tantilla2.core.node.*
-import org.kobjects.tantilla2.core.node.expression.StrNode
-import org.kobjects.tantilla2.core.node.statement.BlockNode
-import org.kobjects.tantilla2.core.node.statement.IfNode
-import org.kobjects.tantilla2.core.node.statement.WhileNode
 import org.kobjects.tantilla2.core.type.Type
 
 class CodeWriter(
@@ -121,7 +117,7 @@ class CodeWriter(
         appendWrapped(Kind.COMMENT, s)
     }
 
-    fun appendPrefix(code: Evaluable, parentPrecedence: Int, name: String, precedence: Int) {
+    fun appendPrefix(code: Node, parentPrecedence: Int, name: String, precedence: Int) {
         if (parentPrecedence > precedence) {
             append('(')
             append(name)
@@ -133,7 +129,7 @@ class CodeWriter(
         }
     }
 
-    fun appendInfix(code: Evaluable, parentPrecedence: Int, name: String, precedence: Int) {
+    fun appendInfix(code: Node, parentPrecedence: Int, name: String, precedence: Int) {
         if (parentPrecedence > precedence) {
             append('(')
             appendInfix(code, precedence, name, precedence)

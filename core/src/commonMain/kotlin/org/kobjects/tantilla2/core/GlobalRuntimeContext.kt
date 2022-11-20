@@ -2,9 +2,9 @@ package org.kobjects.tantilla2.core
 
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.definition.UserRootScope
-import org.kobjects.tantilla2.core.node.Evaluable
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.FunctionType
+import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.parser.Parser
 
 class GlobalRuntimeContext(
@@ -19,7 +19,7 @@ class GlobalRuntimeContext(
     val staticVariableValues = LocalRuntimeContext(this, userRootScope.count())
 
 
-    fun createException(definition: Definition?, node: Evaluable?, message: String?, cause: Exception? = null) =
+    fun createException(definition: Definition?, node: Node?, message: String?, cause: Exception? = null) =
         TantillaRuntimeException(
             if (definition == null && node != null) userRootScope.findNode(node) else definition,
             node,

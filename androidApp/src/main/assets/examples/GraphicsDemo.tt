@@ -48,7 +48,7 @@ def main():
 
 def cross_hatch(cx: float, cy: float):
   pen.stroke_color = Color.WHITE
-  let mx = max(screen.width, screen.height) // 40
+  let mx = max(screen.width, screen.height) // 40 + 1
   for i in range(-mx, mx):
     pen.line(cx + i * 20, 0, cx + i * 20, screen.height)
     pen.line(0, cy + i * 20, screen.width, cy + i * 20)

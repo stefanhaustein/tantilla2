@@ -3,7 +3,7 @@ package org.kobjects.tantilla2.core.definition
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.CompilationResults
 import org.kobjects.tantilla2.core.SerializableCode
-import org.kobjects.tantilla2.core.node.Evaluable
+import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.type.dynamicType
 
@@ -42,7 +42,7 @@ interface Definition : SerializableCode, Comparable<Definition> {
         return 1 + depth(scope.parentScope!!)
     }
 
-    fun findNode(node: Evaluable): Definition? = null
+    fun findNode(node: Node): Definition? = null
     fun isDynamic() = kind == Kind.METHOD || kind == Kind.PROPERTY
     fun isScope(): Boolean = false
 

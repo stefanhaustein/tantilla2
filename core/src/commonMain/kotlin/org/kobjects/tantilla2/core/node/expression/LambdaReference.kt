@@ -6,24 +6,23 @@ import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.CallableImpl
-import org.kobjects.tantilla2.core.node.Evaluable
 import org.kobjects.tantilla2.core.node.Node
 
 class LambdaReference(
     val type: FunctionType,
     val scopeSize: Int,
-    val body: Evaluable
+    val body: Node
 ) : Node() {
     override val returnType: Type
         get() = type
 
-    override fun children(): List<Evaluable> = emptyList()
+    override fun children(): List<Node> =  listOf(body)
 
     override fun eval(context: LocalRuntimeContext): Callable {
         return CallableImpl(type, scopeSize, body, context)
     }
 
-    override fun reconstruct(newChildren: List<Evaluable>) = this
+    override fun reconstruct(newChildren: List<Node>) = LambdaReference(type, scopeSize, newChildren[0])
 
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
         writer.append("lambda ")

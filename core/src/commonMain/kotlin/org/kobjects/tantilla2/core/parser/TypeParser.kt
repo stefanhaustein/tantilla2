@@ -1,6 +1,5 @@
 package org.kobjects.tantilla2.core.parser
 
-import org.kobjects.tantilla2.core.node.Evaluable
 import org.kobjects.tantilla2.core.definition.Scope
 import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
@@ -8,6 +7,7 @@ import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.classifier.StructDefinition
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Parameter
+import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.type.ListType
 import org.kobjects.tantilla2.core.type.VoidType
 
@@ -45,7 +45,7 @@ object TypeParser {
         tokenizer.consume(":", "Colon expected, separating the parameter type from the parameter name.")
         val rawType = TypeParser.parseType(tokenizer, context)
         val type = if (isVararg) ListType(rawType) else rawType
-        val defaultValue: Evaluable? = if (tokenizer.tryConsume("="))
+        val defaultValue: Node? = if (tokenizer.tryConsume("="))
             ExpressionParser.matchType(context.scope,
                 ExpressionParser.parseExpression(tokenizer, context), type)
         else null

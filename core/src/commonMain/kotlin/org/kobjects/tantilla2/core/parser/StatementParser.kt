@@ -1,6 +1,5 @@
 package org.kobjects.tantilla2.core.parser
 
-import org.kobjects.tantilla2.core.node.Evaluable
 import org.kobjects.tantilla2.core.function.FunctionDefinition
 import org.kobjects.tantilla2.core.function.LocalVariableDefinition
 import org.kobjects.tantilla2.core.node.*
@@ -14,7 +13,7 @@ object StatementParser {
     fun parseStatement(
         tokenizer: TantillaTokenizer,
         context: ParsingContext,
-    ) : Evaluable =
+    ) : Node =
         when (tokenizer.current.text) {
             "for" -> parseFor(tokenizer, context)
             "if" -> parseIf(tokenizer, context)
@@ -27,11 +26,11 @@ object StatementParser {
                 } else {
                     var expr = ExpressionParser.parseExpression(tokenizer, context)
                     if (tokenizer.tryConsume("=")) {
-                        if (expr !is Assignable) {
+                        if (expr !is AssignableNode) {
                             tokenizer.exception("Target is not assignable")
                         }
                         expr = Assignment(
-                            expr as Assignable,
+                            expr as AssignableNode,
                             ExpressionParser.parseExpression(tokenizer, context)
                         )
                     }
@@ -46,7 +45,7 @@ object StatementParser {
             }
         }
 
-    fun parseLet(tokenizer: TantillaTokenizer, context: ParsingContext): Evaluable {
+    fun parseLet(tokenizer: TantillaTokenizer, context: ParsingContext): Node {
         tokenizer.consume("let")
 
         val mutable = tokenizer.tryConsume("mut")
@@ -67,7 +66,7 @@ object StatementParser {
 
 
 
-    fun parseReturn(tokenizer: TantillaTokenizer, context: ParsingContext): Evaluable {
+    fun parseReturn(tokenizer: TantillaTokenizer, context: ParsingContext): Node {
         tokenizer.consume("return")
         if (context.scope !is FunctionDefinition) {
             throw tokenizer.exception("Function scope expected for 'return'")
@@ -107,7 +106,7 @@ object StatementParser {
 
     fun parseIf(tokenizer: TantillaTokenizer, context: ParsingContext): IfNode {
         tokenizer.consume("if")
-        val expressions = mutableListOf<Evaluable>()
+        val expressions = mutableListOf<Node>()
         do {
             val condition = ExpressionParser.parseExpression(tokenizer, context)
             expressions.add(condition)

@@ -1,7 +1,5 @@
 package org.kobjects.tantilla2.core
 
-import org.kobjects.tantilla2.core.node.Evaluable
-
 class LocalRuntimeContext(
     val globalRuntimeContext: GlobalRuntimeContext,
     count: Int = 0,

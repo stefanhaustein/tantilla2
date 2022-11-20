@@ -4,14 +4,13 @@ import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.type.commonType
-import org.kobjects.tantilla2.core.node.Evaluable
 import org.kobjects.tantilla2.core.node.Node
 
 class IfNode(
-    vararg val ifThenElse: Evaluable,
+    vararg val ifThenElse: Node,
 ) : Node() {
     override val returnType: Type
-        get() = commonType(ifThenElse.filterIndexed { index, evaluable -> index and 1 == 1 }.map { it.returnType })
+        get() = commonType(ifThenElse.filterIndexed { index, node -> index and 1 == 1 }.map { it.returnType })
 
     override fun eval(env: LocalRuntimeContext): Any? {
         for (i in ifThenElse.indices step 2) {
@@ -26,7 +25,7 @@ class IfNode(
 
     override fun children() = ifThenElse.toList()
 
-    override fun reconstruct(newChildren: List<Evaluable>) = IfNode(*newChildren.toTypedArray())
+    override fun reconstruct(newChildren: List<Node>) = IfNode(*newChildren.toTypedArray())
 
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
         writer.append("if ")

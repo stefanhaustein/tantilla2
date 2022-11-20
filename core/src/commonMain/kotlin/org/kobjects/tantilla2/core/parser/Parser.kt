@@ -4,7 +4,7 @@ import org.kobjects.tantilla2.core.classifier.*
 import org.kobjects.tantilla2.core.definition.*
 import org.kobjects.tantilla2.core.function.*
 import org.kobjects.tantilla2.core.node.statement.BlockNode
-import org.kobjects.tantilla2.core.node.Evaluable
+import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.type.Type
 
 
@@ -23,7 +23,7 @@ object Parser {
         return s.length - lastBreak - 1
     }
 
-    fun parseShellInput(s: String, scope: UserRootScope): Evaluable {
+    fun parseShellInput(s: String, scope: UserRootScope): Node {
         return parse(s, scope, definitionsAllowed = true, statementsAllowed = true)
     }
 
@@ -36,7 +36,7 @@ object Parser {
         scope: Scope,
         definitionsAllowed: Boolean = true,
         statementsAllowed: Boolean = true
-    ): Evaluable {
+    ): Node {
         val tokenizer = TantillaTokenizer(source)
         tokenizer.consume(TokenType.BOF)
         scope.docString = readDocString(tokenizer)
@@ -62,8 +62,8 @@ object Parser {
         context: ParsingContext,
         statementsAllowed: Boolean = true,
         definitionsAllowed: Boolean = true
-    ): Evaluable {
-        val statements = mutableListOf<Evaluable>()
+    ): Node {
+        val statements = mutableListOf<Node>()
         val scope = context.scope
         var localDepth = context.depth
         while (tokenizer.current.type != TokenType.EOF
@@ -213,11 +213,11 @@ object Parser {
 
 
     fun resolveVariable(tokenizer: TantillaTokenizer, context: ParsingContext, typeOnly: Boolean = false):
-            Triple<Type, Boolean, Evaluable?> {
+            Triple<Type, Boolean, Node?> {
 
         val scope = context.scope
         var type: Type? = null
-        var initializer: Evaluable? = null
+        var initializer: Node? = null
         var typeIsExplicit = tokenizer.tryConsume(":")
         if (typeIsExplicit) {
             type = TypeParser.parseType(tokenizer, ParsingContext(scope, 0))

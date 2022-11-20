@@ -1,12 +1,12 @@
 package org.kobjects.tantilla2.core.function
 
-import org.kobjects.tantilla2.core.node.Evaluable
 import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.classifier.Updatable
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.definition.Scope
+import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.node.statement.FlowSignal
 import org.kobjects.tantilla2.core.parser.*
 
@@ -20,7 +20,7 @@ class FunctionDefinition (
 
     private var resolutionState: ResolutionState = ResolutionState.UNRESOLVED
     private var resolvedType: FunctionType? = null
-    internal var resolvedBody: Evaluable? = null
+    internal var resolvedBody: Node? = null
 
     var _definitionText = definitionText
     override var definitionText: String
@@ -183,7 +183,7 @@ class FunctionDefinition (
 
     override fun isScope() = false
 
-    override fun findNode(node: Evaluable): Definition? =
+    override fun findNode(node: Node): Definition? =
         if (resolvedBody?.containsNode(node) ?: false) this else null
 
     override fun reset() {

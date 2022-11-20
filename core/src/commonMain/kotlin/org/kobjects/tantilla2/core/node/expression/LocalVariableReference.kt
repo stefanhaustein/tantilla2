@@ -3,8 +3,8 @@ package org.kobjects.tantilla2.core.node.expression
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.type.Type
-import org.kobjects.tantilla2.core.node.Assignable
-import org.kobjects.tantilla2.core.node.Evaluable
+import org.kobjects.tantilla2.core.node.AssignableNode
+import org.kobjects.tantilla2.core.node.Node
 
 class LocalVariableReference(
     val name: String,
@@ -12,8 +12,8 @@ class LocalVariableReference(
     val depth: Int,
     val index: Int,
     val mutable: Boolean,
-) : Assignable() {
-    override fun children(): List<Evaluable> = emptyList()
+) : AssignableNode() {
+    override fun children(): List<Node> = emptyList()
 
     override fun eval(ctx: LocalRuntimeContext): Any? {
         //        println("Evaluating $name")
@@ -28,7 +28,7 @@ class LocalVariableReference(
         return result
     }
 
-    override fun reconstruct(newChildren: List<Evaluable>): Evaluable =
+    override fun reconstruct(newChildren: List<Node>): Node =
         this
 
     override fun assign(context: LocalRuntimeContext, value: Any?) {

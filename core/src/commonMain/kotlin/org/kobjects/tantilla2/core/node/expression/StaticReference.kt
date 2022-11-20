@@ -2,17 +2,17 @@ package org.kobjects.tantilla2.core.node.expression
 
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.definition.Definition
-import org.kobjects.tantilla2.core.node.Assignable
-import org.kobjects.tantilla2.core.node.Evaluable
+import org.kobjects.tantilla2.core.node.AssignableNode
+import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.type.Type
 
 
-data class StaticReference(val definition: Definition, val qualified: Boolean) : Assignable() {
-    override fun children() = emptyList<Evaluable>()
+data class StaticReference(val definition: Definition, val qualified: Boolean) : AssignableNode() {
+    override fun children() = emptyList<Node>()
 
     override fun eval(ctx: LocalRuntimeContext): Any? = definition.getValue(ctx.globalRuntimeContext.staticVariableValues)
 
-    override fun reconstruct(newChildren: List<Evaluable>) = this
+    override fun reconstruct(newChildren: List<Node>) = this
 
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
         val parent = definition.parentScope

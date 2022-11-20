@@ -4,13 +4,12 @@ import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.type.VoidType
-import org.kobjects.tantilla2.core.node.Assignable
-import org.kobjects.tantilla2.core.node.Evaluable
+import org.kobjects.tantilla2.core.node.AssignableNode
 import org.kobjects.tantilla2.core.node.Node
 
 class Assignment(
-    val target: Assignable,
-    val source: Evaluable
+    val target: AssignableNode,
+    val source: Node
 ) : Node() {
 
     override val returnType: Type
@@ -20,8 +19,8 @@ class Assignment(
 
     override fun eval(ctx: LocalRuntimeContext) = target.assign(ctx, source.eval(ctx))
 
-    override fun reconstruct(newChildren: List<Evaluable>) =
-        Assignment(newChildren[0] as Assignable, newChildren[1])
+    override fun reconstruct(newChildren: List<Node>) =
+        Assignment(newChildren[0] as AssignableNode, newChildren[1])
 
     override fun serializeCode(sb: CodeWriter, parentPrecedence: Int) {
         sb.appendCode(target)

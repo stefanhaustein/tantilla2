@@ -4,14 +4,14 @@ import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.type.IntType
 import org.kobjects.tantilla2.core.type.ListType
 import org.kobjects.tantilla2.core.type.TypedList
-import org.kobjects.tantilla2.core.node.Assignable
-import org.kobjects.tantilla2.core.node.Evaluable
+import org.kobjects.tantilla2.core.node.AssignableNode
+import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.type.Type
 
 class ElementAt(
-    val baseExpr: Evaluable,
-    val indexExpr: Evaluable
-) : Assignable() {
+    val baseExpr: Node,
+    val indexExpr: Node
+) : AssignableNode() {
 
     init {
         if (baseExpr.returnType !is ListType) {
@@ -32,7 +32,7 @@ class ElementAt(
     override val returnType: Type
         get() = (baseExpr.returnType as ListType).elementType
 
-    override fun children(): List<Evaluable> = listOf(baseExpr, indexExpr)
+    override fun children(): List<Node> = listOf(baseExpr, indexExpr)
 
     override fun eval(context: LocalRuntimeContext): Any? {
         val list = baseExpr.eval(context) as TypedList
@@ -43,7 +43,7 @@ class ElementAt(
        return list[index]
     }
 
-    override fun reconstruct(newChildren: List<Evaluable>): Evaluable =
+    override fun reconstruct(newChildren: List<Node>) =
         ElementAt(newChildren[0], newChildren[1])
 
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {

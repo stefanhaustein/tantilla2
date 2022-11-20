@@ -1,4 +1,4 @@
-package org.kobjects.tantilla2.core.node
+package org.kobjects.tantilla2.core
 
 import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.type.Type
@@ -15,23 +15,10 @@ interface Evaluable {
         return (eval(context) as Number).toLong()
     }
 
-    fun children(): List<Evaluable> = listOf()
-
-    fun reconstruct(newChildren: List<Evaluable>): Evaluable = this
 
     val returnType: Type
 
-    fun containsNode(node: Evaluable): Boolean {
-        if (this == node) {
-            return true
-        }
-        for (child in children()) {
-            if (child.containsNode(node)) {
-                return true
-            }
-        }
-        return false
-    }
+
 
     /*
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {

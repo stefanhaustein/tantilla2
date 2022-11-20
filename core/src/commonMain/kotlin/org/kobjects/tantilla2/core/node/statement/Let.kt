@@ -3,11 +3,10 @@ package org.kobjects.tantilla2.core.node.statement
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.function.LocalVariableDefinition
 import org.kobjects.tantilla2.core.type.VoidType
-import org.kobjects.tantilla2.core.node.Evaluable
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.type.Type
 
-class Let(val definition: LocalVariableDefinition, val type: Type, val typeIsExplicit: Boolean, val initializer: Evaluable?) : Node() {
+class Let(val definition: LocalVariableDefinition, val type: Type, val typeIsExplicit: Boolean, val initializer: Node?) : Node() {
     override val returnType: Type
         get() = VoidType
 
@@ -20,7 +19,7 @@ class Let(val definition: LocalVariableDefinition, val type: Type, val typeIsExp
         return null
     }
 
-    override fun reconstruct(newChildren: List<Evaluable>) =
+    override fun reconstruct(newChildren: List<Node>) =
         Let(definition, type, typeIsExplicit, if (newChildren.isEmpty()) null else newChildren[0])
 
 

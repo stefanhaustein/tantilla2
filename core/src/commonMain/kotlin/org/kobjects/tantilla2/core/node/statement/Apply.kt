@@ -5,15 +5,14 @@ import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.Parameter
-import org.kobjects.tantilla2.core.node.Evaluable
 import org.kobjects.tantilla2.core.node.expression.ListLiteral
 import org.kobjects.tantilla2.core.node.Node
 
 
 class Apply(
-    val callable: Evaluable,
+    val callable: Node,
     val parameterDeclarations: List<Parameter>,
-    val parameters: List<Evaluable>,
+    val parameters: List<Node>,
     val implicit: Boolean,
     val asMethod: Boolean,
 ) : Node() {
@@ -36,11 +35,11 @@ class Apply(
         return function.eval(functionContext)
     }
 
-    override fun children(): List<Evaluable> = List(parameters.size + 1) {
+    override fun children(): List<Node> = List(parameters.size + 1) {
        if (it == 0) callable else parameters[it - 1]
     }
 
-    override fun reconstruct(newChildren: List<Evaluable>): Evaluable =
+    override fun reconstruct(newChildren: List<Node>): Node =
         Apply(newChildren[0], parameterDeclarations, newChildren.subList(1, newChildren.size), implicit, asMethod)
 
     override val returnType

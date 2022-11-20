@@ -1,6 +1,6 @@
 package org.kobjects.tantilla2.core.function
 
-import org.kobjects.tantilla2.core.node.Evaluable
+import org.kobjects.tantilla2.core.Evaluable
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.SerializableCode

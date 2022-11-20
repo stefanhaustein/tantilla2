@@ -4,24 +4,24 @@ import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.type.Type
-import org.kobjects.tantilla2.core.node.Assignable
-import org.kobjects.tantilla2.core.node.Evaluable
+import org.kobjects.tantilla2.core.node.AssignableNode
+import org.kobjects.tantilla2.core.node.Node
 
 class PropertyReference(
-    val base: Evaluable,
+    val base: Node,
     val definition: Definition
-) : Assignable() {
+) : AssignableNode() {
     override val returnType: Type
         get() = definition.type
 
-    override fun children(): List<Evaluable> = emptyList()
+    override fun children(): List<Node> = emptyList()
 
     override fun eval(ctx: LocalRuntimeContext): Any? {
         val self = base.eval(ctx)
         return definition.getValue(self)
     }
 
-    override fun reconstruct(newChildren: List<Evaluable>): Evaluable =
+    override fun reconstruct(newChildren: List<Node>): Node =
         PropertyReference(newChildren[0], definition)
 
     override fun assign(context: LocalRuntimeContext, value: Any?) {

@@ -3,13 +3,13 @@ package org.kobjects.tantilla2.core.definition
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.CompilationResults
 import org.kobjects.tantilla2.core.LocalRuntimeContext
-import org.kobjects.tantilla2.core.node.Evaluable
 import org.kobjects.tantilla2.core.type.RootScope
 import org.kobjects.tantilla2.core.classifier.FieldDefinition
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
 import org.kobjects.tantilla2.core.classifier.NativePropertyDefinition
 import org.kobjects.tantilla2.core.classifier.Updatable
 import org.kobjects.tantilla2.core.function.*
+import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.parser.Parser
 import org.kobjects.tantilla2.core.parser.ParsingContext
 import org.kobjects.tantilla2.core.parser.TantillaTokenizer
@@ -249,7 +249,7 @@ abstract class Scope(
 
     override fun isScope() = errors.isEmpty()
 
-    override fun findNode(node: Evaluable): Definition? {
+    override fun findNode(node: Node): Definition? {
         for (definition in this) {
             val result = definition.findNode(node)
             if (result != null) {
