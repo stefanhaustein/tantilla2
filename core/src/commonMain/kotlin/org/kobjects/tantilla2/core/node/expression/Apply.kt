@@ -1,18 +1,17 @@
-package org.kobjects.tantilla2.core.node.statement
+package org.kobjects.tantilla2.core.node.expression
 
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.Parameter
-import org.kobjects.tantilla2.core.node.expression.ListLiteral
 import org.kobjects.tantilla2.core.node.Node
 
 
 class Apply(
     val callable: Node,
-    val parameterDeclarations: List<Parameter>,
     val parameters: List<Node>,
+    val parameterSerialization: List<ParameterSerialization>,
     val implicit: Boolean,
     val asMethod: Boolean,
 ) : Node() {
@@ -40,43 +39,37 @@ class Apply(
     }
 
     override fun reconstruct(newChildren: List<Node>): Node =
-        Apply(newChildren[0], parameterDeclarations, newChildren.subList(1, newChildren.size), implicit, asMethod)
+        Apply(newChildren[0], newChildren.subList(1, newChildren.size), parameterSerialization, implicit, asMethod)
 
     override val returnType
         get() = (callable.returnType as FunctionType).returnType
 
     override fun serializeCode(sb: CodeWriter, parentPrcedence: Int) {
-        val startIndex = if (!asMethod) 0 else {
+        if (asMethod) {
             sb.appendCode(parameters[0])
             sb.append(".")
-            1
         }
-
         sb.appendCode(callable)
         if (!implicit) {
             sb.append("(")
-            var first = true
-            for (i in startIndex until parameters.size) {
-                if (parameterDeclarations[i].isVararg) {
-                    for (sub in (parameters[i] as ListLiteral).elements) {
-                        if (first) {
-                            first = false
-                        } else {
-                            sb.append(", ")
-                        }
-                        sb.appendCode(sub)
-                    }
-                } else {
-                    if (first) {
-                        first = false
-                    } else {
-                        sb.append(", ")
-                    }
-                    sb.appendCode(parameters[i])
+            for (i in parameterSerialization.indices) {
+                val parameter = parameterSerialization[i]
+                if (i > 0) {
+                    sb.append(", ")
                 }
+                if (parameter.named.isNotEmpty()) {
+                    sb.append(parameter.named)
+                    sb.append(" = ")
+                }
+                sb.appendCode(parameter.node)
             }
             sb.append(")")
         }
     }
+
+    class ParameterSerialization(
+        val named: String,
+        val node: Node,
+    )
 
 }

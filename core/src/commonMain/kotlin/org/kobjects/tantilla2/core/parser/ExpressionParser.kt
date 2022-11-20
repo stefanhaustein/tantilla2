@@ -12,7 +12,7 @@ import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.LambdaScope
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.node.expression.*
-import org.kobjects.tantilla2.core.node.statement.Apply
+import org.kobjects.tantilla2.core.node.expression.Apply
 import org.kobjects.tantilla2.core.type.Type
 
 object ExpressionParser {
@@ -289,9 +289,13 @@ object ExpressionParser {
 
         val expectedParameters = type.parameters
         val parameterExpressions = MutableList<Node?>(expectedParameters.size) { null }
+        val parameterSerialization = mutableListOf<Apply.ParameterSerialization>()
         var index = 0
         if (self != null) {
             parameterExpressions[index++] = self
+            if (!asMethod) {
+                parameterSerialization.add(Apply.ParameterSerialization("", self))
+            }
         }
 
         val indexMap = mutableMapOf<String, Int>()
@@ -304,8 +308,9 @@ object ExpressionParser {
         var nameRequired = false
         if (hasArgs && !tokenizer.tryConsume(")")) {
             do {
+                var name = ""
                 if (tokenizer.current.type == TokenType.IDENTIFIER && tokenizer.lookAhead(1).text == "=") {
-                    val name = tokenizer.consume(TokenType.IDENTIFIER)
+                    name = tokenizer.consume(TokenType.IDENTIFIER)
                     tokenizer.consume("=")
                     nameRequired = true
                     index = indexMap[name] ?: throw tokenizer.exception("Parameter name '$name' not found.")
@@ -316,6 +321,7 @@ object ExpressionParser {
                 }
                 val expectedParameter = expectedParameters[index]
                 val expression = parseExpression(tokenizer, context, expectedParameter.type)
+                parameterSerialization.add(Apply.ParameterSerialization(name, expression))
                 if (expectedParameter.isVararg) {
                     varargs.add(expression)
                     varargIndex = index
@@ -347,8 +353,8 @@ object ExpressionParser {
 
         return Apply(
             value,
-            expectedParameters,
             List(parameterExpressions.size) { parameterExpressions[it]!!},
+            parameterSerialization.toList(),
             !hasArgs,
             asMethod
         )
