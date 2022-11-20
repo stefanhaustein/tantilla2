@@ -139,11 +139,15 @@ class FunctionDefinition (
     override fun toString() = "def $name"
 
     override fun serializeTitle(writer: CodeWriter, abbreviated: Boolean) {
-                if (parentScope.supportsMethods && kind == Definition.Kind.FUNCTION) {
-                    writer.appendKeyword("static ")
-                }
-                writer.appendKeyword("def ").appendDeclaration(name)
+        if (resolutionState != ResolutionState.RESOLVED && resolutionState != ResolutionState.TYPE_RESOLVED) {
+            writer.appendUnparsed(definitionText.split('\n').first(), errors)
+        } else {
+            if (parentScope.supportsMethods && kind == Definition.Kind.FUNCTION) {
+                writer.appendKeyword("static ")
+            }
+            writer.appendKeyword("def ").appendDeclaration(name)
             type.serializeType(writer, if (abbreviated) null else parentScope)
+        }
     }
 
 

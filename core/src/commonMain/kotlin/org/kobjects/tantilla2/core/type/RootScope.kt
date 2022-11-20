@@ -4,6 +4,7 @@ import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.definition.Scope
 import org.kobjects.tantilla2.core.function.Parameter
+import org.kobjects.tantilla2.stdlib.math.MathScope
 
 class RootScope(
     val systemAbstraction: SystemAbstraction,

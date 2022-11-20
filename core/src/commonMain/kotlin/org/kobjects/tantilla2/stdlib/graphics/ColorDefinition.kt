@@ -34,8 +34,18 @@ class ColorDefinition(graphicsScope: GraphicsScope) : NativeStructDefinition(
         }
 
         defineNativeFunction(
+            "gray",
+            "Create a Color instance light (l) and (optional) alpha values in the range from 0 to 1",
+            this,
+            Parameter("l", FloatType),
+            Parameter("a", FloatType, FloatNode.Const(1.0)),
+        ) {
+            Color(it.f64(0), it.f64(0), it.f64(0), it.f64(1))
+        }
+
+        defineNativeFunction(
             "hsl",
-            "Converts the given hue (degree), saturation (0..1) and light (0..1) and otptional alpha values to a 32 bit ARGB value (as used in setPixel).",
+            "Converts the given hue (0..360), saturation (0..1) and light (0..1) and optional alpha values to a 32 bit ARGB value (as used in setPixel).",
             FloatType,
             Parameter("h", FloatType),
             Parameter("s", FloatType),

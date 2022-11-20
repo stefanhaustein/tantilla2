@@ -1,35 +1,87 @@
 import graphics.Color
 
 def main():
-  pen.fill_color = Color.GRAY
+  pen.fill_color = Color.rgb(0.25, 0.25, 0.25)
   pen.stroke_color = Color.TRANSPARENT
 
   pen.rect(0, 0, screen.width, screen.height)
 
-  pen.stroke_color = Color.WHITE
-  pen.fill_color = Color.TRANSPARENT
-
   let cx = screen.width / 2
   let cy = screen.height / 2
-  for i in range(0, max(screen.width, screen.height) // 50):
-    pen.line(cx + i * 25, 0, cx + i * 25, screen.height)
-    pen.line(cx - i * 25, 0, cx - i * 25, screen.height)
-    pen.line(0, cy + i * 25, screen.width, cy + i * 25)
-    pen.line(0, cy - i * 25, screen.width, cy - i * 25)
 
-  pen.circle(cx, cy, 120)
+  cross_hatch(cx, cy)
 
   pen.fill_color = Color.WHITE
   pen.stroke_color = Color.TRANSPARENT
+  pen.rect(cx-120, cy-100, 240, 200)
 
-  pen.rect(cx-100, cy-100, 200, 200)
-  for i in range(0, 200):
-    let x = cx - 100 + i
-    pen.stroke_color = Color.hsl(i*365/200, 1, 0.5)
-    pen.line(x, cy - 100, x, cy - 33)
-    pen.stroke_color = Color.hsl(0, 0, i/200)
-    pen.line(x, cy - 33, x, cy)
+  pen.fill_color = Color.gray(0.5)
+  pen.rect(cx - 95, cy + 20, 215, 20)
+  pen.fill_color = Color.gray(0.3)
+  pen.rect(cx + 40, cy + 60, 80, 40)
 
+  color_bar(cx - 120, cy - 100)
+  gray_stairs(cx - 120, cy - 40)
+  label(cx, cy)
+
+  let base = 0.8
+  sine(cx - 90, cy + 20, base)
+  sine(cx - 45, cy + 20, 2 * base)
+  sine(cx + 5, cy + 20, 4.433 * base)
+
+  pen.stroke_color = Color.TRANSPARENT
+  pen.fill_color = Color.rgb(0.7, 0.5, 0)
+  pen.rect(cx + 50, cy + 20, 60, 20)
+
+  ramp(cx - 120, cy + 60, 340)
+  ramp(cx - 120, cy + 80, 250)
+
+  pen.stroke_color = Color.WHITE
+  pen.fill_color = Color.TRANSPARENT
+  pen.rect(cx-120, cy-100, 240, 200)
+  pen.circle(cx, cy, 135)
+  pen.line(cx - 120, cy, cx + 120, cy)
+  pen.line(cx, cy - 40, cx, cy + 40)
+  pen.stroke_color = Color.BLACK
+  pen.line(cx, cy + 40, cx, cy + 60)
+
+
+def cross_hatch(cx: float, cy: float):
+  pen.stroke_color = Color.WHITE
+  let mx = max(screen.width, screen.height) // 40
+  for i in range(-mx, mx):
+    pen.line(cx + i * 20, 0, cx + i * 20, screen.height)
+    pen.line(0, cy + i * 20, screen.width, cy + i * 20)
+
+def color_bar(x: float, y: float):
+  pen.stroke_color = Color.TRANSPARENT
+  for i in range(0, 8):
+    pen.fill_color = Color.rgb(0.75 - ((i & 2) >> 1), 0.75 - ((i & 4) >> 2), 0.75 - (i & 1))
+    pen.rect(x + i * 30, y, 30, 60)
+
+def gray_stairs(x: float, y: float):
+  pen.stroke_color = Color.TRANSPARENT
+  for i in range(0, 5):
+    pen.fill_color = Color.gray(i/4)
+    pen.rect(x + i * 48, y, 48, 40)
+
+def label(cx: float, cy: float):
+  pen.stroke_color = Color.TRANSPARENT
   pen.fill_color = Color.BLACK
-  pen.text(cx - 90, cy + 30, "Width: " + str(screen.width))
-  pen.text(cx - 90, cy + 60, "Height: " + str(screen.height))
+  pen.rect(cx - 72, cy, 144, 20)
+
+  pen.fill_color = Color.WHITE
+  pen.text(cx - 72, cy + 15, "  w:" + str(screen.width))
+  pen.text(cx, cy + 15, "  h:" + str(screen.height))
+
+
+def ramp(x: float, y: float, hue: float):
+  for i in range(0, 160):
+    pen.stroke_color = Color.hsl(hue, 1, 0.5 - i/320)
+    pen.line(x + i, y, x + i, y + 20)
+
+
+def sine(x: float, y: float, f: float):
+  for i in range(0, 40):
+    pen.stroke_color = Color.gray(math.sin(i * f) * 0.5 + 0.5)
+    pen.line(x + i, y, x + i, y + 20)
