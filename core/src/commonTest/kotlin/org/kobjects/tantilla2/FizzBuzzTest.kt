@@ -35,7 +35,7 @@ class FizzBuzzTest {
     fun testFizzBuzz() {
         val output = mutableListOf<String>()
 
-        val context = UserRootScope(TestSystem)
+        val context = TestSystemAbstraction.createScope()
 
         context.defineNativeFunction(
             "print", "internal",

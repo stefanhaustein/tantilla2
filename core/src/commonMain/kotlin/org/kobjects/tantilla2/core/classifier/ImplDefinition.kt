@@ -42,6 +42,7 @@ class ImplDefinition(
     override fun resolveAll(compilationResults: CompilationResults): Boolean {
         if (super.resolveAll(compilationResults)) {
 
+            // TODO: Move VMT creation to trait?
             val vmt = MutableList<Callable?>(trait.traitIndex) { null }
             for (definition in trait) {
                 val index = ((definition.getValue(null) as FunctionDefinition).resolvedBody as TraitMethodBody).index
@@ -68,6 +69,9 @@ class ImplDefinition(
                 val traitName = name.substring(0, name.indexOf(' '))
                 resolvedTrait =
                     parentScope.resolveStaticOrError(traitName, true).getValue(null) as TraitDefinition
+
+                resolvedTrait!!.resolveAll(CompilationResults())
+
                 val className = name.substring(name.lastIndexOf(' ') + 1)
                 resolvedScope =
                     parentScope.resolveStaticOrError(className, true).getValue(null) as Scope

@@ -2,8 +2,10 @@ package org.kobjects.tantilla2
 
 import org.kobjects.tantilla2.core.Lock
 import org.kobjects.tantilla2.core.SystemAbstraction
+import org.kobjects.tantilla2.core.definition.UserRootScope
+import org.kobjects.tantilla2.core.type.RootScope
 
-object TestSystem : SystemAbstraction {
+object TestSystemAbstraction : SystemAbstraction {
     override fun write(s: String) {
         println(s)
     }
@@ -15,4 +17,6 @@ object TestSystem : SystemAbstraction {
     override fun createLock(): Lock {
         TODO("Not yet implemented")
     }
+
+    fun createScope() = UserRootScope(RootScope(TestSystemAbstraction))
 }

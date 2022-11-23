@@ -11,12 +11,12 @@ import kotlin.test.assertTrue
 class TraitTest {
     val TEST = """
         trait Animal:
-           def noise(self) -> str
+           def noise() -> str
            
         struct Dog:
         
         impl Animal for Dog:
-            def noise(self) -> str:
+            def noise() -> str:
               "Woof"
               
         Dog() as Animal.noise()
@@ -24,7 +24,7 @@ class TraitTest {
 
     @Test
     fun testTrait() {
-        val parsingContext = UserRootScope(TestSystem)
+        val parsingContext = TestSystemAbstraction.createScope()
 
         val result = Parser.parse(TEST, parsingContext)
 
