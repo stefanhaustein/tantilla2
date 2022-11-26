@@ -13,6 +13,7 @@ import org.kobjects.tantilla2.core.function.LambdaScope
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.node.expression.*
 import org.kobjects.tantilla2.core.node.expression.Apply
+import org.kobjects.tantilla2.core.type.FloatType
 import org.kobjects.tantilla2.core.type.Type
 
 object ExpressionParser {
@@ -20,6 +21,10 @@ object ExpressionParser {
     fun bothInt(l: Node, r: Node) =
          l.returnType == org.kobjects.tantilla2.core.type.IntType
                  && r.returnType == org.kobjects.tantilla2.core.type.IntType
+
+    fun bothNumber(l: Node, r: Node) =
+        FloatType.isAssignableFrom(l.returnType)
+                && FloatType.isAssignableFrom(r.returnType)
 
     fun parseExpression(tokenizer: TantillaTokenizer, context: ParsingContext, expectedType: Type? = null): Node {
         if (expectedType is FunctionType && tokenizer.current.text == "lambda") {
@@ -219,7 +224,7 @@ object ExpressionParser {
     ): Node {
         val traitName = tokenizer.consume(TokenType.IDENTIFIER)
         val className = base.returnType.typeName
-        val impl = context.scope.resolveStaticOrError("$traitName for $className").getValue(null) as ImplDefinition
+        val impl = context.scope.resolveStaticOrError("$traitName for $className", true).getValue(null) as ImplDefinition
         impl.resolveAll(CompilationResults())
         return As(base, impl, implicit = false)
     }
@@ -387,8 +392,8 @@ object ExpressionParser {
             GreenspunExpressionParser.infix(Precedence.BITWISE_OR, "|") { _, _, _, l, r -> IntNode.Or(l, r)},
             GreenspunExpressionParser.suffix(Precedence.RELATIONAL, "as") {
                     tokenizer, context, _, base -> parseAs(tokenizer, context, base) },
-            GreenspunExpressionParser.infix(Precedence.RELATIONAL, "==") { _, _, _, l, r ->  if (bothInt(l, r)) IntNode.Eq(l, r) else FloatNode.Eq(l, r)},
-            GreenspunExpressionParser.infix(Precedence.RELATIONAL, "!=") { _, _, _, l, r ->  if (bothInt(l, r)) IntNode.Ne(l, r) else FloatNode.Ne(l, r)},
+            GreenspunExpressionParser.infix(Precedence.RELATIONAL, "==") { _, _, _, l, r ->  if (bothInt(l, r)) IntNode.Eq(l, r) else if (bothNumber(l, r)) FloatNode.Eq(l, r) else StrNode.Eq(l, r) },
+            GreenspunExpressionParser.infix(Precedence.RELATIONAL, "!=") { _, _, _, l, r ->  if (bothInt(l, r)) IntNode.Ne(l, r) else  if (bothNumber(l, r)) FloatNode.Ne(l, r) else StrNode.Ne(l, r)},
             GreenspunExpressionParser.infix(Precedence.RELATIONAL, "<") { _, _, _, l, r ->  if (bothInt(l, r)) IntNode.Lt(l, r) else FloatNode.Lt(l, r)},
             GreenspunExpressionParser.infix(Precedence.RELATIONAL, ">") { _, _, _, l, r ->  if (bothInt(l, r)) IntNode.Gt(l, r) else FloatNode.Gt(l, r)},
             GreenspunExpressionParser.infix(Precedence.RELATIONAL, "<=") { _, _, _, l, r ->  if (bothInt(l, r)) IntNode.Le(l, r) else FloatNode.Le(l, r)},

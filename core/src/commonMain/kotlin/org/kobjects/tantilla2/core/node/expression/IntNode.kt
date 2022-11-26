@@ -146,7 +146,7 @@ object IntNode {
             get() = BoolType
 
         override fun eval(context: LocalRuntimeContext): Boolean {
-            return (left.evalI64(context) == right.evalI64(context))
+            return (left.evalI64(context) != right.evalI64(context))
         }
 
         override fun children() = listOf(left, right)

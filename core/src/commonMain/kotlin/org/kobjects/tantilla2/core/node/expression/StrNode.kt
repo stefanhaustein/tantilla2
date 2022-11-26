@@ -7,6 +7,7 @@ import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.type.StrType
 import org.kobjects.tantilla2.core.node.LeafNode
 import org.kobjects.tantilla2.core.node.Node
+import org.kobjects.tantilla2.core.type.BoolType
 
 
 object StrNode {
@@ -42,6 +43,48 @@ object StrNode {
             writer.appendInfix(this, parentPrecedence, "+", Precedence.PLUSMINUS)
         }
     }
+
+    class Eq(
+        val left: Node,
+        val right: Node,
+    ): Node() {
+        override val returnType: Type
+            get() = BoolType
+
+        override fun eval(context: LocalRuntimeContext): Boolean {
+            return (left.eval(context) == right.eval(context))
+        }
+
+        override fun children() = listOf(left, right)
+        override fun reconstruct(newChildren: List<Node>): Node =
+            Eq(newChildren[0], newChildren[1])
+
+        override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
+            writer.appendInfix(this, parentPrecedence, "==", Precedence.RELATIONAL)
+        }
+    }
+
+    class Ne(
+        val left: Node,
+        val right: Node,
+    ): Node() {
+        override val returnType: Type
+            get() = BoolType
+
+        override fun eval(context: LocalRuntimeContext): Boolean {
+            return (left.eval(context) != right.eval(context))
+        }
+
+        override fun children() = listOf(left, right)
+
+        override fun reconstruct(newChildren: List<Node>): Node =
+            Ne(newChildren[0], newChildren[1])
+
+        override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
+            writer.appendInfix(this, parentPrecedence, "!=", Precedence.RELATIONAL)
+        }
+    }
+
 
     override fun toString() = "Str"
 }

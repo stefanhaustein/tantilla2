@@ -3,7 +3,6 @@ package org.kobjects.tantilla2.core.definition
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.CompilationResults
 import org.kobjects.tantilla2.core.LocalRuntimeContext
-import org.kobjects.tantilla2.core.type.RootScope
 import org.kobjects.tantilla2.core.classifier.FieldDefinition
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
 import org.kobjects.tantilla2.core.classifier.NativePropertyDefinition

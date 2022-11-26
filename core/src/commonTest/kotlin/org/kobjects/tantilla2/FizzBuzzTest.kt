@@ -1,67 +1,39 @@
 package org.kobjects.tantilla2
 
-import org.kobjects.tantilla2.core.*
-import org.kobjects.tantilla2.core.definition.UserRootScope
-import org.kobjects.tantilla2.core.function.Callable
-import org.kobjects.tantilla2.core.function.Parameter
-import org.kobjects.tantilla2.core.parser.Parser
-import org.kobjects.tantilla2.core.type.StrType
-import org.kobjects.tantilla2.core.type.VoidType
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
+import org.kobjects.tantilla2.testing.TantillaTest
 
-class FizzBuzzTest {
-
-    val FIZZ_BUZZ = """
-        def fizz_buzz(): 
-          let x = 1
-          while x <= 20:
+class FizzBuzzTest : TantillaTest("""
+     def fizz_buzz(x: int) -> str: 
             if x % 3 == 0:
               if x % 5 == 0:
-                print("FizzBuzz")
+                return "FizzBuzz"
               else:
-                print("Fizz")
+                return "Fizz"
             elif x % 5 == 0:
-              print("Buzz")
+              return "Buzz"
             else:
-              print(str(x))
+              return str(x)
               
-            x = x + 1
-    """.trimIndent()
-
-
-    @Test
-    fun testFizzBuzz() {
-        val output = mutableListOf<String>()
-
-        val context = TestSystemAbstraction.createScope()
-
-        context.defineNativeFunction(
-            "print", "internal",
-            VoidType,
-            Parameter("text", StrType)) { try {
-                output.add(it.variables[0].toString())
-            } catch (e: Exception) {
-                throw RuntimeException("Issue with context $it", e)
-            } }
-
-        Parser.parse(FIZZ_BUZZ, context)
-
-        val impl = context["fizz_buzz"]!!
-
-        assertNotNull(impl.getValue(null))
-
-        // assertEquals("", impl.toString())
-
-        val runtimeContext = LocalRuntimeContext(GlobalRuntimeContext(context), 1)
-        (impl.getValue(null)!! as Callable).eval(runtimeContext)
-
-        assertEquals(listOf(
-            "1", "2", "Fizz", "4", "Buzz",
-            "Fizz", "7", "8", "Fizz", "Buzz",
-            "11", "Fizz", "13", "14", "FizzBuzz",
-            "16", "17", "Fizz", "19", "Buzz"), output)
-    }
-
-}
+     def test_fizz_buzz():
+       assert(fizz_buzz(1) == "1")
+       assert(fizz_buzz(2) == "2")
+       assert(fizz_buzz(3) == "Fizz")
+       assert(fizz_buzz(4) == "4")
+       assert(fizz_buzz(5) == "Buzz")
+       assert(fizz_buzz(6) == "Fizz")
+       assert(fizz_buzz(7) == "7")
+       assert(fizz_buzz(8) == "8")
+       assert(fizz_buzz(9) == "Fizz")
+       assert(fizz_buzz(10) == "Buzz")       
+       assert(fizz_buzz(11) == "11")
+       assert(fizz_buzz(12) == "Fizz")
+       assert(fizz_buzz(13) == "13")
+       assert(fizz_buzz(14) == "14")
+       assert(fizz_buzz(15) == "FizzBuzz")
+       assert(fizz_buzz(16) == "16")
+       assert(fizz_buzz(17) == "17")
+       assert(fizz_buzz(18) == "Fizz")
+       assert(fizz_buzz(19) == "19")
+       
+               
+""")

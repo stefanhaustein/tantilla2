@@ -7,7 +7,7 @@ import org.kobjects.tantilla2.core.GlobalRuntimeContext
 import org.kobjects.tantilla2.core.Lock
 import org.kobjects.tantilla2.core.SystemAbstraction
 import org.kobjects.tantilla2.core.definition.UserRootScope
-import org.kobjects.tantilla2.core.type.RootScope
+import org.kobjects.tantilla2.core.definition.RootScope
 
 // ./gradlew consoleApp:run -q --console=plain
 

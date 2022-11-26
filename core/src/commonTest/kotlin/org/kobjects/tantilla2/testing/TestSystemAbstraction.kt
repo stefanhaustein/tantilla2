@@ -1,9 +1,9 @@
-package org.kobjects.tantilla2
+package org.kobjects.tantilla2.testing
 
 import org.kobjects.tantilla2.core.Lock
 import org.kobjects.tantilla2.core.SystemAbstraction
 import org.kobjects.tantilla2.core.definition.UserRootScope
-import org.kobjects.tantilla2.core.type.RootScope
+import org.kobjects.tantilla2.core.definition.RootScope
 
 object TestSystemAbstraction : SystemAbstraction {
     override fun write(s: String) {

@@ -120,9 +120,8 @@ object FloatNode {
         override val returnType: Type
             get() = BoolType
 
-        override fun eval(context: LocalRuntimeContext): Boolean {
-            return (left.evalF64(context) == right.evalF64(context))
-        }
+        override fun eval(context: LocalRuntimeContext) =
+            left.evalF64(context) == right.evalF64(context)
 
         override fun children() = listOf(left, right)
 
@@ -141,9 +140,8 @@ object FloatNode {
         override val returnType: Type
             get() = BoolType
 
-        override fun eval(context: LocalRuntimeContext): Boolean {
-            return (left.evalF64(context) == right.evalF64(context))
-        }
+        override fun eval(context: LocalRuntimeContext) =
+            left.evalF64(context) != right.evalF64(context)
 
         override fun children() = listOf(left, right)
 

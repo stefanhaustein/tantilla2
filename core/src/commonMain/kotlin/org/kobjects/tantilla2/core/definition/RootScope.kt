@@ -1,9 +1,9 @@
-package org.kobjects.tantilla2.core.type
+package org.kobjects.tantilla2.core.definition
 
 import org.kobjects.tantilla2.core.*
-import org.kobjects.tantilla2.core.definition.Definition
-import org.kobjects.tantilla2.core.definition.Scope
 import org.kobjects.tantilla2.core.function.Parameter
+import org.kobjects.tantilla2.core.node.expression.StrNode
+import org.kobjects.tantilla2.core.type.*
 import org.kobjects.tantilla2.stdlib.math.MathScope
 
 class RootScope(
@@ -27,6 +27,13 @@ class RootScope(
                 val list = it[0] as List<Any?>
                 systemAbstraction.write(list.joinToString(" "))
             }
+
+        defineNativeFunction("assert", "Throws an exception if the argument does not evaluate to true.",
+            VoidType, Parameter("condition", BoolType), Parameter("message", StrType, StrNode.Const("Assertion failed"))) {
+            if (!(it[0] as Boolean)) {
+                throw IllegalArgumentException(it[1] as String)
+            }
+        }
 
 
     }

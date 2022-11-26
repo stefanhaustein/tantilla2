@@ -14,7 +14,7 @@ import org.kobjects.konsole.compose.AnsiConverter.ansiToAnnotatedString
 import org.kobjects.konsole.compose.ComposeKonsole
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.parser.Parser
-import org.kobjects.tantilla2.core.type.RootScope
+import org.kobjects.tantilla2.core.definition.RootScope
 import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.definition.Scope
