@@ -3,13 +3,12 @@ package org.kobjects.tantilla2.core.type
 import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
 import org.kobjects.tantilla2.core.function.Parameter
 
-data class ListType(
+open class ListType(
     val elementType: Type,
-) : NativeStructDefinition(null, "List[${elementType.typeName}]") {
+    name: String = "List[${elementType.typeName}]"
+) : NativeStructDefinition(null, name) {
 
-    fun empty() = TypedList(this)
-
-    fun create(size: Int, init: (Int) -> Any?) = TypedList(this, MutableList(size, init))
+    open fun create(size: Int, init: (Int) -> Any?) = TypedList(this, MutableList(size, init))
 
     init {
         defineNativeFunction("len", "Returns the length of the list",
@@ -17,4 +16,7 @@ data class ListType(
             (it[0] as TypedList).size.toLong()
         }
     }
+
+    override fun equals(other: Any?): Boolean =
+        other is ListType && other.elementType == elementType && other !is MutableListType
 }

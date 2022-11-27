@@ -11,8 +11,8 @@ def main():
 
   cross_hatch(cx, cy)
 
-  pen.fill_color = Color.WHITE
   pen.stroke_color = Color.TRANSPARENT
+  pen.fill_color = Color.WHITE
   pen.rect(cx-120, cy-100, 240, 200)
 
   pen.fill_color = Color.gray(0.5)
@@ -42,6 +42,7 @@ def main():
   pen.circle(cx, cy, 135)
   pen.line(cx - 120, cy, cx + 120, cy)
   pen.line(cx, cy - 40, cx, cy + 40)
+
   pen.stroke_color = Color.BLACK
   pen.line(cx, cy + 40, cx, cy + 60)
 

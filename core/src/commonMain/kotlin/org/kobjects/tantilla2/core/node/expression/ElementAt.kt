@@ -1,12 +1,9 @@
 package org.kobjects.tantilla2.core.node.expression
 
 import org.kobjects.tantilla2.core.*
-import org.kobjects.tantilla2.core.type.IntType
-import org.kobjects.tantilla2.core.type.ListType
-import org.kobjects.tantilla2.core.type.TypedList
 import org.kobjects.tantilla2.core.node.AssignableNode
 import org.kobjects.tantilla2.core.node.Node
-import org.kobjects.tantilla2.core.type.Type
+import org.kobjects.tantilla2.core.type.*
 
 class ElementAt(
     val baseExpr: Node,
@@ -14,7 +11,7 @@ class ElementAt(
 ) : AssignableNode() {
 
     init {
-        if (baseExpr.returnType !is ListType) {
+        if (baseExpr.returnType !is ListType && baseExpr.returnType !is MutableListType) {
             throw IllegalArgumentException("Base expression must be of list type")
         }
         if (indexExpr.returnType != IntType) {
@@ -23,7 +20,7 @@ class ElementAt(
     }
 
     override fun assign(context: LocalRuntimeContext, value: Any?) {
-        val list = baseExpr.eval(context) as TypedList
+        val list = baseExpr.eval(context) as MutableTypedList
         val index = indexExpr.evalF64(context).toInt()
         list[index] = value
     }
