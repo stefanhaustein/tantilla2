@@ -149,7 +149,8 @@ fun RenderAppBar(
                         "GraphicsDemo" to { viewModel.loadExample("GraphicsDemo.tt") },
                         "RayTracer" to { viewModel.loadExample("RayTracer.tt") },
                         "RuntimeError" to { viewModel.loadExample("RuntimeError.tt") },
-                        "CompilationError" to { viewModel.loadExample("CompilationError.tt") }
+                        "CompilationError" to { viewModel.loadExample("CompilationError.tt") },
+                        "AoC Day 1" to { viewModel.loadExample("aoc/Day1.tt") },
                     )
                     RenderDropDownMenu(
                         showClearMenu,

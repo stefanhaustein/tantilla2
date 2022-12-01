@@ -13,6 +13,14 @@ object StrType : NativeStructDefinition(
         it[0].toString()
     }
 )  {
-
-
+    init {
+        defineMethod(
+            "split",
+            "Split the string at given delimiter",
+            ListType(StrType),
+            Parameter("delimiter", StrType)
+        ) {
+            TypedList(StrType, (it[0] as String).split(it[1] as String))
+        }
+    }
 }

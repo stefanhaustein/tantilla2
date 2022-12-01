@@ -183,7 +183,8 @@ object ExpressionParser {
     fun parsePrimary(tokenizer: TantillaTokenizer, context: ParsingContext) =
         when (tokenizer.current.type) {
             TokenType.NUMBER -> createNumberLiteral(tokenizer.next().text);
-            TokenType.STRING -> StrNode.Const(tokenizer.next().text.unquote())
+            TokenType.STRING -> StrNode.Const(tokenizer.next().text.unquote().unescape())
+            TokenType.MULTILINE_STRING ->StrNode.Const(tokenizer.next().text.unquoteMultiline(), true)
             TokenType.IDENTIFIER ->  if (tokenizer.current.text == "lambda")
                 parseLambda(tokenizer, context) else parseFreeIdentifier(tokenizer, context)
             else -> {

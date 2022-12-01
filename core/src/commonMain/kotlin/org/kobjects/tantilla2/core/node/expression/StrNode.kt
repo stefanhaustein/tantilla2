@@ -13,7 +13,8 @@ import org.kobjects.tantilla2.core.type.BoolType
 object StrNode {
 
     class Const(
-        val value: String
+        val value: String,
+        val multiline: Boolean = false
     ): LeafNode() {
         override val returnType: Type
             get() = StrType
@@ -21,7 +22,11 @@ object StrNode {
         override fun eval(ctx: LocalRuntimeContext) = value
 
         override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
-            writer.appendQuoted(value)
+            if (multiline) {
+                writer.appendTripleQuoted(value)
+            } else {
+                writer.appendQuoted(value)
+            }
         }
     }
 
