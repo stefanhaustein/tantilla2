@@ -2,6 +2,7 @@ package org.kobjects.tantilla2.core.node.expression
 
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.LocalRuntimeContext
+import org.kobjects.tantilla2.core.Precedence
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.Parameter
@@ -46,7 +47,7 @@ class Apply(
 
     override fun serializeCode(sb: CodeWriter, parentPrcedence: Int) {
         if (asMethod) {
-            sb.appendCode(parameters[0])
+            sb.appendCode(parameters[0], Precedence.DOT)
             sb.append(".")
         }
         sb.appendCode(callable)

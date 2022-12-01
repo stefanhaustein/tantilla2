@@ -34,7 +34,7 @@ class WhileNode(
 
 
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
-        writer.append("while ")
+        writer.appendKeyword("while ")
         writer.appendCode(condition)
         writer.append(':').indent().newline()
         writer.appendCode(body)

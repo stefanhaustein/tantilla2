@@ -38,7 +38,7 @@ class ForNode(
         ForNode(iteratorName, iteratorIndex, newChildren[0], newChildren[1])
 
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
-        writer.append("for ").append(iteratorName).append(" in ")
+        writer.appendKeyword("for ").appendDeclaration(iteratorName).appendKeyword(" in ")
         writer.appendCode(rangeExpression)
         writer.append(':').indent().newline()
         writer.appendCode(bodyExpression)
