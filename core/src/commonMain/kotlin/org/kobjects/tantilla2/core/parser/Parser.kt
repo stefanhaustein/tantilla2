@@ -38,7 +38,7 @@ fun String.unescape(): String {
 }
 
 object Parser {
-    val DECLARATION_KEYWORDS = setOf("def", "import", "struct", "trait", "unit", "impl", "static", "mut")
+    val DECLARATION_KEYWORDS = setOf("def", "import", "struct", "trait", "unit", "impl", "static", "mut", "enum")
 
     val VALID_AFTER_STATEMENT = setOf(")", ",", "]", "}", "<|")
 
@@ -150,6 +150,7 @@ object Parser {
         }
 
         return when (val kind = tokenizer.current.text) {
+            "enum" -> parseEnum(tokenizer, context)
             "def" -> {
                 val isMethod = !explicitlyStatic
                         && (scope is StructDefinition || scope is TraitDefinition || scope is ImplDefinition)
@@ -197,6 +198,20 @@ object Parser {
             }
             else -> throw tokenizer.exception("Declaration expected.")
         }
+    }
+
+    fun parseEnum(tokenizer: TantillaTokenizer, parsingContext: ParsingContext): EnumDefinition {
+        tokenizer.consume("enum")
+        val name = tokenizer.consume(TokenType.IDENTIFIER)
+        val enumDefinition = EnumDefinition(parsingContext.scope, name)
+
+        tokenizer.consume(":")
+        while (tokenizer.current.type == TokenType.LINE_BREAK && getIndent(tokenizer.current.text) > parsingContext.depth) {
+            tokenizer.consume(TokenType.LINE_BREAK)
+            val literalName = tokenizer.consume(TokenType.IDENTIFIER)
+            enumDefinition.add(EnumLiteral(enumDefinition, literalName))
+        }
+        return enumDefinition
     }
 
     fun consumeLine(tokenizer: TantillaTokenizer, startPos: Int): String {
