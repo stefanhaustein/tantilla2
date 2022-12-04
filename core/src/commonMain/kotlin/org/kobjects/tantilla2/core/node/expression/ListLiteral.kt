@@ -4,23 +4,28 @@ import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.type.ListType
 import org.kobjects.tantilla2.core.type.TypedList
 import org.kobjects.tantilla2.core.node.Node
+import org.kobjects.tantilla2.core.type.MutableListType
 import org.kobjects.tantilla2.core.type.commonType
 
 class ListLiteral(
     val elements: List<Node>,
+    val mutable: Boolean
 ) : Node() {
 
     override fun eval(context: LocalRuntimeContext): TypedList {
         return returnType.create(elements.size) { elements[it].eval(context) }
     }
 
-    override val returnType = ListType(commonType(elements.map { it.returnType }))
+    override val returnType = if (mutable) MutableListType(commonType(elements.map { it.returnType })) else ListType(commonType(elements.map { it.returnType }))
 
     override fun children(): List<Node> = elements
 
-    override fun reconstruct(newChildren: List<Node>) = ListLiteral(newChildren)
+    override fun reconstruct(newChildren: List<Node>) = ListLiteral(newChildren, mutable)
 
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
+        if (mutable) {
+            writer.append("mut ")
+        }
         writer.append('[')
         if (elements.isNotEmpty()) {
             writer.appendCode(elements[0])

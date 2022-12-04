@@ -13,5 +13,16 @@ class MutableListType(
 
     override fun create(size: Int, init: (Int) -> Any?) = MutableTypedList(this, MutableList(size, init))
 
+    init {
+        defineMethod("append", "Appends an element to the list",
+            VoidType,
+            Parameter("value", elementType)) {
+            (it[0] as MutableTypedList).data.add(it[1])
+        }
 
+        defineMethod("sort", "Sort this list in place.",
+            VoidType) {
+            ((it[0] as MutableTypedList).data as (MutableList<Comparable<Any>>)).sort()
+        }
+    }
 }

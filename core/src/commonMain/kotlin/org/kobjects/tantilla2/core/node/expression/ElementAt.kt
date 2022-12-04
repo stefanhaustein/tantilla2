@@ -11,8 +11,8 @@ class ElementAt(
 ) : AssignableNode() {
 
     init {
-        if (baseExpr.returnType !is ListType && baseExpr.returnType !is MutableListType) {
-            throw IllegalArgumentException("Base expression must be of list type")
+        if (baseExpr.returnType !is ListType && baseExpr.returnType !is MutableListType && baseExpr.returnType != StrType) {
+            throw IllegalArgumentException("Base expression must be of list or str type")
         }
         if (indexExpr.returnType != IntType) {
             throw IllegalArgumentException("Index expression must be int.")
@@ -25,19 +25,23 @@ class ElementAt(
         list[index] = value
     }
 
-
     override val returnType: Type
-        get() = (baseExpr.returnType as ListType).elementType
+        get() = if (baseExpr.returnType == StrType) StrType else (baseExpr.returnType as ListType).elementType
 
     override fun children(): List<Node> = listOf(baseExpr, indexExpr)
 
     override fun eval(context: LocalRuntimeContext): Any? {
-        val list = baseExpr.eval(context) as TypedList
         val index = indexExpr.evalF64(context).toInt()
+        if (baseExpr.returnType == StrType) {
+            val s = baseExpr.eval(context) as String
+            return s.substring(index, index + 1)
+        } else {
+        val list = baseExpr.eval(context) as TypedList
         if (index < 0 || index >= list.size) {
             throw context.globalRuntimeContext.createException(null, this, "List index $index out of range(0, ${list.size})")
         }
        return list[index]
+        }
     }
 
     override fun reconstruct(newChildren: List<Node>) =

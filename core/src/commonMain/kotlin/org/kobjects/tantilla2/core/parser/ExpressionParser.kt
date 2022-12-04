@@ -185,11 +185,22 @@ object ExpressionParser {
             TokenType.NUMBER -> createNumberLiteral(tokenizer.next().text);
             TokenType.STRING -> StrNode.Const(tokenizer.next().text.unquote().unescape())
             TokenType.MULTILINE_STRING ->StrNode.Const(tokenizer.next().text.unquoteMultiline(), true)
-            TokenType.IDENTIFIER ->  if (tokenizer.current.text == "lambda")
-                parseLambda(tokenizer, context) else parseFreeIdentifier(tokenizer, context)
+            TokenType.IDENTIFIER ->  when (tokenizer.current.text) {
+                "mut" -> {
+                    tokenizer.consume("mut")
+                    tokenizer.consume("[")
+                    ListLiteral(parseList(tokenizer, context, "]"), true)
+                }
+                "lambda" -> parseLambda(tokenizer, context)
+                else -> parseFreeIdentifier(tokenizer, context)
+            }
             else -> {
+                val mutable = tokenizer.tryConsume("mut")
                 when (tokenizer.current.text) {
                     "(" -> {
+                        if (mutable) {
+                            throw tokenizer.exception("'[' expected after mut.")
+                        }
                         tokenizer.consume("(")
                         val result = parseExpression(tokenizer, context)
                         tokenizer.consume(")")
@@ -197,7 +208,7 @@ object ExpressionParser {
                     }
                     "[" -> {
                         tokenizer.consume("[")
-                        ListLiteral(parseList(tokenizer, context, "]"))
+                        ListLiteral(parseList(tokenizer, context, "]"), false)
                     }
                     else -> throw tokenizer.exception("Number, identifier or opening bracket expected here.")
                 }
@@ -339,7 +350,7 @@ object ExpressionParser {
         }
 
         if (varargIndex != -1) {
-            parameterExpressions[varargIndex] = ListLiteral(varargs)
+            parameterExpressions[varargIndex] = ListLiteral(varargs, false)
         }
 
         for (i in expectedParameters.indices) {
@@ -347,7 +358,7 @@ object ExpressionParser {
             if (parameterExpressions[i] == null) {
                 if (expectedParameter.defaultValueExpression == null) {
                     if (expectedParameter.isVararg) {
-                        parameterExpressions[i] = ListLiteral(varargs)
+                        parameterExpressions[i] = ListLiteral(varargs, false)
                     } else {
                         throw tokenizer.exception("Parameter '${expectedParameter.name}' is missing.")
                     }

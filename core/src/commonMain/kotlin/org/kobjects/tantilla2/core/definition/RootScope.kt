@@ -16,6 +16,7 @@ class RootScope(
         add(FloatType)
         add(IntType)
         add(ListType(AnyType))
+        add(MutableListType(AnyType))
         add(StrType)
 
         add(MathScope)

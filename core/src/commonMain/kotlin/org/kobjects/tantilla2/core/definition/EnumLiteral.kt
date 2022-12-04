@@ -11,18 +11,19 @@ class EnumLiteral(
         get() = Definition.Kind.ENUM_LITERAL
 
     override fun getValue(self: Any?): Any? {
-        TODO("Not yet implemented")
+        return this
     }
 
     override fun serializeSummary(writer: CodeWriter) {
-        TODO("Not yet implemented")
+        writer.append(name)
     }
 
     override fun serializeTitle(writer: CodeWriter, abbreviated: Boolean) {
-        TODO("Not yet implemented")
+        writer.append(name)
     }
 
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
-        TODO("Not yet implemented")
+        writer.append(name)
+        writer.newline()
     }
 }

@@ -1,0 +1,5 @@
+enum Field:
+  SNAKE
+  FOOD
+  EMPTY
+
