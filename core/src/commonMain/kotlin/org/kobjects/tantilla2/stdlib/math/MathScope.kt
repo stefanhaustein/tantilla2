@@ -2,11 +2,9 @@ package org.kobjects.tantilla2.stdlib.math
 
 import org.kobjects.tantilla2.core.definition.UnitDefinition
 import org.kobjects.tantilla2.core.function.Parameter
+import org.kobjects.tantilla2.core.node.expression.FloatNode
 import org.kobjects.tantilla2.core.type.FloatType
-import kotlin.math.ceil
-import kotlin.math.cos
-import kotlin.math.floor
-import kotlin.math.sin
+import kotlin.math.*
 
 object MathScope : UnitDefinition(null, "math") {
 
@@ -38,6 +36,29 @@ object MathScope : UnitDefinition(null, "math") {
             FloatType,
             Parameter("x", FloatType)) {
             cos(it.f64(0))
+        }
+        defineNativeFunction(
+            "log2",
+            "Computes the base 2 logarithm argument.",
+            FloatType,
+            Parameter("x", FloatType)) {
+            log2(it.f64(0))
+        }
+        defineNativeFunction(
+            "log10",
+            "Computes the base 10 logarithm argument.",
+            FloatType,
+            Parameter("x", FloatType)) {
+            log10(it.f64(0))
+        }
+        defineNativeFunction(
+            "log",
+            "Computes the logarithm of the argument.",
+            FloatType,
+            Parameter("x", FloatType),
+            Parameter("base", FloatType, FloatNode.Const(E))
+        ) {
+            log(it.f64(0), it.f64(1))
         }
     }
 

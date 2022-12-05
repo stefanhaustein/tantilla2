@@ -15,6 +15,20 @@ object StrType : NativeStructDefinition(
 )  {
     init {
         defineMethod(
+            "len",
+            "Returns the length of the string",
+            IntType
+        ) {
+            (it[0] as String).length.toLong()
+        }
+        defineMethod(
+            "ord",
+            "Returns the value of the first code point in this string",
+            IntType
+        ) {
+            (it[0] as String).first().code.toLong()
+        }
+        defineMethod(
             "split",
             "Split the string at given delimiter",
             ListType(StrType),

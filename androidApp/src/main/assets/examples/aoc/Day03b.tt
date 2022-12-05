@@ -1,0 +1,36 @@
+def calculate_priority(s: str) -> int:
+  let v = ord(s)
+  if  v > 96:
+    return v - 96
+  return v - 64 + 26
+
+def main():
+  let mut score = 0
+  let mut group = 0
+  let mut n = 0
+  for line in RUCKSACKS.split("\n"):
+    let mut types = 0
+    for i in range(0, len(line)):
+      let p = calculate_priority(line[i])
+      let mask = 1 << (p - 1)
+      types = types | mask
+
+    if n == 0:
+      group = types
+    else:
+      group = group & types
+
+    if n == 2:
+      score = score + 1 + int(math.log2(group))
+      n = 0
+    else:
+      n = n + 1
+
+  print(score)
+
+RUCKSACKS = """vJrwpWtwJgWrhcsFMMfFFhFp
+jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
+PmmdzqPrVvPwwTWBwg
+wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn
+ttgJtRGJQctTZtZT
+CrZsJsPPZsGzwwsLwLmpwMDw"""

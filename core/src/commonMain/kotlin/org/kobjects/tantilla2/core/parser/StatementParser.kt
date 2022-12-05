@@ -19,6 +19,7 @@ object StatementParser {
             "if" -> parseIf(tokenizer, context)
             "let" -> parseLet(tokenizer, context)
             "return" -> parseReturn(tokenizer, context)
+            "break" -> parseBreak(tokenizer, context)
             "while" -> parseWhile(tokenizer, context)
             else -> {
                 if (tokenizer.current.type == TokenType.COMMENT) {
@@ -64,7 +65,10 @@ object StatementParser {
         return Let(definition, type, typeIsExplicit, initializer)
     }
 
-
+    fun parseBreak(tokenizer: TantillaTokenizer, context: ParsingContext): Node {
+        tokenizer.consume("break")
+        return FlowControlNode(FlowSignal.Kind.BREAK)
+    }
 
     fun parseReturn(tokenizer: TantillaTokenizer, context: ParsingContext): Node {
         tokenizer.consume("return")
