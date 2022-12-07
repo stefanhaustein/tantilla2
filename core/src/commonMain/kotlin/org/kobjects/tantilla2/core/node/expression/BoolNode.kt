@@ -27,7 +27,7 @@ object BoolNode {
 
     class Or(private val left: Node, private val right: Node) : Node() {
         override fun eval(context: LocalRuntimeContext): Boolean =
-            (left.eval(context) as Boolean) && (right.eval(context) as Boolean)
+            (left.eval(context) as Boolean) || (right.eval(context) as Boolean)
 
         override val returnType: Type
             get() = BoolType
