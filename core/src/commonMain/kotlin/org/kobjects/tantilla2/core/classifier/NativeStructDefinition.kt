@@ -18,7 +18,7 @@ open class NativeStructDefinition(
     override val kind: Definition.Kind
         get() = Definition.Kind.TYPE
 
-    override val type: FunctionType
+    override val type: StructMetaType
         get() = StructMetaType(this, ctorParams)
 
     override fun eval(context: LocalRuntimeContext) = ctor(context)

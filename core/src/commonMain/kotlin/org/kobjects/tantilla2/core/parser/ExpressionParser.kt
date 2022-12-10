@@ -2,6 +2,7 @@ package org.kobjects.tantilla2.core.parser
 
 import org.kobjects.tantilla2.core.node.expression.StrNode
 import org.kobjects.tantilla2.core.*
+import org.kobjects.tantilla2.core.classifier.Generic
 import org.kobjects.tantilla2.core.type.StrType
 import org.kobjects.parserlib.expressionparser.ExpressionParser as GreenspunExpressionParser
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
@@ -49,6 +50,17 @@ object ExpressionParser {
     }
 
     fun parseElementAt(tokenizer: TantillaTokenizer, context: ParsingContext, base: Node): Node {
+        if (base.returnType is StructMetaType
+            && (base.returnType as StructMetaType).wrapped is Generic) {
+            val generic = ((base.returnType as StructMetaType).wrapped) as Generic
+            val typeParameters = mutableListOf<Type>()
+            do {
+                typeParameters.add(TypeParser.parseType(tokenizer, context))
+            } while(tokenizer.tryConsume(","))
+            tokenizer.consume("]")
+            return GenericTypeNode(base, typeParameters)
+        }
+
         val result = ElementAt(base, parseExpression(tokenizer, context))
         tokenizer.consume("]")
         return result

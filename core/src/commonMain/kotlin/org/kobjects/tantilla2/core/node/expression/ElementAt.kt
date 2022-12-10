@@ -12,7 +12,7 @@ class ElementAt(
 
     init {
         if (baseExpr.returnType !is ListType && baseExpr.returnType !is MutableListType && baseExpr.returnType != StrType) {
-            throw IllegalArgumentException("Base expression must be of list or str type")
+            throw IllegalArgumentException("Base expression must be of list or str type instead of ${baseExpr.returnType}: $baseExpr")
         }
         if (indexExpr.returnType != IntType) {
             throw IllegalArgumentException("Index expression must be int.")
@@ -31,12 +31,18 @@ class ElementAt(
     override fun children(): List<Node> = listOf(baseExpr, indexExpr)
 
     override fun eval(context: LocalRuntimeContext): Any? {
-        val index = indexExpr.evalF64(context).toInt()
+        var index = indexExpr.evalF64(context).toInt()
         if (baseExpr.returnType == StrType) {
             val s = baseExpr.eval(context) as String
+            if (index < 0) {
+                index = s.length + index
+            }
             return s.substring(index, index + 1)
         } else {
         val list = baseExpr.eval(context) as TypedList
+        if (index < 0) {
+           index = list.size + index
+        }
         if (index < 0 || index >= list.size) {
             throw context.globalRuntimeContext.createException(null, this, "List index $index out of range(0, ${list.size})")
         }

@@ -1,6 +1,6 @@
 def main():
   let mut current = 0
-  let all = mut[0]
+  let all = MutableList[int]()
   for line in (CALORIES + "\n").split("\n"):
     if line == "":
       all.append(current)

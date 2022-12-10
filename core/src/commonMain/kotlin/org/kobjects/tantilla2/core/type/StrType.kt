@@ -22,6 +22,14 @@ object StrType : NativeStructDefinition(
             (it[0] as String).length.toLong()
         }
         defineMethod(
+            "join",
+            "Joins the list parameter, separating elements with this string.",
+            StrType,
+            Parameter("list", ListType(StrType))
+        ) {
+            (it[1] as TypedList).joinToString(it[0] as String)
+        }
+        defineMethod(
             "ord",
             "Returns the value of the first code point in this string",
             IntType

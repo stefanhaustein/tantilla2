@@ -3,10 +3,7 @@ package org.kobjects.tantilla2.core.definition
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.CompilationResults
 import org.kobjects.tantilla2.core.LocalRuntimeContext
-import org.kobjects.tantilla2.core.classifier.FieldDefinition
-import org.kobjects.tantilla2.core.classifier.ImplDefinition
-import org.kobjects.tantilla2.core.classifier.NativePropertyDefinition
-import org.kobjects.tantilla2.core.classifier.Updatable
+import org.kobjects.tantilla2.core.classifier.*
 import org.kobjects.tantilla2.core.function.*
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.parser.Parser
@@ -201,10 +198,10 @@ abstract class Scope(
 
     override fun getValue(self: Any?) = this
 
-    override fun toString() = name
+    override fun toString() = qualifiedName()
 
     override fun serializeTitle(writer: CodeWriter, abbreviated: Boolean) {
-        writer.appendKeyword(kind.name.lowercase()).append(' ').appendDeclaration(name)
+        writer.appendKeyword(kind.name.lowercase()).append(' ').appendDeclaration(qualifiedName())
     }
 
     fun serializeBody(writer: CodeWriter) {
@@ -220,7 +217,7 @@ abstract class Scope(
     }
 
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
-        writer.appendKeyword(kind.name.lowercase()).append(' ').appendDeclaration(name).append(":")
+        writer.appendKeyword(kind.name.lowercase()).append(' ').appendDeclaration(qualifiedName()).append(":")
         writer.indent()
         writer.newline()
 
@@ -288,5 +285,15 @@ abstract class Scope(
         return sb.toString()
     }
 
+    fun qualifiedName(): String {
+        if (this is Generic) {
+            val sb = StringBuilder(name)
+            sb.append("[")
+            sb.append(genericParameterTypes[0])
+            sb.append("]")
+            return sb.toString()
+        }
+        return name
+    }
 
 }

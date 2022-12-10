@@ -9,6 +9,7 @@ import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.type.ListType
+import org.kobjects.tantilla2.core.type.MutableListType
 import org.kobjects.tantilla2.core.type.VoidType
 
 object TypeParser {
@@ -23,11 +24,11 @@ object TypeParser {
             return org.kobjects.tantilla2.core.type.StrType
         }
         var name = tokenizer.consume(TokenType.IDENTIFIER)
-        if (name.equals("List")) {
+        if (name.equals("List") || name.equals("MutableList")) {
             tokenizer.consume("[")
             val elementType = parseType(tokenizer, context)
             tokenizer.consume("]")
-            return ListType(elementType)
+            return if (name == "List") ListType(elementType) else MutableListType(elementType)
         }
         var scope = context.scope
         while (tokenizer.tryConsume(".")) {
