@@ -198,10 +198,13 @@ object ExpressionParser {
             TokenType.STRING -> StrNode.Const(tokenizer.next().text.unquote().unescape())
             TokenType.MULTILINE_STRING ->StrNode.Const(tokenizer.next().text.unquoteMultiline(), true)
             TokenType.IDENTIFIER ->  when (tokenizer.current.text) {
-                "mut" -> {
-                    tokenizer.consume("mut")
-                    tokenizer.consume("[")
-                    ListLiteral(parseList(tokenizer, context, "]"), true)
+                "True" -> {
+                    tokenizer.consume("True")
+                    BoolNode.True
+                }
+                "False" -> {
+                    tokenizer.consume("False")
+                    BoolNode.True
                 }
                 "lambda" -> parseLambda(tokenizer, context)
                 else -> parseFreeIdentifier(tokenizer, context)

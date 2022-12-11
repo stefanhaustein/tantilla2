@@ -3,11 +3,32 @@ package org.kobjects.tantilla2.core.node.expression
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.Precedence
+import org.kobjects.tantilla2.core.node.LeafNode
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.type.BoolType
 import org.kobjects.tantilla2.core.type.Type
 
 object BoolNode {
+
+    object True : LeafNode() {
+        override fun eval(context: LocalRuntimeContext) = true
+
+        override val returnType = BoolType
+
+        override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
+            writer.append("True")
+        }
+    }
+
+    object False : LeafNode() {
+        override fun eval(context: LocalRuntimeContext) = false
+
+        override val returnType = BoolType
+
+        override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
+            writer.append("False")
+        }
+    }
 
     class And(private val left: Node, private val right: Node) : Node() {
         override fun eval(context: LocalRuntimeContext): Boolean =
