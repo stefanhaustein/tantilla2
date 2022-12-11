@@ -1,10 +1,10 @@
 package org.kobjects.tantilla2.core.node.expression
 
 import org.kobjects.tantilla2.core.*
-import org.kobjects.tantilla2.core.type.ListType
-import org.kobjects.tantilla2.core.type.TypedList
+import org.kobjects.tantilla2.core.collection.ListType
+import org.kobjects.tantilla2.core.collection.TypedList
 import org.kobjects.tantilla2.core.node.Node
-import org.kobjects.tantilla2.core.type.MutableListType
+import org.kobjects.tantilla2.core.collection.MutableListType
 import org.kobjects.tantilla2.core.type.commonType
 
 class ListLiteral(
@@ -13,7 +13,7 @@ class ListLiteral(
 ) : Node() {
 
     override fun eval(context: LocalRuntimeContext): TypedList {
-        return returnType.create(elements.size) { elements[it].eval(context) }
+        return returnType.create(elements.size) { elements[it].eval(context)!! }
     }
 
     override val returnType = if (mutable) MutableListType(commonType(elements.map { it.returnType })) else ListType(commonType(elements.map { it.returnType }))

@@ -1,6 +1,10 @@
 package org.kobjects.tantilla2.core.definition
 
 import org.kobjects.tantilla2.core.*
+import org.kobjects.tantilla2.core.collection.ListType
+import org.kobjects.tantilla2.core.collection.MapType
+import org.kobjects.tantilla2.core.collection.MutableListType
+import org.kobjects.tantilla2.core.collection.MutableMapType
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.node.expression.StrNode
 import org.kobjects.tantilla2.core.type.*
@@ -17,6 +21,8 @@ class RootScope(
         add(IntType)
         add(ListType(TypeVariable("E")))
         add(MutableListType(TypeVariable("E")))
+        add(MapType(TypeVariable("K"), TypeVariable("V")))
+        add(MutableMapType(TypeVariable("K"), TypeVariable("V")))
         add(StrType)
 
         add(MathScope)
@@ -25,7 +31,7 @@ class RootScope(
                 "Print the value of the text parameter to the console.",
                 VoidType, Parameter("value", AnyType, isVararg = true)
             ) {
-                val list = it[0] as List<Any?>
+                val list = it[0] as Iterable<Any?>
                 systemAbstraction.write(list.joinToString(" "))
             }
 

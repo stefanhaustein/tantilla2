@@ -69,7 +69,7 @@ object BoolNode {
             get() = BoolType
 
         override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
-            writer.appendInfix(this, parentPrecedence, "and", Precedence.LOGICAL_AND)
+            writer.appendPrefix(this, parentPrecedence, "not", Precedence.LOGICAL_NOT)
         }
 
         override fun reconstruct(newChildren: List<Node>) = Not(newChildren[0])

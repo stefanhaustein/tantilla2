@@ -1,6 +1,8 @@
 package org.kobjects.tantilla2.core.type
 
 import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
+import org.kobjects.tantilla2.core.collection.Range
+import org.kobjects.tantilla2.core.collection.RangeType
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.node.expression.IntNode
 import kotlin.math.max

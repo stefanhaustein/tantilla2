@@ -10,6 +10,7 @@ import org.kobjects.tantilla2.core.parser.Parser
 import org.kobjects.tantilla2.core.parser.ParsingContext
 import org.kobjects.tantilla2.core.parser.TantillaTokenizer
 import org.kobjects.tantilla2.core.parser.TokenType
+import org.kobjects.tantilla2.core.type.GenericType
 import org.kobjects.tantilla2.core.type.Type
 
 abstract class Scope(
@@ -286,7 +287,7 @@ abstract class Scope(
     }
 
     fun qualifiedName(): String {
-        if (this is Generic) {
+        if (this is GenericType) {
             val sb = StringBuilder(name)
             sb.append("[")
             sb.append(genericParameterTypes[0])

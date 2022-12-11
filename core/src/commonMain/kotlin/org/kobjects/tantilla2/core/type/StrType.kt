@@ -1,6 +1,8 @@
 package org.kobjects.tantilla2.core.type
 
 import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
+import org.kobjects.tantilla2.core.collection.ListType
+import org.kobjects.tantilla2.core.collection.TypedList
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.node.expression.StrNode
 
@@ -27,7 +29,7 @@ object StrType : NativeStructDefinition(
             StrType,
             Parameter("list", ListType(StrType))
         ) {
-            (it[1] as TypedList).joinToString(it[0] as String)
+            (it[1] as TypedList).data.joinToString(it[0] as String)
         }
         defineMethod(
             "ord",

@@ -2,7 +2,7 @@ package org.kobjects.tantilla2.core.parser
 
 import org.kobjects.tantilla2.core.node.expression.StrNode
 import org.kobjects.tantilla2.core.*
-import org.kobjects.tantilla2.core.classifier.Generic
+import org.kobjects.tantilla2.core.type.GenericType
 import org.kobjects.tantilla2.core.type.StrType
 import org.kobjects.parserlib.expressionparser.ExpressionParser as GreenspunExpressionParser
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
@@ -51,8 +51,9 @@ object ExpressionParser {
 
     fun parseElementAt(tokenizer: TantillaTokenizer, context: ParsingContext, base: Node): Node {
         if (base.returnType is StructMetaType
-            && (base.returnType as StructMetaType).wrapped is Generic) {
-            val generic = ((base.returnType as StructMetaType).wrapped) as Generic
+            && (base.returnType as StructMetaType).wrapped is GenericType
+        ) {
+            val generic = ((base.returnType as StructMetaType).wrapped) as GenericType
             val typeParameters = mutableListOf<Type>()
             do {
                 typeParameters.add(TypeParser.parseType(tokenizer, context))
@@ -417,6 +418,7 @@ object ExpressionParser {
             GreenspunExpressionParser.infix(Precedence.BITWISE_AND, "&") { _, _, _, l, r -> IntNode.And(l, r)},
             GreenspunExpressionParser.infix(Precedence.BITWISE_XOR, "^") { _, _, _, l, r -> IntNode.Xor(l, r)},
             GreenspunExpressionParser.infix(Precedence.BITWISE_OR, "|") { _, _, _, l, r -> IntNode.Or(l, r)},
+            GreenspunExpressionParser.infix(Precedence.RELATIONAL, "in") { _, _, _, l, r, -> CollectionNode.In(l, r)},
             GreenspunExpressionParser.suffix(Precedence.RELATIONAL, "as") {
                     tokenizer, context, _, base -> parseAs(tokenizer, context, base) },
             GreenspunExpressionParser.infix(Precedence.RELATIONAL, "==") { _, _, _, l, r ->  if (bothInt(l, r)) IntNode.Eq(l, r) else if (bothNumber(l, r)) FloatNode.Eq(l, r) else StrNode.Eq(l, r) },

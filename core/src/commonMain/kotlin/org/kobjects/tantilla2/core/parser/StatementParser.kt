@@ -3,8 +3,8 @@ package org.kobjects.tantilla2.core.parser
 import org.kobjects.tantilla2.core.function.FunctionDefinition
 import org.kobjects.tantilla2.core.function.LocalVariableDefinition
 import org.kobjects.tantilla2.core.node.*
-import org.kobjects.tantilla2.core.type.ListType
-import org.kobjects.tantilla2.core.type.RangeType
+import org.kobjects.tantilla2.core.collection.ListType
+import org.kobjects.tantilla2.core.collection.RangeType
 import org.kobjects.tantilla2.core.type.VoidType
 import org.kobjects.tantilla2.core.node.statement.*
 

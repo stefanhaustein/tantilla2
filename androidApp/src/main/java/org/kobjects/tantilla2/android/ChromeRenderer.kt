@@ -163,6 +163,8 @@ fun RenderAppBar(
                         "AoC Day 5b" to { viewModel.loadExample("aoc2022/Day05b.tt") },
                         "AoC Day 6a" to { viewModel.loadExample("aoc2022/Day06a.tt") },
                         "AoC Day 6b" to { viewModel.loadExample("aoc2022/Day06b.tt") },
+                        "AoC Day 7a" to { viewModel.loadExample("aoc2022/Day07a.tt") },
+                        "AoC Day 7b" to { viewModel.loadExample("aoc2022/Day07b.tt") },
                     )
                     RenderDropDownMenu(
                         showClearMenu,

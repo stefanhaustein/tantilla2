@@ -1,52 +1,75 @@
 package org.kobjects.tantilla2.core.node.expression
 
 import org.kobjects.tantilla2.core.*
+import org.kobjects.tantilla2.core.collection.*
 import org.kobjects.tantilla2.core.node.AssignableNode
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.type.*
 
 class ElementAt(
     val baseExpr: Node,
-    val indexExpr: Node
+    val keyExpr: Node
 ) : AssignableNode() {
 
     init {
-        if (baseExpr.returnType !is ListType && baseExpr.returnType !is MutableListType && baseExpr.returnType != StrType) {
-            throw IllegalArgumentException("Base expression must be of list or str type instead of ${baseExpr.returnType}: $baseExpr")
-        }
-        if (indexExpr.returnType != IntType) {
-            throw IllegalArgumentException("Index expression must be int.")
+        val baseType = baseExpr.returnType
+        if (baseType is ListType
+            || baseType is StrType) {
+            if (keyExpr.returnType != IntType) {
+                throw IllegalArgumentException("Index expression must be of type int.")
+            }
+        } else if (baseType is MapType) {
+            if (!baseType.keyType.isAssignableFrom(keyExpr.returnType)) {
+                throw IllegalArgumentException("Key expression must be of type ${baseType.keyType}")
+            }
+        } else {
+            throw IllegalArgumentException("Base expression must be List, Map or str type for index access; actual type: $baseType")
         }
     }
 
     override fun assign(context: LocalRuntimeContext, value: Any?) {
-        val list = baseExpr.eval(context) as MutableTypedList
-        val index = indexExpr.evalF64(context).toInt()
-        list[index] = value
+        val target = baseExpr.eval(context)
+        if (target is MutableTypedList) {
+            val index = keyExpr.evalF64(context).toInt()
+            target[index] = value!!
+        } else {
+            val key = keyExpr.eval(context)
+            (target as MutableTypedMap).data[key!!] = value!!
+        }
     }
 
     override val returnType: Type
-        get() = if (baseExpr.returnType == StrType) StrType else (baseExpr.returnType as ListType).elementType
+        get() = when(baseExpr.returnType) {
+            StrType -> StrType
+            is ListType -> ((baseExpr.returnType) as ListType).elementType
+            is MapType -> ((baseExpr.returnType) as MapType).valueType
+            else -> throw IllegalArgumentException()
+        }
 
-    override fun children(): List<Node> = listOf(baseExpr, indexExpr)
+    override fun children(): List<Node> = listOf(baseExpr, keyExpr)
 
     override fun eval(context: LocalRuntimeContext): Any? {
-        var index = indexExpr.evalF64(context).toInt()
-        if (baseExpr.returnType == StrType) {
-            val s = baseExpr.eval(context) as String
-            if (index < 0) {
-                index = s.length + index
-            }
-            return s.substring(index, index + 1)
+        val base = baseExpr.eval(context)
+        if (base is TypedMap) {
+            val key = keyExpr.eval(context)
+            return base[key!!]
         } else {
-        val list = baseExpr.eval(context) as TypedList
-        if (index < 0) {
-           index = list.size + index
-        }
-        if (index < 0 || index >= list.size) {
-            throw context.globalRuntimeContext.createException(null, this, "List index $index out of range(0, ${list.size})")
-        }
-       return list[index]
+            var index = keyExpr.evalI64(context).toInt()
+            if (base is String) {
+                if (index < 0) {
+                    index = base.length + index
+                }
+                return base.substring(index, index + 1)
+            } else {
+                val list = base as TypedList
+                if (index < 0) {
+                    index = list.size + index
+                }
+                if (index < 0 || index >= list.size) {
+                    throw context.globalRuntimeContext.createException(null, this, "List index $index out of range(0, ${list.size})")
+                }
+                return list[index]
+            }
         }
     }
 
@@ -56,7 +79,7 @@ class ElementAt(
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
         writer.appendCode(baseExpr)
         writer.append("[")
-        writer.appendCode(indexExpr)
+        writer.appendCode(keyExpr)
         writer.append("]")
     }
 }

@@ -8,8 +8,8 @@ import org.kobjects.tantilla2.core.classifier.StructDefinition
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.node.Node
-import org.kobjects.tantilla2.core.type.ListType
-import org.kobjects.tantilla2.core.type.MutableListType
+import org.kobjects.tantilla2.core.collection.ListType
+import org.kobjects.tantilla2.core.collection.MutableListType
 import org.kobjects.tantilla2.core.type.VoidType
 
 object TypeParser {
