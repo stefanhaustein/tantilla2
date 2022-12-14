@@ -1,0 +1,38 @@
+def scan(lines: List[str], map: MutableList[MutableList[bool]], x: int, y: int, dx: int, dy: int):
+  let mut visible_height = 0
+  while x >= 0 and y >= 0 and x < len(lines[0]) and y < len(lines) and visible_height <= 9:
+    let tree_height = int(lines[y][x])
+    if tree_height >= visible_height:
+      map[y][x] = True
+      visible_height = tree_height + 1
+
+    x = x + dx
+    y = y + dy
+
+def main():
+  let lines = FOREST.split("\n")
+  let width = len(lines[0])
+  let height = len(lines)
+  let map = MutableList[MutableList[bool]].init(height, MutableList[bool].init(width, False))
+
+  for y in range(0, height):
+    scan(lines, map, 0, y, 1, 0)
+    scan(lines, map, width - 1, y, -1, 0)
+
+  for x in range(0, width):
+    scan(lines, map, x, 0, 0, 1)
+    scan(lines, map, x, height - 1, 0, -1)
+
+  let mut count = 0
+  for y in range(0, height):
+    for x in range(0, width):
+      if map[y][x]:
+        count = count + 1
+
+  print (count)
+
+FOREST = """30373
+25512
+65332
+33549
+35390"""

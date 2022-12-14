@@ -1,5 +1,8 @@
 package org.kobjects.tantilla2.core.collection
 
+import org.kobjects.tantilla2.core.LocalRuntimeContext
+import org.kobjects.tantilla2.core.function.Callable
+import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.type.IntType
 import org.kobjects.tantilla2.core.type.Type
@@ -50,6 +53,26 @@ class MutableListType(
             VoidType
         ) {
             ((it[0] as MutableTypedList).data as (MutableList<Comparable<Any>>)).sort()
+        }
+
+        defineNativeFunction(
+            "init",
+            "Create a mutable list of the given size, filled using the function parameter",
+            this,
+            Parameter("len", IntType),
+            Parameter("fill", FunctionType.Impl(elementType, listOf(Parameter("index", IntType)))),
+        ) { context ->
+            val size = context.i32(0)
+            val fn = context[1] as Callable
+            val functionContext = LocalRuntimeContext(
+                context.globalRuntimeContext,
+                fn.scopeSize,
+                closure = fn.closure,
+            )
+            MutableTypedList(elementType, MutableList(size) {
+                functionContext.variables[0] = it.toLong()
+                fn.eval(functionContext)!!
+            } )
         }
 
     }

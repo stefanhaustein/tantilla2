@@ -40,6 +40,7 @@ object ExpressionParser {
         if (expectedType == null || expectedType.isAssignableFrom(expr.returnType)) {
             return expr
         }
+
         val implName = expectedType.typeName + " for " + expr.returnType.typeName
         try {
             val impl = context.resolveStaticOrError(implName, true).getValue(null) as ImplDefinition
@@ -134,6 +135,31 @@ object ExpressionParser {
         throw tokenizer.exception("Symbol not found: '$name'.")
     }
 
+    fun parseFunctionExpression(tokenizer: TantillaTokenizer,
+                                context: ParsingContext,
+                                type: FunctionType): Node {
+        if (tokenizer.current.text == "lambda") {
+            return parseLambda(tokenizer, context, type)
+        }
+        val functionScope = LambdaScope(context.scope) // resolvedType = type)
+        for (i in type.parameters.indices) {
+            val parameter = type.parameters[i]
+            functionScope.declareLocalVariable("\$$i", parameter.type, false)
+        }
+/*
+        val closureIndices = mutableListOf<Int>()
+        for (definition in context.scope) {
+            if (definition.kind == Definition.Kind.LOCAL_VARIABLE && !parameterNames.contains(definition.name)) {
+                functionScope.declareLocalVariable(definition.name, definition.type(), definition.mutable)
+                closureIndices.add(definition.index)
+            }
+        } */
+        val body = parseExpression(tokenizer, ParsingContext(functionScope, context.depth + 1), type.returnType)
+
+        return LambdaReference(type, functionScope.locals.size, body)
+    }
+
+
     // Add support for known signature later
     fun parseLambda(
         tokenizer: TantillaTokenizer,
@@ -205,7 +231,7 @@ object ExpressionParser {
                 }
                 "False" -> {
                     tokenizer.consume("False")
-                    BoolNode.True
+                    BoolNode.False
                 }
                 "lambda" -> parseLambda(tokenizer, context)
                 else -> parseFreeIdentifier(tokenizer, context)
@@ -353,7 +379,11 @@ object ExpressionParser {
                     throw tokenizer.exception("Expected parameters $expectedParameters exceeded; index: $index")
                 }
                 val expectedParameter = expectedParameters[index]
-                val expression = parseExpression(tokenizer, context, expectedParameter.type)
+                val expression = if (expectedParameter.type is FunctionType) {
+                    parseFunctionExpression(tokenizer, context, expectedParameter.type)
+                } else {
+                    parseExpression(tokenizer, context, expectedParameter.type)
+                }
                 parameterSerialization.add(Apply.ParameterSerialization(name, expression))
                 if (expectedParameter.isVararg) {
                     varargs.add(expression)

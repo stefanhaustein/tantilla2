@@ -32,9 +32,11 @@ class ElementAt(
         if (target is MutableTypedList) {
             val index = keyExpr.evalF64(context).toInt()
             target[index] = value!!
-        } else {
+        } else if (target is MutableTypedMap) {
             val key = keyExpr.eval(context)
             (target as MutableTypedMap).data[key!!] = value!!
+        } else {
+            throw RuntimeException("Can't assign to type ${baseExpr.returnType}")
         }
     }
 
