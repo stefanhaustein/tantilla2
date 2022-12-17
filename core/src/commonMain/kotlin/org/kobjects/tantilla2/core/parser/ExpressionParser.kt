@@ -237,20 +237,16 @@ object ExpressionParser {
                 else -> parseFreeIdentifier(tokenizer, context)
             }
             else -> {
-                val mutable = tokenizer.tryConsume("mut")
                 when (tokenizer.current.text) {
                     "(" -> {
-                        if (mutable) {
-                            throw tokenizer.exception("'[' expected after mut.")
-                        }
                         tokenizer.consume("(")
-                        val result = parseExpression(tokenizer, context)
+                        val expression = parseExpression(tokenizer, context)
                         tokenizer.consume(")")
-                        result
+                        Parentesized(expression)
                     }
                     "[" -> {
                         tokenizer.consume("[")
-                        ListLiteral(parseList(tokenizer, context, "]"), false)
+                        ListLiteral(parseList(tokenizer, context, "]"))
                     }
                     else -> throw tokenizer.exception("Number, identifier or opening bracket expected here.")
                 }
@@ -396,7 +392,7 @@ object ExpressionParser {
         }
 
         if (varargIndex != -1) {
-            parameterExpressions[varargIndex] = ListLiteral(varargs, false)
+            parameterExpressions[varargIndex] = ListLiteral(varargs)
         }
 
         for (i in expectedParameters.indices) {
@@ -404,7 +400,7 @@ object ExpressionParser {
             if (parameterExpressions[i] == null) {
                 if (expectedParameter.defaultValueExpression == null) {
                     if (expectedParameter.isVararg) {
-                        parameterExpressions[i] = ListLiteral(varargs, false)
+                        parameterExpressions[i] = ListLiteral(varargs)
                     } else {
                         throw tokenizer.exception("Parameter '${expectedParameter.name}' is missing.")
                     }

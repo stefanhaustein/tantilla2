@@ -56,11 +56,6 @@ open class ListType(
                 fn.eval(functionContext)!!
             } )
         }
-
-    }
-
-    override fun serializeType(writer: CodeWriter, scope: Scope?) {
-        writer.append(name).append("[").appendType(elementType, scope).append("]")
     }
 
     open fun create(size: Int, init: (Int) -> Any) = TypedList(this, MutableList(size, init))

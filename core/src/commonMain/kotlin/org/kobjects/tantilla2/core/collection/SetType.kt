@@ -34,10 +34,6 @@ open class SetType(
 
     }
 
-    override fun serializeType(writer: CodeWriter, scope: Scope?) {
-        writer.append(name).append("[").appendType(elementType, scope).append("]")
-    }
-
     override val genericParameterTypes: List<Type> = listOf(elementType)
 
     override fun create(types: List<Type>) = SetType(types.first())

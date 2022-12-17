@@ -288,9 +288,14 @@ abstract class Scope(
 
     fun qualifiedName(): String {
         if (this is GenericType) {
+            val types = genericParameterTypes
             val sb = StringBuilder(name)
             sb.append("[")
-            sb.append(genericParameterTypes[0])
+            sb.append(types[0])
+            for (i in 1 until types.size) {
+                sb.append(", ")
+                sb.append(types[i])
+            }
             sb.append("]")
             return sb.toString()
         }

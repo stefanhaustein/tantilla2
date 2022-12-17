@@ -23,11 +23,6 @@ open class MapType(
     ctor,
 ), CollectionType, GenericType {
 
-    override fun serializeType(writer: CodeWriter, scope: Scope?) {
-        writer.append(name).append("[").appendType(keyType, scope).append(", ")
-            .appendType(valueType, scope).append("]")
-    }
-
     override val genericParameterTypes: List<Type> = listOf(keyType, valueType)
 
     override fun create(types: List<Type>) = MapType(types[0], types[1])

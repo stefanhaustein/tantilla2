@@ -21,11 +21,6 @@ open class PairType(
     { TypedPair(typeA, typeB, it.get(0)!!, it.get(1)!!) },
 ), CollectionType, GenericType {
 
-    override fun serializeType(writer: CodeWriter, scope: Scope?) {
-        writer.append(name).append("[").appendType(typeA, scope).append(", ")
-            .appendType(typeB, scope).append("]")
-    }
-
     override val genericParameterTypes: List<Type> = listOf(typeA, typeB)
 
     override fun create(types: List<Type>) = PairType(types[0], types[1])
