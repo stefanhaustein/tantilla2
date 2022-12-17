@@ -11,6 +11,7 @@ import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.collection.ListType
 import org.kobjects.tantilla2.core.collection.MutableListType
 import org.kobjects.tantilla2.core.collection.PairType
+import org.kobjects.tantilla2.core.type.GenericType
 import org.kobjects.tantilla2.core.type.VoidType
 
 object TypeParser {
@@ -18,34 +19,24 @@ object TypeParser {
 
 
     fun parseType(tokenizer: TantillaTokenizer, context: ParsingContext): Type {
-        if (tokenizer.tryConsume("float")) {
-            return org.kobjects.tantilla2.core.type.FloatType
-        }
-        if (tokenizer.tryConsume("str")) {
-            return org.kobjects.tantilla2.core.type.StrType
-        }
         var name = tokenizer.consume(TokenType.IDENTIFIER)
-        if (name.equals("List") || name.equals("MutableList")) {
-            tokenizer.consume("[")
-            val elementType = parseType(tokenizer, context)
-            tokenizer.consume("]")
-            return if (name == "List") ListType(elementType) else MutableListType(elementType)
-        }
-        if (name.equals("Pair")) {
-            tokenizer.consume("[")
-            val typeA = parseType(tokenizer, context)
-            tokenizer.consume(",")
-            val typeB = parseType(tokenizer, context)
-            tokenizer.consume("]")
-            return PairType(typeA, typeB)
-        }
         var scope = context.scope
         while (tokenizer.tryConsume(".")) {
             scope = scope.resolveStaticOrError(name, scope == context.scope).getValue(null) as Scope
             name = tokenizer.consume(TokenType.IDENTIFIER)
         }
+        val type = scope.resolveStaticOrError(name, scope == context.scope).getValue(null) as Type
 
-        return scope.resolveStaticOrError(name, scope == context.scope).getValue(null) as Type
+        if (type is GenericType && tokenizer.tryConsume("[")) {
+            val arguments = mutableListOf<Type>()
+            do {
+                arguments.add(parseType(tokenizer, context))
+            } while (tokenizer.tryConsume(","))
+            tokenizer.consume("]")
+            return type.create(arguments)
+        }
+
+        return type
     }
 
 

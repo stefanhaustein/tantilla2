@@ -10,6 +10,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import org.kobjects.dialog.DialogManager
 import org.kobjects.dialog.InputLine
+import org.kobjects.konsole.Ansi
 import org.kobjects.konsole.compose.AnsiConverter.ansiToAnnotatedString
 import org.kobjects.konsole.compose.ComposeKonsole
 import org.kobjects.tantilla2.core.*
@@ -311,6 +312,7 @@ class TantillaViewModel(
     fun annotatedCode(code: String, errors: List<Exception>): AnnotatedString {
 
         val writer = CodeWriter("", CodeWriter.defaultHighlighting)
+        writer.append(Ansi.NOT_PROPORTIONAL)
         highlightSyntax(writer, code, errors, runtimeException.value, runtimeExceptionPosition)
 
         return ansiToAnnotatedString(writer.toString())

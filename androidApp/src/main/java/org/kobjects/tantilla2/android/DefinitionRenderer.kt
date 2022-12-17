@@ -8,7 +8,7 @@ import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Fullscreen
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,7 +16,9 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import org.kobjects.konsole.Ansi
 import org.kobjects.konsole.compose.AnsiConverter
 import org.kobjects.tantilla2.android.model.TantillaViewModel
 import org.kobjects.tantilla2.core.CodeWriter
@@ -39,20 +41,14 @@ fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
                 val editable =
                     !definition.isScope() && viewModel.mode.value == TantillaViewModel.Mode.HIERARCHY
                 detectTapGestures(
-                    onLongPress = {
+                    onTap = {
                         if (definition.isScope()) {
                             viewModel.scope().value = definition.getValue(null) as Scope
                         } else if (editable) {
                             viewModel.editDefinition(definition)
                         }
                     },
-                    onTap = {
-                        if (viewModel.expanded.value.contains(definition)) {
-                            viewModel.expanded.value -= definition
-                        } else {
-                            viewModel.expanded.value += definition
-                        }
-                    }
+
                 )
             }
     ) {
@@ -61,6 +57,7 @@ fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
             val help = viewModel.mode.value == TantillaViewModel.Mode.HELP
             Column() {
                 val writer = CodeWriter(highlighting = CodeWriter.defaultHighlighting, errorNode = viewModel.runtimeException.value?.node)
+                writer.append(Ansi.NOT_PROPORTIONAL)
                 if (!expanded) {
                     definition.serializeTitle(writer)
                 } else {
@@ -73,14 +70,14 @@ fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
                 .alpha(0.2f)) {
                 if (definition.isScope() || !help) {
                     Icon(
-                        Icons.Default.Fullscreen,
+                        if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
                         contentDescription = "Open",
                         modifier = Modifier.clickable {
-                            if (definition.isScope()) {
-                                viewModel.scope().value = definition.getValue(null) as Scope
-                            } else {
-                                viewModel.editDefinition(definition)
-                            }
+                                if (viewModel.expanded.value.contains(definition)) {
+                                    viewModel.expanded.value -= definition
+                                } else {
+                                    viewModel.expanded.value += definition
+                                }
                         })
                 }
             }

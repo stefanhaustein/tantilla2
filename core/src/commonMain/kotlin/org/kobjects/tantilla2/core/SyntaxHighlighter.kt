@@ -49,9 +49,13 @@ fun highlightSyntax(
                         writer.appendWrapped(CodeWriter.Kind.STRING, token.text)
                     TokenType.IDENTIFIER ->
                         when (token.text) {
-                            "def", "var", "mut", "struct", "impl" -> {
+                            "def", "for", "impl", "let", "mut", "struct", "var" -> {
                                 writer.appendKeyword(token.text)
                                 wasDecl = true
+                            }
+                            "else", "elif", "if", "in", "while" -> {
+                                writer.appendKeyword(token.text)
+                                wasDecl = false
                             }
                             else -> {
                                 if (wasDecl) {
