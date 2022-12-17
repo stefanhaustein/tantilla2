@@ -2,6 +2,7 @@ package org.kobjects.tantilla2.core.collection
 
 import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.type.Typed
+import toLiteral
 
 class MutableTypedMap(
     keyType: Type,
@@ -12,7 +13,7 @@ class MutableTypedMap(
     override val type: Type
         get() = MutableMapType(keyType, valueType)
 
-
+    override fun toString() = data.entries.joinToString(", ", "MutableMap(", ")") { it.key.toLiteral() + ": " + it.value.toLiteral() }
 }
 
 

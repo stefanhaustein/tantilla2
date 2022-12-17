@@ -16,7 +16,7 @@ class CallableImpl(
 
     // get() = "(${type.parameters}) -> ${type.returnType}"
 
-    override fun eval(context: LocalRuntimeContext): Any? {
+    override fun eval(context: LocalRuntimeContext): Any {
 
         if (closure != context.closure) {
             throw RuntimeException("closure mismatch")

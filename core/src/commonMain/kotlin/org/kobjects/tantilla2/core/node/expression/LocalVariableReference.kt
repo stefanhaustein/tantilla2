@@ -15,7 +15,7 @@ class LocalVariableReference(
 ) : AssignableNode() {
     override fun children(): List<Node> = emptyList()
 
-    override fun eval(ctx: LocalRuntimeContext): Any? {
+    override fun eval(ctx: LocalRuntimeContext): Any {
         //        println("Evaluating $name")
 
         var varCtx = ctx
@@ -31,7 +31,7 @@ class LocalVariableReference(
     override fun reconstruct(newChildren: List<Node>): Node =
         this
 
-    override fun assign(context: LocalRuntimeContext, value: Any?) {
+    override fun assign(context: LocalRuntimeContext, value: Any) {
         if (index >= context.variables.size) {
             throw IllegalStateException("Variable $name index $index not found!")
         }

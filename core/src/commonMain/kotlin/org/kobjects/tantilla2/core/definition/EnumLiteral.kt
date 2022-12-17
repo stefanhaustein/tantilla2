@@ -10,9 +10,7 @@ class EnumLiteral(
     override val kind: Definition.Kind
         get() = Definition.Kind.ENUM_LITERAL
 
-    override fun getValue(self: Any?): Any? {
-        return this
-    }
+    override fun getValue(self: Any?) = this
 
     override fun serializeSummary(writer: CodeWriter) {
         writer.append(name)

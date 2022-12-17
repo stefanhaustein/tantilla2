@@ -2,6 +2,7 @@ package org.kobjects.tantilla2.core.collection
 
 import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.type.Typed
+import toLiteral
 
 open class TypedMap(
     val keyType: Type,
@@ -17,5 +18,12 @@ open class TypedMap(
         get() = data.size
 
     operator fun get(key: Any): Any = data[key] ?: throw IllegalArgumentException("Key '$key' not found. in $data")
+
+    override fun hashCode() = data.hashCode()
+
+    override fun equals(other: Any?) =
+        other is TypedMap && other.type == type && other.data == data
+
+    override fun toString() = data.entries.joinToString(", ", "{", "}") { it.key.toLiteral() + ": " + it.value.toLiteral() }
 }
 

@@ -29,7 +29,7 @@ open class StructDefinition(
     override val supportsLocalVariables: Boolean
         get() = true
 
-    override fun eval(context: LocalRuntimeContext): Any? = context
+    override fun eval(context: LocalRuntimeContext): Any = context
 
     override fun serializeType(writer: CodeWriter, scope: Scope?) {
         writer.append(if (scope == null) name else scope.typeName(this))

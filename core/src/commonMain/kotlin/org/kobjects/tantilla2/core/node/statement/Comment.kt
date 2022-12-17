@@ -11,7 +11,7 @@ class Comment(val text: String) : LeafNode() {
         get() = VoidType
 
 
-    override fun eval(context: LocalRuntimeContext): Any? = null
+    override fun eval(context: LocalRuntimeContext): Any = VoidType.None
 
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
         writer.appendComment(text)

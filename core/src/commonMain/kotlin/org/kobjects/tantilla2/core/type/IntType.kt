@@ -5,6 +5,7 @@ import org.kobjects.tantilla2.core.collection.Range
 import org.kobjects.tantilla2.core.collection.RangeType
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.node.expression.IntNode
+import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
@@ -23,6 +24,11 @@ object IntType : NativeStructDefinition(
     }
 ) {
     init {
+        defineMethod(
+            "abs", "Return the absolute value.",
+            IntType
+        ) { abs(it.i64(0)) }
+
         defineMethod(
             "bin", "Convert an integer to a binary string prefixed with \"0b\".",
             StrType

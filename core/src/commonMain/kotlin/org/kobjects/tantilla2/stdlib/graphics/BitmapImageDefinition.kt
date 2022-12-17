@@ -38,7 +38,7 @@ class BitmapImageDefinition(val graphicsScope: GraphicsScope) : NativeStructDefi
         ) {
             val image = it[0] as BitmapImage
             image[it.i32(1), it.i32(2)] = it[3] as Color
-            null
+            VoidType.None
         }
 
 

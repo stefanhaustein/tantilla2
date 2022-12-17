@@ -28,9 +28,9 @@ interface Definition : SerializableCode, Comparable<Definition> {
     val errors: List<Exception>
         get() = emptyList()
 
-    fun getValue(self: Any?): Any?
+    fun getValue(self: Any?): Any
 
-    fun setValue(self: Any?, newValue: Any?): Unit = throw UnsupportedOperationException()
+    fun setValue(self: Any?, newValue: Any): Unit = throw UnsupportedOperationException()
 
     fun depth(scope: Scope): Int {
         if (scope == this.parentScope) {

@@ -10,6 +10,7 @@ import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.collection.ListType
 import org.kobjects.tantilla2.core.collection.MutableListType
+import org.kobjects.tantilla2.core.collection.PairType
 import org.kobjects.tantilla2.core.type.VoidType
 
 object TypeParser {
@@ -29,6 +30,14 @@ object TypeParser {
             val elementType = parseType(tokenizer, context)
             tokenizer.consume("]")
             return if (name == "List") ListType(elementType) else MutableListType(elementType)
+        }
+        if (name.equals("Pair")) {
+            tokenizer.consume("[")
+            val typeA = parseType(tokenizer, context)
+            tokenizer.consume(",")
+            val typeB = parseType(tokenizer, context)
+            tokenizer.consume("]")
+            return PairType(typeA, typeB)
         }
         var scope = context.scope
         while (tokenizer.tryConsume(".")) {

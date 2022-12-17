@@ -1,10 +1,7 @@
 package org.kobjects.tantilla2.core.definition
 
 import org.kobjects.tantilla2.core.*
-import org.kobjects.tantilla2.core.collection.ListType
-import org.kobjects.tantilla2.core.collection.MapType
-import org.kobjects.tantilla2.core.collection.MutableListType
-import org.kobjects.tantilla2.core.collection.MutableMapType
+import org.kobjects.tantilla2.core.collection.*
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.node.expression.StrNode
 import org.kobjects.tantilla2.core.type.*
@@ -19,10 +16,13 @@ class RootScope(
         add(BoolType)
         add(FloatType)
         add(IntType)
+        add(PairType(TypeVariable("A"), TypeVariable("B")))
         add(ListType(TypeVariable("E")))
         add(MutableListType(TypeVariable("E")))
         add(MapType(TypeVariable("K"), TypeVariable("V")))
         add(MutableMapType(TypeVariable("K"), TypeVariable("V")))
+        add(SetType(TypeVariable("E")))
+        add(MutableSetType(TypeVariable("E")))
         add(StrType)
 
         add(MathScope)

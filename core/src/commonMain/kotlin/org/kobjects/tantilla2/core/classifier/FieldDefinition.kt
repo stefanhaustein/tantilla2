@@ -68,13 +68,13 @@ class FieldDefinition(
             return resolvedType!!
         }
 
-    override fun getValue(self: Any?): Any? {
+    override fun getValue(self: Any?): Any {
         resolve()
         return (self as LocalRuntimeContext)[index]
     }
 
 
-    override fun setValue(self: Any?, newValue: Any?) {
+    override fun setValue(self: Any?, newValue: Any) {
         resolve()
         (self as LocalRuntimeContext).variables[index] = newValue
     }

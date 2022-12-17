@@ -17,8 +17,8 @@ class ForNode(
 
     override fun children() = listOf(rangeExpression, bodyExpression)
 
-    override fun eval(ctx: LocalRuntimeContext): Any? {
-        val iterable = rangeExpression.eval(ctx) as Iterable<*>
+    override fun eval(ctx: LocalRuntimeContext): Any {
+        val iterable = rangeExpression.eval(ctx) as Iterable<Any>
         for (i in iterable) {
             ctx.checkState(this)
             ctx.variables[iteratorIndex] = i
@@ -31,7 +31,7 @@ class ForNode(
                 }
             }
         }
-        return null
+        return VoidType.None
     }
 
     override fun reconstruct(newChildren: List<Node>) =

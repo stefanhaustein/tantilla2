@@ -1,9 +1,11 @@
 package org.kobjects.tantilla2.core
 
+import org.kobjects.tantilla2.core.type.VoidType
+
 class LocalRuntimeContext(
     val globalRuntimeContext: GlobalRuntimeContext,
     count: Int = 0,
-    initializer: (Int) -> Any? = { null },
+    initializer: (Int) -> Any = { VoidType.None },
     val closure: LocalRuntimeContext? = null
 ) {
     val variables = MutableList(count, initializer)
@@ -26,7 +28,7 @@ class LocalRuntimeContext(
             variables.removeAt(variables.size - 1)
         }
         while (variables.size < size) {
-            variables.add(null)
+            variables.add(VoidType.None)
         }
     }
 

@@ -27,14 +27,14 @@ class ElementAt(
         }
     }
 
-    override fun assign(context: LocalRuntimeContext, value: Any?) {
+    override fun assign(context: LocalRuntimeContext, value: Any) {
         val target = baseExpr.eval(context)
         if (target is MutableTypedList) {
             val index = keyExpr.evalF64(context).toInt()
-            target[index] = value!!
+            target[index] = value
         } else if (target is MutableTypedMap) {
             val key = keyExpr.eval(context)
-            (target as MutableTypedMap).data[key!!] = value!!
+            (target as MutableTypedMap).data[key] = value
         } else {
             throw RuntimeException("Can't assign to type ${baseExpr.returnType}")
         }
@@ -50,7 +50,7 @@ class ElementAt(
 
     override fun children(): List<Node> = listOf(baseExpr, keyExpr)
 
-    override fun eval(context: LocalRuntimeContext): Any? {
+    override fun eval(context: LocalRuntimeContext): Any {
         val base = baseExpr.eval(context)
         if (base is TypedMap) {
             val key = keyExpr.eval(context)

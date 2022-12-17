@@ -13,7 +13,7 @@ open class NativeStructDefinition(
     name: String,
     docString: String = "",
     val ctorParams: List<Parameter> = emptyList(),
-    val ctor: (LocalRuntimeContext) -> Any? = { throw UnsupportedOperationException() },
+    val ctor: (LocalRuntimeContext) -> Any = { throw UnsupportedOperationException() },
 ) : StructDefinition(parent, name, docString) {
     override val kind: Definition.Kind
         get() = Definition.Kind.TYPE
@@ -29,7 +29,7 @@ open class NativeStructDefinition(
         docString: String,
         returnType: Type,
         vararg parameter: Parameter,
-        operation: (LocalRuntimeContext) -> Any?) {
+        operation: (LocalRuntimeContext) -> Any) {
         val type = FunctionType.Impl(returnType, listOf(Parameter("self", this)) + parameter.toList())
         add(
             NativeFunctionDefinition(
@@ -48,8 +48,8 @@ open class NativeStructDefinition(
         name: String,
         docString: String,
         type: Type,
-        getter: (Any?) -> Any?,
-        setter: ((Any?, Any?) -> Unit)? = null
+        getter: (Any?) -> Any,
+        setter: ((Any?, Any) -> Unit)? = null
     ) {
         add(
             NativePropertyDefinition(

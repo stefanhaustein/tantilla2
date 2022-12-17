@@ -14,8 +14,8 @@ class BlockNode(
         get() = if (statements.isEmpty()) VoidType else statements.last().returnType
 
 
-    override fun eval(env: LocalRuntimeContext): Any? {
-        var result: Any? = null
+    override fun eval(env: LocalRuntimeContext): Any {
+        var result: Any = VoidType.None
         for (statement: Node in statements) {
             result = statement.eval(env)
             if (result is FlowSignal) {

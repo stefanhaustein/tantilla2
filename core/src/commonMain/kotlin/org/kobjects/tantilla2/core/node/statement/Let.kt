@@ -12,11 +12,11 @@ class Let(val definition: LocalVariableDefinition, val type: Type, val typeIsExp
 
     override fun children() = if (initializer == null) emptyList() else listOf(initializer)
 
-    override fun eval(context: LocalRuntimeContext): Any? {
+    override fun eval(context: LocalRuntimeContext): Any {
         if (initializer != null) {
             context.variables[definition.index] = initializer.eval(context)
         }
-        return null
+        return VoidType.None
     }
 
     override fun reconstruct(newChildren: List<Node>) =

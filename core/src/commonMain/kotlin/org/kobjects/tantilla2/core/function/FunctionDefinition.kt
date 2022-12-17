@@ -122,7 +122,7 @@ class FunctionDefinition (
        }
     }
 
-    override fun eval(context: LocalRuntimeContext): Any? {
+    override fun eval(context: LocalRuntimeContext): Any {
         resolve()
         val result = resolvedBody!!.eval(context)
         if (result is FlowSignal) {

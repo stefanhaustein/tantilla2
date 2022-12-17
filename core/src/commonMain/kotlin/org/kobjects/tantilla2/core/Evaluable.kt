@@ -5,7 +5,7 @@ import org.kobjects.tantilla2.core.type.Type
 
 
 interface Evaluable {
-    fun eval(context: LocalRuntimeContext): Any?
+    fun eval(context: LocalRuntimeContext): Any
 
     fun evalF64(context: LocalRuntimeContext): Double {
         return (eval(context) as Number).toDouble()

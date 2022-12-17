@@ -4,5 +4,5 @@ import org.kobjects.tantilla2.core.LocalRuntimeContext
 
 abstract class AssignableNode : Node() {
 
-    abstract fun assign(context: LocalRuntimeContext, value: Any?)
+    abstract fun assign(context: LocalRuntimeContext, value: Any)
 }

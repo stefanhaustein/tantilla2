@@ -13,7 +13,7 @@ class WhileNode(
     override val returnType: Type
         get() = VoidType
 
-    override fun eval(env: LocalRuntimeContext): FlowSignal? {
+    override fun eval(env: LocalRuntimeContext): Any {
         while (condition.eval(env) as Boolean) {
             val result = body.eval(env)
             if (result is FlowSignal) {
@@ -24,7 +24,7 @@ class WhileNode(
                 }
             }
         }
-        return null
+        return VoidType.None
     }
 
     override fun children() = listOf(condition, body)

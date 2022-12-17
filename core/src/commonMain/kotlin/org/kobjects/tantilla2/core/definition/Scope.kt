@@ -148,7 +148,7 @@ abstract class Scope(
         docString: String,
         returnType: Type,
         vararg parameter: Parameter,
-        operation: (LocalRuntimeContext) -> Any?) {
+        operation: (LocalRuntimeContext) -> Any) {
         val type = object : FunctionType {
             override val returnType = returnType
             override val parameters = parameter.toList()

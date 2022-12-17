@@ -4,25 +4,23 @@ import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.type.Typed
 import toLiteral
 
-open class TypedList(
+open class TypedSet(
     val elementType: Type,
-    open val data: List<Any> = emptyList()
+    open val data: Set<Any> = emptySet()
 ) : TypedCollection {
     override fun iterator() = data.iterator()
 
     override val type: Type
-        get() = ListType(elementType)
+        get() = SetType(elementType)
 
     val size: Int
         get() = data.size
 
-    operator fun get(index: Int) = data[index]
-
-    override fun toString() = data.joinToString(", ", "[", "]") { it.toLiteral() }
+    override fun toString() = data.joinToString(", ", "{", "}") { it.toLiteral() }
 
     override fun hashCode() = data.hashCode()
 
     override fun equals(other: Any?) =
-        other is TypedList && other.type == type && other.data == data
+        other is TypedSet && other.type == type && other.data == data
 
 }

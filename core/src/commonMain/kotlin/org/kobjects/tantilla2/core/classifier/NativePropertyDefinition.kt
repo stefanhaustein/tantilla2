@@ -12,8 +12,8 @@ class NativePropertyDefinition(
     override val name: String,
     override var docString: String = "",
     override val type: Type,
-    private val getter: (self: Any?) -> Any?,
-    private val setter: ((self: Any?, newValue: Any?) -> Unit)? = null,
+    private val getter: (self: Any?) -> Any,
+    private val setter: ((self: Any?, newValue: Any) -> Unit)? = null,
 ) : Definition {
 
     override var index: Int
@@ -22,7 +22,7 @@ class NativePropertyDefinition(
 
     override fun getValue(self: Any?) = getter(self)
 
-    override fun setValue(self: Any?, newValue: Any?) {
+    override fun setValue(self: Any?, newValue: Any) {
         val setter = setter ?: throw UnsupportedOperationException()
         setter(self, newValue)
     }

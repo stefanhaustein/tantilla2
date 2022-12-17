@@ -10,7 +10,7 @@ class NativeFunctionDefinition(
     override val name: String,
     override var docString: String,
     override val type: FunctionType,
-    val body: (LocalRuntimeContext) -> Any?,
+    val body: (LocalRuntimeContext) -> Any,
 ) : Callable, Definition {
 
     /*override val name: String

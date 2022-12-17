@@ -7,4 +7,13 @@ object VoidType : Type {
     override fun serializeType(writer: CodeWriter, scope: Scope?) {
         writer.append("Void")
     }
+
+    object None : Typed {
+        override val type: Type
+            get() = VoidType
+
+        override fun toString() = "None"
+    }
+
+    override fun toString() = "NoneType"
 }

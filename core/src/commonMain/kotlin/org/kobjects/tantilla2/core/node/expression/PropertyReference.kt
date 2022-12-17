@@ -16,7 +16,7 @@ class PropertyReference(
 
     override fun children(): List<Node> = emptyList()
 
-    override fun eval(ctx: LocalRuntimeContext): Any? {
+    override fun eval(ctx: LocalRuntimeContext): Any {
         val self = base.eval(ctx)
         return definition.getValue(self)
     }
@@ -24,7 +24,7 @@ class PropertyReference(
     override fun reconstruct(newChildren: List<Node>): Node =
         PropertyReference(newChildren[0], definition)
 
-    override fun assign(context: LocalRuntimeContext, value: Any?) {
+    override fun assign(context: LocalRuntimeContext, value: Any) {
         val self = base.eval(context)
         definition.setValue(self, value)
     }

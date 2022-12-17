@@ -12,7 +12,7 @@ class IfNode(
     override val returnType: Type
         get() = commonType(ifThenElse.filterIndexed { index, node -> index and 1 == 1 }.map { it.returnType })
 
-    override fun eval(env: LocalRuntimeContext): Any? {
+    override fun eval(env: LocalRuntimeContext): Any {
         for (i in ifThenElse.indices step 2) {
             if (i == ifThenElse.size - 1) {
                 return ifThenElse[i].eval(env)

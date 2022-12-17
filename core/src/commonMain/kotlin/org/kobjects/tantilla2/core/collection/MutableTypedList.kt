@@ -2,6 +2,7 @@ package org.kobjects.tantilla2.core.collection
 
 import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.type.Typed
+import toLiteral
 
 class MutableTypedList(
     elementType: Type,
@@ -15,4 +16,8 @@ class MutableTypedList(
 
     override val type: Type
         get() = MutableListType(elementType)
+
+
+    override fun toString() = data.joinToString(", ", "MutableList(", ")") { it.toLiteral() }
+
 }

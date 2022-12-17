@@ -4,6 +4,8 @@ import org.kobjects.konsole.Ansi
 import org.kobjects.tantilla2.core.definition.Scope
 import org.kobjects.tantilla2.core.node.*
 import org.kobjects.tantilla2.core.type.Type
+import quote
+import tripleQuote
 
 class CodeWriter(
     indent: String = "",
@@ -105,11 +107,11 @@ class CodeWriter(
     }
 
     fun appendQuoted(s: String) {
-        appendWrapped(Kind.STRING, quote(s))
+        appendWrapped(Kind.STRING, s.quote())
     }
 
     fun appendTripleQuoted(s: String) {
-        appendWrapped(Kind.STRING, tripleQuote(s))
+        appendWrapped(Kind.STRING, s.tripleQuote())
     }
 
 
@@ -159,22 +161,7 @@ class CodeWriter(
     }
 
     companion object {
-        fun tripleQuote(s: String) = "\"\"\"$s\"\"\""
 
-        fun quote(s: String): String {
-            val sb = StringBuilder()
-            sb.append('"')
-            for (c in s) {
-                when (c) {
-                    '\t' -> sb.append("\\t")
-                    '\n' -> sb.append("\\n")
-                    '"' -> sb.append("\"\"")
-                    else -> sb.append(c)
-                }
-            }
-            sb.append('"')
-            return sb.toString()
-        }
 
         val defaultHighlighting = mapOf(
             Kind.COMMENT to Pair(Ansi.rgbForeground(0x777777), Ansi.FOREGROUND_DEFAULT),

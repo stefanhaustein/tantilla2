@@ -5,5 +5,5 @@ import org.kobjects.tantilla2.core.function.Callable
 
 class Adapter(
     val vmt: List<Callable>,
-    val instance: Any?,
+    val instance: Any,
 )

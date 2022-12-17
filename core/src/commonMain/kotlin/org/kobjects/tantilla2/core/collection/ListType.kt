@@ -18,7 +18,7 @@ open class ListType(
     val elementType: Type,
     name: String = "List",
     docString: String = "An immutable list of elements.",
-    ctor:  (LocalRuntimeContext) -> Any? = { TypedList(elementType, it.get(0) as List<Any>) }
+    ctor:  (LocalRuntimeContext) -> Any = { TypedList(elementType, it.get(0) as List<Any>) }
 ) : NativeStructDefinition(
     null,
     name,
@@ -73,4 +73,4 @@ open class ListType(
 
     override fun equals(other: Any?): Boolean =
         other is ListType && other.elementType == elementType && other !is MutableListType
-}
+    }

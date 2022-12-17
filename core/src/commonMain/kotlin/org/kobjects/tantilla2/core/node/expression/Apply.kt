@@ -7,6 +7,7 @@ import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.node.Node
+import org.kobjects.tantilla2.core.type.VoidType
 
 
 class Apply(
@@ -16,7 +17,7 @@ class Apply(
     val implicit: Boolean,
     val asMethod: Boolean,
 ) : Node() {
-    override fun eval(context: LocalRuntimeContext): Any? {
+    override fun eval(context: LocalRuntimeContext): Any {
         context.checkState(this)
         val shouldBeLambda = callable.eval(context)
         if (shouldBeLambda !is Callable) {
@@ -30,7 +31,7 @@ class Apply(
                 val result = parameters[it].eval(context)
                 // println("Result $result")
                 result
-            } else null
+            } else VoidType.None
         }, function.closure)
         return function.eval(functionContext)
     }

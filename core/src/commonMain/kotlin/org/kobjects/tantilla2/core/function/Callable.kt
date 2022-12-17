@@ -7,7 +7,7 @@ import org.kobjects.tantilla2.core.type.Typed
 
 interface Callable : Typed, Evaluable {
     override val type: FunctionType
-    override fun eval(context: LocalRuntimeContext): Any?
+    override fun eval(context: LocalRuntimeContext): Any
     override val returnType: Type
         get() = type.returnType
     val scopeSize: Int
