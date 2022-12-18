@@ -6,9 +6,12 @@ import org.kobjects.tantilla2.core.type.GenericType
 import org.kobjects.tantilla2.core.type.StrType
 import org.kobjects.parserlib.expressionparser.ExpressionParser as GreenspunExpressionParser
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
+import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
 import org.kobjects.tantilla2.core.classifier.StructMetaType
 import org.kobjects.tantilla2.core.definition.Definition
+import org.kobjects.tantilla2.core.definition.ImportDefinition
 import org.kobjects.tantilla2.core.definition.Scope
+import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.LambdaScope
 import org.kobjects.tantilla2.core.node.Node
@@ -76,6 +79,13 @@ object ExpressionParser {
     }
     else StaticReference(definition, qualified)
 
+    fun isCallable(definition: Definition): Boolean {
+        val resolvedDefinition = definition.getValue(null) // Resolve imports
+        if (resolvedDefinition is NativeStructDefinition) {
+            return resolvedDefinition.ctor != NativeStructDefinition.noConstructorAvailable
+        }
+        return definition is Callable
+    }
 
     fun parseFreeIdentifier(tokenizer: TantillaTokenizer, context: ParsingContext): Node {
         val name = tokenizer.consume(TokenType.IDENTIFIER)
@@ -103,7 +113,7 @@ object ExpressionParser {
         }
 
         val staticDefinition = scope.resolveStatic(name, fallBackToParent = true)
-        if (staticDefinition != null) {
+        if (staticDefinition != null && (tokenizer.current.text != "(" || isCallable(staticDefinition)) ) {
             return parseMaybeApply(
                 tokenizer,
                 context,

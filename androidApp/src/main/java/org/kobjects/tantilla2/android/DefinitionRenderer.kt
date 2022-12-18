@@ -16,9 +16,9 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
-import org.kobjects.konsole.Ansi
 import org.kobjects.konsole.compose.AnsiConverter
 import org.kobjects.tantilla2.android.model.TantillaViewModel
 import org.kobjects.tantilla2.core.CodeWriter
@@ -57,13 +57,13 @@ fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
             val help = viewModel.mode.value == TantillaViewModel.Mode.HELP
             Column() {
                 val writer = CodeWriter(highlighting = CodeWriter.defaultHighlighting, errorNode = viewModel.runtimeException.value?.node)
-                writer.append(Ansi.NOT_PROPORTIONAL)
+                // writer.append(Ansi.NOT_PROPORTIONAL)
                 if (!expanded) {
                     definition.serializeTitle(writer)
                 } else {
                     definition.serializeSummary(writer)
                 }
-                Text(AnsiConverter.ansiToAnnotatedString(writer.toString()))
+                Text(AnsiConverter.ansiToAnnotatedString(writer.toString(), TantillaViewModel.MONOSPACE_FONT_FAMILY, TantillaViewModel.MONOSPACE_FONT_FAMILY))
             }
             Row(modifier = Modifier
                 .align(Alignment.TopEnd)

@@ -6,17 +6,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import org.kobjects.dialog.DialogManager
 import org.kobjects.dialog.InputLine
-import org.kobjects.konsole.Ansi
 import org.kobjects.konsole.compose.AnsiConverter.ansiToAnnotatedString
 import org.kobjects.konsole.compose.ComposeKonsole
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.parser.Parser
 import org.kobjects.tantilla2.core.definition.RootScope
 import org.kobjects.parserlib.tokenizer.ParsingException
+import org.kobjects.tantilla2.android.R
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.definition.Scope
 import org.kobjects.tantilla2.core.definition.UserRootScope
@@ -312,10 +315,10 @@ class TantillaViewModel(
     fun annotatedCode(code: String, errors: List<Exception>): AnnotatedString {
 
         val writer = CodeWriter("", CodeWriter.defaultHighlighting)
-        writer.append(Ansi.NOT_PROPORTIONAL)
+       // writer.append(Ansi.NOT_PROPORTIONAL)
         highlightSyntax(writer, code, errors, runtimeException.value, runtimeExceptionPosition)
 
-        return ansiToAnnotatedString(writer.toString())
+        return ansiToAnnotatedString(writer.toString(), MONOSPACE_FONT_FAMILY, MONOSPACE_FONT_FAMILY)
     }
 
     fun onTap(x: Double, y: Double) = globalRuntimeContext.onTap(x, y)
@@ -332,6 +335,11 @@ class TantillaViewModel(
     companion object {
         const val SCRATCH_FILE_NAME = "Scratch.tt"
         const val DEFAULT_SCRATCH = "def main():\n  print(\"Hello World!\")"
+        val MONOSPACE_FONT_FAMILY = FontFamily(
+            Font(R.font.iosevka),
+            //Font(R.font.mplus_1m_bold, weight = FontWeight.Bold)
+            )
+
 
         fun findLineRange(s: AnnotatedString, lineNumber: Int): IntRange {
             var pos = 0
@@ -363,4 +371,6 @@ class TantillaViewModel(
 
 
     }
+
+
 }

@@ -4,6 +4,7 @@ import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
 import org.kobjects.tantilla2.core.collection.ListType
 import org.kobjects.tantilla2.core.collection.TypedList
 import org.kobjects.tantilla2.core.function.Parameter
+import org.kobjects.tantilla2.core.node.expression.IntNode
 import org.kobjects.tantilla2.core.node.expression.StrNode
 
 object StrType : NativeStructDefinition(
@@ -16,6 +17,19 @@ object StrType : NativeStructDefinition(
     }
 )  {
     init {
+        defineMethod("int",
+            "Converts this string to an integer value.",
+            IntType,
+            Parameter("radix", IntType, IntNode.Const(10))
+        ) {
+            (it[0] as String).toInt((it[1] as Long).toInt())
+        }
+        defineMethod("float",
+            "Converts this string to a float value.",
+            IntType) {
+            (it[0] as String).toFloat()
+        }
+
         defineMethod(
             "len",
             "Returns the length of the string",

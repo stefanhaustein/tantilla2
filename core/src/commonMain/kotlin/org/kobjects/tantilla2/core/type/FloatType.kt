@@ -9,7 +9,7 @@ object FloatType : NativeStructDefinition(
     null,
     "float",
     "Floating point number. The constructor is able to parse strings and to convert ints.",
-    ctorParams = listOf(Parameter("value", AnyType, defaultValueExpression = FloatNode.Const(0.0))),
+    /*ctorParams = listOf(Parameter("value", AnyType, defaultValueExpression = FloatNode.Const(0.0))),
     ctor = {
         val arg = it[0]
         when (arg) {
@@ -17,7 +17,7 @@ object FloatType : NativeStructDefinition(
             is Number -> arg.toDouble()
             else -> throw IllegalArgumentException("Can't convert $arg to a floating point number.")
         }
-    }
+    }*/
 ), Type {
 
     init {
@@ -25,6 +25,10 @@ object FloatType : NativeStructDefinition(
             "abs", "Return the absolute value.",
             FloatType
         ) { abs(it.f64(0)) }
+        defineMethod(
+            "int", "Return the value truncated to the next integer.",
+            FloatType
+        ) { it.f64(0).toInt() }
 
         defineMethod(
             "max", "Returns the maximum of two values.",

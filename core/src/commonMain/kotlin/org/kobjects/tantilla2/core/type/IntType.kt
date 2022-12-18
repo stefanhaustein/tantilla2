@@ -13,15 +13,6 @@ object IntType : NativeStructDefinition(
     null,
     "int",
     "64 bit signed integer.",
-    ctorParams = listOf(Parameter("value", AnyType, defaultValueExpression = IntNode.Const(0))),
-    ctor = {
-        val arg = it[0]
-        when (arg) {
-            is String -> arg.toInt()
-            is Number -> arg.toInt()
-            else -> throw IllegalArgumentException("Can't convert $arg to an integer.")
-        }
-    }
 ) {
     init {
         defineMethod(

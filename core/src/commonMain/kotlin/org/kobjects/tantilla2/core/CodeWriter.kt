@@ -138,7 +138,10 @@ class CodeWriter(
             append(')')
         } else {
             appendCode(code.children()[0], precedence)
-            append(" $name ")
+            when (name) {
+                "*", "**", "/", "//" -> append(name)
+                else -> append(" $name ")
+            }
             appendCode(code.children()[1], precedence + 1)
         }
     }

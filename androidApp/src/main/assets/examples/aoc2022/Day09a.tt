@@ -24,12 +24,10 @@ def main():
       hy = hy + dy
       let abs_x = abs(hx - tx)
       let abs_y = abs(hy - ty)
-      if hx != tx and hy != ty and (abs_x > 1 or abs_y > 1):
+      let diagonal = abs_x > 0 and abs_y > 0 and (abs_x > 1 or abs_y > 1)
+      if diagonal or abs_x > 1:
         tx = tx + (hx - tx) // abs_x
-        ty = ty + (hy - ty) // abs_y
-      elif abs_x > 1:
-        tx = tx + (hx - tx) // abs_x
-      elif abs_y > 1:
+      if diagonal or abs_y > 1:
         ty = ty + (hy - ty) // abs_y
       positions.add(Pair[int,int](tx, ty))
 

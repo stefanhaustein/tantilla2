@@ -9,9 +9,13 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.Colors
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.coroutineScope
 import org.kobjects.konsole.compose.ComposeKonsole
 import org.kobjects.tantilla2.android.model.Platform
@@ -86,6 +90,7 @@ class MainActivity : AppCompatActivity() {
         }
         MaterialTheme(
             colors = colors,
+            typography = TYPOGRAPHY,
             content = content
         )
     }
@@ -121,6 +126,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     companion object {
+        val TYPOGRAPHY = Typography(
+            defaultFontFamily = FontFamily(
+                Font(R.font.roboto_condensed_regular),
+                Font(R.font.roboto_condensed_bold, weight = FontWeight.Bold)
+            )
+        )
+
         val LIGHT_COLORS = Colors(
             primary = Color(0xff555555), // Palette.BLUE),
             primaryVariant = Color(0xff0072cb),

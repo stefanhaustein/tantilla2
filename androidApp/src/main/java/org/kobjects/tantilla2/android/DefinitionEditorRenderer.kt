@@ -119,7 +119,6 @@ fun RenderDefinitionEditor(viewModel: TantillaViewModel) {
                 colors = TextFieldDefaults.textFieldColors(
                     backgroundColor = Color.Transparent
                 ),
-                textStyle = LocalTextStyle.current.copy(fontFamily = FontFamily.Monospace)
             )
     }
 }
