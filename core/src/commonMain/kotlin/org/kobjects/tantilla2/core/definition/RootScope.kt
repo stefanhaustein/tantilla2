@@ -16,6 +16,7 @@ class RootScope(
         add(BoolType)
         add(FloatType)
         add(IntType)
+        add(StringableType)
         add(PairType(TypeVariable("A"), TypeVariable("B")))
         add(ListType(TypeVariable("E")))
         add(MutableListType(TypeVariable("E")))
@@ -29,7 +30,7 @@ class RootScope(
 
         defineNativeFunction("print",
                 "Print the value of the text parameter to the console.",
-                VoidType, Parameter("value", AnyType, isVararg = true)
+                VoidType, Parameter("value", StringableType, isVararg = true)
             ) {
                 val list = it[0] as Iterable<Any?>
                 systemAbstraction.write(list.joinToString(" "))
