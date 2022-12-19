@@ -158,8 +158,10 @@ class FieldDefinition(
     override fun serializeSummary(writer: CodeWriter, kind: Definition.SummaryKind) {
         if (kind == Definition.SummaryKind.EXPANDED) {
             serializeCode(writer)
-        } else {
+        } else if (resolutionState == ResolutionState.RESOLVED) {
             serializeDeclaration(writer)
+        } else {
+            writer.appendUnparsed(definitionText.split("\n").first())
         }
     }
 
