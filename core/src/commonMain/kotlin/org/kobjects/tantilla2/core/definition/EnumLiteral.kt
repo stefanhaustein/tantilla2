@@ -12,13 +12,12 @@ class EnumLiteral(
 
     override fun getValue(self: Any?) = this
 
-    override fun serializeSummary(writer: CodeWriter) {
+    override fun isSummaryExpandable() = false
+
+    override fun serializeSummary(writer: CodeWriter, kind: Definition.SummaryKind) {
         writer.append(name)
     }
 
-    override fun serializeTitle(writer: CodeWriter, abbreviated: Boolean) {
-        writer.append(name)
-    }
 
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
         writer.append(name)

@@ -38,8 +38,9 @@ class LocalVariableDefinition (
 
     override fun toString() = serializeCode()
 
+    override fun isSummaryExpandable() = false
 
-    override fun serializeTitle(writer: CodeWriter, abbreviated: Boolean) {
+    override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
         if (kind == Definition.Kind.STATIC && parentScope.supportsLocalVariables) {
             writer.appendKeyword("static ")
         }
@@ -51,15 +52,7 @@ class LocalVariableDefinition (
         writer.appendType(type, parentScope)
     }
 
-
-    override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
-
-
-                   serializeTitle(writer)
-
-    }
-
-    override fun serializeSummary(writer: CodeWriter) {
+    override fun serializeSummary(writer: CodeWriter, length: Definition.SummaryKind) {
         serializeCode(writer)
     }
 

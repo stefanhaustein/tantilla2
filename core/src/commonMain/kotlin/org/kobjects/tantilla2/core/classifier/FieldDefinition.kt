@@ -139,8 +139,7 @@ class FieldDefinition(
 
     override fun toString() = serializeCode()
 
-
-    override fun serializeTitle(writer: CodeWriter, abbreviated: Boolean) {
+    private fun serializeDeclaration(writer: CodeWriter) {
         if (kind == Definition.Kind.STATIC && parentScope.supportsLocalVariables) {
             writer.appendKeyword("static ")
         }
@@ -152,10 +151,22 @@ class FieldDefinition(
         writer.appendType(type, parentScope)
     }
 
+    override fun isSummaryExpandable(): Boolean {
+        return resolvedInitializer != null
+    }
+
+    override fun serializeSummary(writer: CodeWriter, kind: Definition.SummaryKind) {
+        if (kind == Definition.SummaryKind.EXPANDED) {
+            serializeCode(writer)
+        } else {
+            serializeDeclaration(writer)
+        }
+    }
+
 
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
         if (resolutionState == ResolutionState.RESOLVED) {
-            serializeTitle(writer)
+            serializeSummary(writer, Definition.SummaryKind.COLLAPSED)
             if (resolvedInitializer != null) {
                 writer.append(" = ")
                 writer.appendCode(resolvedInitializer)
@@ -163,10 +174,6 @@ class FieldDefinition(
         } else {
             writer.appendUnparsed(definitionText, errors)
         }
-    }
-
-    override fun serializeSummary(writer: CodeWriter) {
-        serializeCode(writer)
     }
 
 

@@ -33,7 +33,7 @@ class NativePropertyDefinition(
 
     override fun toString() = serializeCode()
 
-    override fun serializeTitle(writer: CodeWriter, abbreviated: Boolean) {
+    private fun serializeTitle(writer: CodeWriter) {
         if (kind == Definition.Kind.STATIC && parentScope.supportsLocalVariables) {
             writer.appendKeyword("static ")
         }
@@ -45,18 +45,19 @@ class NativePropertyDefinition(
         writer.appendType(type, parentScope)
     }
 
+    override fun isSummaryExpandable() = docString.isNotEmpty() && docString.contains("\n")
 
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
-         serializeTitle(writer)
-    }
-
-    override fun serializeSummary(writer: CodeWriter) {
         serializeTitle(writer)
         writer.newline()
-        if (docString.isNotEmpty()) {
-            writer.appendWrapped(CodeWriter.Kind.STRING, docString)
-        } else {
+    }
+
+    override fun serializeSummary(writer: CodeWriter, kind: Definition.SummaryKind) {
+        serializeTitle(writer)
+        if (docString.isNotEmpty() && kind != Definition.SummaryKind.NESTED) {
             writer.newline()
+            writer.appendWrapped(CodeWriter.Kind.STRING,
+                if (kind == Definition.SummaryKind.EXPANDED) docString else docString.split("\n").first())
         }
     }
 

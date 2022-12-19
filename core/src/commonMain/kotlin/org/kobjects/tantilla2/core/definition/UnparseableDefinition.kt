@@ -20,13 +20,15 @@ class UnparseableDefinition(
 
     override fun resolveAll(compilationResults: CompilationResults) = false
 
-    override fun serializeSummary(writer: CodeWriter) {
-       serializeCode(writer)
-    }
+    override fun isSummaryExpandable() = definitionText.contains("\n")
 
-    override fun serializeTitle(writer: CodeWriter, abbreviated: Boolean) {
-       val cut = definitionText.indexOf('\n')
-        writer.appendUnparsed(if (!abbreviated || cut == -1) definitionText else definitionText.substring(0, cut))
+    override fun serializeSummary(writer: CodeWriter, kind: Definition.SummaryKind) {
+        if (kind == Definition.SummaryKind.EXPANDED) {
+            serializeCode(writer)
+        } else {
+            val cut = definitionText.indexOf('\n')
+            writer.appendUnparsed(if (cut == -1) definitionText else definitionText.substring(0, cut))
+        }
     }
 
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {

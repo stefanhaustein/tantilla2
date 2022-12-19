@@ -5,13 +5,12 @@ import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.Precedence
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Callable
-import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.type.VoidType
 
 
 class Apply(
-    val callable: Node,
+    val base: Node,
     val parameters: List<Node>,
     val parameterSerialization: List<ParameterSerialization>,
     val implicit: Boolean,
@@ -19,39 +18,38 @@ class Apply(
 ) : Node() {
     override fun eval(context: LocalRuntimeContext): Any {
         context.checkState(this)
-        val shouldBeLambda = callable.eval(context)
-        if (shouldBeLambda !is Callable) {
-            throw IllegalStateException("Lambda expected; got $shouldBeLambda")
+        val callable = base.eval(context)
+        if (callable !is Callable) {
+            throw IllegalStateException("Callable expected; got $callable")
         }
-        val function = shouldBeLambda as Callable
         val functionContext = LocalRuntimeContext(
             context.globalRuntimeContext,
-            function.scopeSize, {
+            callable.scopeSize, {
             if (it < parameters.size) {
                 val result = parameters[it].eval(context)
                 // println("Result $result")
                 result
             } else VoidType.None
-        }, function.closure)
-        return function.eval(functionContext)
+        }, callable.closure)
+        return callable.eval(functionContext)
     }
 
     override fun children(): List<Node> = List(parameters.size + 1) {
-       if (it == 0) callable else parameters[it - 1]
+       if (it == 0) base else parameters[it - 1]
     }
 
     override fun reconstruct(newChildren: List<Node>): Node =
         Apply(newChildren[0], newChildren.subList(1, newChildren.size), parameterSerialization, implicit, asMethod)
 
     override val returnType
-        get() = (callable.returnType as FunctionType).returnType
+        get() = (base.returnType as FunctionType).returnType
 
     override fun serializeCode(sb: CodeWriter, parentPrcedence: Int) {
         if (asMethod) {
             sb.appendCode(parameters[0], Precedence.DOT)
             sb.append(".")
         }
-        sb.appendCode(callable)
+        sb.appendCode(base)
         if (!implicit) {
             sb.append("(")
             for (i in parameterSerialization.indices) {

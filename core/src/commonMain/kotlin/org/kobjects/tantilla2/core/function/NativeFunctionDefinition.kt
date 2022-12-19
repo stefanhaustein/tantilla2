@@ -20,24 +20,19 @@ class NativeFunctionDefinition(
 
     override fun getValue(self: Any?): NativeFunctionDefinition = this
 
+    override fun isSummaryExpandable(): Boolean = docString.isNotEmpty() || type.parameters.isNotEmpty()
 
-    override fun serializeSummary(writer: CodeWriter) {
-        serializeTitle(writer)
-        writer.newline()
-        if (docString.isEmpty()) {
-            writer.newline()
-        } else {
-            writer.appendWrapped(CodeWriter.Kind.STRING, docString)
-        }
-    }
-
-    override fun serializeTitle(writer: CodeWriter, abbreviated: Boolean) {
+    override fun serializeSummary(writer: CodeWriter, length: Definition.SummaryKind) {
         if (parentScope.supportsMethods && kind == Definition.Kind.FUNCTION) {
             writer.appendKeyword("static ")
         }
         writer.appendKeyword("def ")
         writer.appendDeclaration(name)
-        type.serializeType(writer, if (abbreviated) null else parentScope)
+        type.serializeType(writer, if (length != Definition.SummaryKind.EXPANDED) null else parentScope)
+        if (length == Definition.SummaryKind.EXPANDED) {
+            writer.newline()
+            writer.appendWrapped(CodeWriter.Kind.STRING, docString)
+        }
     }
 
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) = throw UnsupportedOperationException()

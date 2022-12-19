@@ -58,17 +58,14 @@ fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
             Column() {
                 val writer = CodeWriter(highlighting = CodeWriter.defaultHighlighting, errorNode = viewModel.runtimeException.value?.node)
                 // writer.append(Ansi.NOT_PROPORTIONAL)
-                if (!expanded) {
-                    definition.serializeTitle(writer)
-                } else {
-                    definition.serializeSummary(writer)
-                }
+
+                definition.serializeSummary(writer, if (expanded) Definition.SummaryKind.EXPANDED else Definition.SummaryKind.COLLAPSED)
                 Text(AnsiConverter.ansiToAnnotatedString(writer.toString(), TantillaViewModel.MONOSPACE_FONT_FAMILY, TantillaViewModel.MONOSPACE_FONT_FAMILY))
             }
             Row(modifier = Modifier
                 .align(Alignment.TopEnd)
                 .alpha(0.2f)) {
-                if (definition.isScope() || !help) {
+                if (definition.isSummaryExpandable()) {
                     Icon(
                         if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
                         contentDescription = "Open",

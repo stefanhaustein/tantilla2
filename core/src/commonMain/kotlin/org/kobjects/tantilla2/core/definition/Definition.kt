@@ -66,8 +66,9 @@ interface Definition : SerializableCode, Comparable<Definition> {
         return CodeWriter("", )
     }
 
-    fun serializeSummary(writer: CodeWriter)
-    fun serializeTitle(writer: CodeWriter, abbreviated: Boolean = false)
+    fun isSummaryExpandable(): Boolean
+
+    fun serializeSummary(writer: CodeWriter, kind: SummaryKind)
 
     enum class Kind {
         IMPORT, STATIC, FUNCTION, ENUM, ENUM_LITERAL, PROPERTY, METHOD, TRAIT, TYPE, STRUCT, UNIT, IMPL, UNPARSEABLE,
@@ -92,6 +93,10 @@ interface Definition : SerializableCode, Comparable<Definition> {
             current = current?.parentScope ?: throw RuntimeException("User root scope not found.")
         }
         return current
+    }
+
+    enum class SummaryKind {
+        NESTED, COLLAPSED, EXPANDED
     }
 
 }

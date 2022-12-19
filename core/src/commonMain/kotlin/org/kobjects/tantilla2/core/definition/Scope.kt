@@ -201,7 +201,7 @@ abstract class Scope(
 
     override fun toString() = qualifiedName()
 
-    override fun serializeTitle(writer: CodeWriter, abbreviated: Boolean) {
+    private fun serializeTitle(writer: CodeWriter) {
         writer.appendKeyword(kind.name.lowercase()).append(' ').appendDeclaration(qualifiedName())
     }
 
@@ -218,7 +218,8 @@ abstract class Scope(
     }
 
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
-        writer.appendKeyword(kind.name.lowercase()).append(' ').appendDeclaration(qualifiedName()).append(":")
+        serializeTitle(writer)
+        writer.append(":")
         writer.indent()
         writer.newline()
 
@@ -226,20 +227,25 @@ abstract class Scope(
         writer.outdent()
     }
 
-    override fun serializeSummary(writer: CodeWriter) {
+    override fun isSummaryExpandable() = definitions.isNotEmpty() || docString.isNotEmpty()
+
+
+    override fun serializeSummary(writer: CodeWriter, kind: Definition.SummaryKind) {
         serializeTitle(writer)
-        writer.append(":")
-        if(docString.isNotEmpty()) {
-            writer.newline()
-            writer.appendWrapped(CodeWriter.Kind.STRING, docString.split("\n").first())
+        if (kind == Definition.SummaryKind.EXPANDED) {
+            writer.append(":")
+            if (docString.isNotEmpty()) {
+                writer.newline()
+                writer.appendWrapped(CodeWriter.Kind.STRING, docString.split("\n").first())
+            }
+            writer.indent()
+            val scope = getValue(null) as Scope
+            for (definition in scope.sorted()) {
+                writer.newline()
+                definition.serializeSummary(writer, Definition.SummaryKind.NESTED)
+            }
+            writer.outdent()
         }
-        writer.indent()
-        val scope = getValue(null) as Scope
-        for (definition in scope.sorted()) {
-            writer.newline()
-            definition.serializeTitle(writer, abbreviated = true)
-        }
-        writer.outdent()
     }
 
     override fun isDynamic() = false

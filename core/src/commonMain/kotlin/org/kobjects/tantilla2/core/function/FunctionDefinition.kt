@@ -138,15 +138,19 @@ class FunctionDefinition (
     // reporting.
     override fun toString() = "def $name"
 
-    override fun serializeTitle(writer: CodeWriter, abbreviated: Boolean) {
-        if (resolutionState != ResolutionState.RESOLVED && resolutionState != ResolutionState.TYPE_RESOLVED) {
+    override fun isSummaryExpandable() = true
+
+    override fun serializeSummary(writer: CodeWriter, length: Definition.SummaryKind) {
+        if (length == Definition.SummaryKind.EXPANDED) {
+            serializeCode(writer)
+        } else if (resolutionState != ResolutionState.RESOLVED && resolutionState != ResolutionState.TYPE_RESOLVED) {
             writer.appendUnparsed(definitionText.split('\n').first(), errors)
         } else {
             if (parentScope.supportsMethods && kind == Definition.Kind.FUNCTION) {
                 writer.appendKeyword("static ")
             }
             writer.appendKeyword("def ").appendDeclaration(name)
-            type.serializeType(writer, if (abbreviated) null else parentScope)
+            type.serializeType(writer, if (length != Definition.SummaryKind.EXPANDED) null else parentScope)
         }
     }
 
@@ -172,10 +176,6 @@ class FunctionDefinition (
                 writer.outdent()
             }
         }
-    }
-
-    override fun serializeSummary(writer: CodeWriter) {
-        serializeCode(writer)
     }
 
 

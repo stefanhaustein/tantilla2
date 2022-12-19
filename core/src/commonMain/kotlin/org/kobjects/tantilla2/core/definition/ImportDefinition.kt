@@ -27,9 +27,9 @@ class ImportDefinition(
         return resolved!!
     }
 
-    override fun serializeSummary(writer: CodeWriter) = serializeCode(writer)
-
-    override fun serializeTitle(writer: CodeWriter, abbreviated: Boolean) = serializeCode(writer)
+    override fun isSummaryExpandable() = false
+    
+    override fun serializeSummary(writer: CodeWriter, kind: Definition.SummaryKind) = serializeCode(writer)
 
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
         writer.appendKeyword("import ").append(path.joinToString("."))
