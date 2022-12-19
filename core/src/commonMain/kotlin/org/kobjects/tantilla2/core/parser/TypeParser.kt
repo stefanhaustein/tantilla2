@@ -19,6 +19,9 @@ object TypeParser {
 
 
     fun parseType(tokenizer: TantillaTokenizer, context: ParsingContext): Type {
+        if (tokenizer.current.text == "(") {
+            return parseFunctionType(tokenizer, context, false)
+        }
         var name = tokenizer.consume(TokenType.IDENTIFIER)
         var scope = context.scope
         while (tokenizer.tryConsume(".")) {
