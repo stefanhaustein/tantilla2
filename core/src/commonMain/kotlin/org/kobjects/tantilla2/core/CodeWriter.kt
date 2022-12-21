@@ -11,7 +11,8 @@ class CodeWriter(
     indent: String = "",
     val highlighting: Map<Kind, Pair<String, String>> = emptyMap(),
     val errorNode: Evaluable? = null,
-    val errors: List<Pair<IntRange, Exception>> = emptyList()
+    val errors: List<Pair<IntRange, Exception>> = emptyList(),
+    var lineLength: Int = Int.MAX_VALUE,
 ) : Appendable {
     val sb = StringBuilder()
     val indent = StringBuilder(indent)
@@ -20,6 +21,8 @@ class CodeWriter(
     var pos = 0
     val startIndices = mutableMapOf<Int, Exception>()
     val endIndices = mutableSetOf<Int>()
+    var lineStart = 0
+
 
     fun addError(position: IntRange, error: Exception) {
         startIndices.put(pos + position.start, error)
@@ -81,7 +84,12 @@ class CodeWriter(
 
     fun appendDeclaration(name: String) = appendWrapped(Kind.DECLARATION, name)
 
-    fun newline(): CodeWriter = append("\n").append(indent)
+    fun newline(): CodeWriter {
+        append("\n")
+                lineStart = pos
+        append(indent)
+        return this
+    }
 
     fun appendType(type: Type, scope: Scope?): CodeWriter {
         type.serializeType(this, scope)

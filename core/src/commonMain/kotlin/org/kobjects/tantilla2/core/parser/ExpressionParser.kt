@@ -262,10 +262,7 @@ object ExpressionParser {
                         tokenizer.consume(")")
                         Parentesized(expression)
                     }
-                    "[" -> {
-                        tokenizer.consume("[")
-                        ListLiteral(parseList(tokenizer, context, "]"))
-                    }
+                    "[" -> ListLiteral(parseList(tokenizer, context, "[", "]"))
                     else -> throw tokenizer.exception("Number, identifier or opening bracket expected here.")
                 }
             }
@@ -274,9 +271,12 @@ object ExpressionParser {
     fun parseList(
         tokenizer: TantillaTokenizer,
         context: ParsingContext,
-        endMarker: String): List<Node> {
+        startMarker: String,
+        endMarker: String
+    ): List<Node> {
         tokenizer.disable(TokenType.LINE_BREAK)
-
+        tokenizer.consume(startMarker)
+        
         val result = mutableListOf<Node>()
         if (tokenizer.current.text != endMarker) {
             do {
