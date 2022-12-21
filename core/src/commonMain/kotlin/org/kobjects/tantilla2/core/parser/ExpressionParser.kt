@@ -54,6 +54,8 @@ object ExpressionParser {
     }
 
     fun parseElementAt(tokenizer: TantillaTokenizer, context: ParsingContext, base: Node): Node {
+        tokenizer.disable(TokenType.LINE_BREAK)
+
         if (base.returnType is StructMetaType
             && (base.returnType as StructMetaType).wrapped is GenericType
         ) {
@@ -63,10 +65,12 @@ object ExpressionParser {
                 typeParameters.add(TypeParser.parseType(tokenizer, context))
             } while(tokenizer.tryConsume(","))
             tokenizer.consume("]")
+            tokenizer.enable(TokenType.LINE_BREAK)
             return GenericTypeNode(base, typeParameters)
         }
 
         val result = ElementAt(base, parseExpression(tokenizer, context))
+        tokenizer.enable(TokenType.LINE_BREAK)
         tokenizer.consume("]")
         return result
     }
@@ -249,8 +253,12 @@ object ExpressionParser {
             else -> {
                 when (tokenizer.current.text) {
                     "(" -> {
+                        tokenizer.disable(TokenType.LINE_BREAK)
                         tokenizer.consume("(")
+
                         val expression = parseExpression(tokenizer, context)
+
+                        tokenizer.enable(TokenType.LINE_BREAK)
                         tokenizer.consume(")")
                         Parentesized(expression)
                     }
@@ -267,6 +275,8 @@ object ExpressionParser {
         tokenizer: TantillaTokenizer,
         context: ParsingContext,
         endMarker: String): List<Node> {
+        tokenizer.disable(TokenType.LINE_BREAK)
+
         val result = mutableListOf<Node>()
         if (tokenizer.current.text != endMarker) {
             do {
@@ -274,6 +284,8 @@ object ExpressionParser {
             } while (tokenizer.tryConsume(","))
         }
         tokenizer.consume(endMarker, "$endMarker or , expected")
+
+        tokenizer.enable(TokenType.LINE_BREAK)
         return result.toList()
     }
 
@@ -372,6 +384,7 @@ object ExpressionParser {
         var varargIndex = -1
         var nameRequired = false
         if (hasArgs && !tokenizer.tryConsume(")")) {
+            tokenizer.disable(TokenType.LINE_BREAK)
             do {
                 var name = ""
                 if (tokenizer.current.type == TokenType.IDENTIFIER && tokenizer.lookAhead(1).text == "=") {
@@ -398,6 +411,7 @@ object ExpressionParser {
                     parameterExpressions[index++] = expression
                 }
             } while (tokenizer.tryConsume(","))
+            tokenizer.enable(TokenType.LINE_BREAK)
             tokenizer.consume(")")
         }
 
@@ -419,6 +433,7 @@ object ExpressionParser {
                 }
             }
         }
+
 
         return Apply(
             value,
