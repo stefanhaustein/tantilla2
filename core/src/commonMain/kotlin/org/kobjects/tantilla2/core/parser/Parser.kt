@@ -214,8 +214,22 @@ object Parser {
         return enumDefinition
     }
 
+    fun consumeInBrackets(tokenizer: TantillaTokenizer) {
+        val end: String
+        when(tokenizer.current.text) {
+            "(" -> end = ")"
+            "[" -> end = "]"
+            "{" -> end = "}"
+            else -> return
+        }
+        do {
+            tokenizer.next()
+        } while (tokenizer.current.text != end)
+    }
+
     fun consumeLine(tokenizer: TantillaTokenizer, startPos: Int): String {
         while (tokenizer.current.type != TokenType.EOF && tokenizer.current.type != TokenType.LINE_BREAK) {
+            consumeInBrackets(tokenizer)
             tokenizer.next()
         }
         return tokenizer.input.substring(startPos, tokenizer.current.pos)
@@ -227,15 +241,15 @@ object Parser {
         returnDepth: Int
     ): String {
         var localDepth = returnDepth + 1
-        val pos = tokenizer.current.pos
         while (tokenizer.current.type != TokenType.EOF) {
             if (tokenizer.current.type == TokenType.LINE_BREAK) {
                 localDepth = getIndent(tokenizer.current.text)
-                println("- new local depth: $localDepth")
+           //     println("- new local depth: $localDepth")
             } else {
                 when (tokenizer.current.text) {
                     "def", "if", "while", "struct", "impl", "trait" -> localDepth++
                     "<|" -> localDepth--
+                    else -> consumeInBrackets(tokenizer)
                 }
             }
             if (localDepth <= returnDepth) {
