@@ -12,13 +12,17 @@ abstract class TantillaTest(val code: String) {
 
     @Test
     fun runTest() {
-        val context = TestSystemAbstraction.createScope()
-        Parser.parse(code, context)
+        val testRootScope = TestSystemAbstraction.createScope()
+        Parser.parseProgram(code, testRootScope)
         var count = 0
-        for (test in context) {
+
+        testRootScope.rebuild()
+        val globalContext = GlobalRuntimeContext(testRootScope)
+        testRootScope.initialize(globalContext)
+
+        for (test in testRootScope) {
             if (test.name.startsWith("test_") && test is FunctionDefinition) {
-                val globalContext = GlobalRuntimeContext(context)
-                val localRuntimeContext = LocalRuntimeContext(globalContext, 0)
+                val localRuntimeContext = LocalRuntimeContext(globalContext, test.scopeSize)
                 count++
                 test.eval(localRuntimeContext)
                 println("Test passed: ${test.name}")
