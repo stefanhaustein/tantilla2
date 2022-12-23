@@ -70,6 +70,59 @@ class CodeWriter(
         return this
     }
 
+    val x: Int
+       get() = pos - lineStart
+
+    fun appendList(expressions: List<Node>, prefixes: List<String>? = null) {
+        val l0 = sb.length
+        val p0 = pos
+        val savedLineLength = lineLength
+        lineLength = Int.MAX_VALUE
+        var ok = true
+        for (i in expressions.indices) {
+            val node = expressions[i]
+            if (sb.length > l0) {
+                append(", ")
+            }
+            if (prefixes != null) {
+                append(prefixes[i])
+            }
+            appendCode(node)
+            if (x > savedLineLength) {
+                ok = false
+                break
+            }
+        }
+        lineLength = savedLineLength
+
+        if (!ok) {
+            sb.setLength(l0)
+            pos = p0
+            var x0 = x
+            indent()
+            for (i in expressions.indices) {
+                if (sb.length != l0) {
+                    sb.append(",")
+                    if (x > x0 + 2) {
+                        newline()
+                    } else {
+                        sb.append(' ')
+                    }
+                } else {
+                    newline()
+                    x0 = x
+                }
+                if (prefixes != null) {
+                    append(prefixes[i])
+                }
+                appendCode(expressions[i])
+            }
+            outdent()
+            newline()
+        }
+    }
+
+
     fun appendWrapped(kind: Kind, s: String) = appendStart(kind).append(s).appendEnd(kind)
 
     fun appendEnd(kind: Kind): CodeWriter {

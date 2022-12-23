@@ -23,13 +23,7 @@ class ListLiteral(
 
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
         writer.append('[')
-        if (elements.isNotEmpty()) {
-            writer.appendCode(elements[0])
-            for (i in 1 until elements.size) {
-                writer.append(", ")
-                writer.appendCode(elements[i])
-            }
-        }
+        writer.appendList(elements)
         writer.append(']')
     }
 }

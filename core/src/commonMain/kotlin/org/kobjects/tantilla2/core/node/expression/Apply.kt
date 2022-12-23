@@ -44,26 +44,27 @@ class Apply(
     override val returnType
         get() = (base.returnType as FunctionType).returnType
 
-    override fun serializeCode(sb: CodeWriter, parentPrcedence: Int) {
+    override fun serializeCode(writer: CodeWriter, parentPrcedence: Int) {
         if (asMethod) {
-            sb.appendCode(parameters[0], Precedence.DOT)
-            sb.append(".")
+            writer.appendCode(parameters[0], Precedence.DOT)
+            writer.append(".")
         }
-        sb.appendCode(base)
+        writer.appendCode(base)
         if (!implicit) {
-            sb.append("(")
+            val nodeList = mutableListOf<Node>()
+            val prefixList = mutableListOf<String>()
+            writer.append("(")
             for (i in parameterSerialization.indices) {
                 val parameter = parameterSerialization[i]
-                if (i > 0) {
-                    sb.append(", ")
-                }
+                nodeList.add(parameter.node)
                 if (parameter.named.isNotEmpty()) {
-                    sb.append(parameter.named)
-                    sb.append(" = ")
+                    prefixList.add(parameter.named + " = ")
+                } else {
+                    prefixList.add("")
                 }
-                sb.appendCode(parameter.node)
             }
-            sb.append(")")
+            writer.appendList(nodeList, prefixList)
+            writer.append(")")
         }
     }
 

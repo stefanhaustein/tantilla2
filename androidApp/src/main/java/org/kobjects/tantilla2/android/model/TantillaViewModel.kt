@@ -140,7 +140,11 @@ class TantillaViewModel(
     fun editDefinition(definition: Definition?) {
         this.editingDefinition.value = definition
         val errorNode = if (definition == runtimeException.value?.definition) runtimeException.value?.node else null
-        val writer = CodeWriter(errorNode = errorNode, highlighting = mapOf(CodeWriter.Kind.ERROR to Pair("", "")))
+        val writer = CodeWriter(
+            errorNode = errorNode,
+            highlighting = mapOf(CodeWriter.Kind.ERROR to Pair("", "")),
+            lineLength = 40
+        )
         definition?.serializeCode(writer)
         runtimeExceptionPosition = IntRange(writer.errorPosition, writer.errorPosition + writer.errorLength)
         initialEditorText = writer.toString()
@@ -314,7 +318,7 @@ class TantillaViewModel(
 
     fun annotatedCode(code: String, errors: List<Exception>): AnnotatedString {
 
-        val writer = CodeWriter("", CodeWriter.defaultHighlighting)
+        val writer = CodeWriter("", CodeWriter.defaultHighlighting, lineLength = 50)
        // writer.append(Ansi.NOT_PROPORTIONAL)
         highlightSyntax(writer, code, errors, runtimeException.value, runtimeExceptionPosition)
 

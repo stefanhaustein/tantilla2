@@ -50,7 +50,10 @@ fun RenderDocumentation(viewModel: TantillaViewModel) {
             if (scope.docString.isBlank()) {
                 Text("(Undocumented)", color = Color.LightGray)
             } else {
-                val writer = CodeWriter(highlighting = CodeWriter.defaultHighlighting)
+                val writer = CodeWriter(
+                    highlighting = CodeWriter.defaultHighlighting,
+                    lineLength = 40
+                )
                 if (expanded.value) {
                     writer.appendWrapped(CodeWriter.Kind.STRING, scope.docString)
                 } else {

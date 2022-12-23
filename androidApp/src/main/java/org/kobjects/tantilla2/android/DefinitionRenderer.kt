@@ -56,7 +56,11 @@ fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
         //    val expanded = viewModel.expanded.value.contains(definition)
             val help = viewModel.mode.value == TantillaViewModel.Mode.HELP
             Column() {
-                val writer = CodeWriter(highlighting = CodeWriter.defaultHighlighting, errorNode = viewModel.runtimeException.value?.node)
+                val writer = CodeWriter(
+                    highlighting = CodeWriter.defaultHighlighting,
+                    errorNode = viewModel.runtimeException.value?.node,
+                    lineLength = 40
+                )
                 // writer.append(Ansi.NOT_PROPORTIONAL)
 
                 definition.serializeSummary(writer, if (expanded) Definition.SummaryKind.EXPANDED else Definition.SummaryKind.COLLAPSED)
