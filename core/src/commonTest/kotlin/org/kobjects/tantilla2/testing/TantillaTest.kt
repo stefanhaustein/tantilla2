@@ -9,7 +9,6 @@ import kotlin.test.*
 
 abstract class TantillaTest(val code: String) {
 
-
     @Test
     fun runTest() {
         val testRootScope = TestSystemAbstraction.createScope()
