@@ -22,7 +22,7 @@ class CodeWriter(
     val startIndices = mutableMapOf<Int, Exception>()
     val endIndices = mutableSetOf<Int>()
     var lineStart = 0
-
+    var spacePressure = false
 
     fun addError(position: IntRange, error: Exception) {
         startIndices.put(pos + position.start, error)
@@ -73,15 +73,23 @@ class CodeWriter(
     val x: Int
        get() = pos - lineStart
 
+    fun mark() = Pair(sb.length, pos)
+
+    fun reset(mark: Pair<Int, Int>) {
+        sb.setLength(mark.first)
+        pos = mark.second
+    }
+
+
     fun appendList(expressions: List<Node>, prefixes: List<String>? = null) {
-        val l0 = sb.length
-        val p0 = pos
+        val mark = mark()
         val savedLineLength = lineLength
         lineLength = Int.MAX_VALUE
-        var ok = true
+        var ok = !spacePressure
+        if (ok) {
         for (i in expressions.indices) {
             val node = expressions[i]
-            if (sb.length > l0) {
+            if (sb.length > mark.first) {
                 append(", ")
             }
             if (prefixes != null) {
@@ -93,15 +101,17 @@ class CodeWriter(
                 break
             }
         }
+        } else {
+            spacePressure = false
+        }
         lineLength = savedLineLength
 
         if (!ok) {
-            sb.setLength(l0)
-            pos = p0
+            reset(mark)
             var x0 = x
             indent()
             for (i in expressions.indices) {
-                if (sb.length != l0) {
+                if (sb.length != mark.first) {
                     sb.append(",")
                     if (x > x0 + 2) {
                         newline()
@@ -198,15 +208,27 @@ class CodeWriter(
             appendInfix(code, precedence, name, precedence)
             append(')')
         } else {
-            appendCode(code.children()[0], precedence)
-            when (name) {
-                "*", "**", "/", "//" -> append(name)
-                else -> append(" $name ")
+            val mark = mark()
+            appendInfixImpl(code, parentPrecedence, name, precedence)
+            if (x >= lineLength) {
+                reset(mark)
+                val savePressure = spacePressure
+                spacePressure = true
+                appendInfixImpl(code, parentPrecedence, name, parentPrecedence)
+                spacePressure = savePressure
             }
-            appendCode(code.children()[1], precedence + 1)
+
         }
     }
 
+    private fun appendInfixImpl(code: Node, parentPrecedence: Int,  name: String, precedence: Int) {
+        appendCode(code.children()[0], precedence)
+        when (name) {
+            "*", "**", "/", "//" -> append(name)
+            else -> append(" $name ")
+        }
+        appendCode(code.children()[1], precedence + 1)
+    }
 
 
     fun appendUnparsed(code: String, errors: List<Exception> = emptyList()): CodeWriter {
