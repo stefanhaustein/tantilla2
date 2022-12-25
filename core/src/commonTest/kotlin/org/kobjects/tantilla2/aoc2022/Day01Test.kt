@@ -1,9 +1,6 @@
 package org.kobjects.tantilla2.aoc2022
 
-
 import org.kobjects.tantilla2.testing.TantillaTest
-
-
 
 class Day01Test : TantillaTest("""
 

@@ -6,6 +6,4 @@ class MapTest : TantillaTest("""
     def test_mutable():
       let map = MutableMap[int,int]()
       assert(map.len == 0, "len")
-""") {
-
-}
+""")

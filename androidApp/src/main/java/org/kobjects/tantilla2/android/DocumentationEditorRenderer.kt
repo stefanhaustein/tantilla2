@@ -14,7 +14,6 @@ import androidx.compose.ui.graphics.Color
 import org.kobjects.tantilla2.android.model.TantillaViewModel
 
 
-@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun RenderDocumentationEditor(viewModel: TantillaViewModel) {
     var showMenu = remember { mutableStateOf(false) }
@@ -58,7 +57,7 @@ fun RenderDocumentationEditor(viewModel: TantillaViewModel) {
                 onValueChange = {
                     viewModel.currentText.value = it
                 },
-                Modifier.fillMaxSize(),
+                Modifier.fillMaxSize().padding(it),
                 colors = TextFieldDefaults.textFieldColors(
                     backgroundColor = Color.Transparent
                 )

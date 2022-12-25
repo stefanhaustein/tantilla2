@@ -1,21 +1,28 @@
 package org.kobjects.tantilla2.android
 
+import android.util.TypedValue
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
+import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
@@ -29,6 +36,9 @@ import org.kobjects.tantilla2.core.definition.Scope
 @Composable
 fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
     val expanded = viewModel.expanded.value.contains(definition)
+    val textWidth = remember {
+        mutableStateOf(40)
+    }
     Card(
         backgroundColor = if (!expanded && (viewModel.userRootScope.definitionsWithErrors.contains(definition)
                     || definition.errors.isNotEmpty()
@@ -49,22 +59,29 @@ fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
                         }
                     },
 
-                )
+                    )
             }
     ) {
         Box(Modifier.padding(8.dp)) {
         //    val expanded = viewModel.expanded.value.contains(definition)
             val help = viewModel.mode.value == TantillaViewModel.Mode.HELP
-            Column() {
+            Column {
                 val writer = CodeWriter(
                     highlighting = CodeWriter.defaultHighlighting,
                     errorNode = viewModel.runtimeException.value?.node,
-                    lineLength = 40
+                    lineLength = textWidth.value
                 )
                 // writer.append(Ansi.NOT_PROPORTIONAL)
 
                 definition.serializeSummary(writer, if (expanded) Definition.SummaryKind.EXPANDED else Definition.SummaryKind.COLLAPSED)
-                Text(AnsiConverter.ansiToAnnotatedString(writer.toString(), TantillaViewModel.MONOSPACE_FONT_FAMILY, TantillaViewModel.MONOSPACE_FONT_FAMILY))
+
+                Text(AnsiConverter.ansiToAnnotatedString(writer.toString(),
+                        TantillaViewModel.MONOSPACE_FONT_FAMILY,
+                        TantillaViewModel.MONOSPACE_FONT_FAMILY),
+
+                    onTextLayout = { updateTextWidth(it, textWidth) }
+
+                )
             }
             Row(modifier = Modifier
                 .align(Alignment.TopEnd)

@@ -30,6 +30,9 @@ object StatementParser {
                         if (expr !is AssignableNode) {
                             tokenizer.exception("Target is not assignable")
                         }
+                        while (tokenizer.current.type == TokenType.LINE_BREAK) {
+                            tokenizer.next()
+                        }
                         expr = Assignment(
                             expr as AssignableNode,
                             ExpressionParser.parseExpression(tokenizer, context)

@@ -217,6 +217,13 @@ object Parser {
     fun consumeInBrackets(tokenizer: TantillaTokenizer) {
         val end: String
         when(tokenizer.current.text) {
+            "=" -> {
+                tokenizer.next()
+                while(tokenizer.current.type == TokenType.LINE_BREAK) {
+                    tokenizer.next()
+                }
+                return
+            }
             "(" -> end = ")"
             "[" -> end = "]"
             "{" -> end = "}"

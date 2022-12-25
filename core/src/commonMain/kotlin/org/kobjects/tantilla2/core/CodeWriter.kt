@@ -23,6 +23,7 @@ class CodeWriter(
     val endIndices = mutableSetOf<Int>()
     var lineStart = 0
     var spacePressure = false
+    var lhs = false
 
     fun addError(position: IntRange, error: Exception) {
         startIndices.put(pos + position.start, error)
@@ -128,7 +129,9 @@ class CodeWriter(
                 appendCode(expressions[i])
             }
             outdent()
-            newline()
+            if (lhs) {
+                newline()
+            }
         }
     }
 
@@ -222,7 +225,10 @@ class CodeWriter(
     }
 
     private fun appendInfixImpl(code: Node, parentPrecedence: Int,  name: String, precedence: Int) {
+        val saveLhs = lhs
+        lhs = true
         appendCode(code.children()[0], precedence)
+        lhs = saveLhs
         when (name) {
             "*", "**", "/", "//" -> append(name)
             else -> append(" $name ")

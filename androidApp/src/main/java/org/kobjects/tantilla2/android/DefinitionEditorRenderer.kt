@@ -1,8 +1,10 @@
 package org.kobjects.tantilla2.android
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowLeft
@@ -14,13 +16,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import org.kobjects.tantilla2.android.model.TantillaViewModel
 
 
-@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun RenderDefinitionEditor(viewModel: TantillaViewModel) {
     var showMenu = remember { mutableStateOf(false) }
@@ -29,6 +32,7 @@ fun RenderDefinitionEditor(viewModel: TantillaViewModel) {
     val errors = remember {
         mutableStateOf(viewModel.editingDefinition.value?.errors ?: emptyList())
     }
+    val textWidth = remember { mutableStateOf(40) }
     val errorIndex = remember { mutableStateOf(0) }
 
     Scaffold(
@@ -81,20 +85,24 @@ fun RenderDefinitionEditor(viewModel: TantillaViewModel) {
                     Icon(Icons.Default.ArrowLeft, "Previous")
                 }
                 if (errors.isEmpty()) {
-                    Text("(No error)", Modifier.weight(1f)
-                        .height(48.dp)
-                        .padding(4.dp, 10.dp, 4.dp, 4.dp)
+                    Text("(No error)",
+                        Modifier
+                            .weight(1f)
+                            .height(48.dp)
+                            .padding(4.dp, 10.dp, 4.dp, 4.dp)
 
                     )
                 } else {
                     val error = errors[errorIndex.value % errors.size]
                     val text = error.message ?: error.toString()
-                    Text(text, Modifier.weight(1f)
-                        .height(48.dp)
-                        .padding(4.dp)
-                        .clickable {
-                            viewModel.dialogManager.showError(text)
-                        })
+                    Text(text,
+                        Modifier
+                            .weight(1f)
+                            .height(48.dp)
+                            .padding(4.dp)
+                            .clickable {
+                                viewModel.dialogManager.showError(text)
+                            })
                 }
 
                 IconButton(
@@ -106,6 +114,17 @@ fun RenderDefinitionEditor(viewModel: TantillaViewModel) {
             }
         },
     ) {
+
+        val textPx = with (LocalDensity.current) {
+            LocalTextStyle.current.fontSize.toPx()
+        }
+        val padding = with(LocalDensity.current) {
+            20.dp.toPx()
+        }
+        println("DefinitionEditor composition")
+
+
+
             TextField(
                 value = viewModel.currentText.value,
                 onValueChange = {
@@ -115,10 +134,19 @@ fun RenderDefinitionEditor(viewModel: TantillaViewModel) {
                     viewModel.currentText.value = it.copy(
                         annotatedString = viewModel.annotatedCode(it.text, errors.value))
                 },
-                Modifier.fillMaxSize(),
+                Modifier
+                    .fillMaxSize()
+                    .padding(it)
+                //    .background(Color.Yellow)
+                    .onSizeChanged {
+                        val availableWidth = it.width - 2 * padding
+                        viewModel.editorLineLength.value = (availableWidth / (textPx / 2f)).toInt() - 1
+                        println("Editor text width: ${textWidth.value}")
+                    },
                 colors = TextFieldDefaults.textFieldColors(
                     backgroundColor = Color.Transparent
                 ),
+                //onTextLayout = { updateTextWidth(it, textWidth) }
             )
     }
 }

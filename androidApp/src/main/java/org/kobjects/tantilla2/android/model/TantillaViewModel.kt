@@ -58,6 +58,8 @@ class TantillaViewModel(
 
     val graphicsSystem = defineNatives(rootScope, bitmap, graphicsUpdateTrigger)
 
+    val editorLineLength = mutableStateOf(50)
+
     init {
         val file = File(platform.rootDirectory, platform.fileName)
         if (file.exists()) {
@@ -143,7 +145,7 @@ class TantillaViewModel(
         val writer = CodeWriter(
             errorNode = errorNode,
             highlighting = mapOf(CodeWriter.Kind.ERROR to Pair("", "")),
-            lineLength = 40
+            lineLength = editorLineLength.value
         )
         definition?.serializeCode(writer)
         runtimeExceptionPosition = IntRange(writer.errorPosition, writer.errorPosition + writer.errorLength)
@@ -318,7 +320,7 @@ class TantillaViewModel(
 
     fun annotatedCode(code: String, errors: List<Exception>): AnnotatedString {
 
-        val writer = CodeWriter("", CodeWriter.defaultHighlighting, lineLength = 50)
+        val writer = CodeWriter("", CodeWriter.defaultHighlighting)
        // writer.append(Ansi.NOT_PROPORTIONAL)
         highlightSyntax(writer, code, errors, runtimeException.value, runtimeExceptionPosition)
 
