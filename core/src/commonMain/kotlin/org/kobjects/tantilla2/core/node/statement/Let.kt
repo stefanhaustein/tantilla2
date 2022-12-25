@@ -34,8 +34,8 @@ class Let(val definition: LocalVariableDefinition, val type: Type, val typeIsExp
             writer.appendType(type, null)
         }
         if (initializer != null) {
-            writer.append(" = ")
-            writer.appendCode(initializer)
+            writer.append(" =")
+            writer.appendMaybeNextLine(initializer)
         }
     }
 }

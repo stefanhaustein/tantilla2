@@ -24,7 +24,7 @@ class Assignment(
 
     override fun serializeCode(sb: CodeWriter, parentPrecedence: Int) {
         sb.appendCode(target)
-        sb.append(" = ")
-        sb.appendCode(source)
+        sb.append(" =")
+        sb.appendMaybeNextLine(source)
     }
 }

@@ -289,6 +289,9 @@ object Parser {
             }
         }
         if (tokenizer.tryConsume("=")) {
+            while (tokenizer.current.type == TokenType.LINE_BREAK) {
+                tokenizer.next()
+            }
             initializer = ExpressionParser.parseExpression(tokenizer, context)
             if (type == null) {
                 type = initializer.returnType

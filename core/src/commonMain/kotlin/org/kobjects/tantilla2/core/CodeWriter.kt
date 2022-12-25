@@ -22,12 +22,22 @@ class CodeWriter(
     val startIndices = mutableMapOf<Int, Exception>()
     val endIndices = mutableSetOf<Int>()
     var lineStart = 0
-    var spacePressure = false
     var lhs = false
+    var depth = 0
 
     fun addError(position: IntRange, error: Exception) {
         startIndices.put(pos + position.start, error)
         endIndices.add(pos + position.endInclusive + 1)
+    }
+
+    fun appendOpen(value: Char) {
+        append(value)
+        depth++
+    }
+
+    fun appendClose(value: Char) {
+        append(value)
+        depth--
     }
 
     override fun append(value: Char): CodeWriter {
@@ -74,64 +84,89 @@ class CodeWriter(
     val x: Int
        get() = pos - lineStart
 
-    fun mark() = Pair(sb.length, pos)
-
-    fun reset(mark: Pair<Int, Int>) {
-        sb.setLength(mark.first)
-        pos = mark.second
+    fun mark(unrestrictedLineLength: Boolean = true): Mark {
+        val result = Mark()
+        if (unrestrictedLineLength) {
+            lineLength = Int.MAX_VALUE
+        }
+        lhs = false
+        return result
     }
 
+    fun reset(mark: Mark) {
+        unmark(mark)
+        sb.setLength(mark.savedLength)
+        pos = mark.savedPos
+    }
+
+    fun unmark(mark: Mark) {
+        lineLength = mark.savedLineLength
+        lhs = mark.savedLhs
+    }
+
+    fun appendInParens(node: Node) {
+        appendOpen('(')
+        indent()
+        appendCode(node)
+        outdent()
+        appendClose(')')
+    }
+
+    fun appendMaybeNextLine(node: Node) {
+        val mark = mark()
+        append(' ')
+        appendCode(node)
+        unmark(mark)
+        if (x >= lineLength) {
+            reset(mark)
+            indent()
+            newline()
+            appendCode(node)
+            outdent()
+        }
+    }
 
     fun appendList(expressions: List<Node>, prefixes: List<String>? = null) {
         val mark = mark()
-        val savedLineLength = lineLength
-        lineLength = Int.MAX_VALUE
-        var ok = !spacePressure
-        if (ok) {
+
+        lhs = false
         for (i in expressions.indices) {
             val node = expressions[i]
-            if (sb.length > mark.first) {
+            if (sb.length > mark.savedLength) {
                 append(", ")
             }
             if (prefixes != null) {
                 append(prefixes[i])
             }
             appendCode(node)
-            if (x > savedLineLength) {
-                ok = false
-                break
-            }
         }
-        } else {
-            spacePressure = false
-        }
-        lineLength = savedLineLength
 
-        if (!ok) {
+        unmark(mark)
+
+        if (x + 1 >= lineLength) {
+            val len = x - mark.savedX
+            var multiLine = indent.length + 2 + len + 1 >= mark.savedLineLength
+
             reset(mark)
-            var x0 = x
             indent()
             for (i in expressions.indices) {
-                if (sb.length != mark.first) {
-                    sb.append(",")
-                    if (x > x0 + 2) {
-                        newline()
-                    } else {
-                        sb.append(' ')
-                    }
-                } else {
-                    newline()
-                    x0 = x
-                }
-                if (prefixes != null) {
-                    append(prefixes[i])
-                }
-                appendCode(expressions[i])
-            }
-            outdent()
-            if (lhs) {
-                newline()
-            }
+                  if (sb.length == mark.savedLength) {
+                      newline()
+                  } else if (multiLine) {
+                      sb.append(",")
+                      newline()
+                  } else {
+                      sb.append(", ")
+                  }
+                  if (prefixes != null) {
+                      append(prefixes[i])
+                  }
+                  appendCode(expressions[i])
+              }
+              outdent()
+          }
+        if (lhs) {
+            newline()
         }
     }
 
@@ -207,33 +242,29 @@ class CodeWriter(
 
     fun appendInfix(code: Node, parentPrecedence: Int, name: String, precedence: Int) {
         if (parentPrecedence > precedence) {
-            append('(')
-            appendInfix(code, precedence, name, precedence)
-            append(')')
+            appendInParens(code)
         } else {
-            val mark = mark()
-            appendInfixImpl(code, parentPrecedence, name, precedence)
-            if (x >= lineLength) {
-                reset(mark)
-                val savePressure = spacePressure
-                spacePressure = true
-                appendInfixImpl(code, parentPrecedence, name, parentPrecedence)
-                spacePressure = savePressure
+            val outerMark = mark(false)
+            appendCode(code.children()[0], precedence)
+            val innerMark = mark(true)
+            when (name) {
+                "*", "**", "/", "//" -> append(name)
+                else -> append(" $name ")
             }
-
+            appendCode(code.children()[1], precedence + 1)
+            unmark(outerMark)
+            if (x >= lineLength) {
+                if (depth > 0) {
+                    reset(innerMark)
+                    newline()
+                    append("$name ")
+                    appendCode(code.children()[1], precedence + 1)
+                } else {
+                    reset(outerMark)
+                    appendInfix(code, precedence + 1, name, precedence)
+                }
+            }
         }
-    }
-
-    private fun appendInfixImpl(code: Node, parentPrecedence: Int,  name: String, precedence: Int) {
-        val saveLhs = lhs
-        lhs = true
-        appendCode(code.children()[0], precedence)
-        lhs = saveLhs
-        when (name) {
-            "*", "**", "/", "//" -> append(name)
-            else -> append(" $name ")
-        }
-        appendCode(code.children()[1], precedence + 1)
     }
 
 
@@ -268,5 +299,14 @@ class CodeWriter(
             Kind.ERROR to Pair(Ansi.rgbBackground(0xeb586e), Ansi.BACKGROUND_DEFAULT),
             Kind.STRING to Pair(Ansi.rgbForeground(0xa7d489), Ansi.FOREGROUND_DEFAULT)
         )
+    }
+
+
+    inner class Mark() {
+        val savedLength = sb.length
+        val savedPos = pos
+        val savedLineLength = lineLength
+        val savedX = x
+        val savedLhs = lhs
     }
 }

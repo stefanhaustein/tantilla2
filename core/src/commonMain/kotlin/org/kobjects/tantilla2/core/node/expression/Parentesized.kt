@@ -17,8 +17,6 @@ class Parentesized(val expression: Node) : Node() {
         get() = expression.returnType
 
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
-        writer.append('(')
-        expression.serializeCode(writer, 0)
-        writer.append(')')
+        writer.appendInParens(expression)
     }
 }
