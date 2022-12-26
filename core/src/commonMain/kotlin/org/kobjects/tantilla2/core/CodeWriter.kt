@@ -124,7 +124,11 @@ class CodeWriter(
         }
     }
 
-    fun appendList(expressions: List<Node>, prefixes: List<String>? = null) {
+    fun appendList(
+        expressions: List<Node>,
+        prefixes: List<String>? = null,
+        addBracesOnOverflow: Boolean = false,
+    ) {
         val mark = mark()
 
         for (i in expressions.indices) {
@@ -140,11 +144,16 @@ class CodeWriter(
 
         unmark(mark)
 
-        if (x + 1 >= lineLength) {
+        val overflow = x + 1 >= lineLength
+
+        if (overflow) {
             val len = x - mark.savedX
             var multiLine = indent.length + 2 + len + 1 >= mark.savedLineLength
 
             reset(mark)
+            if (addBracesOnOverflow) {
+                appendOpen('(')
+            }
             indent()
             for (i in expressions.indices) {
                   if (sb.length == mark.savedLength) {
@@ -164,6 +173,9 @@ class CodeWriter(
           }
         if (x >= lineLength - 1) {
             newline()
+        }
+        if (addBracesOnOverflow && overflow) {
+            appendClose(')')
         }
     }
 

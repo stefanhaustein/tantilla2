@@ -13,7 +13,7 @@ class Apply(
     val base: Node,
     val parameters: List<Node>,
     val parameterSerialization: List<ParameterSerialization>,
-    val implicit: Boolean,
+    val parens: Boolean,
     val asMethod: Boolean,
 ) : Node() {
     override fun eval(context: LocalRuntimeContext): Any {
@@ -39,7 +39,7 @@ class Apply(
     }
 
     override fun reconstruct(newChildren: List<Node>): Node =
-        Apply(newChildren[0], newChildren.subList(1, newChildren.size), parameterSerialization, implicit, asMethod)
+        Apply(newChildren[0], newChildren.subList(1, newChildren.size), parameterSerialization, parens, asMethod)
 
     override val returnType
         get() = (base.returnType as FunctionType).returnType
@@ -50,21 +50,26 @@ class Apply(
             writer.append(".")
         }
         writer.appendCode(base)
-        if (!implicit) {
-            val nodeList = mutableListOf<Node>()
-            val prefixList = mutableListOf<String>()
-            writer.append("(")
-            for (i in parameterSerialization.indices) {
-                val parameter = parameterSerialization[i]
-                nodeList.add(parameter.node)
-                if (parameter.named.isNotEmpty()) {
-                    prefixList.add(parameter.named + " = ")
-                } else {
-                    prefixList.add("")
-                }
+
+        val nodeList = mutableListOf<Node>()
+        val prefixList = mutableListOf<String>()
+        if (parens) {
+            writer.appendOpen('(')
+        } else {
+            writer.append(' ')
+        }
+        for (i in parameterSerialization.indices) {
+            val parameter = parameterSerialization[i]
+            nodeList.add(parameter.node)
+            if (parameter.named.isNotEmpty()) {
+                prefixList.add(parameter.named + " = ")
+            } else {
+                prefixList.add("")
             }
-            writer.appendList(nodeList, prefixList)
-            writer.append(")")
+        }
+        writer.appendList(nodeList, prefixList)
+        if (parens) {
+            writer.appendClose(')')
         }
     }
 

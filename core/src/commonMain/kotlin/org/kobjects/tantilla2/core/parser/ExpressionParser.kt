@@ -448,7 +448,7 @@ object ExpressionParser {
             value,
             List(parameterExpressions.size) { parameterExpressions[it]!!},
             parameterSerialization.toList(),
-            !parentesizedArgsList,
+            parentesizedArgsList,
             asMethod
         )
     }
