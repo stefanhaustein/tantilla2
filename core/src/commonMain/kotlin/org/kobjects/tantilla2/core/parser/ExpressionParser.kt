@@ -2,14 +2,11 @@ package org.kobjects.tantilla2.core.parser
 
 import org.kobjects.tantilla2.core.node.expression.StrNode
 import org.kobjects.tantilla2.core.*
-import org.kobjects.tantilla2.core.type.GenericType
-import org.kobjects.tantilla2.core.type.StrType
 import org.kobjects.parserlib.expressionparser.ExpressionParser as GreenspunExpressionParser
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
 import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
 import org.kobjects.tantilla2.core.classifier.StructMetaType
 import org.kobjects.tantilla2.core.definition.Definition
-import org.kobjects.tantilla2.core.definition.ImportDefinition
 import org.kobjects.tantilla2.core.definition.Scope
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.FunctionType
@@ -17,8 +14,7 @@ import org.kobjects.tantilla2.core.function.LambdaScope
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.node.expression.*
 import org.kobjects.tantilla2.core.node.expression.Apply
-import org.kobjects.tantilla2.core.type.FloatType
-import org.kobjects.tantilla2.core.type.Type
+import org.kobjects.tantilla2.core.type.*
 
 object ExpressionParser {
 
@@ -127,6 +123,7 @@ object ExpressionParser {
                 asMethod = false)
         }
 
+        // Method in function form
         if (tokenizer.tryConsume("(")) {
             val firstParameter = parseExpression(tokenizer, context)
             val baseType = firstParameter.returnType as Scope
@@ -348,7 +345,6 @@ object ExpressionParser {
         openingParenConsumed: Boolean,
         asMethod: Boolean
     ): Node {
-        tokenizer.disable(TokenType.LINE_BREAK)
         val type = value.returnType
 
         if (type !is FunctionType) {
@@ -357,13 +353,14 @@ object ExpressionParser {
             if (openingParenConsumed || tokenizer.tryConsume("(")) {
                 tokenizer.consume(")", "Empty parameter list expected.")
             }
-            tokenizer.enable(TokenType.LINE_BREAK)
             return value
         }
 
-        val hasArgs = openingParenConsumed || tokenizer.tryConsume("(")
-        if (!hasArgs && type is StructMetaType) {
-            tokenizer.enable(TokenType.LINE_BREAK)
+        // Don't imply constructor calls.
+        val parentesizedArgsList = openingParenConsumed || tokenizer.tryConsume("(")
+        if (parentesizedArgsList) {
+            tokenizer.disable(TokenType.LINE_BREAK)
+        } else if (type is StructMetaType) {
             return value
         }
 
@@ -386,7 +383,13 @@ object ExpressionParser {
         val varargs = mutableListOf<Node>()
         var varargIndex = -1
         var nameRequired = false
-        if (hasArgs && !tokenizer.tryConsume(")")) {
+
+        val parseParameterList = if (parentesizedArgsList) !tokenizer.tryConsume(")")
+        else ((type.returnType == VoidType || type.hasRequiredParameters())
+                && tokenizer.current.type != TokenType.LINE_BREAK
+                && tokenizer.current.text != ":")
+
+        if (parseParameterList)  {
             do {
                 var name = ""
                 if (tokenizer.current.type == TokenType.IDENTIFIER && tokenizer.lookAhead(1).text == "=") {
@@ -413,7 +416,10 @@ object ExpressionParser {
                     parameterExpressions[index++] = expression
                 }
             } while (tokenizer.tryConsume(","))
-            tokenizer.consume(")")
+
+            if (parentesizedArgsList) {
+                tokenizer.consume(")")
+            }
         }
 
         if (varargIndex != -1) {
@@ -435,13 +441,14 @@ object ExpressionParser {
             }
         }
 
-        tokenizer.enable(TokenType.LINE_BREAK)
-
+        if (parentesizedArgsList) {
+            tokenizer.enable(TokenType.LINE_BREAK)
+        }
         return Apply(
             value,
             List(parameterExpressions.size) { parameterExpressions[it]!!},
             parameterSerialization.toList(),
-            !hasArgs,
+            !parentesizedArgsList,
             asMethod
         )
     }

@@ -27,6 +27,15 @@ interface FunctionType : Type {
         }
     }
 
+    fun hasRequiredParameters(): Boolean {
+        for (parameter in parameters) {
+            if (parameter.defaultValueExpression == null && !parameter.isVararg) {
+                return true
+            }
+        }
+        return false
+    }
+
     companion object {
     fun FunctionType.serializeTypeImpl(writer: CodeWriter, scope: Scope?, twoLine: Boolean, multiline: Boolean): Int {
         val startIndex = if (isMethod()) 1 else 0
