@@ -12,6 +12,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -25,6 +26,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.kobjects.konsole.compose.AnsiConverter
 import org.kobjects.tantilla2.android.model.TantillaViewModel
@@ -32,13 +34,12 @@ import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.Palette
 import org.kobjects.tantilla2.core.definition.Scope
+import org.kobjects.tantilla2.core.node.expression.IntNode
 
 @Composable
-fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
+fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition, textWidth: MutableState<Int>) {
     val expanded = viewModel.expanded.value.contains(definition)
-    val textWidth = remember {
-        mutableStateOf(40)
-    }
+
     Card(
         backgroundColor = if (!expanded && (viewModel.userRootScope.definitionsWithErrors.contains(definition)
                     || definition.errors.isNotEmpty()
@@ -78,7 +79,8 @@ fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition) {
                 Text(AnsiConverter.ansiToAnnotatedString(writer.toString(),
                         TantillaViewModel.MONOSPACE_FONT_FAMILY,
                         TantillaViewModel.MONOSPACE_FONT_FAMILY),
-
+                    overflow = TextOverflow.Clip,
+                    softWrap = false,
                     onTextLayout = { updateTextWidth(it, textWidth) }
 
                 )

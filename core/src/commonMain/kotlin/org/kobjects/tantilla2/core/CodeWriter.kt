@@ -22,7 +22,6 @@ class CodeWriter(
     val startIndices = mutableMapOf<Int, Exception>()
     val endIndices = mutableSetOf<Int>()
     var lineStart = 0
-    var lhs = false
     var depth = 0
 
     fun addError(position: IntRange, error: Exception) {
@@ -89,7 +88,6 @@ class CodeWriter(
         if (unrestrictedLineLength) {
             lineLength = Int.MAX_VALUE
         }
-        lhs = false
         return result
     }
 
@@ -97,11 +95,11 @@ class CodeWriter(
         unmark(mark)
         sb.setLength(mark.savedLength)
         pos = mark.savedPos
+        depth = mark.savedDepth
     }
 
     fun unmark(mark: Mark) {
         lineLength = mark.savedLineLength
-        lhs = mark.savedLhs
     }
 
     fun appendInParens(node: Node) {
@@ -129,7 +127,6 @@ class CodeWriter(
     fun appendList(expressions: List<Node>, prefixes: List<String>? = null) {
         val mark = mark()
 
-        lhs = false
         for (i in expressions.indices) {
             val node = expressions[i]
             if (sb.length > mark.savedLength) {
@@ -165,7 +162,7 @@ class CodeWriter(
               }
               outdent()
           }
-        if (lhs) {
+        if (x >= lineLength - 1) {
             newline()
         }
     }
@@ -307,6 +304,6 @@ class CodeWriter(
         val savedPos = pos
         val savedLineLength = lineLength
         val savedX = x
-        val savedLhs = lhs
+        val savedDepth = depth
     }
 }

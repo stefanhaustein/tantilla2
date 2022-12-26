@@ -12,7 +12,7 @@ fun updateTextWidth(textLayoutResult: TextLayoutResult, textWidthState: MutableS
     val textPx = with(textLayoutResult.layoutInput.density) {
         textLayoutResult.layoutInput.style.fontSize.toPx()
     }
-    textWidthState.value = (textLayoutResult.layoutInput.constraints.maxWidth / (textPx / 2f)).toInt() - 1
+    textWidthState.value = (textLayoutResult.layoutInput.constraints.maxWidth / (textPx / 2f)).toInt() - 2
     println("TextWidth: ${textWidthState.value}")
 }
 

@@ -7,6 +7,8 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -22,6 +24,10 @@ fun RenderScope(viewModel: TantillaViewModel) {
     val scope = viewModel.scope().value
 
     val definitions = scope.sorted()
+
+    val textWidth = remember {
+        mutableStateOf(40)
+    }
 
     key(viewModel.codeUpdateTrigger.value) {
         Scaffold(
@@ -73,7 +79,7 @@ fun RenderScope(viewModel: TantillaViewModel) {
                         for (definition in list) {
                             item(key = scope.name + "::" + definition.name + "::" + definition.hashCode()) {
                                 key(viewModel.codeUpdateTrigger.value) {
-                                    RenderDefinition(viewModel, definition)
+                                    RenderDefinition(viewModel, definition, textWidth)
                                 }
                             }
                         }
