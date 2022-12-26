@@ -13,18 +13,18 @@ def main():
     for i in range(0, len(line)):
       let p = calculate_priority(line[i])
       let mask = 1 << (p - 1)
-      types = types | mask
+      types |= mask
 
     if n == 0:
       group = types
     else:
-      group = group & types
+      group &= types
 
     if n == 2:
-      score = score + 1 + int(math.log2(group))
+      score += 1 + int(math.log2(group))
       n = 0
     else:
-      n = n + 1
+      n += 1
 
   print(score)
 

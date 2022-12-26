@@ -7,7 +7,7 @@ def main():
         best = current
       current = 0
     else:
-      current = current + int(line)
+      current += int(line)
 
   print(best)
 

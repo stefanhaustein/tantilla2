@@ -12,10 +12,10 @@ def main():
     for i in range(0, l):
       let p = calculate_priority(line[i])
       let mask = 1 << (p - 1)
-      if (i < l/2):
-        types1 = types1 | mask
+      if i < l/2:
+        types1 |= mask
       elif (types1 & mask) != 0:
-        score = score + p
+        score += p
         break
 
   print(score)

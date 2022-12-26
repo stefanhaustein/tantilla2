@@ -22,7 +22,7 @@ object StrType : NativeStructDefinition(
             IntType,
             Parameter("radix", IntType, IntNode.Const(10))
         ) {
-            (it[0] as String).toInt((it[1] as Long).toInt())
+            (it[0] as String).toLong((it[1] as Long).toInt())
         }
         defineMethod("float",
             "Converts this string to a float value.",

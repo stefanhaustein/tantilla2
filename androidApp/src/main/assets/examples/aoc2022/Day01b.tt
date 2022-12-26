@@ -6,7 +6,7 @@ def main():
       all.append(current)
       current = 0
     else:
-      current = current + int(line)
+      current += int(line)
 
   all.sort()
   let l = len(all)

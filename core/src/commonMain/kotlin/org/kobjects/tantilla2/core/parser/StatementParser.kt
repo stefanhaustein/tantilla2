@@ -26,17 +26,27 @@ object StatementParser {
                     Comment(tokenizer.consume(TokenType.COMMENT))
                 } else {
                     var expr = ExpressionParser.parseExpression(tokenizer, context)
-                    if (tokenizer.tryConsume("=")) {
+                    val text = tokenizer.current.text
+                    if (text.endsWith("=") && text != "!=" && text != "<=" && text != ">=") {
                         if (expr !is AssignableNode) {
                             tokenizer.exception("Target is not assignable")
                         }
+                        tokenizer.next()
                         while (tokenizer.current.type == TokenType.LINE_BREAK) {
                             tokenizer.next()
                         }
-                        expr = Assignment(
-                            expr as AssignableNode,
-                            ExpressionParser.parseExpression(tokenizer, context)
-                        )
+                        if (text == "=") {
+                            expr = Assignment(
+                                expr as AssignableNode,
+                                ExpressionParser.parseExpression(tokenizer, context)
+                            )
+                        } else {
+                            expr = CompoundAssignment.create(
+                                text,
+                                expr as AssignableNode,
+                                ExpressionParser.parseExpression(tokenizer, context)
+                            )
+                        }
                     }
                     if (tokenizer.current.type != TokenType.EOF
                         && tokenizer.current.type != TokenType.LINE_BREAK

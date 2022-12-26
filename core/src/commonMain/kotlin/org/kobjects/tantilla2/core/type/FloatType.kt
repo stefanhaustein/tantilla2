@@ -27,8 +27,8 @@ object FloatType : NativeStructDefinition(
         ) { abs(it.f64(0)) }
         defineMethod(
             "int", "Return the value truncated to the next integer.",
-            FloatType
-        ) { it.f64(0).toInt() }
+            IntType
+        ) { it.f64(0).toLong() }
 
         defineMethod(
             "max", "Returns the maximum of two values.",
