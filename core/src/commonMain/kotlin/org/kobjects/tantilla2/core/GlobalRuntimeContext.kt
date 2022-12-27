@@ -67,7 +67,12 @@ class GlobalRuntimeContext(
         try {
             val function = definition.getValue(null) as Callable
             launch {
-                userRootScope.initialize(this)
+                this.initialize()    /*val startIndex = if (incremental) initializedTo else 0
+        globalRuntimeContext.staticVariableValues.setSize(staticFieldDefinitions.size)
+        for (index in startIndex until staticFieldDefinitions.size) {
+            staticFieldDefinitions[index]?.initialize(globalRuntimeContext.staticVariableValues)
+        }
+        initializedTo = staticFieldDefinitions.size*/
                 function.eval(LocalRuntimeContext(this, function.scopeSize))
             }
         } catch (e: RuntimeException) {
@@ -125,5 +130,14 @@ class GlobalRuntimeContext(
         }
     }
 
+
+    fun initialize(incremental: Boolean = false) {
+        val startIndex = if (incremental) userRootScope.initializedTo else 0
+        staticVariableValues.setSize(userRootScope.staticFieldDefinitions.size)
+        for (index in startIndex until userRootScope.staticFieldDefinitions.size) {
+            userRootScope.staticFieldDefinitions[index]?.initialize(staticVariableValues)
+        }
+        userRootScope.initializedTo = userRootScope.staticFieldDefinitions.size
+    }
 
 }

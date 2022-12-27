@@ -17,7 +17,12 @@ abstract class TantillaTest(val code: String) {
 
         testRootScope.rebuild()
         val globalContext = GlobalRuntimeContext(testRootScope)
-        testRootScope.initialize(globalContext)
+        globalContext.initialize()    /*val startIndex = if (incremental) initializedTo else 0
+        globalRuntimeContext.staticVariableValues.setSize(staticFieldDefinitions.size)
+        for (index in startIndex until staticFieldDefinitions.size) {
+            staticFieldDefinitions[index]?.initialize(globalRuntimeContext.staticVariableValues)
+        }
+        initializedTo = staticFieldDefinitions.size*/
 
         for (test in testRootScope) {
             if (test.name.startsWith("test_") && test is FunctionDefinition) {

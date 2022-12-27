@@ -38,15 +38,6 @@ class UserRootScope(
         initializedTo = 0
     }
 
-    fun initialize(globalRuntimeContext: GlobalRuntimeContext, incremental: Boolean = false) {
-        val startIndex = if (incremental) initializedTo else 0
-        globalRuntimeContext.staticVariableValues.setSize(staticFieldDefinitions.size)
-        for (index in startIndex until staticFieldDefinitions.size) {
-            staticFieldDefinitions[index]?.initialize(globalRuntimeContext.staticVariableValues)
-        }
-        initializedTo = staticFieldDefinitions.size
-    }
-
 
     fun rebuild() {
         reset()
