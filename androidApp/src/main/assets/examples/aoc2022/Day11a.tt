@@ -1,6 +1,6 @@
 struct Monkey:
   items: MutableList[int]
-  operation: (old: int) -> int
+  operation: (int) -> int
   divisible: int
   if_true: int
   if_false: int

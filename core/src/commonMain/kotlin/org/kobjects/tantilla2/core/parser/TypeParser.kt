@@ -43,10 +43,18 @@ object TypeParser {
     }
 
 
-    fun parseParameter(tokenizer: TantillaTokenizer, context: ParsingContext): Parameter {
+    fun parseParameter(tokenizer: TantillaTokenizer, context: ParsingContext, index: Int): Parameter {
         val isVararg = tokenizer.tryConsume("*")
-        val name = tokenizer.consume(TokenType.IDENTIFIER)
-        tokenizer.consume(":", "Colon expected, separating the parameter type from the parameter name.")
+        val name: String
+        if (tokenizer.current.type == TokenType.IDENTIFIER && tokenizer.lookAhead(1).text == ":") {
+            name = tokenizer.consume(TokenType.IDENTIFIER)
+            tokenizer.consume(
+                ":",
+                "Colon expected, separating the parameter type from the parameter name."
+            )
+        } else {
+            name = "\$$index"
+        }
         val rawType = TypeParser.parseType(tokenizer, context)
         val type = if (isVararg) ListType(rawType) else rawType
         val defaultValue: Node? = if (tokenizer.tryConsume("="))
@@ -71,8 +79,9 @@ object TypeParser {
             parameters.add(Parameter("self", selfType, null))
         }
         if (!tokenizer.tryConsume(")")) {
+            var index = 0
             do {
-                parameters.add(parseParameter(tokenizer, context))
+                parameters.add(parseParameter(tokenizer, context, index++))
             } while (tokenizer.tryConsume(","))
             var varargCount = 0
             for (parameter in parameters) {

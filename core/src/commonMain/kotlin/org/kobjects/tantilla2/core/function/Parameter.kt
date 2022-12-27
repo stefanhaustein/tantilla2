@@ -19,9 +19,14 @@ data class Parameter(
             if (isVararg) {
                 writer.append("*")
             }
-            writer.append(name)
-            if (scope != null) {
-                writer.append(": ")
+
+            if (scope == null && !name.startsWith("$")) {
+                writer.append(name)
+            } else {
+                if (!name.startsWith("$")) {
+                    writer.append(name)
+                    writer.append(": ")
+                }
                 writer.appendType(type, scope)
                 if (defaultValueExpression != null) {
                     writer.append(" = ")
