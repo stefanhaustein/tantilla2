@@ -123,8 +123,6 @@ fun RenderDefinitionEditor(viewModel: TantillaViewModel) {
         }
         println("DefinitionEditor composition")
 
-
-
             TextField(
                 value = viewModel.currentText.value,
                 onValueChange = {
@@ -132,20 +130,23 @@ fun RenderDefinitionEditor(viewModel: TantillaViewModel) {
                         errors.value = scope.checkErrors(it.text)
                     }
                     viewModel.currentText.value = it.copy(
-                        annotatedString = viewModel.annotatedCode(it.text, errors.value))
+                        annotatedString = viewModel.annotatedCode(it.text, errors.value),
+                    )
                 },
                 Modifier
                     .fillMaxSize()
                     .padding(it)
-                //    .background(Color.Yellow)
+                    //    .background(Color.Yellow)
                     .onSizeChanged {
                         val availableWidth = it.width - 2 * padding
-                        viewModel.editorLineLength.value = (availableWidth / (textPx / 2f)).toInt() - 1
+                        viewModel.setEditorLineLength(
+                            (availableWidth / (textPx / 2f)).toInt() - 2)
                         println("Editor text width: ${textWidth.value}")
                     },
                 colors = TextFieldDefaults.textFieldColors(
                     backgroundColor = Color.Transparent
                 ),
+
                 //onTextLayout = { updateTextWidth(it, textWidth) }
             )
     }

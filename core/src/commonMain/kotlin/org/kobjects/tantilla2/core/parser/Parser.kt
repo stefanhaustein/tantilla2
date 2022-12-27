@@ -231,7 +231,8 @@ object Parser {
         }
         do {
             tokenizer.next()
-        } while (tokenizer.current.text != end)
+        } while (tokenizer.current.text != end
+            && tokenizer.current.type != TokenType.EOF)
     }
 
     fun consumeLine(tokenizer: TantillaTokenizer, startPos: Int): String {

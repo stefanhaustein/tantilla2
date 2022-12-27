@@ -58,7 +58,7 @@ class TantillaViewModel(
 
     val graphicsSystem = defineNatives(rootScope, bitmap, graphicsUpdateTrigger)
 
-    val editorLineLength = mutableStateOf(50)
+    private var editorLineLength = 40
 
     init {
         val file = File(platform.rootDirectory, platform.fileName)
@@ -139,13 +139,22 @@ class TantillaViewModel(
         mode.value = Mode.DEFINITION_EDITOR
     }
 
+    fun setEditorLineLength(value: Int) {
+        if (editorLineLength != value) {
+            editorLineLength = value
+            if (editingDefinition.value != null) {
+                editDefinition(editingDefinition.value)
+            }
+        }
+    }
+
     fun editDefinition(definition: Definition?) {
         this.editingDefinition.value = definition
         val errorNode = if (definition == runtimeException.value?.definition) runtimeException.value?.node else null
         val writer = CodeWriter(
             errorNode = errorNode,
             highlighting = mapOf(CodeWriter.Kind.ERROR to Pair("", "")),
-            lineLength = editorLineLength.value
+            lineLength = editorLineLength
         )
         definition?.serializeCode(writer)
         runtimeExceptionPosition = IntRange(writer.errorPosition, writer.errorPosition + writer.errorLength)
