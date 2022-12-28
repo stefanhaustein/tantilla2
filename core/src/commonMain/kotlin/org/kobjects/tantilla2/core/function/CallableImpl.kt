@@ -8,7 +8,7 @@ import org.kobjects.tantilla2.core.node.statement.FlowSignal
 
 class CallableImpl(
     override val type: FunctionType,
-    override val scopeSize: Int,
+    override val dynamicScopeSize: Int,
     val body: Evaluable,
     override val closure: LocalRuntimeContext? = null
     ) : Callable, SerializableCode {
@@ -18,7 +18,7 @@ class CallableImpl(
 
     override fun eval(context: LocalRuntimeContext): Any {
 
-        if (closure != context.closure) {
+        if (closure != context.scope.closure) {
             throw RuntimeException("closure mismatch")
         }
 

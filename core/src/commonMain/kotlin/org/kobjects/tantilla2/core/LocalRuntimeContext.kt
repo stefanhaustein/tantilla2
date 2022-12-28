@@ -1,14 +1,15 @@
 package org.kobjects.tantilla2.core
 
+import org.kobjects.tantilla2.core.definition.DynamicScope
+import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.type.VoidType
 
 class LocalRuntimeContext(
     val globalRuntimeContext: GlobalRuntimeContext,
-    count: Int = 0,
+    val scope: DynamicScope,
     initializer: (Int) -> Any = { VoidType.None },
-    val closure: LocalRuntimeContext? = null
 ) {
-    val variables = MutableList(count, initializer)
+    val variables = MutableList(scope.dynamicScopeSize, initializer)
 
     operator fun get(i: Int) = variables[i]
 
@@ -32,4 +33,5 @@ class LocalRuntimeContext(
         }
     }
 
+    override fun toString() = scope.toString(this)
 }

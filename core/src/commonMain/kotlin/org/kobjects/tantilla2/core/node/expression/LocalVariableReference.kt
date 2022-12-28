@@ -20,7 +20,7 @@ class LocalVariableReference(
 
         var varCtx = ctx
         for (i in 0 until depth) {
-            varCtx = varCtx.closure!!
+            varCtx = varCtx.scope.closure!!
         }
 
         val result = varCtx[index]

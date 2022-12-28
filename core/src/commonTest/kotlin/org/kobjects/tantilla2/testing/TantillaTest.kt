@@ -26,7 +26,7 @@ abstract class TantillaTest(val code: String) {
 
         for (test in testRootScope) {
             if (test.name.startsWith("test_") && test is FunctionDefinition) {
-                val localRuntimeContext = LocalRuntimeContext(globalContext, test.scopeSize)
+                val localRuntimeContext = LocalRuntimeContext(globalContext, test.dynamicScopeSize)
                 count++
                 test.eval(localRuntimeContext)
                 println("Test passed: ${test.name}")

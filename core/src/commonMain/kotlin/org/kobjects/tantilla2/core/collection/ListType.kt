@@ -1,18 +1,13 @@
 package org.kobjects.tantilla2.core.collection
 
-import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
-import org.kobjects.tantilla2.core.definition.Scope
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Parameter
-import org.kobjects.tantilla2.core.node.expression.FloatNode
-import org.kobjects.tantilla2.core.type.FloatType
 import org.kobjects.tantilla2.core.type.GenericType
 import org.kobjects.tantilla2.core.type.IntType
 import org.kobjects.tantilla2.core.type.Type
-import org.kobjects.tantilla2.stdlib.graphics.Color
 
 open class ListType(
     val elementType: Type,
@@ -48,8 +43,7 @@ open class ListType(
             val fn = context[1] as Callable
             val functionContext = LocalRuntimeContext(
                 context.globalRuntimeContext,
-                fn.scopeSize,
-                closure = fn.closure,
+                fn
             )
             TypedList(elementType, List(size) {
                 functionContext.variables[0] = it.toLong()

@@ -18,11 +18,11 @@ class TraitMethodBody(val index: Int): LeafNode() {
       val methodImpl = self.vmt[index]
 
       val methodContext = LocalRuntimeContext(context.globalRuntimeContext,
-          methodImpl.scopeSize, {
+          methodImpl, {
               if (it == 0) self.instance
               else if (it < context.variables.size) context.variables[it]
               else VoidType.None
-          }, methodImpl.closure)
+          })
       return self.vmt[index].eval(methodContext)
     }
 }

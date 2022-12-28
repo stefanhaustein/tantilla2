@@ -1,6 +1,7 @@
 package org.kobjects.tantilla2.core
 
 import org.kobjects.tantilla2.core.definition.Definition
+import org.kobjects.tantilla2.core.definition.DynamicScope
 import org.kobjects.tantilla2.core.definition.UserRootScope
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.FunctionType
@@ -16,7 +17,7 @@ class GlobalRuntimeContext(
     var activeThreads = 0
     var exception: TantillaRuntimeException? = null
     val tapListeners = mutableListOf<(Double, Double) -> Unit>()
-    val staticVariableValues = LocalRuntimeContext(this, userRootScope.count())
+    val staticVariableValues = LocalRuntimeContext(this, userRootScope)
 
 
     fun createException(definition: Definition?, node: Node?, message: String?, cause: Exception? = null) =
@@ -73,7 +74,7 @@ class GlobalRuntimeContext(
             staticFieldDefinitions[index]?.initialize(globalRuntimeContext.staticVariableValues)
         }
         initializedTo = staticFieldDefinitions.size*/
-                function.eval(LocalRuntimeContext(this, function.scopeSize))
+                function.eval(LocalRuntimeContext(this, function))
             }
         } catch (e: RuntimeException) {
             e.printStackTrace()
@@ -106,7 +107,11 @@ class GlobalRuntimeContext(
             userRootScope.resolveAll(CompilationResults())
             println("resolved: $parsed")
 
-            val runtimeContext = LocalRuntimeContext(this)
+            val runtimeContext = LocalRuntimeContext(this, object : DynamicScope {
+                override val dynamicScopeSize: Int
+                    get() = 0
+
+            })
             launch {
                 try {
                     val evaluationResult = parsed.eval(runtimeContext)

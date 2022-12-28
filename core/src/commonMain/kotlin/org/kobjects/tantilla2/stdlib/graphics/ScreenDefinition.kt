@@ -54,8 +54,7 @@ class ScreenDefinition(graphicsScope: GraphicsScope) : UnitDefinition(null, "scr
                     val fn = context[0] as Callable
                     val functionContext = LocalRuntimeContext(
                         context.globalRuntimeContext,
-                        fn.scopeSize,
-                        closure = fn.closure,
+                        fn,
                         initializer = { when (it) {
                             0 -> x
                             1 -> y
@@ -86,8 +85,7 @@ class ScreenDefinition(graphicsScope: GraphicsScope) : UnitDefinition(null, "scr
                         val fn = context[0] as Callable
                         val functionContext = LocalRuntimeContext(
                             context.globalRuntimeContext,
-                            fn.scopeSize,
-                            closure = fn.closure
+                            fn
                         )
                         fn.eval(functionContext)
                     } finally {

@@ -8,7 +8,7 @@ import org.kobjects.tantilla2.core.classifier.TraitDefinition
 
 class UserRootScope(
     override val parentScope: RootScope,
-) : Scope() {
+) : Scope(), DynamicScope {
     override var docString = ""
     val staticFieldDefinitions = mutableListOf<FieldDefinition?>()
 
@@ -48,5 +48,8 @@ class UserRootScope(
         traitToClass = results.traitToClass.toMap()
         definitionsWithErrors = results.definitionsWithErrors.toSet()
     }
+
+    override val dynamicScopeSize: Int
+        get() = staticFieldDefinitions.size
 
 }

@@ -39,8 +39,8 @@ class FunctionDefinition (
     override val supportsLocalVariables: Boolean
         get() = true
 
-    override val scopeSize: Int
-        get() = if (parentScope is TraitDefinition) super.scopeSize
+    override val dynamicScopeSize: Int
+        get() = if (parentScope is TraitDefinition) super.dynamicScopeSize
             else getValue(null).locals.size
 
     override val errors: List<Exception>

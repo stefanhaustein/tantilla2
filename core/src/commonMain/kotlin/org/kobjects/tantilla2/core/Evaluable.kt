@@ -4,6 +4,9 @@ import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.type.Type
 
 
+/**
+ * Common super interface of Callable and Node
+ */
 interface Evaluable {
     fun eval(context: LocalRuntimeContext): Any
 

@@ -66,8 +66,7 @@ class MutableListType(
             val fn = context[1] as Callable
             val functionContext = LocalRuntimeContext(
                 context.globalRuntimeContext,
-                fn.scopeSize,
-                closure = fn.closure,
+                fn,
             )
             MutableTypedList(elementType, MutableList(size) {
                 functionContext.variables[0] = it.toLong()
