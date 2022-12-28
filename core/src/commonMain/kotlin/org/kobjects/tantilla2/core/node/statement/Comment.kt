@@ -15,8 +15,6 @@ class Comment(val text: String?) : LeafNode() {
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
         if (text != null) {
             writer.appendComment(text)
-        } else {
-            writer.newline()
         }
     }
 }

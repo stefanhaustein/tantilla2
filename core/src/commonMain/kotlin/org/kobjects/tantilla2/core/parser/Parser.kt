@@ -5,6 +5,7 @@ import org.kobjects.tantilla2.core.definition.*
 import org.kobjects.tantilla2.core.function.*
 import org.kobjects.tantilla2.core.node.statement.BlockNode
 import org.kobjects.tantilla2.core.node.Node
+import org.kobjects.tantilla2.core.node.statement.Comment
 import org.kobjects.tantilla2.core.type.Type
 
 
@@ -98,32 +99,41 @@ object Parser {
         ) {
             if (tokenizer.current.type == TokenType.LINE_BREAK) {
                 localDepth = getIndent(tokenizer.current.text)
-                println("line break with depth $localDepth")
+
+                // println("line break with depth $localDepth")
                 if (localDepth < context.depth) {
                     break
                 }
+                if (statementsAllowed) {
+                    for (i in 1 until tokenizer.current.text.count{ it == '\n'}) {
+                        statements.add(Comment(null))
+                    }
+                }
                 tokenizer.next()
             } else if (tokenizer.current.type == TokenType.DISABLED_CODE) {
-                if (!definitionsAllowed) {
-                    throw tokenizer.exception("Definitions are not allowed here.")
-                }
-                val code = tokenizer.current.text
-                scope.add(parseFailsafe(scope, code.substring(4, code.length - 4)))
-                tokenizer.next()
-            } else if (DECLARATION_KEYWORDS.contains(tokenizer.current.text) ||
-                (!statementsAllowed
-                        && tokenizer.current.type == TokenType.IDENTIFIER
-                        && (tokenizer.lookAhead(1).text == ":" || tokenizer.lookAhead(1).text == "="))) {
-                if (!definitionsAllowed) {
-                    throw tokenizer.exception("Definitions are not allowed here.")
-                }
-                val definition = parseDefinition(tokenizer, ParsingContext(scope, localDepth))
-                scope.add(definition)
-            } else if (statementsAllowed) {
-                val statement = StatementParser.parseStatement(tokenizer, ParsingContext(scope, localDepth))
-                statements.add(statement)
-            } else {
-                throw tokenizer.exception("Statements are not allowed here.")
+                    if (!definitionsAllowed) {
+                        throw tokenizer.exception("Definitions are not allowed here.")
+                    }
+                    val code = tokenizer.current.text
+                    scope.add(parseFailsafe(scope, code.substring(4, code.length - 4)))
+                    tokenizer.next()
+                } else if (DECLARATION_KEYWORDS.contains(tokenizer.current.text) ||
+                    (!statementsAllowed
+                            && tokenizer.current.type == TokenType.IDENTIFIER
+                            && (tokenizer.lookAhead(1).text == ":" || tokenizer.lookAhead(1).text == "="))
+                ) {
+                    if (!definitionsAllowed) {
+                        throw tokenizer.exception("Definitions are not allowed here.")
+                    }
+                    val definition = parseDefinition(tokenizer, ParsingContext(scope, localDepth))
+                    scope.add(definition)
+                } else if (statementsAllowed) {
+                    val statement =
+                        StatementParser.parseStatement(tokenizer, ParsingContext(scope, localDepth))
+                    statements.add(statement)
+                } else {
+                    throw tokenizer.exception("Statements are not allowed here.")
+
             }
         }
         return if (statements.size == 1) statements[0]
