@@ -24,7 +24,7 @@ class SquareTest() {
         // assertEquals("def square (x: float):\n  x * x", squareImpl.toString())
 
         val globalContext = GlobalRuntimeContext(context)
-        val runtimeContext = LocalRuntimeContext(globalContext, 1, initializer =  { 4 })
+        val runtimeContext = LocalRuntimeContext(globalContext, squareImpl, initializer =  { 4 })
         val result = squareImpl.eval(runtimeContext)
 
         assertEquals(16.0, result)

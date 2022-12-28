@@ -1,4 +1,41 @@
-def main():
+package org.kobjects.tantilla2.aoc2022
+
+import org.kobjects.tantilla2.testing.TantillaTest
+
+class Day10Test : TantillaTest("""
+def test_day_10_a():
+  let mut cycle = 0
+  let mut x = 1
+  let mut wait_state = False
+  let mut next_signal = 20
+  let mut signal_str = 0
+  let mut lines = INPUT.split("\n")
+  let mut index = 0
+  let mut v = 0
+
+  while True:
+    cycle = cycle + 1
+
+    if cycle == next_signal:
+      signal_str = signal_str + cycle * x
+      if next_signal <= 180:
+        next_signal = next_signal + 40
+
+    if wait_state:
+      x = x + v
+      wait_state = False
+    else:
+      if index >= len(lines):
+        break
+      let cmd = lines[index].split(" ")
+      if cmd[0] == "addx":
+        v = int(cmd[1])
+        wait_state = True
+      index = index + 1
+
+  assert  signal_str == 13140
+
+def test_day_10_b():
   let mut cycle = 0
   let mut x = 1
   let mut wait_state = False
@@ -8,7 +45,7 @@ def main():
   let mut output = ""
   let mut v = 0
 
-  while True:
+  while index < len(lines):
     cycle = cycle + 1
 
     if x >= horiz_pos - 2 and x <= horiz_pos:
@@ -25,17 +62,24 @@ def main():
       x = x + v
       wait_state = False
     else:
-      if index >= len(lines):
-        break
       let cmd = lines[index].split(" ")
       if cmd[0] == "addx":
         v = int(cmd[1])
         wait_state = True
       index = index + 1
 
-  print(output)
+  assert output == OUTPUT
 
-INPUT = """addx 15
+OUTPUT = '''!!..!!..!!..!!..!!..!!..!!..!!..!!..!!..
+!!!...!!!...!!!...!!!...!!!...!!!...!!!.
+!!!!....!!!!....!!!!....!!!!....!!!!....
+!!!!!.....!!!!!.....!!!!!.....!!!!!.....
+!!!!!!......!!!!!!......!!!!!!......!!!!
+!!!!!!!.......!!!!!!!.......!!!!!!!.....
+'''
+
+
+INPUT = '''addx 15
 addx -11
 addx 6
 addx -3
@@ -180,4 +224,5 @@ addx -6
 addx -11
 noop
 noop
-noop"""
+noop'''    
+""")
