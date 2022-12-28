@@ -167,7 +167,7 @@ object ExpressionParser {
         } */
         val body = parseExpression(tokenizer, ParsingContext(functionScope, context.depth + 1), type.returnType)
 
-        return LambdaReference(type, functionScope.locals.size, body)
+        return LambdaReference(type, functionScope.locals.size, body, implicit = true)
     }
 
 
@@ -223,7 +223,7 @@ object ExpressionParser {
         } */
         val body = Parser.parseDefinitionsAndStatements(tokenizer, ParsingContext(functionScope, context.depth + 1))
 
-        return LambdaReference(type, functionScope.locals.size, body)
+        return LambdaReference(type, functionScope.locals.size, body, implicit = false)
     }
 
     fun createNumberLiteral(s: String) =

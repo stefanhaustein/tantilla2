@@ -11,7 +11,8 @@ import org.kobjects.tantilla2.core.node.Node
 class LambdaReference(
     val type: FunctionType,
     val scopeSize: Int,
-    val body: Node
+    val body: Node,
+    val implicit: Boolean
 ) : Node() {
     override val returnType: Type
         get() = type
@@ -22,15 +23,19 @@ class LambdaReference(
         return CallableImpl(type, scopeSize, body, context)
     }
 
-    override fun reconstruct(newChildren: List<Node>) = LambdaReference(type, scopeSize, newChildren[0])
+    override fun reconstruct(newChildren: List<Node>) = LambdaReference(type, scopeSize, newChildren[0], implicit)
 
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
-        writer.append("lambda ")
-        writer.appendType(type, null)
-        writer.append(":")
-        writer.indent()
-        writer.newline()
-        writer.appendCode(body)
-        writer.outdent()
+        if (implicit) {
+            writer.appendCode(body)
+        } else {
+            writer.append("lambda ")
+            writer.appendType(type, null)
+            writer.append(":")
+            writer.indent()
+            writer.newline()
+            writer.appendCode(body)
+            writer.outdent()
+        }
     }
 }
