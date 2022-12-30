@@ -150,7 +150,7 @@ class FunctionDefinition (
                 writer.appendKeyword("static ")
             }
             writer.appendKeyword("def ").appendDeclaration(name)
-            type.serializeType(writer, if (length != Definition.SummaryKind.EXPANDED) null else parentScope)
+            type.serializeType(writer)
         }
     }
 
@@ -162,7 +162,7 @@ class FunctionDefinition (
             if (parentScope.supportsMethods && !isDynamic()) {
                 writer.appendKeyword("static ")
             }
-            writer.appendKeyword("def ").appendDeclaration(name).appendType(type, parentScope)
+            writer.appendKeyword("def ").appendDeclaration(name).appendType(type)
             if (resolvedBody !is TraitMethodBody) {
                 writer.append(":")
                 writer.indent()

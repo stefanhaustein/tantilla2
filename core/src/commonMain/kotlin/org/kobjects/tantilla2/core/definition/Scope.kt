@@ -152,6 +152,9 @@ abstract class Scope(
         val type = object : FunctionType {
             override val returnType = returnType
             override val parameters = parameter.toList()
+            override fun serializeType(writer: CodeWriter) {
+                FunctionType.serializeType(this, writer)
+            }
         }
         definitions[name] = NativeFunctionDefinition(
             this,
@@ -223,7 +226,10 @@ abstract class Scope(
         writer.indent()
         writer.newline()
 
+        writer.enterScope(this)
         serializeBody(writer)
+        writer.leaveScope()
+
         writer.outdent()
     }
 
@@ -233,6 +239,7 @@ abstract class Scope(
     override fun serializeSummary(writer: CodeWriter, kind: Definition.SummaryKind) {
         serializeTitle(writer)
         if (kind == Definition.SummaryKind.EXPANDED) {
+            writer.forTitle = true
             writer.append(":")
             if (docString.isNotEmpty()) {
                 writer.newline()

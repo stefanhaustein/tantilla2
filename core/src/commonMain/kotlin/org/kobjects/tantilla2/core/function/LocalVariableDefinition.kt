@@ -49,7 +49,7 @@ class LocalVariableDefinition (
         }
         writer.appendDeclaration(name)
         writer.append(": ")
-        writer.appendType(type, parentScope)
+        writer.appendType(type)
     }
 
     override fun serializeSummary(writer: CodeWriter, length: Definition.SummaryKind) {

@@ -10,7 +10,7 @@ class EnumDefinition(
     override val kind: Definition.Kind
         get() = Definition.Kind.ENUM
 
-    override fun serializeType(writer: CodeWriter, scope: Scope?) {
+    override fun serializeType(writer: CodeWriter) {
         TODO("Not yet implemented")
     }
 

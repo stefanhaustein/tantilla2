@@ -1,6 +1,7 @@
 package org.kobjects.tantilla2.core
 
 import org.kobjects.konsole.Ansi
+import org.kobjects.tantilla2.core.definition.AbsoluteRootScope
 import org.kobjects.tantilla2.core.definition.Scope
 import org.kobjects.tantilla2.core.node.*
 import org.kobjects.tantilla2.core.type.Type
@@ -9,6 +10,8 @@ import tripleQuote
 
 class CodeWriter(
     indent: String = "",
+    var forTitle: Boolean = false,
+    var scope: Scope = AbsoluteRootScope,
     val highlighting: Map<Kind, Pair<String, String>> = emptyMap(),
     val errorNode: Evaluable? = null,
     val errors: List<Pair<IntRange, Exception>> = emptyList(),
@@ -16,6 +19,7 @@ class CodeWriter(
 ) : Appendable {
     val sb = StringBuilder()
     val indent = StringBuilder(indent)
+    val scopeStack = mutableListOf<Scope>()
     var errorPosition = -1
     var errorLength = 0
     var pos = 0
@@ -23,6 +27,7 @@ class CodeWriter(
     val endIndices = mutableSetOf<Int>()
     var lineStart = 0
     var depth = 0
+
 
     fun addError(position: IntRange, error: Exception) {
         startIndices.put(pos + position.start, error)
@@ -61,6 +66,15 @@ class CodeWriter(
     }
 
     override fun toString() = sb.toString()
+
+    fun enterScope(newScope: Scope) {
+        scopeStack.add(scope)
+        scope = newScope
+    }
+
+    fun leaveScope() {
+        scopeStack.removeLast()
+    }
 
     fun indent(): CodeWriter {
         indent.append("  ")
@@ -201,10 +215,6 @@ class CodeWriter(
         return this
     }
 
-    fun appendType(type: Type, scope: Scope?): CodeWriter {
-        type.serializeType(this, scope)
-        return this
-    }
 
     fun appendCode(code: Any?, parentPrecedence: Int = 0): CodeWriter {
         val error = code == errorNode
@@ -286,6 +296,11 @@ class CodeWriter(
             highlightSyntax(this, code, errors)
         }
         return this
+    }
+
+    fun appendType(type: Type): CodeWriter {
+            type.serializeType(this)
+            return this
     }
 
     enum class Kind {

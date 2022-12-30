@@ -70,7 +70,8 @@ fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition, textW
                 val writer = CodeWriter(
                     highlighting = CodeWriter.defaultHighlighting,
                     errorNode = viewModel.runtimeException.value?.node,
-                    lineLength = textWidth.value
+                    lineLength = textWidth.value,
+                    forTitle = !expanded
                 )
                 // writer.append(Ansi.NOT_PROPORTIONAL)
 

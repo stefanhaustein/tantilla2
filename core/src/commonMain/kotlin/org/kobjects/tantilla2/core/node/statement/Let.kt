@@ -31,7 +31,7 @@ class Let(val definition: LocalVariableDefinition, val type: Type, val typeIsExp
         writer.appendDeclaration(definition.name)
         if (typeIsExplicit) {
             writer.append(": ")
-            writer.appendType(type, null)
+            writer.appendType(type)
         }
         if (initializer != null) {
             writer.append(" =")

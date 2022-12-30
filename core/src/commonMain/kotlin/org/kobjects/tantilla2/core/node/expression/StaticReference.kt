@@ -2,7 +2,6 @@ package org.kobjects.tantilla2.core.node.expression
 
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.definition.Definition
-import org.kobjects.tantilla2.core.definition.Scope
 import org.kobjects.tantilla2.core.node.AssignableNode
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.type.Type
@@ -18,7 +17,8 @@ data class StaticReference(val definition: Definition, val qualified: Boolean, v
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
         val parent = definition.parentScope
         if (qualified) {
-            writer.append(parent!!.qualifiedName())
+            (parent as Type).serializeType(writer)
+//            writer.append(parent!!.qualifiedName())
             if (!raw) {
                 writer.append('.')
             }

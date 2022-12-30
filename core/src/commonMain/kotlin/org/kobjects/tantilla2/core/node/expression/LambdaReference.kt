@@ -31,7 +31,7 @@ class LambdaReference(
             writer.appendCode(body)
         } else {
             writer.append("lambda ")
-            writer.appendType(type, AbsoluteRootScope)
+            writer.appendType(type)
             writer.append(":")
             writer.indent()
             writer.newline()

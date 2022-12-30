@@ -12,7 +12,7 @@ data class Parameter(
     val isVararg: Boolean = false,
 ) {
 
-    fun serialize(writer: CodeWriter, scope: Scope?) {
+    fun serialize(writer: CodeWriter) {
         if (name == "self") {
             writer.append(name)
         } else {
@@ -20,14 +20,14 @@ data class Parameter(
                 writer.append("*")
             }
 
-            if (scope == null && !name.startsWith("$")) {
+            if (writer.forTitle && !name.startsWith("$")) {
                 writer.append(name)
             } else {
                 if (!name.startsWith("$")) {
                     writer.append(name)
                     writer.append(": ")
                 }
-                writer.appendType(type, scope)
+                writer.appendType(type)
                 if (defaultValueExpression != null) {
                     writer.append(" = ")
                     writer.appendCode(defaultValueExpression)
@@ -37,8 +37,8 @@ data class Parameter(
     }
 
     override fun toString(): String {
-        val writer = CodeWriter()
-        serialize(writer, null)
+        val writer = CodeWriter(forTitle = true)
+        serialize(writer)
         return writer.toString()
     }
 }

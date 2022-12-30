@@ -14,7 +14,7 @@ open class UnitDefinition(
     override val kind: Definition.Kind
         get() = Definition.Kind.UNIT
 
-    override fun serializeType(writer: CodeWriter, scope: Scope?) {
+    override fun serializeType(writer: CodeWriter) {
         writer.append(name)
     }
 }

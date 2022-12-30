@@ -24,10 +24,10 @@ class GenericTypeNode(
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
         writer.appendCode(base)
         writer.append("[")
-        writer.appendType(typeParams[0], null)
+        writer.appendType(typeParams[0])
         for (i in 1 until typeParams.size) {
             writer.append(", ")
-            writer.appendType(typeParams[i], null)
+            writer.appendType(typeParams[i])
         }
         writer.append("]")
     }

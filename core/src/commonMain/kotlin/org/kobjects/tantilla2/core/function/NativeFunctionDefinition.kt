@@ -28,7 +28,7 @@ class NativeFunctionDefinition(
         }
         writer.appendKeyword("def ")
         writer.appendDeclaration(name)
-        type.serializeType(writer, if (length != Definition.SummaryKind.EXPANDED) null else parentScope)
+        writer.appendType(type)
         if (length == Definition.SummaryKind.EXPANDED) {
             writer.newline()
             writer.appendWrapped(CodeWriter.Kind.STRING, docString)

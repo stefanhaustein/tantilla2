@@ -59,7 +59,7 @@ class ImplDefinition(
         return false
     }
 
-    override fun serializeType(writer: CodeWriter, scope: Scope?) {
+    override fun serializeType(writer: CodeWriter) {
         writer.append(this.name)
     }
 

@@ -328,7 +328,7 @@ class TantillaViewModel(
 
     fun annotatedCode(code: String, errors: List<Exception>): AnnotatedString {
 
-        val writer = CodeWriter("", CodeWriter.defaultHighlighting)
+        val writer = CodeWriter("", highlighting = CodeWriter.defaultHighlighting)
        // writer.append(Ansi.NOT_PROPORTIONAL)
         highlightSyntax(writer, code, errors, runtimeException.value, runtimeExceptionPosition)
 

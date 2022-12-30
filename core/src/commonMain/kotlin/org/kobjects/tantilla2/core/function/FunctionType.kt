@@ -2,6 +2,7 @@ package org.kobjects.tantilla2.core.function
 
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.definition.Scope
+import org.kobjects.tantilla2.core.function.FunctionType.Companion.serializeTypeImpl
 import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.type.VoidType
 
@@ -10,22 +11,6 @@ interface FunctionType : Type {
     val parameters: List<Parameter>
 
     fun isMethod() = parameters.size > 0 && parameters[0].name == "self"
-
-    override fun serializeType(writer: CodeWriter, scope: Scope?) {
-        writer.appendOpen('(')
-        val mark = writer.mark()
-        val rx = serializeTypeImpl(writer, scope, false, false)
-        writer.unmark(mark)
-        if (writer.x >= writer.lineLength - 1) {
-            val multiLine = rx - mark.savedX + writer.indent.length + 3 >= writer.lineLength
-            val twoLine = writer.x - mark.savedX + writer.indent.length + 3 >= writer.lineLength
-            writer.indent()
-            writer.reset(mark)
-            writer.newline()
-            serializeTypeImpl(writer, scope, twoLine, multiLine)
-            writer.outdent()
-        }
-    }
 
     fun hasRequiredParameters(): Boolean {
         for (parameter in parameters) {
@@ -56,10 +41,10 @@ interface FunctionType : Type {
     }
 
     companion object {
-    fun FunctionType.serializeTypeImpl(writer: CodeWriter, scope: Scope?, twoLine: Boolean, multiline: Boolean): Int {
+    fun FunctionType.serializeTypeImpl(writer: CodeWriter, twoLine: Boolean, multiline: Boolean): Int {
         val startIndex = if (isMethod()) 1 else 0
         if (parameters.size > startIndex) {
-            parameters[startIndex].serialize(writer, scope)
+            parameters[startIndex].serialize(writer)
             for (i in startIndex + 1 until parameters.size) {
                 if (multiline) {
                     writer.append(",")
@@ -67,7 +52,7 @@ interface FunctionType : Type {
                 } else {
                     writer.append(", ")
                 }
-                parameters[i].serialize(writer, scope)
+                parameters[i].serialize(writer)
             }
         }
         if (twoLine && returnType != VoidType) {
@@ -79,16 +64,39 @@ interface FunctionType : Type {
         writer.appendClose(')')
         if (returnType != VoidType) {
             writer.append(" -> ")
-            writer.appendType(returnType, scope)
+            writer.appendType(returnType)
         }
         return resultX
     }
+
+
+        fun serializeType(functionType: FunctionType, writer: CodeWriter) {
+            writer.appendOpen('(')
+            val mark = writer.mark()
+            val rx = functionType.serializeTypeImpl(writer, false, false)
+            writer.unmark(mark)
+            if (writer.x >= writer.lineLength - 1) {
+                val multiLine = rx - mark.savedX + writer.indent.length + 3 >= writer.lineLength
+                val twoLine = writer.x - mark.savedX + writer.indent.length + 3 >= writer.lineLength
+                writer.indent()
+                writer.reset(mark)
+                writer.newline()
+                functionType.serializeTypeImpl(writer, twoLine, multiLine)
+                writer.outdent()
+            }
+        }
+
+
     }
+
+
 
     open class Impl(override val returnType: Type, override val parameters: List<Parameter>) : FunctionType {
 
-        override fun toString() = CodeWriter().appendType(this, null).toString()
+        override fun toString() = CodeWriter(forTitle = true).appendType(this).toString()
 
         override fun equals(other: Any?) = other is FunctionType && isAssignableFrom(other)
+
+        override fun serializeType(writer: CodeWriter) = Companion.serializeType(this, writer)
     }
 }

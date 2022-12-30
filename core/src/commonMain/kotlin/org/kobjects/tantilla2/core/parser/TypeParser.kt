@@ -17,7 +17,6 @@ import org.kobjects.tantilla2.core.type.VoidType
 object TypeParser {
 
 
-
     fun parseType(tokenizer: TantillaTokenizer, context: ParsingContext): Type {
         if (tokenizer.current.text == "(") {
             return parseFunctionType(tokenizer, context, false)
@@ -31,11 +30,13 @@ object TypeParser {
         val type = scope.resolveStaticOrError(name, scope == context.scope).getValue(null) as Type
 
         if (type is GenericType && tokenizer.tryConsume("[")) {
+            tokenizer.disable(TokenType.LINE_BREAK)
             val arguments = mutableListOf<Type>()
             do {
                 arguments.add(parseType(tokenizer, context))
             } while (tokenizer.tryConsume(","))
             tokenizer.consume("]")
+            tokenizer.enable(TokenType.LINE_BREAK)
             return type.create(arguments)
         }
 
@@ -67,6 +68,7 @@ object TypeParser {
 
     fun parseFunctionType(tokenizer: TantillaTokenizer, context: ParsingContext, isMethod: Boolean): FunctionType {
         tokenizer.consume("(")
+        tokenizer.disable(TokenType.LINE_BREAK)
         val parameters = mutableListOf<Parameter>()
         if (isMethod) {
             val selfType: Type = when (context.scope) {
@@ -95,6 +97,7 @@ object TypeParser {
 
             tokenizer.consume(")", ", or ) expected here while parsing the parameter list.")
         }
+        tokenizer.enable(TokenType.LINE_BREAK)
         val returnType = if (tokenizer.tryConsume("->")) parseType(tokenizer, context) else VoidType
         return FunctionType.Impl(returnType, parameters)
     }

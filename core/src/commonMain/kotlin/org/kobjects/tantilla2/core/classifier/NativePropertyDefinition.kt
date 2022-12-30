@@ -42,7 +42,7 @@ class NativePropertyDefinition(
         }
         writer.appendDeclaration(name)
         writer.append(": ")
-        writer.appendType(type, parentScope)
+        writer.appendType(type)
     }
 
     override fun isSummaryExpandable() = docString.isNotEmpty() && docString.contains("\n")
