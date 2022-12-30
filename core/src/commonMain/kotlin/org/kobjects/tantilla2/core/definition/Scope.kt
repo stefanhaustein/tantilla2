@@ -124,17 +124,17 @@ abstract class Scope(
         }
     }
 
-    fun resolveStatic(name: String, fallBackToParent: Boolean = false): Definition? {
-        val result = definitions[name]
+    fun resolveStatic(propertyName: String, fallBackToParent: Boolean = false): Definition? {
+        val result = definitions[propertyName]
         if (result != null) {
             if (result.isDynamic()) {
-                throw RuntimeException("Static property expected; found: $result")
+                throw RuntimeException("Reference to dynamic property '${propertyName}' on static type '${name}'. Did you mean to use an object instead of a type?")
             }
             return result
         }
         val parent = parentScope
         if (fallBackToParent && parent != null) {
-            return parent.resolveStatic(name, true)
+            return parent.resolveStatic(propertyName, true)
         }
         return null
     }

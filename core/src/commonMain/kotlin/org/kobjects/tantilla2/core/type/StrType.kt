@@ -37,6 +37,15 @@ object StrType : NativeStructDefinition(
         ) {
             (it[0] as String).length.toLong()
         }
+
+        defineMethod(
+            "strip",
+            "Removes whitespace at the start and end of the string",
+            StrType
+        ) {
+            (it[0] as String).trim()
+        }
+
         defineMethod(
             "join",
             "Joins the list parameter, separating elements with this string.",
