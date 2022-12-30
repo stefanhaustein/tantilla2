@@ -36,6 +36,25 @@ interface FunctionType : Type {
         return false
     }
 
+    override fun isAssignableFrom(other: Type): Boolean {
+        if (other !is FunctionType) {
+            return false
+        }
+        if (other.returnType != returnType) {
+            return false
+        }
+        if (parameters.size != other.parameters.size) {
+            return false
+        }
+        for (i in parameters.indices) {
+            if (parameters[i].isVararg != other.parameters[i].isVararg
+                || parameters[i].type != other.parameters[i].type) {
+                return false
+            }
+        }
+        return true
+    }
+
     companion object {
     fun FunctionType.serializeTypeImpl(writer: CodeWriter, scope: Scope?, twoLine: Boolean, multiline: Boolean): Int {
         val startIndex = if (isMethod()) 1 else 0
@@ -70,9 +89,6 @@ interface FunctionType : Type {
 
         override fun toString() = CodeWriter().appendType(this, null).toString()
 
-        override fun equals(other: Any?) =
-            other is FunctionType
-                    && other.returnType == returnType
-                    && other.parameters == parameters
+        override fun equals(other: Any?) = other is FunctionType && isAssignableFrom(other)
     }
 }

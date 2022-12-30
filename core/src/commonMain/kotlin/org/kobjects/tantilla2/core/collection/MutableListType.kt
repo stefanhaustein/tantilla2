@@ -27,7 +27,7 @@ class MutableListType(
         defineMethod("append", "Appends an element to the list",
             VoidType,
             Parameter("value", elementType)) {
-            (it[0] as MutableTypedList).data.add(it[1]!!)
+            (it[0] as MutableTypedList).data.add(it[1])
         }
 
         defineMethod("clear", "Remove all elements from this list.",
@@ -41,7 +41,7 @@ class MutableListType(
             Parameter("index", IntType),
             Parameter("value", elementType)
         ) {
-            (it[0] as MutableTypedList).data.add(it.i32(1), it[2]!!)
+            (it[0] as MutableTypedList).data.add(it.i32(1), it[2])
         }
 
         defineMethod("pop", "Remove the last element in this list and return it.",
@@ -70,7 +70,7 @@ class MutableListType(
             )
             MutableTypedList(elementType, MutableList(size) {
                 functionContext.variables[0] = it.toLong()
-                fn.eval(functionContext)!!
+                fn.eval(functionContext)
             } )
         }
 
