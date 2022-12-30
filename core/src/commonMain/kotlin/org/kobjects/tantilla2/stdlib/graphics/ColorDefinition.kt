@@ -46,7 +46,7 @@ class ColorDefinition(graphicsScope: GraphicsScope) : NativeStructDefinition(
         defineNativeFunction(
             "hsl",
             "Converts the given hue (0..360), saturation (0..1) and light (0..1) and optional alpha values to a 32 bit ARGB value (as used in setPixel).",
-            FloatType,
+            this,
             Parameter("h", FloatType),
             Parameter("s", FloatType),
             Parameter("l", FloatType),

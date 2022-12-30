@@ -38,13 +38,13 @@ object StatementParser {
                         if (text == "=") {
                             expr = Assignment(
                                 expr as AssignableNode,
-                                ExpressionParser.parseExpression(tokenizer, context)
+                                ExpressionParser.parseExpression(tokenizer, context, expr.returnType)
                             )
                         } else {
                             expr = CompoundAssignment.create(
                                 text,
                                 expr as AssignableNode,
-                                ExpressionParser.parseExpression(tokenizer, context)
+                                ExpressionParser.parseExpression(tokenizer, context, expr.returnType)
                             )
                         }
                     }

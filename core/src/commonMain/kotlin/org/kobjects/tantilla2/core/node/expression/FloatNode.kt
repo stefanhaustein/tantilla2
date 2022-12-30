@@ -56,6 +56,12 @@ object FloatNode {
         override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
             writer.appendInfix(this, parentPrecedence, name, precedence)
         }
+
+        init {
+            require(FloatType.isAssignableFrom(left.returnType)) { "Float type required for left operand of '$name'" }
+            require(FloatType.isAssignableFrom(right.returnType)) { "Float type required for right operand of '$name'" }
+        }
+
     }
 
     class Add(left: Node, right: Node) :
@@ -105,6 +111,10 @@ object FloatNode {
             } else {
                 writer.appendPrefix(this, parentPrecedence, name, precedence)
             }
+        }
+
+        init {
+            require(FloatType.isAssignableFrom(arg.returnType)) { "Float operand type required for $name."}
         }
     }
 
