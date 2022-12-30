@@ -8,7 +8,6 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import org.kobjects.dialog.DialogManager
@@ -17,7 +16,7 @@ import org.kobjects.konsole.compose.AnsiConverter.ansiToAnnotatedString
 import org.kobjects.konsole.compose.ComposeKonsole
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.parser.Parser
-import org.kobjects.tantilla2.core.definition.RootScope
+import org.kobjects.tantilla2.core.definition.SystemRootScope
 import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.android.R
 import org.kobjects.tantilla2.core.definition.Definition
@@ -33,14 +32,14 @@ class TantillaViewModel(
     val bitmap: Bitmap,
     val platform: Platform
 ) : ViewModel() {
-    val rootScope = RootScope(platform, ::runStateCallback)
-    var userRootScope = UserRootScope(rootScope)
+    val systemRootScope = SystemRootScope(platform, ::runStateCallback)
+    var userRootScope = UserRootScope(systemRootScope)
     var globalRuntimeContext = GlobalRuntimeContext(userRootScope)
 
     val mode = mutableStateOf(Mode.SHELL)
     var fileName = mutableStateOf(platform.fileName)
     val currentUserScope = mutableStateOf<Scope>(userRootScope)
-    val currentHelpScope = mutableStateOf<Scope>(rootScope)
+    val currentHelpScope = mutableStateOf<Scope>(systemRootScope)
     val editingDefinition = mutableStateOf<Definition?>(null)
     val currentText = mutableStateOf(TextFieldValue())
     val expanded = mutableStateOf(setOf<Definition>())
@@ -56,7 +55,7 @@ class TantillaViewModel(
 
     var runtimeExceptionPosition = IntRange(-1, 0)
 
-    val graphicsSystem = defineNatives(rootScope, bitmap, graphicsUpdateTrigger)
+    val graphicsSystem = defineNatives(systemRootScope, bitmap, graphicsUpdateTrigger)
 
     private var editorLineLength = 40
 
@@ -206,11 +205,11 @@ class TantillaViewModel(
         globalRuntimeContext.stopRequested = true
         clearBitmap()
         clearConsole()
-        userRootScope = UserRootScope(rootScope)
+        userRootScope = UserRootScope(systemRootScope)
         globalRuntimeContext = GlobalRuntimeContext(userRootScope)
 
         currentUserScope.value = userRootScope
-        currentHelpScope.value = rootScope
+        currentHelpScope.value = systemRootScope
 
         if (addHello) {
             userRootScope.add(

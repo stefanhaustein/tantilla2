@@ -24,7 +24,7 @@ def parse(data: str) -> List[Monkey]:
     let monkey = Monkey(items, ::operation, test, if_true, if_false)
     result.append(monkey)
     index += 7
-  result
+  return result
 
 def main():
   let monkeys = parse(DATA)

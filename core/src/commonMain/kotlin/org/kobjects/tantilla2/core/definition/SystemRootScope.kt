@@ -7,7 +7,7 @@ import org.kobjects.tantilla2.core.node.expression.StrNode
 import org.kobjects.tantilla2.core.type.*
 import org.kobjects.tantilla2.stdlib.math.MathScope
 
-class RootScope(
+class SystemRootScope(
     val systemAbstraction: SystemAbstraction,
     val runStateCallback: (GlobalRuntimeContext) -> Unit = {}
 ) : Scope() {
@@ -48,10 +48,10 @@ class RootScope(
 
 
     override val parentScope: Scope?
-        get() = null
+        get() = AbsoluteRootScope
 
     override val name: String
-        get() = "Root Scope"
+        get() = "System Root Scope"
 
     override val kind: Definition.Kind
         get() = Definition.Kind.UNIT

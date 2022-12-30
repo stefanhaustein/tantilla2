@@ -6,26 +6,26 @@ import org.kobjects.tantilla2.android.stdlib.GraphicsSystemImpl
 import org.kobjects.tantilla2.android.stdlib.PenImpl
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.classifier.NativePropertyDefinition
-import org.kobjects.tantilla2.core.definition.RootScope
+import org.kobjects.tantilla2.core.definition.SystemRootScope
 import org.kobjects.tantilla2.stdlib.graphics.GraphicsScope
 import org.kobjects.tantilla2.stdlib.graphics.ScreenDefinition
 
 fun defineNatives(
-    rootScope: RootScope,
+    systemRootScope: SystemRootScope,
     bitmap: android.graphics.Bitmap,
     graphicsUpdateTrigger: MutableState<Int>
 ): GraphicsSystemImpl {
     val graphicsSystem = GraphicsSystemImpl(bitmap, graphicsUpdateTrigger)
     val graphicsScope = GraphicsScope(graphicsSystem)
 
-    rootScope.add(graphicsScope)
+    systemRootScope.add(graphicsScope)
 
     val canvas = Canvas(bitmap)
 
     val penImpl = PenImpl(canvas, graphicsUpdateTrigger)
-    rootScope.add(
+    systemRootScope.add(
         NativePropertyDefinition(
-            rootScope,
+            systemRootScope,
             Definition.Kind.STATIC,
             "pen",
             type = graphicsScope.penDefinition,
@@ -33,7 +33,7 @@ fun defineNatives(
         )
     )
 
-    rootScope.add(ScreenDefinition(graphicsScope))
+    systemRootScope.add(ScreenDefinition(graphicsScope))
 
     return graphicsSystem
 }

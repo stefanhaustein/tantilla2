@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import org.kobjects.tantilla2.android.model.TantillaViewModel
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.definition.UserRootScope
-import org.kobjects.tantilla2.core.definition.RootScope
+import org.kobjects.tantilla2.core.definition.SystemRootScope
 
 @Composable
 fun RenderAppBar(
@@ -38,12 +38,12 @@ fun RenderAppBar(
             )}, */
             title = {
                 if (viewModel.mode.value != TantillaViewModel.Mode.SHELL
-                    && viewModel.scope().value !is RootScope && viewModel.scope().value !is UserRootScope
+                    && viewModel.scope().value !is SystemRootScope && viewModel.scope().value !is UserRootScope
                 ) {
                     Text(
                         text = "❮ $title",
                         Modifier.clickable {
-                            viewModel.scope().value = viewModel.scope().value.parentScope ?: viewModel.rootScope
+                            viewModel.scope().value = viewModel.scope().value.parentScope ?: viewModel.systemRootScope
                         })
                 } else {
                     Text(text = title)
@@ -105,7 +105,7 @@ fun RenderAppBar(
                                 add("Add  ▶" to { showAddMenu.value = true })
                                 val scope = viewModel.currentUserScope.value
                                 val parent = scope.parentScope
-                                if (parent !is RootScope && parent != null) {
+                                if (parent !is SystemRootScope && parent != null) {
                                     add("Delete" to {
                                         viewModel.dialogManager.showConfirmation(
                                             "Confirm",

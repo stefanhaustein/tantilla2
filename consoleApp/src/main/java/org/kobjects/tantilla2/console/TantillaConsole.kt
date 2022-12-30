@@ -7,7 +7,7 @@ import org.kobjects.tantilla2.core.GlobalRuntimeContext
 import org.kobjects.tantilla2.core.Lock
 import org.kobjects.tantilla2.core.SystemAbstraction
 import org.kobjects.tantilla2.core.definition.UserRootScope
-import org.kobjects.tantilla2.core.definition.RootScope
+import org.kobjects.tantilla2.core.definition.SystemRootScope
 
 // ./gradlew consoleApp:run -q --console=plain
 
@@ -31,8 +31,8 @@ fun main(args : Array<String>) {
         }
     }
 
-    val rootScope = RootScope(systemAbstraction)
-    val userScope = UserRootScope(rootScope)
+    val systemRootScope = SystemRootScope(systemAbstraction)
+    val userScope = UserRootScope(systemRootScope)
     val globalRuntimeContext = GlobalRuntimeContext(userScope)
 
     val reader = BufferedReader(InputStreamReader(System.`in`))

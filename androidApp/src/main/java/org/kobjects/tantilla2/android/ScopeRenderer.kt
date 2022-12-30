@@ -16,7 +16,7 @@ import org.kobjects.tantilla2.android.model.TantillaViewModel
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.classifier.StructDefinition
-import org.kobjects.tantilla2.core.definition.RootScope
+import org.kobjects.tantilla2.core.definition.SystemRootScope
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
@@ -36,7 +36,7 @@ fun RenderScope(viewModel: TantillaViewModel) {
                 RenderAppBar(
                     viewModel, when (scope.parentScope) {
                         null,
-                        is RootScope -> viewModel.fileName.value
+                        is SystemRootScope -> viewModel.fileName.value
                         else -> scope.name
                     }
                 )

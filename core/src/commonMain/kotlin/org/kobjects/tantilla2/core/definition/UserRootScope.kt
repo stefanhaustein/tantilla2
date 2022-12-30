@@ -2,12 +2,11 @@ package org.kobjects.tantilla2.core.definition
 
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.CompilationResults
-import org.kobjects.tantilla2.core.GlobalRuntimeContext
 import org.kobjects.tantilla2.core.classifier.FieldDefinition
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
 
 class UserRootScope(
-    override val parentScope: RootScope,
+    override val parentScope: SystemRootScope,
 ) : Scope(), DynamicScope {
     override var docString = ""
     val staticFieldDefinitions = mutableListOf<FieldDefinition?>()

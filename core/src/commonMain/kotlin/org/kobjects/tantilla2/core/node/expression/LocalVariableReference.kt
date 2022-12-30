@@ -12,6 +12,7 @@ class LocalVariableReference(
     val depth: Int,
     val index: Int,
     val mutable: Boolean,
+    val raw: Boolean
 ) : AssignableNode() {
     override fun children(): List<Node> = emptyList()
 
@@ -39,6 +40,9 @@ class LocalVariableReference(
     }
 
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
+        if (raw) {
+            writer.append("::")
+        }
         writer.append(name)
     }
 

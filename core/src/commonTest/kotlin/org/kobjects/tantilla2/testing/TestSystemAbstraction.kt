@@ -3,7 +3,7 @@ package org.kobjects.tantilla2.testing
 import org.kobjects.tantilla2.core.Lock
 import org.kobjects.tantilla2.core.SystemAbstraction
 import org.kobjects.tantilla2.core.definition.UserRootScope
-import org.kobjects.tantilla2.core.definition.RootScope
+import org.kobjects.tantilla2.core.definition.SystemRootScope
 
 object TestSystemAbstraction : SystemAbstraction {
     override fun write(s: String) {
@@ -18,5 +18,5 @@ object TestSystemAbstraction : SystemAbstraction {
         TODO("Not yet implemented")
     }
 
-    fun createScope() = UserRootScope(RootScope(TestSystemAbstraction))
+    fun createScope() = UserRootScope(SystemRootScope(TestSystemAbstraction))
 }

@@ -9,7 +9,8 @@ import org.kobjects.tantilla2.core.node.Node
 
 class PropertyReference(
     val base: Node,
-    val definition: Definition
+    val definition: Definition,
+    val raw: Boolean
 ) : AssignableNode() {
     override val returnType: Type
         get() = definition.type
@@ -22,7 +23,7 @@ class PropertyReference(
     }
 
     override fun reconstruct(newChildren: List<Node>): Node =
-        PropertyReference(newChildren[0], definition)
+        PropertyReference(newChildren[0], definition, raw)
 
     override fun assign(context: LocalRuntimeContext, value: Any) {
         val self = base.eval(context)
@@ -31,7 +32,7 @@ class PropertyReference(
 
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
         writer.appendCode(base)
-        writer.append('.').append(definition.name)
+        writer.append(if (raw) "::" else ".").append(definition.name)
     }
 
 
