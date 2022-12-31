@@ -34,17 +34,7 @@ open class StructDefinition(
         if (writer.forTitle) {
             writer.append(name)
         } else {
-            writer.append(writer.scope.typeName(this))
-        }
-        if (genericParameterTypes.isNotEmpty()) {
-            writer.append('[')
-            val types = genericParameterTypes
-            types.first().serializeType(writer)
-            for (i in 1 until genericParameterTypes.size) {
-                writer.append(", ")
-                types[i].serializeType(writer)
-            }
-            writer.append(']')
+            writer.append(qualifiedName(relativeTo = writer.scope))
         }
     }
 

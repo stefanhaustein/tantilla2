@@ -16,7 +16,7 @@ class As(
     override val returnType: Type
         get() = impl.trait
 
-    override fun children() = listOf(base, StaticReference(impl.trait, false, false))
+    override fun children() = listOf(base, StaticReference(impl.trait,  true, false))
 
     override fun eval(ctx: LocalRuntimeContext) =
         Adapter(impl.vmt, base.eval(ctx))

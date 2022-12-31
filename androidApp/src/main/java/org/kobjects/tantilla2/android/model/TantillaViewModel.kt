@@ -153,7 +153,8 @@ class TantillaViewModel(
         val writer = CodeWriter(
             errorNode = errorNode,
             highlighting = mapOf(CodeWriter.Kind.ERROR to Pair("", "")),
-            lineLength = editorLineLength
+            lineLength = editorLineLength,
+            scope = definition?.parentScope ?: userRootScope
         )
         definition?.serializeCode(writer)
         runtimeExceptionPosition = IntRange(writer.errorPosition, writer.errorPosition + writer.errorLength)

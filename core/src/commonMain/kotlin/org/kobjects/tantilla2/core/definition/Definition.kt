@@ -46,8 +46,6 @@ interface Definition : SerializableCode, Comparable<Definition> {
     fun isDynamic() = kind == Kind.METHOD || kind == Kind.PROPERTY
     fun isScope(): Boolean = false
 
-
-
     fun resolveAll(compilationResults: CompilationResults): Boolean {
         val ok = errors.isEmpty()
         if (!ok) {
@@ -74,6 +72,51 @@ interface Definition : SerializableCode, Comparable<Definition> {
         IMPORT, STATIC, FUNCTION, ENUM, ENUM_LITERAL, PROPERTY, METHOD, TRAIT, TYPE, STRUCT, UNIT, IMPL, UNPARSEABLE,
     }
 
+    fun qualifiedName(raw: Boolean = false, relativeTo: Scope = AbsoluteRootScope): String {
+        val result = StringBuilder()
+
+        // Am I local or at root?
+        if (parentScope == relativeTo
+            || parentScope == null
+            || parentScope == AbsoluteRootScope
+            || parentScope is UserRootScope
+            || parentScope is SystemRootScope) {
+            if (raw) {
+                result.append("::")
+            }
+            result.append(name)
+        } else {
+
+            // Check for imports
+            var scope: Scope? = relativeTo
+            while (scope != null && result.isEmpty()) {
+                for (definition in scope) {
+                    if (definition is ImportDefinition && definition.getValue(null) == this) {
+                        if (raw) {
+                            result.append("::")
+                        }
+                        result.append(definition.name)
+                        break;
+                    }
+                }
+                scope = scope.parentScope
+            }
+
+            if (result.isEmpty()) {
+                result.append(parentScope!!.qualifiedName(false, relativeTo))
+                result.append(if (raw) "::" else ".")
+                result.append(name)
+            }
+        }
+
+        if (this is Type) {
+            val writer = CodeWriter(scope = relativeTo)
+            serializeGenerics(writer)
+            result.append(writer.toString())
+        }
+
+        return result.toString()
+    }
 
     override fun compareTo(other: Definition): Int {
         var d = kind.compareTo(other.kind)

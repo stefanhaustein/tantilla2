@@ -33,6 +33,7 @@ import org.kobjects.tantilla2.android.model.TantillaViewModel
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.Palette
+import org.kobjects.tantilla2.core.definition.AbsoluteRootScope
 import org.kobjects.tantilla2.core.definition.Scope
 import org.kobjects.tantilla2.core.node.expression.IntNode
 
@@ -71,7 +72,8 @@ fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition, textW
                     highlighting = CodeWriter.defaultHighlighting,
                     errorNode = viewModel.runtimeException.value?.node,
                     lineLength = textWidth.value,
-                    forTitle = !expanded
+                    forTitle = !expanded,
+                    scope = definition.parentScope ?: AbsoluteRootScope
                 )
                 // writer.append(Ansi.NOT_PROPORTIONAL)
 

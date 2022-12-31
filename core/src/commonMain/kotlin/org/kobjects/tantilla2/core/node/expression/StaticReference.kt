@@ -14,18 +14,14 @@ data class StaticReference(val definition: Definition, val qualified: Boolean, v
     override fun reconstruct(newChildren: List<Node>) = this
 
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
-        val parent = definition.parentScope
         if (qualified) {
-            (parent as Type).serializeType(writer)
-//            writer.append(parent!!.qualifiedName())
-            if (!raw) {
-                writer.append('.')
+            writer.append(definition.qualifiedName(raw = raw, relativeTo = writer.scope))
+            if (definition is Type) {
+                definition.serializeGenerics(writer)
             }
+        } else {
+            writer.append(definition.name)
         }
-        if (raw) {
-            writer.append("::")
-        }
-        writer.append(definition.name)
     }
 
     override fun assign(context: LocalRuntimeContext, value: Any) = definition.setValue(context.globalRuntimeContext.staticVariableValues, value)
@@ -36,6 +32,12 @@ data class StaticReference(val definition: Definition, val qualified: Boolean, v
     override fun requireAssignability() {
         if (!definition.mutable) {
             throw IllegalStateException("Definition $definition is not mutable.")
+        }
+    }
+
+    init {
+        if (!qualified) {
+            require(!raw) { "Can't combine !qualified with raw." }
         }
     }
 }

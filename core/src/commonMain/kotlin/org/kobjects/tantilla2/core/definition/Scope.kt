@@ -201,10 +201,13 @@ abstract class Scope(
 
     override fun getValue(self: Any?) = this
 
-    override fun toString() = qualifiedName()
+    override fun toString() = if (this is Type) CodeWriter().appendType(this).toString() else name
 
     private fun serializeTitle(writer: CodeWriter) {
-        writer.appendKeyword(kind.name.lowercase()).append(' ').appendDeclaration(qualifiedName())
+        writer.appendKeyword(kind.name.lowercase()).append(' ').appendDeclaration(name)
+        if (this is Type) {
+            serializeGenerics(writer)
+        }
     }
 
     fun serializeBody(writer: CodeWriter) {
@@ -274,44 +277,4 @@ abstract class Scope(
             definition.reset()
         }
     }
-
-    fun typeName(type: Definition): String {
-        // Check for imports
-        var scope: Scope? = this
-        while (scope != null) {
-            for (definition in scope.definitions.values) {
-                if (definition is ImportDefinition && definition.getValue(null) == type) {
-                    return definition.name
-                }
-            }
-            scope = scope.parentScope
-        }
-        // Construct the fully qualified name.
-        val sb = StringBuilder()
-        scope = type.parentScope
-        while (scope != null && scope !is SystemRootScope && scope !is UserRootScope) {
-            sb.insert(0, '.')
-            sb.insert(0, scope.name)
-            scope = scope.parentScope
-        }
-        sb.append(type.name)
-        return sb.toString()
-    }
-
-    fun qualifiedName(): String {
-        if (this is Type && genericParameterTypes.isNotEmpty()) {
-            val types = genericParameterTypes
-            val sb = StringBuilder(name)
-            sb.append("[")
-            sb.append(types[0])
-            for (i in 1 until types.size) {
-                sb.append(", ")
-                sb.append(types[i])
-            }
-            sb.append("]")
-            return sb.toString()
-        }
-        return name
-    }
-
 }

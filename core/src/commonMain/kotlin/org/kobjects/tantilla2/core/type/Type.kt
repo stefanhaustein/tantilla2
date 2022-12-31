@@ -21,4 +21,18 @@ interface Type {
 
     fun withGenericsResolved(types: List<Type>): Type =
         throw UnsupportedOperationException()
+
+    fun serializeGenerics(writer: CodeWriter) {
+        val generics = genericParameterTypes
+        if (generics.isNotEmpty()) {
+            writer.appendOpen('[')
+            writer.appendType(generics[0])
+            for (i in 1 until generics.size) {
+                writer.append(", ")
+                writer.appendType(generics[i])
+            }
+            writer.appendClose(']')
+        }
+    }
+
 }
