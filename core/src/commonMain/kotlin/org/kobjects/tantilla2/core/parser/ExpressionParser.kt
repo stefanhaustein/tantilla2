@@ -45,9 +45,8 @@ object ExpressionParser {
         tokenizer.disable(TokenType.LINE_BREAK)
 
         if (base.returnType is StructMetaType
-            && (base.returnType as StructMetaType).wrapped is GenericType
+            && (base.returnType as StructMetaType).wrapped.genericParameterTypes.isNotEmpty()
         ) {
-            val generic = ((base.returnType as StructMetaType).wrapped) as GenericType
             val typeParameters = mutableListOf<Type>()
             do {
                 typeParameters.add(TypeParser.parseType(tokenizer, context))
@@ -317,7 +316,6 @@ object ExpressionParser {
         raw: Boolean,
     ): Node {
         var self: Node? = null
-        val name = definition.name
         val value = when (definition.kind) {
             Definition.Kind.PROPERTY -> PropertyReference(base, definition, raw)
             Definition.Kind.METHOD ->
@@ -327,9 +325,7 @@ object ExpressionParser {
                     self = base
                     StaticReference(definition, false, false)
                 }
-            Definition.Kind.FUNCTION -> StaticReference(definition, true, raw)
-            Definition.Kind.STATIC -> StaticReference(definition, true, raw)
-            else -> throw tokenizer.exception("Unsupported definition kind ${definition.kind} for $base.$name")
+            else -> StaticReference(definition, true, raw)
         }
         return parseMaybeApply(
             tokenizer,

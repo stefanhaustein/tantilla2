@@ -16,7 +16,7 @@ class MutableSetType(
     "A mutable set of elements.",
     { MutableTypedSet(elementType, (it.get(0) as TypedList).data.toMutableSet()) }
 ) {
-    override fun create(types: List<Type>) = MutableSetType(types.first())
+    override fun withGenericsResolved(types: List<Type>) = MutableSetType(types.first())
 
     override fun equals(other: Any?): Boolean =
         other is MutableSetType && other.elementType == elementType

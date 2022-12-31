@@ -16,7 +16,7 @@ class MutableListType(
     "A mutable list of elements.",
     { MutableTypedList(elementType, (it.get(0) as TypedList).data.toMutableList()) }
 ) {
-    override fun create(types: List<Type>) = MutableListType(types.first())
+    override fun withGenericsResolved(types: List<Type>) = MutableListType(types.first())
 
     override fun create(size: Int, init: (Int) -> Any) = MutableTypedList(this, MutableList(size, init))
 

@@ -28,9 +28,7 @@ class Assignment(
     }
 
     init {
-        require(target.isAssignable()) {
-            "Target expression '$target' is not assignable (= immutable?)."
-        }
+        target.requireAssignability()
         require(source.returnType.isAssignableFrom(target.returnType)) {
             "Can't assign source type ${source.returnType} to an expression of type ${target.returnType}."
         }

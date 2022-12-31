@@ -16,5 +16,5 @@ class MutableMapType(
     override fun equals(other: Any?): Boolean =
         other is MutableMapType && other.keyType == keyType && other.valueType == valueType
 
-    override fun create(types: List<Type>) = MutableMapType(types[0], types[1])
+    override fun withGenericsResolved(types: List<Type>) = MutableMapType(types[0], types[1])
 }

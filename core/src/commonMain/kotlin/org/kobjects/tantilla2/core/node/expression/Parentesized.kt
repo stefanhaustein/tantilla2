@@ -23,5 +23,5 @@ class Parentesized(val expression: Node) : Node() {
         writer.appendInParens(expression)
     }
 
-    override fun isAssignable() = expression.isAssignable()
+    override fun requireAssignability() = expression.requireAssignability()
 }

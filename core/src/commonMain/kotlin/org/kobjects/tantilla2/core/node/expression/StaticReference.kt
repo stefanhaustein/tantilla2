@@ -33,7 +33,9 @@ data class StaticReference(val definition: Definition, val qualified: Boolean, v
     override val returnType: Type
         get() = definition.type
 
-
-    override fun isAssignable() = definition.mutable
-
+    override fun requireAssignability() {
+        if (!definition.mutable) {
+            throw IllegalStateException("Definition $definition is not mutable.")
+        }
+    }
 }

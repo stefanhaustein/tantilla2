@@ -15,4 +15,10 @@ interface Type {
         get() = CodeWriter().appendType(this).toString()
 
     fun resolve(name: String): Definition? = throw UnsupportedOperationException("Can't resolve '$name' for '$typeName'")
+
+    val genericParameterTypes: List<Type>
+        get() = emptyList()
+
+    fun withGenericsResolved(types: List<Type>): Type =
+        throw UnsupportedOperationException()
 }

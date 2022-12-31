@@ -26,7 +26,12 @@ class ElementAt(
         }
     }
 
-    override fun isAssignable() = true
+    override fun requireAssignability() {
+        val baseType = baseExpr.returnType
+        if (baseType !is MutableListType && baseType !is MutableMapType) {
+            throw IllegalArgumentException("MutableMap or MutableList required for assignment but got type '$baseType' for expression '$baseExpr'")
+        }
+    }
 
     override fun assign(context: LocalRuntimeContext, value: Any) {
         val target = baseExpr.eval(context)

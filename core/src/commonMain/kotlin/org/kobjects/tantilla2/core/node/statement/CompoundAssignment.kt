@@ -73,6 +73,6 @@ class CompoundAssignment(
     }
 
     init {
-        require(target.isAssignable()) { "Target expression '$target' is not assignable."}
+        target.requireAssignability()
     }
 }

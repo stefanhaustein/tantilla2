@@ -34,5 +34,9 @@ class PropertyReference(
         writer.append(if (raw) "::" else ".").append(definition.name)
     }
 
-    override fun isAssignable() = definition.mutable
+    override fun requireAssignability() {
+        if (!definition.mutable) {
+            throw IllegalStateException("Property $definition is not mutable.")
+        }
+    }
 }

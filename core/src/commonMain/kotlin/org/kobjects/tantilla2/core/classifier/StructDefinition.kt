@@ -5,7 +5,6 @@ import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.definition.Scope
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.Parameter
-import org.kobjects.tantilla2.core.type.GenericType
 import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.type.Typed
 
@@ -37,7 +36,7 @@ open class StructDefinition(
         } else {
             writer.append(writer.scope.typeName(this))
         }
-        if (this is GenericType) {
+        if (genericParameterTypes.isNotEmpty()) {
             writer.append('[')
             val types = genericParameterTypes
             types.first().serializeType(writer)

@@ -45,5 +45,9 @@ class LocalVariableReference(
         writer.append(name)
     }
 
-    override fun isAssignable() = mutable
+    override fun requireAssignability() {
+        if (!mutable) {
+            throw IllegalStateException("Loca variable '$name' is not mutable.")
+        }
+    }
 }

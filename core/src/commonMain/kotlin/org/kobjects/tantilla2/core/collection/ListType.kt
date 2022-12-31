@@ -5,7 +5,6 @@ import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Parameter
-import org.kobjects.tantilla2.core.type.GenericType
 import org.kobjects.tantilla2.core.type.IntType
 import org.kobjects.tantilla2.core.type.Type
 
@@ -20,7 +19,7 @@ open class ListType(
     docString,
     listOf(Parameter("elements", elementType, isVararg = true)),
     ctor
-    ), CollectionType, GenericType {
+    ), CollectionType {
 
     init {
         defineMethod("len", "Returns the length of the list", IntType) {
@@ -56,7 +55,7 @@ open class ListType(
 
     override val genericParameterTypes: List<Type> = listOf(elementType)
 
-    override fun create(types: List<Type>) = ListType(types.first())
+    override fun withGenericsResolved(types: List<Type>) = ListType(types.first())
 
     override fun isAssignableFrom(other: Type) = other is ListType && other.elementType == elementType
 

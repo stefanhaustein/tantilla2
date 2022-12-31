@@ -9,9 +9,6 @@ import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.collection.ListType
-import org.kobjects.tantilla2.core.collection.MutableListType
-import org.kobjects.tantilla2.core.collection.PairType
-import org.kobjects.tantilla2.core.type.GenericType
 import org.kobjects.tantilla2.core.type.VoidType
 
 object TypeParser {
@@ -29,7 +26,7 @@ object TypeParser {
         }
         val type = scope.resolveStaticOrError(name, scope == context.scope).getValue(null) as Type
 
-        if (type is GenericType && tokenizer.tryConsume("[")) {
+        if (type.genericParameterTypes.isNotEmpty() && tokenizer.tryConsume("[")) {
             tokenizer.disable(TokenType.LINE_BREAK)
             val arguments = mutableListOf<Type>()
             do {
@@ -37,7 +34,7 @@ object TypeParser {
             } while (tokenizer.tryConsume(","))
             tokenizer.consume("]")
             tokenizer.enable(TokenType.LINE_BREAK)
-            return type.create(arguments)
+            return type.withGenericsResolved(arguments)
         }
 
         return type
