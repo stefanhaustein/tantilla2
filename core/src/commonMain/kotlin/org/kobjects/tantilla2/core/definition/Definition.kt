@@ -72,50 +72,52 @@ interface Definition : SerializableCode, Comparable<Definition> {
         IMPORT, STATIC, FUNCTION, ENUM, ENUM_LITERAL, PROPERTY, METHOD, TRAIT, TYPE, STRUCT, UNIT, IMPL, UNPARSEABLE,
     }
 
-    fun qualifiedName(raw: Boolean = false, relativeTo: Scope = AbsoluteRootScope): String {
-        val result = StringBuilder()
-
+    fun serializeQualifiedName(writer: CodeWriter, raw: Boolean) {
         // Am I local or at root?
-        if (parentScope == relativeTo
+        if (parentScope == writer.scope
             || parentScope == null
             || parentScope == AbsoluteRootScope
             || parentScope is UserRootScope
             || parentScope is SystemRootScope) {
             if (raw) {
-                result.append("::")
+                writer.append("::")
             }
-            result.append(name)
+            writer.append(name)
         } else {
 
             // Check for imports
-            var scope: Scope? = relativeTo
-            while (scope != null && result.isEmpty()) {
+            var scope: Scope? = writer.scope
+            var found = false
+            while (scope != null && !found) {
                 for (definition in scope) {
                     if (definition is ImportDefinition && definition.getValue(null) == this) {
                         if (raw) {
-                            result.append("::")
+                            writer.append("::")
                         }
-                        result.append(definition.name)
+                        writer.append(definition.name)
+                        found = true
                         break;
                     }
                 }
                 scope = scope.parentScope
             }
 
-            if (result.isEmpty()) {
-                result.append(parentScope!!.qualifiedName(false, relativeTo))
-                result.append(if (raw) "::" else ".")
-                result.append(name)
+            if (!found) {
+                parentScope!!.serializeQualifiedName(writer, false)
+                writer.append(if (raw) "::" else ".")
+                writer.append(name)
             }
         }
 
         if (this is Type) {
-            val writer = CodeWriter(scope = relativeTo)
             serializeGenerics(writer)
-            result.append(writer.toString())
         }
+    }
 
-        return result.toString()
+    fun qualifiedName(raw: Boolean = false, relativeTo: Scope = AbsoluteRootScope): String {
+        val writer = CodeWriter(scope = relativeTo)
+        serializeQualifiedName(writer, raw)
+        return writer.toString()
     }
 
     override fun compareTo(other: Definition): Int {
