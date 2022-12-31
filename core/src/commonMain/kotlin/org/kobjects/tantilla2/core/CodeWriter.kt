@@ -267,7 +267,7 @@ class CodeWriter(
             appendCode(code.children()[0], precedence)
             val innerMark = mark(true)
             when (name) {
-                "*", "**", "/", "//" -> append(name)
+                "*", "**", "/", "//", ".", "::" -> append(name)
                 else -> append(" $name ")
             }
             appendCode(code.children()[1], precedence + 1)
@@ -276,7 +276,11 @@ class CodeWriter(
                 if (depth > 0) {
                     reset(innerMark)
                     newline()
-                    append("$name ")
+                    if (name == "." || name == "::") {
+                        append(name)
+                    } else {
+                        append("$name ")
+                    }
                     appendCode(code.children()[1], precedence + 1)
                 } else {
                     reset(outerMark)

@@ -3,6 +3,7 @@ package org.kobjects.tantilla2.core.node.expression
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.LocalRuntimeContext
+import org.kobjects.tantilla2.core.Precedence
 import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.node.Node
 
@@ -14,7 +15,7 @@ class PropertyReference(
     override val returnType: Type
         get() = definition.type
 
-    override fun children(): List<Node> = emptyList()
+    override fun children(): List<Node> = listOf(base, Identifier(definition.name))
 
     override fun eval(ctx: LocalRuntimeContext): Any {
         val self = base.eval(ctx)
@@ -30,8 +31,7 @@ class PropertyReference(
     }
 
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
-        writer.appendCode(base)
-        writer.append(if (raw) "::" else ".").append(definition.name)
+        writer.appendInfix(this, parentPrecedence, if (raw) "::" else ".", Precedence.DOT)
     }
 
     override fun requireAssignability() {

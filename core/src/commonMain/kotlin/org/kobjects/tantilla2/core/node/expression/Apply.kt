@@ -24,13 +24,14 @@ class Apply(
         }
         val functionContext = LocalRuntimeContext(
             context.globalRuntimeContext,
-            callable, {
+            callable
+        ) {
             if (it < parameters.size) {
                 val result = parameters[it].eval(context)
                 // println("Result $result")
                 result
             } else VoidType.None
-        })
+        }
         return callable.eval(functionContext)
     }
 
