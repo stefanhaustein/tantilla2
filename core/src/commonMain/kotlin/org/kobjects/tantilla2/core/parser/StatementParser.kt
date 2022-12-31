@@ -28,25 +28,13 @@ object StatementParser {
                     var expr = ExpressionParser.parseExpression(tokenizer, context)
                     val text = tokenizer.current.text
                     if (text.endsWith("=") && text != "!=" && text != "<=" && text != ">=") {
-                        if (expr !is AssignableNode) {
-                            tokenizer.exception("Target is not assignable")
-                        }
                         tokenizer.next()
                         while (tokenizer.current.type == TokenType.LINE_BREAK) {
                             tokenizer.next()
                         }
-                        if (text == "=") {
-                            expr = Assignment(
-                                expr as AssignableNode,
-                                ExpressionParser.parseExpression(tokenizer, context, expr.returnType)
-                            )
-                        } else {
-                            expr = CompoundAssignment.create(
-                                text,
-                                expr as AssignableNode,
-                                ExpressionParser.parseExpression(tokenizer, context, expr.returnType)
-                            )
-                        }
+                        val source = ExpressionParser.parseExpression(tokenizer, context, expr.returnType)
+                        expr = if (text == "=") Assignment(expr, source)
+                        else CompoundAssignment.create(text, expr, source)
                     }
                     if (tokenizer.current.type != TokenType.EOF
                         && tokenizer.current.type != TokenType.LINE_BREAK

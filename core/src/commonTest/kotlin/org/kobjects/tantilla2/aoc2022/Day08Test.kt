@@ -3,8 +3,10 @@ package org.kobjects.tantilla2.aoc2022
 import org.kobjects.tantilla2.testing.TantillaTest
 
 class Day08Test : TantillaTest("""
-def scan_a(lines: List[str], map: MutableList[MutableList[bool]], x: int, y: int, dx: int, dy: int):
+def scan_a(lines: List[str], map: MutableList[MutableList[bool]], x0: int, y0: int, dx: int, dy: int):
   let mut visible_height = 0
+  let mut x = x0
+  let mut y = y0
   while x >= 0 and y >= 0 and x < len(lines[0]) and y < len(lines) and visible_height <= 9:
     let tree_height = int(lines[y][x])
     if tree_height >= visible_height:

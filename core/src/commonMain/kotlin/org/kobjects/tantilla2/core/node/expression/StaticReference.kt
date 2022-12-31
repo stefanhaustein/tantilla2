@@ -2,12 +2,11 @@ package org.kobjects.tantilla2.core.node.expression
 
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.definition.Definition
-import org.kobjects.tantilla2.core.node.AssignableNode
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.type.Type
 
 
-data class StaticReference(val definition: Definition, val qualified: Boolean, val raw: Boolean) : AssignableNode() {
+data class StaticReference(val definition: Definition, val qualified: Boolean, val raw: Boolean) : Node() {
     override fun children() = emptyList<Node>()
 
     override fun eval(ctx: LocalRuntimeContext): Any = definition.getValue(ctx.globalRuntimeContext.staticVariableValues)
@@ -33,5 +32,8 @@ data class StaticReference(val definition: Definition, val qualified: Boolean, v
 
     override val returnType: Type
         get() = definition.type
+
+
+    override fun isAssignable() = definition.mutable
 
 }

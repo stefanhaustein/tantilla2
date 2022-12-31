@@ -2,6 +2,7 @@ package org.kobjects.tantilla2.core.node
 
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.Evaluable
+import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.SerializableCode
 
 /**
@@ -27,4 +28,9 @@ abstract class Node : Evaluable, SerializableCode {
         }
         return false
     }
+
+    open fun isAssignable() = false
+
+    open fun assign(context: LocalRuntimeContext, value: Any): Unit =
+        throw UnsupportedOperationException()
 }

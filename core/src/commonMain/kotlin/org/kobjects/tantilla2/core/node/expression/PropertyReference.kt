@@ -4,14 +4,13 @@ import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.type.Type
-import org.kobjects.tantilla2.core.node.AssignableNode
 import org.kobjects.tantilla2.core.node.Node
 
 class PropertyReference(
     val base: Node,
     val definition: Definition,
     val raw: Boolean
-) : AssignableNode() {
+) : Node() {
     override val returnType: Type
         get() = definition.type
 
@@ -35,5 +34,5 @@ class PropertyReference(
         writer.append(if (raw) "::" else ".").append(definition.name)
     }
 
-
+    override fun isAssignable() = definition.mutable
 }

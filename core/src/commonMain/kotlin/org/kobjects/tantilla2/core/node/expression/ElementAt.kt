@@ -2,14 +2,13 @@ package org.kobjects.tantilla2.core.node.expression
 
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.collection.*
-import org.kobjects.tantilla2.core.node.AssignableNode
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.type.*
 
 class ElementAt(
     val baseExpr: Node,
     val keyExpr: Node
-) : AssignableNode() {
+) : Node() {
 
     init {
         val baseType = baseExpr.returnType
@@ -26,6 +25,8 @@ class ElementAt(
             throw IllegalArgumentException("Base expression must be List, Map or str type for index access; actual type: $baseType")
         }
     }
+
+    override fun isAssignable() = true
 
     override fun assign(context: LocalRuntimeContext, value: Any) {
         val target = baseExpr.eval(context)

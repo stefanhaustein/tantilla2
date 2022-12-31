@@ -10,6 +10,7 @@ interface Type {
     // Set scope to null to get an abbreviated type; use RootScope for fully qualified names.
     fun serializeType(writer: CodeWriter)
 
+    // Something that can easily be used in toString()
     val typeName: String
         get() = CodeWriter().appendType(this).toString()
 

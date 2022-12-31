@@ -1,16 +1,14 @@
 package org.kobjects.tantilla2.core.node.expression
 
 import org.kobjects.tantilla2.core.CodeWriter
-import org.kobjects.tantilla2.core.Evaluable
 import org.kobjects.tantilla2.core.LocalRuntimeContext
-import org.kobjects.tantilla2.core.node.AssignableNode
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.type.Type
 
-class Parentesized(val expression: Node) : AssignableNode() {
-    override fun assign(context: LocalRuntimeContext, value: Any) {
-        (expression as AssignableNode).assign(context, value)
-    }
+class Parentesized(val expression: Node) : Node() {
+    override fun assign(context: LocalRuntimeContext, value: Any) =
+        expression.assign(context, value)
+
 
     override fun children() = listOf(expression)
 
@@ -24,4 +22,6 @@ class Parentesized(val expression: Node) : AssignableNode() {
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
         writer.appendInParens(expression)
     }
+
+    override fun isAssignable() = expression.isAssignable()
 }

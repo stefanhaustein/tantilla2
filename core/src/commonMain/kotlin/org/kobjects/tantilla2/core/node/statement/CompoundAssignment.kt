@@ -2,14 +2,13 @@ package org.kobjects.tantilla2.core.node.statement
 
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.LocalRuntimeContext
-import org.kobjects.tantilla2.core.node.AssignableNode
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.type.*
 import kotlin.math.pow
 
 class CompoundAssignment(
     val name: String,
-    val target: AssignableNode,
+    val target: Node,
     val source: Node,
     val operation: (Any, Any) -> Any
 ) : Node() {
@@ -23,7 +22,7 @@ class CompoundAssignment(
         target.assign(ctx, operation(target.eval(ctx), source.eval(ctx)))
 
     override fun reconstruct(newChildren: List<Node>) =
-        CompoundAssignment(name, newChildren[0] as AssignableNode, newChildren[1], operation)
+        CompoundAssignment(name, newChildren[0] , newChildren[1], operation)
 
     override fun serializeCode(sb: CodeWriter, parentPrecedence: Int) {
         sb.appendCode(target)
@@ -32,11 +31,11 @@ class CompoundAssignment(
     }
 
     companion object {
-        fun create(name: String, target: AssignableNode, source: Node): CompoundAssignment {
+        fun create(name: String, target: Node, source: Node): CompoundAssignment {
             val op: (Any, Any) -> Any = when (target.returnType) {
                 IntType -> {
                     if (source.returnType != IntType) {
-                        throw IllegalArgumentException("Int operand required for compoud assignment to an Int value.")
+                        throw IllegalArgumentException("Int operand required for compound assignment to an Int value.")
                     }
                     when (name) {
                         "+=" -> { a, b -> (a as Long) + (b as Long) }
@@ -71,5 +70,9 @@ class CompoundAssignment(
             }
             return CompoundAssignment(name, target, source, op)
         }
+    }
+
+    init {
+        require(target.isAssignable()) { "Target expression '$target' is not assignable."}
     }
 }

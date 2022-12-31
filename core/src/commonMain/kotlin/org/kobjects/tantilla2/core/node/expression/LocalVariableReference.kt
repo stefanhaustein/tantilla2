@@ -3,7 +3,6 @@ package org.kobjects.tantilla2.core.node.expression
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.type.Type
-import org.kobjects.tantilla2.core.node.AssignableNode
 import org.kobjects.tantilla2.core.node.Node
 
 class LocalVariableReference(
@@ -13,7 +12,7 @@ class LocalVariableReference(
     val index: Int,
     val mutable: Boolean,
     val raw: Boolean
-) : AssignableNode() {
+) : Node() {
     override fun children(): List<Node> = emptyList()
 
     override fun eval(ctx: LocalRuntimeContext): Any {
@@ -46,4 +45,5 @@ class LocalVariableReference(
         writer.append(name)
     }
 
+    override fun isAssignable() = mutable
 }
