@@ -53,7 +53,8 @@ object ExpressionParser {
             } while(tokenizer.tryConsume(","))
             tokenizer.consume("]")
             tokenizer.enable(TokenType.LINE_BREAK)
-            return GenericTypeNode(base, typeParameters)
+            return StaticReference(((base.returnType) as StructMetaType).wrapped.withGenericsResolved(typeParameters) as Definition, true, false)
+            // GenericTypeNode(base, typeParameters)
         }
 
         val result = ElementAt(base, parseExpression(tokenizer, context))
