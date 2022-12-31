@@ -74,7 +74,8 @@ interface Definition : SerializableCode, Comparable<Definition> {
 
     fun serializeQualifiedName(writer: CodeWriter, raw: Boolean) {
         // Am I local or at root?
-        if (parentScope == writer.scope
+        if (writer.forTitle
+            || parentScope == writer.scope
             || parentScope == null
             || parentScope == AbsoluteRootScope
             || parentScope is UserRootScope

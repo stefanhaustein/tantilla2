@@ -15,10 +15,7 @@ data class StaticReference(val definition: Definition, val qualified: Boolean, v
 
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
         if (qualified) {
-            writer.append(definition.qualifiedName(raw = raw, relativeTo = writer.scope))
-            if (definition is Type) {
-                definition.serializeGenerics(writer)
-            }
+            definition.serializeQualifiedName(writer, raw)
         } else {
             writer.append(definition.name)
         }

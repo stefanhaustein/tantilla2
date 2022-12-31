@@ -17,11 +17,7 @@ class TraitDefinition(
     var traitIndex = 0
 
     override fun serializeType(writer: CodeWriter) {
-        if (writer.forTitle) {
-            writer.append(name)
-        } else {
-            writer.append(qualifiedName(relativeTo = writer.scope))
-        }
+        serializeQualifiedName(writer, false)
     }
 
     override fun isAssignableFrom(type: Type): Boolean {
