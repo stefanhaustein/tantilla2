@@ -12,7 +12,9 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import org.kobjects.tantilla2.android.model.TantillaViewModel
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.definition.UserRootScope
@@ -21,7 +23,8 @@ import org.kobjects.tantilla2.core.definition.SystemRootScope
 @Composable
 fun RenderAppBar(
     viewModel: TantillaViewModel,
-    title: String) {
+    title: String,
+) {
 
     val showMenu = remember { mutableStateOf(false) }
     val showAddMenu = remember { mutableStateOf(false) }
@@ -37,16 +40,16 @@ fun RenderAppBar(
                 Palette.ORANGE
             )}, */
             title = {
-                if (viewModel.mode.value != TantillaViewModel.Mode.SHELL
-                    && viewModel.scope().value !is SystemRootScope && viewModel.scope().value !is UserRootScope
-                ) {
-                    Text(
-                        text = "❮ $title",
-                        Modifier.clickable {
-                            viewModel.scope().value = viewModel.scope().value.parentScope ?: viewModel.systemRootScope
-                        })
+                val scope = viewModel.scope().value
+                if (viewModel.mode.value == TantillaViewModel.Mode.SHELL) {
+                    Text(viewModel.fileName.value)
+                } else if (scope is UserRootScope || scope is SystemRootScope){
+                    Text(viewModel.definitionTitle(scope))
                 } else {
-                    Text(text = title)
+                    Column(Modifier.clickable { viewModel.scope().value = viewModel.scope().value.parentScope ?: viewModel.systemRootScope }) {
+                        Text("❮ " + viewModel.definitionTitle(scope.parentScope), fontSize = 10.sp, fontFamily = FontFamily.SansSerif)
+                        Text(viewModel.definitionTitle(scope))
+                    }
                 }
             },
             actions = {

@@ -70,6 +70,18 @@ class TantillaViewModel(
         }
     }
 
+    fun definitionTitle(definition: Definition?) = when (definition) {
+            is UserRootScope -> fileName.value
+            null,
+            is SystemRootScope -> "API Reference"
+            else -> {
+                val writer = CodeWriter(forTitle = true)
+                definition.serializeSummary(writer, Definition.SummaryKind.COLLAPSED)
+                writer.toString()
+            }
+        }
+
+
     fun clearBitmap() {
         val filler = IntArray(bitmap.width)
         for (y in 0 until bitmap.height) {

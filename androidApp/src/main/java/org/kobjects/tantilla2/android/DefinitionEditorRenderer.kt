@@ -21,6 +21,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import org.kobjects.tantilla2.android.model.TantillaViewModel
 
 
@@ -39,7 +40,11 @@ fun RenderDefinitionEditor(viewModel: TantillaViewModel) {
         backgroundColor = Color.Transparent,
         topBar = {
             TopAppBar(
-                title = { Text(text = definition?.name ?: "New Property") },
+                title = {
+                    Column() {
+                        Text(viewModel.definitionTitle(scope), fontSize = 10.sp, fontFamily = FontFamily.SansSerif)
+                        Text(text = definition?.name ?: "New Property")
+                    }},
                 actions = {
                     IconButton(onClick = {
                         viewModel.closeEditorAndSave()
@@ -140,7 +145,8 @@ fun RenderDefinitionEditor(viewModel: TantillaViewModel) {
                     .onSizeChanged {
                         val availableWidth = it.width - 2 * padding
                         viewModel.setEditorLineLength(
-                            (availableWidth / (textPx / 2f)).toInt() - 2)
+                            (availableWidth / (textPx / 2f)).toInt() - 2
+                        )
                         println("Editor text width: ${textWidth.value}")
                     },
                 colors = TextFieldDefaults.textFieldColors(
