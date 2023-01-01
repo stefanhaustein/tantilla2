@@ -55,6 +55,8 @@ class TantillaViewModel(
 
     var runtimeExceptionPosition = IntRange(-1, 0)
 
+    var navigationStack = mutableListOf<Definition?>()
+
     val graphicsSystem = defineNatives(systemRootScope, bitmap, graphicsUpdateTrigger)
 
     private var editorLineLength = 40
@@ -182,18 +184,22 @@ class TantillaViewModel(
         mode.value = Mode.DOCUMENTATION_EDITOR
     }
 
-    fun closeEditorAndSave() {
-        val changed = currentText.value.text.trimEnd() != initialEditorText.trimEnd()
-        println("Close editor; changed: $changed; new text: ${currentText.value.text}")
-        if (changed) {
-            if (mode.value == Mode.DEFINITION_EDITOR) {
-                currentUserScope.value.update(currentText.value.text, this.editingDefinition.value)
-            } else {
-                currentUserScope.value.docString = currentText.value.text
+    fun saveEditorChanges() {
+        if (mode.value == Mode.DEFINITION_EDITOR || mode.value == Mode.DOCUMENTATION_EDITOR) {
+            val changed = currentText.value.text.trimEnd() != initialEditorText.trimEnd()
+            println("Close editor; changed: $changed; new text: ${currentText.value.text}")
+            if (changed) {
+                if (mode.value == Mode.DEFINITION_EDITOR) {
+                    currentUserScope.value.update(
+                        currentText.value.text,
+                        this.editingDefinition.value
+                    )
+                } else {
+                    currentUserScope.value.docString = currentText.value.text
+                }
+                notifyCodeChangedAndSave()
             }
-            notifyCodeChangedAndSave()
         }
-        mode.value = Mode.HIERARCHY
     }
 
 
@@ -210,6 +216,46 @@ class TantillaViewModel(
             }
         } else {
             replacement()
+        }
+    }
+
+    fun Definition?.isBuiltin(): Boolean {
+        if (this is UserRootScope) {
+            return false
+        } else if (this == null) {
+            return true
+        } else {
+            return parentScope.isBuiltin()
+        }
+    }
+
+    fun navigateBack(discardChanges: Boolean = false): Boolean {
+        if (navigationStack.size < 2) {
+            return false
+        }
+        navigationStack.removeLast()
+        navigateTo(navigationStack.removeLast(), discardChanges)
+        return true
+    }
+
+    fun navigateTo(definition: Definition?, discardChanges: Boolean = false) {
+        if (!discardChanges) {
+            saveEditorChanges()
+        }
+
+        if (definition == null) {
+            mode.value = Mode.SHELL
+        } else if (definition.isScope()) {
+            mode.value = if (definition.isBuiltin()) Mode.HELP else Mode.HIERARCHY
+            scope().value = definition.getValue(null) as Scope
+        } else if (definition.isBuiltin()) {
+            return
+        } else {
+            editDefinition(definition)
+        }
+
+        if (navigationStack.isEmpty() || navigationStack.last() != definition) {
+            navigationStack.add(definition)
         }
     }
 
@@ -236,6 +282,9 @@ class TantillaViewModel(
             saveAs("Scratch.tt")
             scratchFileModified = false
         }
+
+        navigationStack.clear()
+        navigationStack.add(userRootScope)
     }
 
     fun stop() {

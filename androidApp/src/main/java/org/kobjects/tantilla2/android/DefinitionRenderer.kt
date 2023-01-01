@@ -50,19 +50,10 @@ fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition, textW
             .clip(RoundedCornerShape(4.dp))
             .padding(4.dp)
             .pointerInput(Unit) {
-                val editable =
-                    !definition.isScope() && viewModel.mode.value == TantillaViewModel.Mode.HIERARCHY
                 detectTapGestures(
                     onTap = {
-                        if (definition.isScope()) {
-                            viewModel.scope().value = definition.getValue(null) as Scope
-                        } else if (editable) {
-                            viewModel.editDefinition(definition)
-                        }
-                    },
-
-                    )
-            }
+                        viewModel.navigateTo(definition)
+                    }) }
     ) {
         Box(Modifier.padding(8.dp)) {
         //    val expanded = viewModel.expanded.value.contains(definition)

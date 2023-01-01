@@ -29,6 +29,7 @@ import java.lang.Math.abs
 
 class MainActivity : AppCompatActivity() {
 
+    lateinit var viewModel: TantillaViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,7 +60,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        val viewModel = TantillaViewModel(
+        viewModel = TantillaViewModel(
             console,
             bitmap,
             platform,
@@ -74,6 +75,14 @@ class MainActivity : AppCompatActivity() {
             MyTheme {
                 Render(viewModel)
             }
+        }
+    }
+
+    override fun onBackPressed() {
+        if (viewModel.navigationStack.size < 2) {
+            super.onBackPressed()
+        } else {
+            viewModel.navigateBack()
         }
     }
 

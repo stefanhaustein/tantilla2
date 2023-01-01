@@ -26,7 +26,7 @@ fun RenderDocumentationEditor(viewModel: TantillaViewModel) {
                 title = { Text(text = scope.name ) },
                 actions = {
                     IconButton(onClick = {
-                        viewModel.closeEditorAndSave()
+                        viewModel.navigateBack()
                     }) {
                         Icon(Icons.Default.Check, contentDescription = "Save")
                     }
@@ -41,7 +41,7 @@ fun RenderDocumentationEditor(viewModel: TantillaViewModel) {
                         Text("Move")
                     } */
                         DropdownMenuItem(onClick = {
-                            viewModel.mode.value = TantillaViewModel.Mode.HIERARCHY
+                            viewModel.navigateBack(discardChanges = true)
                         }) {
                             Text("Cancel")
                         }

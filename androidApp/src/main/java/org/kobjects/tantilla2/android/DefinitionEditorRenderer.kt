@@ -47,7 +47,7 @@ fun RenderDefinitionEditor(viewModel: TantillaViewModel) {
                     }},
                 actions = {
                     IconButton(onClick = {
-                        viewModel.closeEditorAndSave()
+                        viewModel.navigateBack()
                     }) {
                         Icon(Icons.Default.Check, contentDescription = "Save")
                     }
@@ -62,14 +62,14 @@ fun RenderDefinitionEditor(viewModel: TantillaViewModel) {
                         Text("Move")
                     } */
                         DropdownMenuItem(onClick = {
-                            viewModel.mode.value = TantillaViewModel.Mode.HIERARCHY
+                            viewModel.navigateBack(discardChanges = true)
                         }) {
                             Text("Cancel")
                         }
                         if (definition != null) {
                             DropdownMenuItem(onClick = {
                                 scope.remove(definition.name)
-                                viewModel.mode.value = TantillaViewModel.Mode.HIERARCHY
+                                viewModel.navigateBack(discardChanges = true)
                             }) {
                                 Text("Delete")
                             }
@@ -80,7 +80,7 @@ fun RenderDefinitionEditor(viewModel: TantillaViewModel) {
         },
         bottomBar = {
             Divider()
-            val errors = if (viewModel.runtimeException.value?.definition != definition) errors.value
+            val errors = if (definition == null || viewModel.runtimeException.value?.definition != definition) errors.value
                 else listOf(viewModel.runtimeException.value!!) + errors.value
             Row() {
                 IconButton(

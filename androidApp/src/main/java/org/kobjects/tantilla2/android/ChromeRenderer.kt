@@ -13,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.kobjects.tantilla2.android.model.TantillaViewModel
@@ -42,13 +43,22 @@ fun RenderAppBar(
             title = {
                 val scope = viewModel.scope().value
                 if (viewModel.mode.value == TantillaViewModel.Mode.SHELL) {
-                    Text(viewModel.fileName.value)
+                    Text(viewModel.fileName.value, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 } else if (scope is UserRootScope || scope is SystemRootScope){
-                    Text(viewModel.definitionTitle(scope))
+                    Text(viewModel.definitionTitle(scope), maxLines = 1, overflow = TextOverflow.Ellipsis)
                 } else {
-                    Column(Modifier.clickable { viewModel.scope().value = viewModel.scope().value.parentScope ?: viewModel.systemRootScope }) {
+                    Column(Modifier.clickable {
+                        val target = viewModel.scope().value.parentScope ?: viewModel.systemRootScope
+                        val stackSize = viewModel.navigationStack.size
+                        if (stackSize >= 2
+                            && viewModel.navigationStack[stackSize - 2] == target) {
+                            viewModel.navigateBack()
+                        } else {
+                            viewModel.navigateTo(target)
+                        }
+                    }) {
                         Text("❮ " + viewModel.definitionTitle(scope.parentScope), fontSize = 10.sp, fontFamily = FontFamily.SansSerif)
-                        Text(viewModel.definitionTitle(scope))
+                        Text(viewModel.definitionTitle(scope), maxLines = 1, fontSize = 18.sp, overflow = TextOverflow.Ellipsis)
                     }
                 }
             },
@@ -82,7 +92,11 @@ fun RenderAppBar(
                         }
                     } else {
                         IconButton(
-                            onClick = { viewModel.mode.value = mode }
+                            onClick = { when (mode) {
+                                TantillaViewModel.Mode.HELP -> viewModel.navigateTo(viewModel.currentHelpScope.value)
+                                TantillaViewModel.Mode.HIERARCHY -> viewModel.navigateTo(viewModel.currentUserScope.value)
+                                TantillaViewModel.Mode.SHELL -> viewModel.navigateTo(null)
+                            } }
                         ) {
                             Icon(
                                 icon,
