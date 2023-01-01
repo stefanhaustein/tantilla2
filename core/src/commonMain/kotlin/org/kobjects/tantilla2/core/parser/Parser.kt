@@ -195,13 +195,14 @@ object Parser {
                 tokenizer.consume("impl")
                 val traitName = tokenizer.consume(TokenType.IDENTIFIER, "Trait name expected.")
                 tokenizer.consume("for")
-                val name = tokenizer.consume(TokenType.IDENTIFIER, "Class name expected.")
+                val scopeName = tokenizer.consume(TokenType.IDENTIFIER, "Class name expected.")
                 tokenizer.consume(":")
                 val docString = readDocString(tokenizer)
                 val text = consumeBody(tokenizer, startPos, context.depth)
                 ImplDefinition(
                     context.scope,
-                    "$traitName for $name",
+                    traitName = traitName,
+                    scopeName = scopeName,
                     definitionText = text,
                     docString = docString
                 )

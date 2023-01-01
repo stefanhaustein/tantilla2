@@ -26,7 +26,7 @@ class FieldDefinition(
     override var definitionText
         get() = _definitionText
         set(value) {
-            resolutionState = ResolutionState.RESOLVED
+            resolutionState = ResolutionState.UNRESOLVED
             _definitionText = value
         }
 

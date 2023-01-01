@@ -13,10 +13,14 @@ import org.kobjects.tantilla2.core.type.Type
 
 class ImplDefinition(
     override val parentScope: Scope,
-    override val name: String,
+    val traitName: String,
+    val scopeName: String,
     val definitionText: String,
     override var docString: String,
 ) : Scope(), Type {
+    override val name: String
+        get() = "$traitName for $scopeName"
+
     var vmt = listOf<Callable>()
 
     var resolvedTrait: TraitDefinition? = null
@@ -54,6 +58,9 @@ class ImplDefinition(
             }
             this.vmt = vmt.toList() as List<Callable>
 
+            compilationResults.classToTrait.getOrPut(scope) { mutableMapOf() }[trait] = this
+            compilationResults.traitToClass.getOrPut(trait) { mutableMapOf() }[scope] = this
+
             return true
         }
         return false
@@ -65,29 +72,29 @@ class ImplDefinition(
 
 
     override fun getValue(scope: Any?): ImplDefinition {
-            if (resolvedTrait == null) {
-                val traitName = name.substring(0, name.indexOf(' '))
-                resolvedTrait =
-                    parentScope.resolveStaticOrError(traitName, true).getValue(null) as TraitDefinition
+        if (resolvedTrait == null) {
+            val traitName = name.substring(0, name.indexOf(' '))
+            resolvedTrait =
+                parentScope.resolveStaticOrError(traitName, true).getValue(null) as TraitDefinition
 
-                resolvedTrait!!.resolveAll(CompilationResults())
+            resolvedTrait!!.resolveAll(CompilationResults())
 
-                val className = name.substring(name.lastIndexOf(' ') + 1)
-                resolvedScope =
-                    parentScope.resolveStaticOrError(className, true).getValue(null) as Scope
+            val className = name.substring(name.lastIndexOf(' ') + 1)
+            resolvedScope =
+                parentScope.resolveStaticOrError(className, true).getValue(null) as Scope
 
-                val tokenizer = TantillaTokenizer(definitionText)
-                tokenizer.consume(TokenType.BOF)
-                tokenizer.consume("impl")
-                tokenizer.consume(traitName)
-                tokenizer.consume("for")
-                tokenizer.consume(className)
-                tokenizer.consume(":")
-                Parser.parseDefinitionsAndStatements(tokenizer, ParsingContext(this, 0))
-                println("Impl successfully resolved!")
-            }
-            return this
+            val tokenizer = TantillaTokenizer(definitionText)
+            tokenizer.consume(TokenType.BOF)
+            tokenizer.consume("impl")
+            tokenizer.consume(traitName)
+            tokenizer.consume("for")
+            tokenizer.consume(className)
+            tokenizer.consume(":")
+            Parser.parseDefinitionsAndStatements(tokenizer, ParsingContext(this, 0))
+            println("Impl successfully resolved!")
         }
+        return this
+    }
 
     override val kind: Definition.Kind
         get() = Definition.Kind.IMPL
