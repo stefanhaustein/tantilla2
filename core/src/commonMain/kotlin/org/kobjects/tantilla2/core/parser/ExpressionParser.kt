@@ -6,6 +6,7 @@ import org.kobjects.parserlib.expressionparser.ExpressionParser as GreenspunExpr
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
 import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
 import org.kobjects.tantilla2.core.classifier.StructMetaType
+import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.definition.Scope
 import org.kobjects.tantilla2.core.function.Callable
@@ -14,6 +15,7 @@ import org.kobjects.tantilla2.core.function.LambdaScope
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.node.expression.*
 import org.kobjects.tantilla2.core.node.expression.Apply
+import org.kobjects.tantilla2.core.parser.TypeParser.parseType
 import org.kobjects.tantilla2.core.type.*
 
 object ExpressionParser {
@@ -28,17 +30,17 @@ object ExpressionParser {
 
 
     fun matchType(context: Scope, expr: Node, expectedType: Type?): Node {
-        if (expectedType == null || expectedType.isAssignableFrom(expr.returnType)) {
+        val actualType = expr.returnType
+        if (expectedType == null || expectedType.isAssignableFrom(actualType)) {
             return expr
         }
 
-        val implName = expectedType.typeName + " for " + expr.returnType.typeName
-        try {
-            val impl = context.resolveStaticOrError(implName, true).getValue(null) as ImplDefinition
+        if (expectedType is TraitDefinition) {
+            val impl = expectedType.requireImplementationFor(actualType, context)
             return As(expr, impl, implicit = true)
-        } catch (e: Exception) {
-            throw IllegalArgumentException("Can't convert $expr with type '${expr.returnType}' to '$expectedType' -- '$implName' not available.", e)
         }
+
+        throw IllegalArgumentException("Can't convert $expr with type '${expr.returnType}' to '$expectedType'")
     }
 
     fun parseElementAt(tokenizer: TantillaTokenizer, context: ParsingContext, base: Node): Node {
@@ -289,9 +291,8 @@ object ExpressionParser {
         context: ParsingContext,
         base: Node,
     ): Node {
-        val traitName = tokenizer.consume(TokenType.IDENTIFIER)
-        val className = base.returnType.typeName
-        val impl = context.scope.resolveStaticOrError("$traitName for $className", true).getValue(null) as ImplDefinition
+        val trait = parseType(tokenizer, context) as TraitDefinition
+        val impl = trait.requireImplementationFor(base.returnType, context.scope)
         impl.resolveAll(CompilationResults())
         return As(base, impl, implicit = false)
     }

@@ -28,6 +28,11 @@ class TraitDefinition(
         get() = Definition.Kind.TRAIT
 
 
-
     override fun resolve(name: String) = resolveDynamic(name, false)
+
+
+    fun requireImplementationFor(type: Type, context: Scope): ImplDefinition {
+        val implName = typeName + " for " + type.typeName
+        return context.resolveStaticOrError(implName, true) as ImplDefinition
+    }
 }
