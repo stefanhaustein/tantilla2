@@ -20,6 +20,8 @@ object TypeParser {
         }
         var name = tokenizer.consume(TokenType.IDENTIFIER)
         var scope = context.scope
+
+        // Note that getValue() below is required to resolve imports!
         while (tokenizer.tryConsume(".")) {
             scope = scope.resolveStaticOrError(name, scope == context.scope).getValue(null) as Scope
             name = tokenizer.consume(TokenType.IDENTIFIER)
@@ -53,7 +55,7 @@ object TypeParser {
         } else {
             name = "\$$index"
         }
-        val rawType = TypeParser.parseType(tokenizer, context)
+        val rawType = parseType(tokenizer, context)
         val type = if (isVararg) ListType(rawType) else rawType
         val defaultValue: Node? = if (tokenizer.tryConsume("="))
             ExpressionParser.matchType(context.scope,

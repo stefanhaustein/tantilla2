@@ -13,5 +13,5 @@ class TraitTest : TantillaTest("""
       "Woof"
                         
   def test_trait(): 
-    assert (Dog() as Animal.noise() == "Woof") 
+    assert ((Dog() as Animal).noise() == "Woof") 
 """)

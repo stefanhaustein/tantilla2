@@ -4,6 +4,8 @@ import org.kobjects.tantilla2.core.LocalRuntimeContext
 import toLiteral
 
 /**
+ * Something that "owns" a local runtime context; Used to render instances.
+ *
  * Not a subclass of Scope because Callable implements this
  */
 interface DynamicScope {
