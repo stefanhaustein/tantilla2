@@ -42,7 +42,7 @@ fun RenderDefinition(viewModel: TantillaViewModel, definition: Definition, textW
     val expanded = viewModel.expanded.value.contains(definition)
 
     Card(
-        backgroundColor = if (!expanded && (viewModel.userRootScope.definitionsWithErrors.contains(definition)
+        backgroundColor = if (!expanded && (viewModel.userRootScope.definitionsWithErrors.containsKey(definition)
                     || definition.errors.isNotEmpty()
                     || definition == viewModel.runtimeException.value?.definition)) Color(Palette.BRIGHTEST_RED) else Color(0xffeeeeee),
         modifier = Modifier

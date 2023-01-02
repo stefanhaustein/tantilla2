@@ -188,7 +188,7 @@ abstract class Scope(
             }
         }
         if (childError) {
-            compilationResults.definitionsWithErrors.add(this)
+            compilationResults.definitionsWithErrors.put(this, errors)
         }
         return !childError
     }

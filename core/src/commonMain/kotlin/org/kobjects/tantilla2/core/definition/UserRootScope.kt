@@ -14,7 +14,7 @@ class UserRootScope(
     var initializedTo = 0
     var classToTrait = emptyMap<Scope, MutableMap<TraitDefinition, Definition>>()
     var traitToClass = emptyMap<TraitDefinition, MutableMap<Scope, Definition>>()
-    var definitionsWithErrors = emptySet<Definition>()
+    var definitionsWithErrors = emptyMap<Definition, List<Throwable>>()
 
     override val kind: Definition.Kind
         get() = Definition.Kind.UNIT
@@ -45,7 +45,7 @@ class UserRootScope(
 
         classToTrait = results.classToTrait.toMap()
         traitToClass = results.traitToClass.toMap()
-        definitionsWithErrors = results.definitionsWithErrors.toSet()
+        definitionsWithErrors = results.definitionsWithErrors.toMap()
     }
 
     override val dynamicScopeSize: Int

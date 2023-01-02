@@ -49,7 +49,7 @@ interface Definition : SerializableCode, Comparable<Definition> {
     fun resolveAll(compilationResults: CompilationResults): Boolean {
         val ok = errors.isEmpty()
         if (!ok) {
-            compilationResults.definitionsWithErrors.add(this)
+            compilationResults.definitionsWithErrors.put(this, errors)
         }
         return ok
     }

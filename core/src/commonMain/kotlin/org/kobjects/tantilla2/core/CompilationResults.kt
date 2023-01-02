@@ -8,6 +8,6 @@ class CompilationResults {
     val traitToClass = mutableMapOf<TraitDefinition, MutableMap<Scope, Definition>>()
     val classToTrait = mutableMapOf<Scope, MutableMap<TraitDefinition, Definition>>()
 
-    val definitionsWithErrors = mutableSetOf<Definition>()
+    val definitionsWithErrors = mutableMapOf<Definition, List<Throwable>>()
 
 }
