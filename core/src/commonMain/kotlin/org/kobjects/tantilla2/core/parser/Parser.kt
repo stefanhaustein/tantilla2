@@ -198,14 +198,14 @@ object Parser {
                 val scopeName = tokenizer.consume(TokenType.IDENTIFIER, "Class name expected.")
                 tokenizer.consume(":")
                 val docString = readDocString(tokenizer)
-                val text = consumeBody(tokenizer, startPos, context.depth)
-                ImplDefinition(
+                val impl = ImplDefinition(
                     context.scope,
                     traitName = traitName,
                     scopeName = scopeName,
-                    definitionText = text,
                     docString = docString
                 )
+                parseDefinitions(tokenizer, ParsingContext(impl, context.depth + 1))
+                impl
             }
             else -> throw tokenizer.exception("Declaration expected.")
         }

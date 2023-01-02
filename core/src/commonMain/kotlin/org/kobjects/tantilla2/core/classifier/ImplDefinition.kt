@@ -15,7 +15,7 @@ class ImplDefinition(
     override val parentScope: Scope,
     val traitName: String,
     val scopeName: String,
-    val definitionText: String,
+    //val definitionText: String,
     override var docString: String,
 ) : Scope(), Type {
     override val name: String
@@ -28,13 +28,17 @@ class ImplDefinition(
 
     val trait: TraitDefinition
         get() {
-            getValue(null)
+            if (resolvedTrait == null) {
+                resolvedTrait = parentScope.resolveStaticOrError(traitName, true).getValue(null) as TraitDefinition
+            }
             return resolvedTrait!!
         }
 
     val scope: Scope
         get() {
-            getValue(null)
+            if (resolvedScope == null) {
+                resolvedScope = parentScope.resolveStaticOrError(scopeName, true).getValue(null) as Scope
+            }
             return resolvedScope!!
         }
 
@@ -47,13 +51,11 @@ class ImplDefinition(
         if (super.resolveAll(compilationResults)) {
 
             // TODO: Move VMT creation to trait?
-            val vmt = MutableList<Callable?>(trait.traitIndex) { null }
+            val vmt = Array<Callable?>(trait.traitIndex) { null }
             for (definition in trait) {
                 val index = ((definition.getValue(null) as FunctionDefinition).resolvedBody as TraitMethodBody).index
                 val resolved = resolve(definition.name)
-                if (resolved == null) {
-                    throw RuntimeException("Can't resolve '${definition.name}' for '${this.name}'")
-                }
+                    ?: throw RuntimeException("Can't resolve '${definition.name}' for '${this.name}'")
                 vmt[index] = resolved.getValue(null) as Callable
             }
             this.vmt = vmt.toList() as List<Callable>
@@ -73,25 +75,8 @@ class ImplDefinition(
 
     override fun getValue(scope: Any?): ImplDefinition {
         if (resolvedTrait == null) {
-            val traitName = name.substring(0, name.indexOf(' '))
-            resolvedTrait =
-                parentScope.resolveStaticOrError(traitName, true).getValue(null) as TraitDefinition
-
-            resolvedTrait!!.resolveAll(CompilationResults())
-
-            val className = name.substring(name.lastIndexOf(' ') + 1)
-            resolvedScope =
-                parentScope.resolveStaticOrError(className, true).getValue(null) as Scope
-
-            val tokenizer = TantillaTokenizer(definitionText)
-            tokenizer.consume(TokenType.BOF)
-            tokenizer.consume("impl")
-            tokenizer.consume(traitName)
-            tokenizer.consume("for")
-            tokenizer.consume(className)
-            tokenizer.consume(":")
-            Parser.parseDefinitionsAndStatements(tokenizer, ParsingContext(this, 0))
-            println("Impl successfully resolved!")
+            trait
+            scope
         }
         return this
     }
