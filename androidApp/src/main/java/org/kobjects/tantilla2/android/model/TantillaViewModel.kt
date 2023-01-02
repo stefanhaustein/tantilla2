@@ -174,7 +174,7 @@ class TantillaViewModel(
         runtimeExceptionPosition = IntRange(writer.errorPosition, writer.errorPosition + writer.errorLength)
         initialEditorText = writer.toString()
         currentText.value = currentText.value.copy(
-            annotatedString = annotatedCode(initialEditorText, definition?.errors ?: emptyList()))
+            annotatedString = annotatedCode(initialEditorText, userRootScope.definitionsWithErrors[definition] ?: emptyList()))
         mode.value = Mode.DEFINITION_EDITOR
     }
 
@@ -230,12 +230,15 @@ class TantillaViewModel(
     }
 
     fun navigateBack(discardChanges: Boolean = false): Boolean {
-        if (navigationStack.size < 2) {
-            return false
+        if (navigationStack.isNotEmpty()) {
+            navigationStack.removeLast()
+            if (navigationStack.isNotEmpty()) {
+                navigateTo(navigationStack.removeLast(), discardChanges)
+                return true
+            }
         }
-        navigationStack.removeLast()
-        navigateTo(navigationStack.removeLast(), discardChanges)
-        return true
+        navigateTo(userRootScope, discardChanges)
+        return false
     }
 
     fun navigateTo(definition: Definition?, discardChanges: Boolean = false) {
@@ -245,7 +248,10 @@ class TantillaViewModel(
 
         if (definition == null) {
             mode.value = Mode.SHELL
-        } else if (definition.isScope()) {
+        } else if (definition.kind != Definition.Kind.FUNCTION
+            && definition.kind != Definition.Kind.PROPERTY
+            && definition.kind != Definition.Kind.METHOD
+            && definition.kind != Definition.Kind.STATIC) {
             mode.value = if (definition.isBuiltin()) Mode.HELP else Mode.HIERARCHY
             scope().value = definition.getValue(null) as Scope
         } else if (definition.isBuiltin()) {
@@ -388,7 +394,7 @@ class TantillaViewModel(
         HELP, HIERARCHY, SHELL, DEFINITION_EDITOR, DOCUMENTATION_EDITOR
     }
 
-    fun annotatedCode(code: String, errors: List<Exception>): AnnotatedString {
+    fun annotatedCode(code: String, errors: List<Throwable>): AnnotatedString {
 
         val writer = CodeWriter("", highlighting = CodeWriter.defaultHighlighting)
        // writer.append(Ansi.NOT_PROPORTIONAL)

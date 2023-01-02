@@ -63,9 +63,6 @@ class NativePropertyDefinition(
 
     override fun isDynamic() = kind == Definition.Kind.PROPERTY
 
-    override fun isScope() = false
-
-
     companion object {
         fun constant(
             parentScope: Scope,

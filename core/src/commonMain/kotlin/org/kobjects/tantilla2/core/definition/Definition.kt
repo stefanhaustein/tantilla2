@@ -25,9 +25,6 @@ interface Definition : SerializableCode, Comparable<Definition> {
         get() = -1
         set(_) = throw UnsupportedOperationException()
 
-    val errors: List<Exception>
-        get() = emptyList()
-
     fun getValue(self: Any?): Any
 
     fun setValue(self: Any?, newValue: Any): Unit = throw UnsupportedOperationException()
@@ -44,20 +41,27 @@ interface Definition : SerializableCode, Comparable<Definition> {
 
     fun findNode(node: Node): Definition? = null
     fun isDynamic() = kind == Kind.METHOD || kind == Kind.PROPERTY
-    fun isScope(): Boolean = false
 
     fun resolveAll(compilationResults: CompilationResults): Boolean {
-        val ok = errors.isEmpty()
-        if (!ok) {
-            compilationResults.definitionsWithErrors.put(this, errors)
+        try {
+            resolve()
+            return true
+        } catch (e: Exception) {
+            compilationResults.definitionsWithErrors[this] = listOf(e)
+            return false
         }
-        return ok
     }
 
     /**
      * Reset the compilation state
      */
     fun reset() {
+    }
+
+    /**
+     * Fully resolve this definition. Called from resolveAll().
+     */
+    fun resolve() {
     }
 
     fun createWriter(): CodeWriter {

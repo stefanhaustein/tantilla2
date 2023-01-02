@@ -43,17 +43,6 @@ class FunctionDefinition (
         get() = if (parentScope is TraitDefinition) super.dynamicScopeSize
             else getValue(null).locals.size
 
-    override val errors: List<Exception>
-        get() {
-            try {
-                resolve()
-            } catch (e: Exception) {
-                e.printStackTrace()
-                return listOf(e)
-            }
-            return emptyList()
-    }
-
     override val type: FunctionType
         get() {
             resolve(typeOnly = true)
@@ -65,7 +54,11 @@ class FunctionDefinition (
         return this
     }
 
-    private fun resolve(typeOnly: Boolean = false) {
+    override fun resolve() {
+        resolve(false)
+    }
+
+    private fun resolve(typeOnly: Boolean) {
         when (resolutionState) {
             ResolutionState.RESOLVED -> return
             ResolutionState.TYPE_RESOLVED -> if (typeOnly) return
@@ -76,9 +69,8 @@ class FunctionDefinition (
 
         val tokenizer = TantillaTokenizer(definitionText)
         tokenizer.consume(TokenType.BOF)
-        error = null
 
-        try {
+
            tokenizer.tryConsume("static")
            tokenizer.consume("def")
            tokenizer.consume(TokenType.IDENTIFIER)
@@ -109,17 +101,7 @@ class FunctionDefinition (
            }
 
            resolutionState = ResolutionState.RESOLVED
-       } catch (e: Exception) {
-           e.printStackTrace()
-           if (e is ParsingException) {
-               error = e
-           } else {
-               error = ParsingException(tokenizer.current, "Error in ${parentScope.name}.$name: " +  (e.message ?: "Parsing Error"), e)
-           }
-           error!!.printStackTrace()
-           resolutionState = ResolutionState.ERROR
-           throw error!!
-       }
+
     }
 
     override fun eval(context: LocalRuntimeContext): Any {
@@ -144,7 +126,7 @@ class FunctionDefinition (
         if (length == Definition.SummaryKind.EXPANDED) {
             serializeCode(writer)
         } else if (resolutionState != ResolutionState.RESOLVED && resolutionState != ResolutionState.TYPE_RESOLVED) {
-            writer.appendUnparsed(definitionText.split('\n').first(), errors)
+            writer.appendUnparsed(definitionText.split('\n').first(), userRootScope().definitionsWithErrors[this] ?: emptyList())
         } else {
             if (parentScope.supportsMethods && kind == Definition.Kind.FUNCTION) {
                 writer.appendKeyword("static ")
@@ -157,7 +139,7 @@ class FunctionDefinition (
 
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
         if (resolutionState != ResolutionState.RESOLVED) {
-            writer.appendUnparsed(definitionText, errors)
+            writer.appendUnparsed(definitionText, userRootScope().definitionsWithErrors[this] ?: emptyList())
         } else {
             if (parentScope.supportsMethods && !isDynamic()) {
                 writer.appendKeyword("static ")
@@ -181,20 +163,19 @@ class FunctionDefinition (
 
     override fun isDynamic() = kind == Definition.Kind.METHOD
 
-    override fun isScope() = false
 
     override fun findNode(node: Node): Definition? =
         if (resolvedBody?.containsNode(node) ?: false) this else null
 
     override fun reset() {
+        super.reset()
         resolutionState = ResolutionState.UNRESOLVED
         resolvedType = null
         resolvedBody = null
         locals.clear()
-        super.reset()
     }
 
     enum class ResolutionState {
-        UNRESOLVED, TYPE_RESOLVED, RESOLVED, ERROR
+        UNRESOLVED, TYPE_RESOLVED, RESOLVED
     }
 }

@@ -19,7 +19,6 @@ class FieldDefinition(
     private var resolvedType: Type? = null
     override var index: Int = -1
     private var resolutionState: ResolutionState = ResolutionState.UNRESOLVED
-    var error: ParsingException? = null
 
     private var _definitionText = definitionText
 
@@ -50,18 +49,6 @@ class FieldDefinition(
     }
 
 
-    override val errors: List<Exception>
-        get() {
-            try {
-                resolve()
-            } catch (e: Exception) {
-                e.printStackTrace()
-                listOf(e)
-            }
-            return emptyList()
-        }
-
-
     override val type: Type
         get() {
             resolve(typeOnly = true)
@@ -84,7 +71,11 @@ class FieldDefinition(
         return resolvedInitializer
     }
 
-    private fun resolve(typeOnly: Boolean = false) {
+    override fun resolve() {
+        resolve(false)
+    }
+
+    private fun resolve(typeOnly: Boolean) {
         when (resolutionState) {
             ResolutionState.RESOLVED -> return
             ResolutionState.TYPE_RESOLVED -> if (typeOnly) return
@@ -95,47 +86,27 @@ class FieldDefinition(
 
         val tokenizer = TantillaTokenizer(definitionText)
         tokenizer.consume(TokenType.BOF)
-        error = null
         resolvedInitializer = null
 
-        try {
-            tokenizer.tryConsume("static")
-            tokenizer.tryConsume("mut")
-            tokenizer.tryConsume("var") || tokenizer.tryConsume("val") // var/val
+        tokenizer.tryConsume("static")
+        tokenizer.tryConsume("mut")
+        tokenizer.tryConsume("var") || tokenizer.tryConsume("val") // var/val
 
-            tokenizer.consume(name)
+        tokenizer.consume(name)
 
-            val resolved =
-                Parser.resolveVariable(tokenizer, ParsingContext(parentScope, 0), typeOnly)
-            resolvedType = resolved.first
+        val resolved = Parser.resolveVariable(tokenizer, ParsingContext(parentScope, 0), typeOnly)
+        resolvedType = resolved.first
 
-            if (typeOnly) {
-                resolutionState = ResolutionState.TYPE_RESOLVED
-            } else {
-                resolvedInitializer = resolved.third
-                if (kind == Definition.Kind.STATIC) {
-                    index = parentScope.registerStatic(this)
-                }
-                resolutionState = ResolutionState.RESOLVED
+        if (typeOnly) {
+            resolutionState = ResolutionState.TYPE_RESOLVED
+        } else {
+            resolvedInitializer = resolved.third
+            if (kind == Definition.Kind.STATIC) {
+                index = parentScope.registerStatic(this)
             }
-
-
-        } catch (e: Exception) {
-            e.printStackTrace()
-            resolutionState = ResolutionState.ERROR
-            if (e is ParsingException) {
-                error = e
-            } else {
-                error = ParsingException(
-                    tokenizer.current,
-                    "Error in ${parentScope.name}.$name: " + (e.message ?: "Parsing Error"),
-                    e
-                )
-            }
-            throw error!!
+            resolutionState = ResolutionState.RESOLVED
         }
     }
-
 
     override fun toString() = serializeCode()
 
@@ -174,14 +145,12 @@ class FieldDefinition(
                 writer.appendCode(resolvedInitializer)
             }
         } else {
-            writer.appendUnparsed(definitionText, errors)
+            writer.appendUnparsed(definitionText, userRootScope().definitionsWithErrors[this] ?: emptyList())
         }
     }
 
 
     override fun isDynamic() = kind == Definition.Kind.PROPERTY
-
-    override fun isScope() = false
 
     override fun findNode(node: Node): Definition? {
         val rid = resolvedInitializer

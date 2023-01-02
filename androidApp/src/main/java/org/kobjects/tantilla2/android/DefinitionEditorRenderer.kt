@@ -31,7 +31,7 @@ fun RenderDefinitionEditor(viewModel: TantillaViewModel) {
     val scope = viewModel.currentUserScope.value
     val definition = viewModel.editingDefinition.value
     val errors = remember {
-        mutableStateOf(viewModel.editingDefinition.value?.errors ?: emptyList())
+        mutableStateOf(viewModel.userRootScope.definitionsWithErrors[viewModel.editingDefinition.value] ?: emptyList())
     }
     val textWidth = remember { mutableStateOf(40) }
     val errorIndex = remember { mutableStateOf(0) }

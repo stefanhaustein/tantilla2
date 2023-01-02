@@ -14,8 +14,6 @@ import org.kobjects.tantilla2.core.type.Type
 
 abstract class Scope(
 ): Definition, Iterable<Definition> {
-    var error: Exception? = null
-
     private val definitions = mutableMapOf<String, Definition>()
     val locals = mutableListOf<String>()
 
@@ -54,13 +52,11 @@ abstract class Scope(
         val tokenizer = TantillaTokenizer(newProperty)
         tokenizer.next()
         var replacement = try {
-            Parser.parseDefinition(tokenizer, ParsingContext(this, 0))
+            val result = Parser.parseDefinition(tokenizer, ParsingContext(this, 0))
+            result.resolve()
         } catch (e: Exception) {
             e.printStackTrace()
             return listOf(e)
-        }
-        if (replacement.errors.isNotEmpty()) {
-            return replacement.errors
         }
         while (tokenizer.current.type == TokenType.LINE_BREAK) {
             tokenizer.next()
@@ -165,32 +161,18 @@ abstract class Scope(
         )
     }
 
-
-    override val errors: List<Exception>
-        get() {
-            if (error == null) {
-                try {
-                    getValue(null)
-                } catch (e: Exception) {
-                    println("Error in $parentScope.$name")
-                    e.printStackTrace()
-                }
-            }
-            val error = error
-            return if (error == null) emptyList() else listOf(error)
-    }
-
     override fun resolveAll(compilationResults: CompilationResults): Boolean {
-        var childError = errors.isNotEmpty()
+        var childError = false
         for (definition in this) {
             if (!definition.resolveAll(compilationResults)) {
                 childError = true
             }
         }
-        if (childError) {
-            compilationResults.definitionsWithErrors.put(this, errors)
+        val localError = !super.resolveAll(compilationResults)
+        if (childError && !localError) {
+            compilationResults.definitionsWithErrors.put(this, listOf())
         }
-        return !childError
+        return !childError && !localError
     }
 
     open fun registerStatic(fieldDefinition: FieldDefinition): Int =
@@ -256,8 +238,6 @@ abstract class Scope(
 
     override fun isDynamic() = false
 
-    override fun isScope() = errors.isEmpty()
-
     override fun findNode(node: Node): Definition? {
         for (definition in this) {
             val result = definition.findNode(node)
@@ -269,7 +249,6 @@ abstract class Scope(
     }
 
     override fun reset() {
-        error = null
         for (definition in this) {
             definition.reset()
         }

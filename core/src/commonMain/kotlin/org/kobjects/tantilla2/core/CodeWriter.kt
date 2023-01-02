@@ -14,7 +14,7 @@ class CodeWriter(
     var scope: Scope = AbsoluteRootScope,
     val highlighting: Map<Kind, Pair<String, String>> = emptyMap(),
     val errorNode: Evaluable? = null,
-    val errors: List<Pair<IntRange, Exception>> = emptyList(),
+    val errors: List<Pair<IntRange, Throwable>> = emptyList(),
     var lineLength: Int = Int.MAX_VALUE,
 ) : Appendable {
     val sb = StringBuilder()
@@ -23,13 +23,13 @@ class CodeWriter(
     var errorPosition = -1
     var errorLength = 0
     var pos = 0
-    val startIndices = mutableMapOf<Int, Exception>()
+    val startIndices = mutableMapOf<Int, Throwable>()
     val endIndices = mutableSetOf<Int>()
     var lineStart = 0
     var depth = 0
 
 
-    fun addError(position: IntRange, error: Exception) {
+    fun addError(position: IntRange, error: Throwable) {
         startIndices.put(pos + position.start, error)
         endIndices.add(pos + position.endInclusive + 1)
     }
@@ -291,7 +291,7 @@ class CodeWriter(
     }
 
 
-    fun appendUnparsed(code: String, errors: List<Exception> = emptyList()): CodeWriter {
+    fun appendUnparsed(code: String, errors: List<Throwable> = emptyList()): CodeWriter {
         if (highlighting.isEmpty()) {
             append("### ")
             append(code.replace("###", "## "))

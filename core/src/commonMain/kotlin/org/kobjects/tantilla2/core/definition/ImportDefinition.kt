@@ -14,9 +14,12 @@ class ImportDefinition(
     override val kind: Definition.Kind
         get() = Definition.Kind.IMPORT
 
-    override fun getValue(self: Any?): Definition = resolve()
+    override fun getValue(self: Any?): Definition {
+        resolve()
+        return resolved!!
+    }
 
-    fun resolve(): Definition {
+    override fun resolve() {
         if (resolved == null) {
             var result = parentScope.resolveStatic(path[0], true)
             for (i in 1 until path.size) {
@@ -24,7 +27,6 @@ class ImportDefinition(
             }
             resolved = result
         }
-        return resolved!!
     }
 
     override fun isSummaryExpandable() = false

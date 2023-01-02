@@ -7,8 +7,8 @@ import org.kobjects.tantilla2.core.parser.TokenType
 fun highlightSyntax(
     writer: CodeWriter,
     code: String,
-    errors: List<Exception> = listOf(),
-    runtimeException: Exception? = null,
+    errors: List<Throwable> = listOf(),
+    runtimeException: Throwable? = null,
     runtimeExceptionPosition: IntRange = IntRange.EMPTY,
 ) {
     for (error in errors) {

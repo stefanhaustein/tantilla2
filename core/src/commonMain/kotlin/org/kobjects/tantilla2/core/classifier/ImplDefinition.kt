@@ -47,6 +47,7 @@ class ImplDefinition(
 
     override fun resolve(name: String): Definition? = resolveDynamic(name, false)
 
+    // This can't be in "simple" resolve as it needs to update the compilation results
     override fun resolveAll(compilationResults: CompilationResults): Boolean {
         if (super.resolveAll(compilationResults)) {
 

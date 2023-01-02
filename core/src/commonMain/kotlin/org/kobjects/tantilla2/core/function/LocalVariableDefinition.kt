@@ -59,7 +59,5 @@ class LocalVariableDefinition (
 
     override fun isDynamic() = kind == Definition.Kind.PROPERTY
 
-    override fun isScope() = false
-
 
 }

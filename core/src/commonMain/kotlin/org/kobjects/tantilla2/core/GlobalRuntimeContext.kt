@@ -53,8 +53,8 @@ class GlobalRuntimeContext(
             return
         }
 
-        if (definition.errors.isNotEmpty()) {
-            exception = wrapException(definition.errors[0])
+        if (userRootScope.definitionsWithErrors.contains(definition)) {
+            exception = createException(definition, null, "Code contains errors.")
             userRootScope.parentScope.runStateCallback(this)
             return
         }
