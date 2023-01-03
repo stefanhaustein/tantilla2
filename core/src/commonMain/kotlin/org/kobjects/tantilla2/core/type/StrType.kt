@@ -11,10 +11,8 @@ object StrType : NativeStructDefinition(
     null,
     "str",
     "A character String. Use the constructor to convert a value to its string representation.",
-    ctorParams = listOf(Parameter("value", AnyType, defaultValueExpression = StrNode.Const(""))),
-    ctor = {
-        it[0].toString()
-    }
+    { it[0].toString() },
+    Parameter("value", AnyType, defaultValueExpression = StrNode.Const("")),
 )  {
     init {
         defineMethod("int",

@@ -15,9 +15,9 @@ open class SetType(
     null,
     name,
     docString,
-    listOf(Parameter("elements", elementType, isVararg = true)),
-    ctor
-    ), CollectionType {
+    ctor,
+    Parameter("elements", elementType, isVararg = true),
+), CollectionType {
 
     init {
         defineMethod("len", "Returns the size of this set", IntType) {

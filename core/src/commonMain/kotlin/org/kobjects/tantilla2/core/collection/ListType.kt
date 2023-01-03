@@ -17,9 +17,9 @@ open class ListType(
     null,
     name,
     docString,
-    listOf(Parameter("elements", elementType, isVararg = true)),
-    ctor
-    ), CollectionType {
+    ctor,
+    Parameter("elements", elementType, isVararg = true),
+), CollectionType {
 
     init {
         defineMethod("len", "Returns the length of the list", IntType) {

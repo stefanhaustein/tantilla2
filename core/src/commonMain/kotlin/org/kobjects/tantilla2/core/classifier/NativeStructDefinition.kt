@@ -13,9 +13,11 @@ open class NativeStructDefinition(
     parentScope: Scope?,
     name: String,
     docString: String = "",
-    val ctorParams: List<Parameter> = emptyList(),
     val ctor: ((LocalRuntimeContext) -> Any),
+    vararg ctorParams: Parameter,
 ) : NativeTypeDefinition(parentScope, name, docString), Callable {
+    var ctorParams = ctorParams.toList()
+
     override val kind: Definition.Kind
         get() = Definition.Kind.STRUCT
 

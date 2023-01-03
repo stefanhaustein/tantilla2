@@ -11,8 +11,9 @@ open class PairType(
     null,
     "Pair",
     "An immutable pair of two values",
-    listOf(Parameter("a", typeA), Parameter("b", typeB)),
     { TypedPair(typeA, typeB, it.get(0)!!, it.get(1)!!) },
+    Parameter("a", typeA),
+    Parameter("b", typeB),
 ), CollectionType {
 
     override val genericParameterTypes: List<Type> = listOf(typeA, typeB)

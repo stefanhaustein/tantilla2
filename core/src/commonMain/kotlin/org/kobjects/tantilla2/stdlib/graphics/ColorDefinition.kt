@@ -10,15 +10,12 @@ class ColorDefinition(graphicsScope: GraphicsScope) : NativeStructDefinition(
     graphicsScope,
     "Color",
     docString = "Color representation with support for RGB and HSL formats.",
-    ctorParams = listOf(
-        Parameter("r", FloatType),
-        Parameter("g", FloatType),
-        Parameter("b", FloatType),
-        Parameter("a", FloatType, FloatNode.Const(1.0))
-    ),
-    ctor = {
-        Color(it.f64(0), it.f64(1), it.f64(2), it.f64(3))
-    }) {
+    { Color(it.f64(0), it.f64(1), it.f64(2), it.f64(3)) },
+    Parameter("r", FloatType),
+    Parameter("g", FloatType),
+    Parameter("b", FloatType),
+    Parameter("a", FloatType, FloatNode.Const(1.0)),
+) {
 
     init {
         defineNativeFunction(

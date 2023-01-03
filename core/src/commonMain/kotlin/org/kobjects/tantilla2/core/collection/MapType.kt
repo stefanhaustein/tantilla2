@@ -15,7 +15,6 @@ open class MapType(
     null,
     name,
     docString,
-    listOf(),
     ctor,
 ), CollectionType {
 

@@ -10,8 +10,9 @@ class BitmapImageDefinition(val graphicsScope: GraphicsScope) : NativeStructDefi
     graphicsScope,
     "BitmapImage",
     docString = "Bitmap image representation",
-    listOf(Parameter("width", IntType), Parameter("height", IntType)),
-    { graphicsScope.graphicsSystem.createBitmap(it.i32(0), it.i32(1)) }
+    { graphicsScope.graphicsSystem.createBitmap(it.i32(0), it.i32(1)) },
+    Parameter("width", IntType),
+    Parameter("height", IntType),
 ) {
 
     init {
