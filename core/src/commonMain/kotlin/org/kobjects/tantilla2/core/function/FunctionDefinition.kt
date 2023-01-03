@@ -7,8 +7,10 @@ import org.kobjects.tantilla2.core.classifier.Updatable
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.definition.Scope
 import org.kobjects.tantilla2.core.node.Node
+import org.kobjects.tantilla2.core.node.expression.UnresolvedNode
 import org.kobjects.tantilla2.core.node.statement.FlowSignal
 import org.kobjects.tantilla2.core.parser.*
+import org.kobjects.tantilla2.core.type.UnresolvedType
 
 class FunctionDefinition (
     override val parentScope: Scope,
@@ -18,9 +20,8 @@ class FunctionDefinition (
 ) : Scope(), Callable, Updatable {
     override var docString: String = ""
 
-    private var resolutionState: ResolutionState = ResolutionState.UNRESOLVED
-    private var resolvedType: FunctionType? = null
-    internal var resolvedBody: Node? = null
+    private var resolvedType: FunctionType = UnresolvedType
+    internal var resolvedBody: Node = UnresolvedNode
 
     var _definitionText = definitionText
     override var definitionText: String
@@ -46,7 +47,7 @@ class FunctionDefinition (
     override val type: FunctionType
         get() {
             resolve(typeOnly = true)
-            return resolvedType!!
+            return resolvedType
         }
 
     override fun getValue(self: Any?): FunctionDefinition {
@@ -59,49 +60,40 @@ class FunctionDefinition (
     }
 
     private fun resolve(typeOnly: Boolean) {
-        when (resolutionState) {
-            ResolutionState.RESOLVED -> return
-            ResolutionState.TYPE_RESOLVED -> if (typeOnly) return
-          /*  ResolutionState.ERROR -> {
-                throw error!!
-            } */
+        if (resolvedBody != UnresolvedNode
+            || (typeOnly && resolvedType != UnresolvedType)) {
+            return
         }
 
         val tokenizer = TantillaTokenizer(definitionText)
         tokenizer.consume(TokenType.BOF)
 
+        tokenizer.tryConsume("static")
+        tokenizer.consume("def")
+        tokenizer.consume(TokenType.IDENTIFIER)
+        resolvedType = TypeParser.parseFunctionType(
+            tokenizer,
+            ParsingContext(parentScope, 0),
+           kind == Definition.Kind.METHOD)
 
-           tokenizer.tryConsume("static")
-           tokenizer.consume("def")
-           tokenizer.consume(TokenType.IDENTIFIER)
-           resolvedType = TypeParser.parseFunctionType(
-               tokenizer,
-               ParsingContext(parentScope, 0),
-               kind == Definition.Kind.METHOD
-           )
+        if (typeOnly) {
+            return
+        }
 
-           if (typeOnly) {
-               resolutionState = ResolutionState.TYPE_RESOLVED
-               return
-           }
-
-           for (parameter in type.parameters) {
-               declareLocalVariable(parameter.name, parameter.type, false)
-           }
-           if (parentScope is TraitDefinition) {
-               if (tokenizer.tryConsume(":")) {
-                   docString = Parser.readDocString(tokenizer)
-               }
-               tokenizer.consume(TokenType.EOF, "Trait methods must not have function bodies.")
-               resolvedBody = TraitMethodBody(parentScope.traitIndex++)
-           } else {
-               tokenizer.consume(":")
-               docString = Parser.readDocString(tokenizer)
-               resolvedBody = Parser.parseDefinitionsAndStatements(tokenizer, ParsingContext(this, 1))
-           }
-
-           resolutionState = ResolutionState.RESOLVED
-
+        for (parameter in type.parameters) {
+            declareLocalVariable(parameter.name, parameter.type, false)
+        }
+        if (parentScope is TraitDefinition) {
+            if (tokenizer.tryConsume(":")) {
+                docString = Parser.readDocString(tokenizer)
+            }
+            tokenizer.consume(TokenType.EOF, "Trait methods must not have function bodies.")
+            resolvedBody = TraitMethodBody(parentScope.traitIndex++)
+        } else {
+            tokenizer.consume(":")
+            docString = Parser.readDocString(tokenizer)
+            resolvedBody = Parser.parseDefinitionsAndStatements(tokenizer, ParsingContext(this, 1))
+        }
     }
 
     override fun eval(context: LocalRuntimeContext): Any {
@@ -125,7 +117,7 @@ class FunctionDefinition (
     override fun serializeSummary(writer: CodeWriter, length: Definition.SummaryKind) {
         if (length == Definition.SummaryKind.EXPANDED) {
             serializeCode(writer)
-        } else if (resolutionState != ResolutionState.RESOLVED && resolutionState != ResolutionState.TYPE_RESOLVED) {
+        } else if (resolvedType == UnresolvedType) {
             writer.appendUnparsed(definitionText.split('\n').first(), userRootScope().definitionsWithErrors[this] ?: emptyList())
         } else {
             if (parentScope.supportsMethods && kind == Definition.Kind.FUNCTION) {
@@ -136,9 +128,8 @@ class FunctionDefinition (
         }
     }
 
-
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
-        if (resolutionState != ResolutionState.RESOLVED) {
+        if (resolvedBody == UnresolvedNode) {
             writer.appendUnparsed(definitionText, userRootScope().definitionsWithErrors[this] ?: emptyList())
         } else {
             if (parentScope.supportsMethods && !isDynamic()) {
@@ -160,22 +151,15 @@ class FunctionDefinition (
         }
     }
 
-
     override fun isDynamic() = kind == Definition.Kind.METHOD
-
 
     override fun findNode(node: Node): Definition? =
         if (resolvedBody?.containsNode(node) ?: false) this else null
 
     override fun reset() {
         super.reset()
-        resolutionState = ResolutionState.UNRESOLVED
-        resolvedType = null
-        resolvedBody = null
+        resolvedType = UnresolvedType
+        resolvedBody = UnresolvedNode
         locals.clear()
-    }
-
-    enum class ResolutionState {
-        UNRESOLVED, TYPE_RESOLVED, RESOLVED
     }
 }
