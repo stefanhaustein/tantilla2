@@ -8,7 +8,7 @@ import toLiteral
  *
  * Not a subclass of Scope because Callable implements this
  */
-interface DynamicScope {
+interface ContextOwner {
     val dynamicScopeSize: Int
     val closure: LocalRuntimeContext?
         get() = null

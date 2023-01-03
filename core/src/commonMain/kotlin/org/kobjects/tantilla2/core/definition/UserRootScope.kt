@@ -7,7 +7,7 @@ import org.kobjects.tantilla2.core.classifier.TraitDefinition
 
 class UserRootScope(
     override val parentScope: SystemRootScope,
-) : Scope(), DynamicScope {
+) : Scope(), ContextOwner {
     override var docString = ""
     val staticFieldDefinitions = mutableListOf<FieldDefinition?>()
 

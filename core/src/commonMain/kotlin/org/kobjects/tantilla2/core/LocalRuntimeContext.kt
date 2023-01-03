@@ -1,12 +1,11 @@
 package org.kobjects.tantilla2.core
 
-import org.kobjects.tantilla2.core.definition.DynamicScope
-import org.kobjects.tantilla2.core.function.Callable
+import org.kobjects.tantilla2.core.definition.ContextOwner
 import org.kobjects.tantilla2.core.type.VoidType
 
 class LocalRuntimeContext(
     val globalRuntimeContext: GlobalRuntimeContext,
-    val scope: DynamicScope,
+    val scope: ContextOwner,
     initializer: (Int) -> Any = { VoidType.None },
 ) {
     val variables = MutableList(scope.dynamicScopeSize, initializer)

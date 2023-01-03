@@ -1,7 +1,7 @@
 package org.kobjects.tantilla2.core
 
 import org.kobjects.tantilla2.core.definition.Definition
-import org.kobjects.tantilla2.core.definition.DynamicScope
+import org.kobjects.tantilla2.core.definition.ContextOwner
 import org.kobjects.tantilla2.core.definition.UserRootScope
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.FunctionType
@@ -107,7 +107,7 @@ class GlobalRuntimeContext(
             userRootScope.resolveAll()
             println("resolved: $parsed")
 
-            val runtimeContext = LocalRuntimeContext(this, object : DynamicScope {
+            val runtimeContext = LocalRuntimeContext(this, object : ContextOwner {
                 override val dynamicScopeSize: Int
                     get() = 0
 
