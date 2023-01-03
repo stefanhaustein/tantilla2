@@ -1,6 +1,6 @@
 package org.kobjects.tantilla2.core
 
-import org.kobjects.tantilla2.core.classifier.Adapter
+import org.kobjects.tantilla2.core.classifier.AdapterInstance
 import org.kobjects.tantilla2.core.node.LeafNode
 import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.type.VoidType
@@ -14,7 +14,7 @@ class TraitMethodBody(val index: Int): LeafNode() {
     }
 
     override fun eval(context: LocalRuntimeContext): Any {
-      val self = context.variables[0] as Adapter
+      val self = context.variables[0] as AdapterInstance
       val methodImpl = self.vmt[index]
 
       val methodContext = LocalRuntimeContext(context.globalRuntimeContext,
