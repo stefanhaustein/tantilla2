@@ -3,11 +3,12 @@ package org.kobjects.tantilla2.stdlib.graphics
 import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
+import org.kobjects.tantilla2.core.classifier.NativeTypeDefinition
 import org.kobjects.tantilla2.core.type.FloatType
 import org.kobjects.tantilla2.core.type.StrType
 import org.kobjects.tantilla2.core.type.VoidType
 
-class PenDefinition(graphicsScope: GraphicsScope) : NativeStructDefinition(graphicsScope, "Pen"),
+class PenDefinition(graphicsScope: GraphicsScope) : NativeTypeDefinition(graphicsScope, "Pen"),
     Type {
 
     init {

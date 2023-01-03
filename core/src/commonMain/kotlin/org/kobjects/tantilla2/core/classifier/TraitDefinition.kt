@@ -10,16 +10,10 @@ class TraitDefinition(
     override val parentScope: Scope,
     override val name: String,
     override var docString: String,
-) : Scope(), Type {
-
-    override val supportsMethods: Boolean
-        get() = true
+) : Classifier() {
 
     var traitIndex = 0
 
-    override fun serializeType(writer: CodeWriter) {
-        serializeQualifiedName(writer, false)
-    }
 
     override fun isAssignableFrom(type: Type): Boolean {
         return type == this || (type is ImplDefinition && type.trait == this)
@@ -27,9 +21,6 @@ class TraitDefinition(
 
     override val kind: Definition.Kind
         get() = Definition.Kind.TRAIT
-
-
-    override fun resolve(name: String) = resolveDynamic(name, false)
 
 
     fun requireImplementationFor(type: Type): ImplDefinition {

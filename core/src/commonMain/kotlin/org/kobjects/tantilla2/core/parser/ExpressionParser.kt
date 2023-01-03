@@ -4,7 +4,7 @@ import org.kobjects.tantilla2.core.node.expression.StrNode
 import org.kobjects.tantilla2.core.*
 import org.kobjects.parserlib.expressionparser.ExpressionParser as GreenspunExpressionParser
 import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
-import org.kobjects.tantilla2.core.classifier.StructMetaType
+import org.kobjects.tantilla2.core.classifier.InstantiableMetaType
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.definition.Scope
@@ -45,8 +45,8 @@ object ExpressionParser {
     fun parseElementAt(tokenizer: TantillaTokenizer, context: ParsingContext, base: Node): Node {
         tokenizer.disable(TokenType.LINE_BREAK)
 
-        if (base.returnType is StructMetaType
-            && (base.returnType as StructMetaType).wrapped.genericParameterTypes.isNotEmpty()
+        if (base.returnType is InstantiableMetaType
+            && (base.returnType as InstantiableMetaType).wrapped.genericParameterTypes.isNotEmpty()
         ) {
             val typeParameters = mutableListOf<Type>()
             do {
@@ -54,7 +54,7 @@ object ExpressionParser {
             } while(tokenizer.tryConsume(","))
             tokenizer.consume("]")
             tokenizer.enable(TokenType.LINE_BREAK)
-            return StaticReference(((base.returnType) as StructMetaType).wrapped.withGenericsResolved(typeParameters) as Definition, true, false)
+            return StaticReference(((base.returnType) as InstantiableMetaType).wrapped.withGenericsResolved(typeParameters) as Definition, true, false)
             // GenericTypeNode(base, typeParameters)
         }
 
@@ -71,13 +71,9 @@ object ExpressionParser {
                 definition.name, definition.type, depth, definition.index, definition.mutable, raw)
         } else StaticReference(definition, qualified, raw)
 
-    fun isCallable(definition: Definition): Boolean {
-        val resolvedDefinition = definition.getValue(null) // Resolve imports
-        if (resolvedDefinition is NativeStructDefinition) {
-            return resolvedDefinition.ctor != NativeStructDefinition.noConstructorAvailable
-        }
-        return definition is Callable
-    }
+    fun isCallable(definition: Definition) =
+        definition.getValue(null) is Callable // Resolve imports
+
 
     fun parseFreeIdentifier(tokenizer: TantillaTokenizer, context: ParsingContext, raw: Boolean): Node {
         val name = tokenizer.consume(TokenType.IDENTIFIER)
@@ -368,7 +364,7 @@ object ExpressionParser {
         val parentesizedArgsList = openingParenConsumed || tokenizer.tryConsume("(")
         if (parentesizedArgsList) {
             tokenizer.disable(TokenType.LINE_BREAK)
-        } else if (type is StructMetaType) {
+        } else if (type is InstantiableMetaType) {
             return value
         }
 

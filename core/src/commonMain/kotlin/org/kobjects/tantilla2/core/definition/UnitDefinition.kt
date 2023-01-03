@@ -9,12 +9,8 @@ open class UnitDefinition(
     override val parentScope: Scope?,
     override val name: String = "",
     override var docString: String = "",
-) : Scope(), Typed, Type {
+) : Scope(), Typed {
     override val type = ScopeType(this)
     override val kind: Definition.Kind
         get() = Definition.Kind.UNIT
-
-    override fun serializeType(writer: CodeWriter) {
-        writer.append(name)
-    }
 }

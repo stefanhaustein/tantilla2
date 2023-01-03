@@ -16,7 +16,7 @@ class ImplDefinition(
     val traitName: String,
     val scopeName: String,
     override var docString: String,
-) : Scope(), Type {
+) : Classifier() {
     override val name: String
         get() = "$traitName for $scopeName"
 
@@ -50,7 +50,6 @@ class ImplDefinition(
         vmt = emptyList()
     }
 
-    override fun resolve(name: String): Definition? = resolveDynamic(name, false)
 
     override fun resolve() {
         // TODO: Move VMT creation to trait?
@@ -63,11 +62,6 @@ class ImplDefinition(
         }
         this.vmt = vmt.toList() as List<Callable>
     }
-
-    override fun serializeType(writer: CodeWriter) {
-        writer.append(name)
-    }
-
 
     override val kind: Definition.Kind
         get() = Definition.Kind.IMPL

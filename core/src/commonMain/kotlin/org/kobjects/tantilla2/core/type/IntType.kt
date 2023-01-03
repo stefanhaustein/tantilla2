@@ -1,6 +1,7 @@
 package org.kobjects.tantilla2.core.type
 
 import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
+import org.kobjects.tantilla2.core.classifier.NativeTypeDefinition
 import org.kobjects.tantilla2.core.collection.Range
 import org.kobjects.tantilla2.core.collection.RangeType
 import org.kobjects.tantilla2.core.function.Parameter
@@ -9,7 +10,7 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
-object IntType : NativeStructDefinition(
+object IntType : NativeTypeDefinition(
     null,
     "int",
     "64 bit signed integer.",

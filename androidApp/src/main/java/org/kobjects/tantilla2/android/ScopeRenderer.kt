@@ -55,14 +55,13 @@ fun RenderScope(viewModel: TantillaViewModel) {
                     val title: String
                     if (kind == null) {
                         title = "IMPL (defined elsewhere)"
-                        if (scope is StructDefinition) {
-                            list = viewModel.userRootScope.classToTrait[scope]?.values?.toSet()?.toList()
-                                ?: emptyList()
-                        } else if (scope is TraitDefinition) {
-                            list = viewModel.userRootScope.traitToClass[scope]?.values?.toSet()?.toList()
+                        if (scope is TraitDefinition) {
+                            list = viewModel.userRootScope.traitToClass[scope]?.values?.toSet()
+                                ?.toList()
                                 ?: emptyList()
                         } else {
-                            continue
+                            list = viewModel.userRootScope.classToTrait[scope]?.values?.toSet()?.toList()
+                                ?: emptyList()
                         }
                     } else {
                         title = kind.name
