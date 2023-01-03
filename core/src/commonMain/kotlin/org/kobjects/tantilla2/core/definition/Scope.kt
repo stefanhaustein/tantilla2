@@ -1,7 +1,6 @@
 package org.kobjects.tantilla2.core.definition
 
 import org.kobjects.tantilla2.core.CodeWriter
-import org.kobjects.tantilla2.core.CompilationResults
 import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.classifier.*
 import org.kobjects.tantilla2.core.function.*
@@ -161,16 +160,16 @@ abstract class Scope(
         )
     }
 
-    override fun resolveAll(compilationResults: CompilationResults): Boolean {
+    override fun resolveAll(): Boolean {
         var childError = false
         for (definition in this) {
-            if (!definition.resolveAll(compilationResults)) {
+            if (!definition.resolveAll()) {
                 childError = true
             }
         }
-        val localError = !super.resolveAll(compilationResults)
+        val localError = !super.resolveAll()
         if (childError && !localError) {
-            compilationResults.definitionsWithErrors.put(this, listOf())
+            userRootScope().definitionsWithErrors.put(this, listOf())
         }
         return !childError && !localError
     }

@@ -104,7 +104,7 @@ class GlobalRuntimeContext(
         try {
             var parsed = Parser.parseShellInput(line, userRootScope)
             println("parsed: $parsed")
-            userRootScope.resolveAll(CompilationResults())
+            userRootScope.resolveAll()
             println("resolved: $parsed")
 
             val runtimeContext = LocalRuntimeContext(this, object : DynamicScope {

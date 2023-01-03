@@ -3,11 +3,17 @@ package org.kobjects.tantilla2.core.type
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.definition.Definition
 
+
+/**
+ * This is not a sublcass of Scope because for FunctionType a Scope seems like too much overhead.
+ * It probably makes sense to remove resolve here -- or map it to the corresponding Scope
+ * concept directly.
+ */
+
 interface Type {
 
     fun isAssignableFrom(type: Type) = type == this
 
-    // Set scope to null to get an abbreviated type; use RootScope for fully qualified names.
     fun serializeType(writer: CodeWriter)
 
     // Something that can easily be used in toString()

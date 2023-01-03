@@ -1,8 +1,8 @@
 package org.kobjects.tantilla2.core.definition
 
 import org.kobjects.tantilla2.core.CodeWriter
-import org.kobjects.tantilla2.core.CompilationResults
 import org.kobjects.tantilla2.core.classifier.FieldDefinition
+import org.kobjects.tantilla2.core.classifier.ImplDefinition
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
 
 class UserRootScope(
@@ -12,9 +12,11 @@ class UserRootScope(
     val staticFieldDefinitions = mutableListOf<FieldDefinition?>()
 
     var initializedTo = 0
-    var classToTrait = emptyMap<Scope, MutableMap<TraitDefinition, Definition>>()
-    var traitToClass = emptyMap<TraitDefinition, MutableMap<Scope, Definition>>()
-    var definitionsWithErrors = emptyMap<Definition, List<Throwable>>()
+    var classToTrait = mutableMapOf<Scope, MutableMap<TraitDefinition, ImplDefinition>>()
+    var traitToClass = mutableMapOf<TraitDefinition, MutableMap<Scope, ImplDefinition>>()
+    var definitionsWithErrors = mutableMapOf<Definition, List<Throwable>>()
+
+    val unresolvedImpls = mutableSetOf<ImplDefinition>()
 
     override val kind: Definition.Kind
         get() = Definition.Kind.UNIT
@@ -33,6 +35,13 @@ class UserRootScope(
 
     override fun reset() {
         super.reset()
+
+        unresolvedImpls.addAll(classToTrait.values.flatMap { it.values })
+
+        classToTrait.clear()
+        traitToClass.clear()
+        definitionsWithErrors.clear()
+
         staticFieldDefinitions.clear()
         initializedTo = 0
     }
@@ -40,12 +49,7 @@ class UserRootScope(
 
     fun rebuild() {
         reset()
-        val results = CompilationResults()
-        resolveAll(results)
-
-        classToTrait = results.classToTrait.toMap()
-        traitToClass = results.traitToClass.toMap()
-        definitionsWithErrors = results.definitionsWithErrors.toMap()
+        resolveAll()
     }
 
     override val dynamicScopeSize: Int

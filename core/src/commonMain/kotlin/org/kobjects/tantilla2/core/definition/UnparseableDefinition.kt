@@ -1,7 +1,6 @@
 package org.kobjects.tantilla2.core.definition
 
 import org.kobjects.tantilla2.core.CodeWriter
-import org.kobjects.tantilla2.core.CompilationResults
 import org.kobjects.tantilla2.core.type.Type
 
 class UnparseableDefinition(
@@ -18,7 +17,10 @@ class UnparseableDefinition(
     override val type: Type
         get() = throw UnsupportedOperationException()
 
-    override fun resolveAll(compilationResults: CompilationResults) = false
+
+    override fun resolve() {
+        throw UnsupportedOperationException("Unparseable Definition.")
+    }
 
     override fun isSummaryExpandable() = definitionText.contains("\n")
 

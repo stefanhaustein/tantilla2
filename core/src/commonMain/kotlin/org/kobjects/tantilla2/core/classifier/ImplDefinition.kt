@@ -48,8 +48,8 @@ class ImplDefinition(
     override fun resolve(name: String): Definition? = resolveDynamic(name, false)
 
     // This can't be in "simple" resolve as it needs to update the compilation results
-    override fun resolveAll(compilationResults: CompilationResults): Boolean {
-        if (super.resolveAll(compilationResults)) {
+    override fun resolveAll(): Boolean {
+        if (super.resolveAll()) {
 
             // TODO: Move VMT creation to trait?
             val vmt = Array<Callable?>(trait.traitIndex) { null }
@@ -61,8 +61,8 @@ class ImplDefinition(
             }
             this.vmt = vmt.toList() as List<Callable>
 
-            compilationResults.classToTrait.getOrPut(scope) { mutableMapOf() }[trait] = this
-            compilationResults.traitToClass.getOrPut(trait) { mutableMapOf() }[scope] = this
+            userRootScope().classToTrait.getOrPut(scope) { mutableMapOf() }[trait] = this
+            userRootScope().traitToClass.getOrPut(trait) { mutableMapOf() }[scope] = this
 
             return true
         }
@@ -85,5 +85,9 @@ class ImplDefinition(
     override val kind: Definition.Kind
         get() = Definition.Kind.IMPL
 
+
+    init {
+        userRootScope().unresolvedImpls.add(this)
+    }
 
 }

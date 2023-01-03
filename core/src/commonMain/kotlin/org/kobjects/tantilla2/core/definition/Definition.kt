@@ -1,7 +1,6 @@
 package org.kobjects.tantilla2.core.definition
 
 import org.kobjects.tantilla2.core.CodeWriter
-import org.kobjects.tantilla2.core.CompilationResults
 import org.kobjects.tantilla2.core.SerializableCode
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.type.Type
@@ -42,12 +41,13 @@ interface Definition : SerializableCode, Comparable<Definition> {
     fun findNode(node: Node): Definition? = null
     fun isDynamic() = kind == Kind.METHOD || kind == Kind.PROPERTY
 
-    fun resolveAll(compilationResults: CompilationResults): Boolean {
+    fun resolveAll(): Boolean {
         try {
             resolve()
+            userRootScope().definitionsWithErrors.remove(this)
             return true
         } catch (e: Exception) {
-            compilationResults.definitionsWithErrors[this] = listOf(e)
+            userRootScope().definitionsWithErrors[this] = listOf(e)
             return false
         }
     }
@@ -62,10 +62,6 @@ interface Definition : SerializableCode, Comparable<Definition> {
      * Fully resolve this definition. Called from resolveAll().
      */
     fun resolve() {
-    }
-
-    fun createWriter(): CodeWriter {
-        return CodeWriter("", )
     }
 
     fun isSummaryExpandable(): Boolean
@@ -138,9 +134,9 @@ interface Definition : SerializableCode, Comparable<Definition> {
     }
 
     fun userRootScope(): UserRootScope {
-        var current = parentScope
+        var current = this
         while (current !is UserRootScope) {
-            current = current?.parentScope ?: throw RuntimeException("User root scope not found.")
+            current = current?.parentScope ?: throw RuntimeException("User root scope not found for $name.")
         }
         return current
     }
