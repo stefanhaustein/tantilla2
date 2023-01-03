@@ -21,7 +21,7 @@ class FunctionDefinition (
     override var docString: String = ""
 
     private var resolvedType: FunctionType = UnresolvedType
-    internal var resolvedBody: Node = UnresolvedNode
+    private var resolvedBody: Node = UnresolvedNode
 
     var _definitionText = definitionText
     override var definitionText: String
@@ -42,7 +42,10 @@ class FunctionDefinition (
 
     override val dynamicScopeSize: Int
         get() = if (parentScope is TraitDefinition) super.dynamicScopeSize
-            else getValue(null).locals.size
+            else {
+                resolve()
+                locals.size
+            }
 
     override val type: FunctionType
         get() {
@@ -51,12 +54,16 @@ class FunctionDefinition (
         }
 
     override fun getValue(self: Any?): FunctionDefinition {
-        resolve()
         return this
     }
 
     override fun resolve() {
         resolve(false)
+    }
+
+    fun body(): Node {
+        resolve()
+        return resolvedBody!!
     }
 
     private fun resolve(typeOnly: Boolean) {
