@@ -5,8 +5,10 @@ import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.definition.Scope
 import org.kobjects.tantilla2.core.node.Node
+import org.kobjects.tantilla2.core.node.expression.UnresolvedNode
 import org.kobjects.tantilla2.core.parser.*
 import org.kobjects.tantilla2.core.type.Type
+import org.kobjects.tantilla2.core.type.UnresolvedType
 
 class FieldDefinition(
     override val parentScope: Scope,
@@ -16,20 +18,19 @@ class FieldDefinition(
     override val mutable: Boolean = false,
     override var docString: String = "",
 ) : Definition, Updatable {
-    private var resolvedType: Type? = null
+    private var resolvedType: Type = UnresolvedType
     override var index: Int = -1
-    private var resolutionState: ResolutionState = ResolutionState.UNRESOLVED
 
     private var _definitionText = definitionText
 
     override var definitionText
         get() = _definitionText
         set(value) {
-            resolutionState = ResolutionState.UNRESOLVED
+            reset()
             _definitionText = value
         }
 
-    private var resolvedInitializer: Node? = null
+    private var resolvedInitializer: Node? = UnresolvedNode
 
     init {
         when (kind) {
@@ -52,7 +53,7 @@ class FieldDefinition(
     override val type: Type
         get() {
             resolve(typeOnly = true)
-            return resolvedType!!
+            return resolvedType
         }
 
     override fun getValue(self: Any?): Any {
@@ -76,17 +77,16 @@ class FieldDefinition(
     }
 
     private fun resolve(typeOnly: Boolean) {
-        when (resolutionState) {
-            ResolutionState.RESOLVED -> return
-            ResolutionState.TYPE_RESOLVED -> if (typeOnly) return
-          /*  ResolutionState.ERROR -> {
-                throw error!!
-            } */
+        if (typeOnly) {
+            if (resolvedType != UnresolvedType) {
+                return
+            }
+        } else if (resolvedInitializer != UnresolvedNode) {
+            return
         }
 
         val tokenizer = TantillaTokenizer(definitionText)
         tokenizer.consume(TokenType.BOF)
-        resolvedInitializer = null
 
         tokenizer.tryConsume("static")
         tokenizer.tryConsume("mut")
@@ -96,20 +96,19 @@ class FieldDefinition(
 
         val resolved = Parser.resolveVariable(tokenizer, ParsingContext(parentScope, 0), typeOnly)
         resolvedType = resolved.first
-
         if (typeOnly) {
-            resolutionState = ResolutionState.TYPE_RESOLVED
-        } else {
-            resolvedInitializer = resolved.third
-            if (kind == Definition.Kind.STATIC) {
-                index = parentScope.registerStatic(this)
-            }
-            resolutionState = ResolutionState.RESOLVED
+            return
+        }
+
+        resolvedInitializer = resolved.third
+        if (kind == Definition.Kind.STATIC) {
+            index = parentScope.registerStatic(this)
         }
     }
 
     override fun toString() = serializeCode()
 
+    // Used internally, only called when resolved
     private fun serializeDeclaration(writer: CodeWriter) {
         if (kind == Definition.Kind.STATIC && parentScope.supportsLocalVariables) {
             writer.appendKeyword("static ")
@@ -129,7 +128,7 @@ class FieldDefinition(
     override fun serializeSummary(writer: CodeWriter, kind: Definition.SummaryKind) {
         if (kind == Definition.SummaryKind.EXPANDED) {
             serializeCode(writer)
-        } else if (resolutionState == ResolutionState.RESOLVED) {
+        } else if (resolvedInitializer != UnresolvedNode) {
             serializeDeclaration(writer)
         } else {
             writer.appendUnparsed(definitionText.split("\n").first())
@@ -138,7 +137,7 @@ class FieldDefinition(
 
 
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
-        if (resolutionState == ResolutionState.RESOLVED) {
+        if (resolvedInitializer != UnresolvedNode) {
             serializeSummary(writer, Definition.SummaryKind.COLLAPSED)
             if (resolvedInitializer != null) {
                 writer.append(" = ")
@@ -148,7 +147,6 @@ class FieldDefinition(
             writer.appendUnparsed(definitionText, userRootScope().definitionsWithErrors[this] ?: emptyList())
         }
     }
-
 
     override fun isDynamic() = kind == Definition.Kind.PROPERTY
 
@@ -161,10 +159,8 @@ class FieldDefinition(
     }
 
     override fun reset() {
-        resolutionState = ResolutionState.UNRESOLVED
-        resolvedInitializer = null
-        resolvedType = null
-
+        resolvedInitializer = UnresolvedNode
+        resolvedType = UnresolvedType
         super.reset()
     }
 
@@ -173,11 +169,6 @@ class FieldDefinition(
         if (kind == Definition.Kind.STATIC) {
            staticVariableContext.variables[index] = resolvedInitializer!!.eval(staticVariableContext)
         }
-    }
-
-
-    enum class ResolutionState {
-        UNRESOLVED, TYPE_RESOLVED, RESOLVED, ERROR
     }
 }
 
