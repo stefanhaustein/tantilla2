@@ -15,13 +15,12 @@ class ImplDefinition(
     override val parentScope: Scope,
     val traitName: String,
     val scopeName: String,
-    //val definitionText: String,
     override var docString: String,
 ) : Scope(), Type {
     override val name: String
         get() = "$traitName for $scopeName"
 
-    var vmt = listOf<Callable>()
+    var vmt = emptyList<Callable>()
 
     var resolvedTrait: TraitDefinition? = null
     var resolvedScope: Scope? = null
@@ -45,42 +44,30 @@ class ImplDefinition(
     override val supportsMethods: Boolean
         get() = true
 
+    override fun reset() {
+        resolvedScope = null
+        resolvedTrait = null
+        vmt = emptyList()
+    }
+
     override fun resolve(name: String): Definition? = resolveDynamic(name, false)
 
-    // This can't be in "simple" resolve as it needs to update the compilation results
-    override fun resolveAll(): Boolean {
-        if (super.resolveAll()) {
-
-            // TODO: Move VMT creation to trait?
-            val vmt = Array<Callable?>(trait.traitIndex) { null }
-            for (definition in trait) {
-                val index = ((definition.getValue(null) as FunctionDefinition).resolvedBody as TraitMethodBody).index
-                val resolved = resolve(definition.name)
-                    ?: throw RuntimeException("Can't resolve '${definition.name}' for '${this.name}'")
-                vmt[index] = resolved.getValue(null) as Callable
-            }
-            this.vmt = vmt.toList() as List<Callable>
-
-            userRootScope().classToTrait.getOrPut(scope) { mutableMapOf() }[trait] = this
-            userRootScope().traitToClass.getOrPut(trait) { mutableMapOf() }[scope] = this
-
-            return true
+    override fun resolve() {
+        // TODO: Move VMT creation to trait?
+        val vmt = Array<Callable?>(trait.traitIndex) { null }
+        for (definition in trait) {
+            val index = ((definition.getValue(null) as FunctionDefinition).resolvedBody as TraitMethodBody).index
+            val resolved = resolve(definition.name)
+                ?: throw RuntimeException("Can't resolve '${definition.name}' for '${this.name}'")
+            vmt[index] = resolved.getValue(null) as Callable
         }
-        return false
+        this.vmt = vmt.toList() as List<Callable>
     }
 
     override fun serializeType(writer: CodeWriter) {
         writer.append(this.name)
     }
 
-
-    override fun getValue(scope: Any?): ImplDefinition {
-        if (resolvedTrait == null) {
-            trait
-            scope
-        }
-        return this
-    }
 
     override val kind: Definition.Kind
         get() = Definition.Kind.IMPL
