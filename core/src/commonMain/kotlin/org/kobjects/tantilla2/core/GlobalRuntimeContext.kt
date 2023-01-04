@@ -38,8 +38,8 @@ class GlobalRuntimeContext(
     }
 
 
-    fun run() {
-        if (activeThreads != 0) {
+    fun run(calledFromCode: Boolean = false) {
+        if (activeThreads != 0 && !calledFromCode) {
             exception = createException(null, null, "Already running.")
             return
         }
@@ -67,14 +67,14 @@ class GlobalRuntimeContext(
         exception = null
         try {
             val function = definition.getValue(null) as Callable
-            launch {
-                this.initialize()    /*val startIndex = if (incremental) initializedTo else 0
-        globalRuntimeContext.staticVariableValues.setSize(staticFieldDefinitions.size)
-        for (index in startIndex until staticFieldDefinitions.size) {
-            staticFieldDefinitions[index]?.initialize(globalRuntimeContext.staticVariableValues)
-        }
-        initializedTo = staticFieldDefinitions.size*/
+            if (calledFromCode) {
+                initialize()
                 function.eval(LocalRuntimeContext(this, function))
+            } else {
+                launch {
+                    this.initialize()
+                    function.eval(LocalRuntimeContext(this, function))
+                }
             }
         } catch (e: RuntimeException) {
             e.printStackTrace()
@@ -112,22 +112,9 @@ class GlobalRuntimeContext(
                     get() = 0
 
             })
-            launch {
-                try {
-                    val evaluationResult = parsed.eval(runtimeContext)
-                    userRootScope.parentScope.systemAbstraction.write(if (evaluationResult == null || evaluationResult == Unit) "Ok" else evaluationResult.toString())
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    val message = e.message ?: e.toString()
-                    userRootScope.parentScope.systemAbstraction.write(message)
-                    exception = if (e is TantillaRuntimeException) e else createException(
-                        null,
-                        parsed,
-                        message,
-                        e
-                    )
-                }
-            }
+
+            val evaluationResult = parsed.eval(runtimeContext)
+            userRootScope.parentScope.systemAbstraction.write(if (evaluationResult == null || evaluationResult == Unit) "Ok" else evaluationResult.toString())
         } catch (e: Exception) {
             e.printStackTrace()
             val message = e.message ?: e.toString()

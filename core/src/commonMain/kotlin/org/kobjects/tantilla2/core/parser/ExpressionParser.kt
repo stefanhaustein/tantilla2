@@ -390,6 +390,7 @@ object ExpressionParser {
 
         val parseParameterList = if (parentesizedArgsList) !tokenizer.tryConsume(")")
         else ((type.returnType == VoidType || type.hasRequiredParameters())
+                && tokenizer.current.type != TokenType.EOF
                 && tokenizer.current.type != TokenType.LINE_BREAK
                 && tokenizer.current.text != ":"
                 && !asMethod

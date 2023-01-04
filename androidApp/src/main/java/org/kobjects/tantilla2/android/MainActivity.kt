@@ -17,6 +17,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.coroutineScope
+import kotlinx.coroutines.runBlocking
 import org.kobjects.konsole.compose.ComposeKonsole
 import org.kobjects.tantilla2.android.model.Platform
 import org.kobjects.tantilla2.android.model.TantillaViewModel
@@ -35,9 +36,16 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         val console = ComposeKonsole()
-        val platform = AndroidPlatform {
-            console.write(it)
-        }
+        val platform = AndroidPlatform(
+            printImpl = { console.write(it) },
+            inputImpl = {
+                var result: String
+                runBlocking {
+                    result = console.read()
+                }
+                result
+            })
+
 
         val config = resources.configuration
 
@@ -66,10 +74,11 @@ class MainActivity : AppCompatActivity() {
             platform,
         )
 
-        lifecycle.coroutineScope.launchWhenCreated {
-            viewModel.consoleLoop()
-        }
+        //lifecycle.coroutineScope.launchWhenCreated {
+        //    viewModel.consoleLoop()
+        //}
 
+        Thread { viewModel.consoleLoop() }.start()
 
         setContent {
             MyTheme {
@@ -106,7 +115,10 @@ class MainActivity : AppCompatActivity() {
 
 
 
-    inner class AndroidPlatform(val printImpl: (String) -> Unit) : Platform {
+    inner class AndroidPlatform(
+        val printImpl: (String) -> Unit,
+        val inputImpl: () -> String,
+    ) : Platform {
 
         override val rootDirectory: File
             get() = filesDir
@@ -131,6 +143,8 @@ class MainActivity : AppCompatActivity() {
         override fun createLock(): Lock {
             TODO("Not yet implemented")
         }
+
+        override fun input(): String = inputImpl()
 
     }
 

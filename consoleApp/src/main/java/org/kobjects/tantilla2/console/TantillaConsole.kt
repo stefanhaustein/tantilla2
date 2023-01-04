@@ -29,6 +29,9 @@ fun main(args : Array<String>) {
                 }
             }
         }
+
+        override fun input() = runBlocking {}
+
     }
 
     val systemRootScope = SystemRootScope(systemAbstraction)

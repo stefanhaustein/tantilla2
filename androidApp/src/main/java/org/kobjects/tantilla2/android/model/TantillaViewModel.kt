@@ -10,6 +10,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.runBlocking
 import org.kobjects.dialog.DialogManager
 import org.kobjects.dialog.InputLine
 import org.kobjects.konsole.compose.AnsiConverter.ansiToAnnotatedString
@@ -406,9 +407,9 @@ class TantillaViewModel(
     fun onTap(x: Double, y: Double) = globalRuntimeContext.onTap(x, y)
 
 
-    suspend fun consoleLoop() {
+    fun consoleLoop() {
         while (true) {
-            val input = konsole.read()
+            val input = runBlocking { konsole.read() }
             globalRuntimeContext.processShellInput(input)
         }
     }

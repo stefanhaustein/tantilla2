@@ -36,12 +36,24 @@ class SystemRootScope(
                 systemAbstraction.write(list.joinToString(" "))
             }
 
+        defineNativeFunction("input", "Prompt the user for input.",
+            StrType)
+            {
+                systemAbstraction.input()
+            }
+
         defineNativeFunction("assert", "Throws an exception if the argument does not evaluate to true.",
             VoidType, Parameter("condition", BoolType), Parameter("message", StrType, StrNode.Const("Assertion failed"))) {
             if (!(it[0] as Boolean)) {
                 throw IllegalArgumentException(it[1] as String)
             }
         }
+
+        defineNativeFunction("run", "Resets the program state and runs the main() function.",
+            VoidType) {
+            it.globalRuntimeContext.run(calledFromCode = true)
+        }
+
 
 
     }

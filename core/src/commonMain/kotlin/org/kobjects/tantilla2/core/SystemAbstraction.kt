@@ -6,4 +6,6 @@ interface SystemAbstraction {
     fun launch(task: () -> Unit)
 
     fun createLock(): Lock
+
+    fun input(): String
 }
