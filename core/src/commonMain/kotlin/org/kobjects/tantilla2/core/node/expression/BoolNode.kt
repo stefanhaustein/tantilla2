@@ -38,7 +38,7 @@ object BoolNode {
             get() = BoolType
 
         override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
-            writer.appendInfix(this, parentPrecedence, "and", Precedence.LOGICAL_AND)
+            writer.appendInfix(parentPrecedence, left, "and", Precedence.LOGICAL_AND, right)
         }
 
         override fun children() = listOf(left, right)
@@ -54,7 +54,7 @@ object BoolNode {
             get() = BoolType
 
         override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
-            writer.appendInfix(this, parentPrecedence, "or", Precedence.LOGICAL_OR)
+            writer.appendInfix(parentPrecedence, left, "or", Precedence.LOGICAL_OR, right)
         }
 
         override fun children() = listOf(left, right)

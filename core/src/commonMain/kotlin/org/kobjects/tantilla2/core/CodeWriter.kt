@@ -124,6 +124,14 @@ class CodeWriter(
         appendClose(')')
     }
 
+    fun appendInParens(lambda: () -> Unit) {
+        appendOpen('(')
+        indent()
+        lambda()
+        outdent()
+        appendClose(')')
+    }
+
     fun appendMaybeNextLine(node: Node) {
         val mark = mark()
         append(' ')
@@ -259,21 +267,21 @@ class CodeWriter(
         }
     }
 
-    fun appendInfix(code: Node, parentPrecedence: Int, name: String, precedence: Int) {
+    fun appendInfix(parentPrecedence: Int, left: Node, name: String, precedence: Int, right: Node) {
         if (parentPrecedence > precedence) {
-            appendInParens(code)
+            appendInParens{ appendInfix(0, left, name, precedence, right) }
         } else {
             val outerMark = mark(false)
-            appendCode(code.children()[0], precedence)
+            appendCode(left, precedence)
             val innerMark = mark(true)
             when (name) {
                 "*", "**", "/", "//", ".", "::" -> append(name)
                 else -> append(" $name ")
             }
-            appendCode(code.children()[1], precedence + 1)
+            appendCode(right, precedence + 1)
             unmark(outerMark)
             if (x >= lineLength) {
-                if (depth > 0) {
+
                     reset(innerMark)
                     newline()
                     if (name == "." || name == "::") {
@@ -281,11 +289,8 @@ class CodeWriter(
                     } else {
                         append("$name ")
                     }
-                    appendCode(code.children()[1], precedence + 1)
-                } else {
-                    reset(outerMark)
-                    appendInfix(code, precedence + 1, name, precedence)
-                }
+                    appendCode(right, precedence + 1)
+
             }
         }
     }

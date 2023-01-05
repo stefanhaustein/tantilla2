@@ -252,7 +252,9 @@ class TantillaViewModel(
         } else if (definition.kind != Definition.Kind.FUNCTION
             && definition.kind != Definition.Kind.PROPERTY
             && definition.kind != Definition.Kind.METHOD
-            && definition.kind != Definition.Kind.STATIC) {
+            && definition.kind != Definition.Kind.STATIC
+            && definition.kind != Definition.Kind.IMPORT
+        ) {
             mode.value = if (definition.isBuiltin()) Mode.HELP else Mode.HIERARCHY
             scope().value = definition.getValue(null) as Scope
         } else if (definition.isBuiltin()) {

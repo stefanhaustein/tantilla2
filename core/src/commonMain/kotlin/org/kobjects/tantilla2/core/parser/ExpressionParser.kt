@@ -43,7 +43,7 @@ object ExpressionParser {
     }
 
     fun parseElementAt(tokenizer: TantillaTokenizer, context: ParsingContext, base: Node): Node {
-        tokenizer.disable(TokenType.LINE_BREAK)
+        // tokenizer.disable(TokenType.LINE_BREAK)
 
         if (base.returnType is InstantiableMetaType
             && (base.returnType as InstantiableMetaType).wrapped.genericParameterTypes.isNotEmpty()
@@ -53,13 +53,13 @@ object ExpressionParser {
                 typeParameters.add(TypeParser.parseType(tokenizer, context))
             } while(tokenizer.tryConsume(","))
             tokenizer.consume("]")
-            tokenizer.enable(TokenType.LINE_BREAK)
+       //     tokenizer.enable(TokenType.LINE_BREAK)
             return StaticReference(((base.returnType) as InstantiableMetaType).wrapped.withGenericsResolved(typeParameters) as Definition, true, false)
             // GenericTypeNode(base, typeParameters)
         }
 
         val result = ElementAt(base, parseExpression(tokenizer, context))
-        tokenizer.enable(TokenType.LINE_BREAK)
+        //tokenizer.enable(TokenType.LINE_BREAK)
         tokenizer.consume("]")
         return result
     }
@@ -246,12 +246,12 @@ object ExpressionParser {
                     }
                     "(" -> {
                         tokenizer.consume("(")
-                        tokenizer.disable(TokenType.LINE_BREAK)
+                                //  tokenizer.disable(TokenType.LINE_BREAK)
 
                         val expression = parseExpression(tokenizer, context)
 
                         tokenizer.consume(")")
-                        tokenizer.enable(TokenType.LINE_BREAK)
+                                //tokenizer.enable(TokenType.LINE_BREAK)
                         Parentesized(expression)
                     }
                     "[" -> ListLiteral(parseList(tokenizer, context, "[", "]"))
@@ -267,7 +267,7 @@ object ExpressionParser {
         endMarker: String
     ): List<Node> {
         tokenizer.consume(startMarker)
-        tokenizer.disable(TokenType.LINE_BREAK)
+        //tokenizer.disable(TokenType.LINE_BREAK)
 
         val result = mutableListOf<Node>()
         if (tokenizer.current.text != endMarker) {
@@ -276,7 +276,7 @@ object ExpressionParser {
             } while (tokenizer.tryConsume(","))
         }
         tokenizer.consume(endMarker, "$endMarker or , expected")
-        tokenizer.enable(TokenType.LINE_BREAK)
+       // tokenizer.enable(TokenType.LINE_BREAK)
 
         return result.toList()
     }
@@ -363,7 +363,7 @@ object ExpressionParser {
         // Don't imply constructor calls.
         val parentesizedArgsList = openingParenConsumed || tokenizer.tryConsume("(")
         if (parentesizedArgsList) {
-            tokenizer.disable(TokenType.LINE_BREAK)
+       //     tokenizer.disable(TokenType.LINE_BREAK)
         } else if (type is InstantiableMetaType) {
             return value
         }
@@ -447,7 +447,7 @@ object ExpressionParser {
         }
 
         if (parentesizedArgsList) {
-            tokenizer.enable(TokenType.LINE_BREAK)
+       //     tokenizer.enable(TokenType.LINE_BREAK)
         }
         return Apply(
             value,

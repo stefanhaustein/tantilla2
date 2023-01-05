@@ -15,7 +15,7 @@ class PropertyReference(
     override val returnType: Type
         get() = definition.type
 
-    override fun children(): List<Node> = listOf(base, Identifier(definition.name))
+    override fun children(): List<Node> = listOf(base)
 
     override fun eval(ctx: LocalRuntimeContext): Any {
         val self = base.eval(ctx)
@@ -31,7 +31,7 @@ class PropertyReference(
     }
 
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
-        writer.appendInfix(this, parentPrecedence, if (raw) "::" else ".", Precedence.DOT)
+        writer.appendInfix(parentPrecedence, base,if (raw) "::" else ".", Precedence.DOT, Identifier(definition.name))
     }
 
     override fun requireAssignability() {

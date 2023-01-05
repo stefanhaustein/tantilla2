@@ -54,7 +54,7 @@ object FloatNode {
             Binary(name, precedence, newChildren[0], newChildren[1], op)
 
         override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
-            writer.appendInfix(this, parentPrecedence, name, precedence)
+            writer.appendInfix(parentPrecedence, left, name, precedence, right)
         }
 
         init {
@@ -139,7 +139,7 @@ object FloatNode {
             Eq(newChildren[0], newChildren[1])
 
         override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
-           writer.appendInfix(this, parentPrecedence, "==", Precedence.RELATIONAL)
+           writer.appendInfix(parentPrecedence, left, "==", Precedence.RELATIONAL, right)
         }
     }
 
@@ -159,7 +159,7 @@ object FloatNode {
             Ne(newChildren[0], newChildren[1])
 
         override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
-            writer.appendInfix(this, parentPrecedence, "!=", Precedence.RELATIONAL)
+            writer.appendInfix(parentPrecedence, left, "!=", Precedence.RELATIONAL, right)
         }
     }
 
@@ -181,7 +181,7 @@ object FloatNode {
             Cmp(name, newChildren[0], newChildren[1], op)
 
         override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
-            writer.appendInfix(this, parentPrecedence, name, Precedence.RELATIONAL)
+            writer.appendInfix(parentPrecedence, left, name, Precedence.RELATIONAL, right)
         }
     }
 

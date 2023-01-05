@@ -16,7 +16,7 @@ class As(
     override val returnType: Type
         get() = impl.trait
 
-    override fun children() = listOf(base, StaticReference(impl.trait,  true, false))
+    override fun children() = listOf(base)
 
     override fun eval(ctx: LocalRuntimeContext) =
         AdapterInstance(impl.vmt, base.eval(ctx))
@@ -28,7 +28,7 @@ class As(
         if (implicit) {
             sb.appendCode(base)
         } else {
-            sb.appendInfix(this, parentPrecedence, "as", Precedence.RELATIONAL)
+            sb.appendInfix(parentPrecedence, base, "as", Precedence.RELATIONAL, StaticReference(impl.trait,  true, false))
         }
     }
 }

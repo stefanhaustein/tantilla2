@@ -18,5 +18,9 @@ object TestSystemAbstraction : SystemAbstraction {
         TODO("Not yet implemented")
     }
 
+    override fun input(): String {
+        TODO("Not yet implemented")
+    }
+
     fun createScope() = UserRootScope(SystemRootScope(TestSystemAbstraction))
 }

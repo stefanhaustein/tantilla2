@@ -45,7 +45,7 @@ object StrNode {
             Add(newChildren[0], newChildren[1])
 
         override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
-            writer.appendInfix(this, parentPrecedence, "+", Precedence.PLUSMINUS)
+            writer.appendInfix(parentPrecedence, left, "+", Precedence.PLUSMINUS, right)
         }
     }
 
@@ -65,7 +65,7 @@ object StrNode {
             Eq(newChildren[0], newChildren[1])
 
         override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
-            writer.appendInfix(this, parentPrecedence, "==", Precedence.RELATIONAL)
+            writer.appendInfix(parentPrecedence, left, "==", Precedence.RELATIONAL, right)
         }
     }
 
@@ -86,7 +86,7 @@ object StrNode {
             Ne(newChildren[0], newChildren[1])
 
         override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
-            writer.appendInfix(this, parentPrecedence, "!=", Precedence.RELATIONAL)
+            writer.appendInfix(parentPrecedence, left, "!=", Precedence.RELATIONAL, right)
         }
     }
 

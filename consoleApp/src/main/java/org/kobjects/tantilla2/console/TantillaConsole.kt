@@ -30,7 +30,7 @@ fun main(args : Array<String>) {
             }
         }
 
-        override fun input() = runBlocking {}
+        override fun input() = throw UnsupportedOperationException()
 
     }
 

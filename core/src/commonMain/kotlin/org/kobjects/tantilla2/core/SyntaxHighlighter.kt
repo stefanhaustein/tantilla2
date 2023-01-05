@@ -23,7 +23,7 @@ fun highlightSyntax(
 
 
 
-        val tokenizer = TantillaTokenizer(code)
+        val tokenizer = TantillaTokenizer(code, false)
         var wasDecl = false
         var lastPos = 0
 

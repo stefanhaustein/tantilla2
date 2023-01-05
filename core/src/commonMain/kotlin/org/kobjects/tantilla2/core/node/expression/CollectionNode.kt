@@ -25,7 +25,7 @@ object CollectionNode {
             get() = BoolType
 
         override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
-            writer.appendInfix(this, parentPrecedence, "in", Precedence.RELATIONAL)
+            writer.appendInfix(parentPrecedence, valueExpr,"in", Precedence.RELATIONAL, collectionExpr)
         }
 
         init {
