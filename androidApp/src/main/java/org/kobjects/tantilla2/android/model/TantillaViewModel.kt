@@ -227,16 +227,14 @@ class TantillaViewModel(
         }
     }
 
-    fun navigateBack(discardChanges: Boolean = false): Boolean {
+    fun navigateBack(target: Definition?, discardChanges: Boolean = false) {
         if (navigationStack.isNotEmpty()) {
             navigationStack.removeLast()
-            if (navigationStack.isNotEmpty()) {
-                navigateTo(navigationStack.removeLast(), discardChanges)
-                return true
+            if (navigationStack.isNotEmpty() && navigationStack.last() == target) {
+                navigationStack.removeLast()
             }
         }
-        navigateTo(userRootScope, discardChanges)
-        return false
+        navigateTo(target, discardChanges)
     }
 
     fun navigateTo(definition: Definition?, discardChanges: Boolean = false) {

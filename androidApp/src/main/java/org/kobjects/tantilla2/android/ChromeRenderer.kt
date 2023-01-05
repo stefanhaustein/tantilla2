@@ -50,12 +50,7 @@ fun RenderAppBar(
                     Column(Modifier.clickable {
                         val target = viewModel.scope().value.parentScope ?: viewModel.systemRootScope
                         val stackSize = viewModel.navigationStack.size
-                        if (stackSize >= 2
-                            && viewModel.navigationStack[stackSize - 2] == target) {
-                            viewModel.navigateBack()
-                        } else {
-                            viewModel.navigateTo(target)
-                        }
+                        viewModel.navigateBack(target)
                     }) {
                         Text("❮ " + viewModel.definitionTitle(scope.parentScope), fontSize = 10.sp, fontFamily = FontFamily.SansSerif)
                         Text(viewModel.definitionTitle(scope), maxLines = 1, fontSize = 18.sp, overflow = TextOverflow.Ellipsis)

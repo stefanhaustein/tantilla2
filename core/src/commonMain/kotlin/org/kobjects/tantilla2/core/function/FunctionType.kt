@@ -41,7 +41,7 @@ interface FunctionType : Type {
     companion object {
         fun FunctionType.serializeTypeImpl(
             writer: CodeWriter,
-            twoLine: Boolean,
+            closeOnNewLine: Boolean,
             multiline: Boolean
         ): Int {
             val startIndex = if (isMethod()) 1 else 0
@@ -57,7 +57,7 @@ interface FunctionType : Type {
                     parameters[i].serialize(writer)
                 }
             }
-            if (twoLine && returnType != VoidType) {
+            if (closeOnNewLine) {
                 writer.outdent()
                 writer.newline()
                 writer.indent()
@@ -79,11 +79,12 @@ interface FunctionType : Type {
             writer.unmark(mark)
             if (writer.x >= writer.lineLength - 1) {
                 val multiLine = rx - mark.savedX + writer.indent.length + 3 >= writer.lineLength
-                val twoLine = writer.x - mark.savedX + writer.indent.length + 3 >= writer.lineLength
+                val closeOnNewLine = !writer.forTitle
+                        || writer.x - mark.savedX + writer.indent.length + 3 >= writer.lineLength
                 writer.indent()
                 writer.reset(mark)
                 writer.newline()
-                functionType.serializeTypeImpl(writer, twoLine, multiLine)
+                functionType.serializeTypeImpl(writer, closeOnNewLine, multiLine)
                 writer.outdent()
             }
         }

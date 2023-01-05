@@ -29,7 +29,8 @@ class TantillaTokenizer(input: String, normalize: Boolean = true) : Tokenizer<To
             + "|-|\\+|\\*\\*|\\*|%|&|\\||//|/|,|\\^|\\."
             + ")[ \\t\\r\\n]*") to TokenType.SYMBOL,
     Regex("(\\(|\\[|\\{|!|~|::)[ \\t\\n\\r]*") to TokenType.SYMBOL,
-    Regex("[ \\t\\n\\r]*(]|\\}|:|\\))") to TokenType.SYMBOL,
+    Regex("[ \\t\\n\\r]*(]|\\}|\\))") to TokenType.SYMBOL,
+    Regex(":") to TokenType.SYMBOL,
     Regex("(\\n[ \\t]*)+") to TokenType.LINE_BREAK,
     RegularExpressions.IDENTIFIER to TokenType.IDENTIFIER,
     Regex("\"\"\"(.|\\n)*?\"\"\""

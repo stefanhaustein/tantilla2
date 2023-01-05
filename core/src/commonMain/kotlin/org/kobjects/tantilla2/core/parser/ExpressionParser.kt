@@ -198,6 +198,8 @@ object ExpressionParser {
             parameterNames = names.toList()
         }
 
+        println("*** Lambda type parsed: $type")
+
         tokenizer.consume(":")
         val functionScope = LambdaScope(context.scope) // resolvedType = type)
         for (i in type.parameters.indices) {
@@ -212,7 +214,13 @@ object ExpressionParser {
                 closureIndices.add(definition.index)
             }
         } */
+
+
+
         val body = Parser.parseDefinitionsAndStatements(tokenizer, ParsingContext(functionScope, context.depth + 1))
+
+        println("*** Lambda body parsed: $body")
+
 
         return LambdaReference(type, functionScope.locals.size, body, implicit = false)
     }
@@ -255,7 +263,7 @@ object ExpressionParser {
                         Parentesized(expression)
                     }
                     "[" -> ListLiteral(parseList(tokenizer, context, "[", "]"))
-                    else -> throw tokenizer.exception("Number, identifier or opening bracket expected here.")
+                    else -> throw tokenizer.exception("Number, identifier or opening bracket expected here, got: '${tokenizer.current.text}'.")
                 }
             }
         }
@@ -362,9 +370,7 @@ object ExpressionParser {
 
         // Don't imply constructor calls.
         val parentesizedArgsList = openingParenConsumed || tokenizer.tryConsume("(")
-        if (parentesizedArgsList) {
-       //     tokenizer.disable(TokenType.LINE_BREAK)
-        } else if (type is InstantiableMetaType) {
+        if (!parentesizedArgsList && type is InstantiableMetaType) {
             return value
         }
 
@@ -446,9 +452,6 @@ object ExpressionParser {
             }
         }
 
-        if (parentesizedArgsList) {
-       //     tokenizer.enable(TokenType.LINE_BREAK)
-        }
         return Apply(
             value,
             List(parameterExpressions.size) { parameterExpressions[it]!!},

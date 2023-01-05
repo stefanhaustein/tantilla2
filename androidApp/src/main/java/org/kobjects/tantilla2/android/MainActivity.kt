@@ -91,7 +91,7 @@ class MainActivity : AppCompatActivity() {
         if (viewModel.navigationStack.size < 2) {
             super.onBackPressed()
         } else {
-            viewModel.navigateBack()
+            viewModel.navigateBack(viewModel.navigationStack[viewModel.navigationStack.size - 2])
         }
     }
 
