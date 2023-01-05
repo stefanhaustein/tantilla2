@@ -1,9 +1,23 @@
+mut monkeys = MutableList[Monkey]()
+
 struct Monkey:
   items: MutableList[int]
   operation: (int) -> int
   divisible: int
   if_true: int
   if_false: int
+  mut count: int = 0
+
+  def process():
+    for item in items:
+      count += 1
+      let level = operation(item)
+      if level % divisible:
+        monkeys[if_true].items.append(level)
+      else:
+        monkeys[if_false].items.append(level)
+
+    items.clear()
 
 def parse(data: str) -> List[Monkey]:
   let result = MutableList[Monkey]()
@@ -27,7 +41,12 @@ def parse(data: str) -> List[Monkey]:
   return result
 
 def main():
-  let monkeys = parse(DATA)
+  monkeys = parse(DATA)
+  print(monkeys)
+
+  for monkey in monkeys:
+    monkey.process()
+
   print(monkeys)
 
 
