@@ -1,8 +1,6 @@
 package org.kobjects.tantilla2.core.function
 
 import org.kobjects.tantilla2.core.CodeWriter
-import org.kobjects.tantilla2.core.definition.Scope
-import org.kobjects.tantilla2.core.function.FunctionType.Companion.serializeTypeImpl
 import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.type.VoidType
 
@@ -41,37 +39,41 @@ interface FunctionType : Type {
     }
 
     companion object {
-    fun FunctionType.serializeTypeImpl(writer: CodeWriter, twoLine: Boolean, multiline: Boolean): Int {
-        val startIndex = if (isMethod()) 1 else 0
-        if (parameters.size > startIndex) {
-            parameters[startIndex].serialize(writer)
-            for (i in startIndex + 1 until parameters.size) {
-                if (multiline) {
-                    writer.append(",")
-                    writer.newline()
-                } else {
-                    writer.append(", ")
+        fun FunctionType.serializeTypeImpl(
+            writer: CodeWriter,
+            twoLine: Boolean,
+            multiline: Boolean
+        ): Int {
+            val startIndex = if (isMethod()) 1 else 0
+            if (parameters.size > startIndex) {
+                parameters[startIndex].serialize(writer)
+                for (i in startIndex + 1 until parameters.size) {
+                    if (multiline) {
+                        writer.append(",")
+                        writer.newline()
+                    } else {
+                        writer.append(", ")
+                    }
+                    parameters[i].serialize(writer)
                 }
-                parameters[i].serialize(writer)
             }
+            if (twoLine && returnType != VoidType) {
+                writer.outdent()
+                writer.newline()
+                writer.indent()
+            }
+            val resultX = writer.x
+            writer.append(')')
+            if (returnType != VoidType) {
+                writer.append(" -> ")
+                writer.appendType(returnType)
+            }
+            return resultX
         }
-        if (twoLine && returnType != VoidType) {
-            writer.outdent()
-            writer.newline()
-            writer.indent()
-        }
-        val resultX = writer.x
-        writer.appendClose(')')
-        if (returnType != VoidType) {
-            writer.append(" -> ")
-            writer.appendType(returnType)
-        }
-        return resultX
-    }
 
 
         fun serializeType(functionType: FunctionType, writer: CodeWriter) {
-            writer.appendOpen('(')
+            writer.append('(')
             val mark = writer.mark()
             val rx = functionType.serializeTypeImpl(writer, false, false)
             writer.unmark(mark)

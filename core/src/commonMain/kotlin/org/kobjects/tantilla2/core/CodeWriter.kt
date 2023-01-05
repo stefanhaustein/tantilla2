@@ -33,14 +33,6 @@ class CodeWriter(
         endIndices.add(pos + position.endInclusive + 1)
     }
 
-    fun appendOpen(value: Char) {
-        append(value)
-    }
-
-    fun appendClose(value: Char) {
-        append(value)
-    }
-
     override fun append(value: Char): CodeWriter {
         if (startIndices.containsKey(pos)) {
             appendStart(Kind.ERROR)

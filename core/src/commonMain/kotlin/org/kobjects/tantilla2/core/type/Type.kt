@@ -31,13 +31,13 @@ interface Type {
     fun serializeGenerics(writer: CodeWriter) {
         val generics = genericParameterTypes
         if (generics.isNotEmpty()) {
-            writer.appendOpen('[')
+            writer.append('[')
             writer.appendType(generics[0])
             for (i in 1 until generics.size) {
                 writer.append(", ")
                 writer.appendType(generics[i])
             }
-            writer.appendClose(']')
+            writer.append(']')
         }
     }
 
