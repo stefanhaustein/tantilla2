@@ -26,7 +26,6 @@ class CodeWriter(
     val startIndices = mutableMapOf<Int, Throwable>()
     val endIndices = mutableSetOf<Int>()
     var lineStart = 0
-    var depth = 0
 
 
     fun addError(position: IntRange, error: Throwable) {
@@ -36,12 +35,10 @@ class CodeWriter(
 
     fun appendOpen(value: Char) {
         append(value)
-        depth++
     }
 
     fun appendClose(value: Char) {
         append(value)
-        depth--
     }
 
     override fun append(value: Char): CodeWriter {
@@ -109,27 +106,29 @@ class CodeWriter(
         unmark(mark)
         sb.setLength(mark.savedLength)
         pos = mark.savedPos
-        depth = mark.savedDepth
     }
 
     fun unmark(mark: Mark) {
         lineLength = mark.savedLineLength
     }
 
-    fun appendInParens(node: Node) {
-        appendOpen('(')
-        indent()
-        appendCode(node)
-        outdent()
-        appendClose(')')
+    fun appendInBrackets(open: String, node: Node, close: String) {
+        appendInBrackets(open, close) { appendCode(node) }
     }
 
-    fun appendInParens(lambda: () -> Unit) {
-        appendOpen('(')
-        indent()
+    fun appendInBrackets(open: String, close: String, lambda: () -> Unit) {
+        append(open)
+        val mark = mark()
         lambda()
-        outdent()
-        appendClose(')')
+        unmark(mark)
+        if (x >= lineLength) {
+            reset(mark)
+            indent()
+            newline()
+            lambda()
+            outdent()
+        }
+        append(close)
     }
 
     fun appendMaybeNextLine(node: Node) {
@@ -149,56 +148,43 @@ class CodeWriter(
     fun appendList(
         expressions: List<Node>,
         prefixes: List<String>? = null,
-        addBracesOnOverflow: Boolean = false,
     ) {
         val mark = mark()
-
+        var overflow = false
         for (i in expressions.indices) {
             val node = expressions[i]
-            if (sb.length > mark.savedLength) {
+            if (i > 0) {
                 append(", ")
             }
             if (prefixes != null) {
                 append(prefixes[i])
             }
             appendCode(node)
+
+            if (x >= mark.savedLineLength) {
+                overflow = true
+                break
+            }
         }
 
         unmark(mark)
 
-        val overflow = x + 1 >= lineLength
-
         if (overflow) {
-            val len = x - mark.savedX
-            var multiLine = indent.length + 2 + len + 1 >= mark.savedLineLength
-
             reset(mark)
-            if (addBracesOnOverflow) {
-                appendOpen('(')
-            }
-            indent()
             for (i in expressions.indices) {
-                  if (sb.length == mark.savedLength) {
-                      newline()
-                  } else if (multiLine) {
-                      sb.append(",")
-                      newline()
-                  } else {
-                      sb.append(", ")
-                  }
-                  if (prefixes != null) {
-                      append(prefixes[i])
-                  }
-                  appendCode(expressions[i])
-              }
-              outdent()
-          }
-        if (x >= lineLength - 1) {
+                if (i > 0) {
+                    sb.append(",")
+                    newline()
+                }
+                if (prefixes != null) {
+                    append(prefixes[i])
+                }
+                appendCode(expressions[i])
+            }
+        }
+        /*if (x >= lineLength - 1) {
             newline()
-        }
-        if (addBracesOnOverflow && overflow) {
-            appendClose(')')
-        }
+        }*/
     }
 
 
@@ -269,7 +255,7 @@ class CodeWriter(
 
     fun appendInfix(parentPrecedence: Int, left: Node, name: String, precedence: Int, right: Node) {
         if (parentPrecedence > precedence) {
-            appendInParens{ appendInfix(0, left, name, precedence, right) }
+            appendInBrackets("(", ")"){ appendInfix(0, left, name, precedence, right) }
         } else {
             val outerMark = mark(false)
             appendCode(left, precedence)
@@ -340,6 +326,5 @@ class CodeWriter(
         val savedPos = pos
         val savedLineLength = lineLength
         val savedX = x
-        val savedDepth = depth
     }
 }

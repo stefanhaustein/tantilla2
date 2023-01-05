@@ -70,7 +70,7 @@ abstract class Scope(
         var replacement = Parser.parseFailsafe(this, newContent)
         if (oldDefinition != null) {
             try {
-                if (oldDefinition is Updatable && replacement is Updatable
+                if (oldDefinition is DefinitionUpdatable && replacement is DefinitionUpdatable
                     && oldDefinition.type == replacement.type
                     && oldDefinition.kind == replacement.kind
                 ) {

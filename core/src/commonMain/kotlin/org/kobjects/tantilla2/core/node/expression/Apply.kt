@@ -48,17 +48,22 @@ class Apply(
     override fun serializeCode(writer: CodeWriter, parentPrcedence: Int) {
         if (asMethod) {
             writer.appendCode(parameters[0], Precedence.DOT)
+            val mark = writer.mark()
             writer.append(".")
+            writer.appendCode(base)
+            writer.unmark(mark)
+            if (writer.x + 1 >= writer.lineLength) {
+                writer.reset(mark)
+                writer.newline()
+                writer.append(".")
+                writer.appendCode(base)
+            }
+        } else {
+            writer.appendCode(base)
         }
-        writer.appendCode(base)
-
         val nodeList = mutableListOf<Node>()
         val prefixList = mutableListOf<String>()
-        if (parens) {
-            writer.appendOpen('(')
-        } else {
-            writer.append(' ')
-        }
+
         for (i in parameterSerialization.indices) {
             val parameter = parameterSerialization[i]
             nodeList.add(parameter.node)
@@ -68,9 +73,13 @@ class Apply(
                 prefixList.add("")
             }
         }
-        writer.appendList(nodeList, prefixList)
         if (parens) {
-            writer.appendClose(')')
+            writer.appendInBrackets("(", ")") {
+                writer.appendList(nodeList, prefixList)
+            }
+        } else {
+            writer.append(" ")
+            writer.appendList(nodeList, prefixList)
         }
     }
 

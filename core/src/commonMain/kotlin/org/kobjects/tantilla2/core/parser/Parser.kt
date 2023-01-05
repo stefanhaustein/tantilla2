@@ -67,7 +67,10 @@ object Parser {
     ): Node {
         val tokenizer = TantillaTokenizer(source)
         tokenizer.consume(TokenType.BOF)
-        scope.docString = if (statementsAllowed) "" else readDocString(tokenizer)
+        if (!statementsAllowed && scope is DocStringUpdatable) {
+            scope.docString = readDocString(tokenizer)
+        }
+        // scope.docString = if (statementsAllowed) "" else readDocString(tokenizer)
         val result = parseDefinitionsAndStatements(
             tokenizer,
             ParsingContext(scope, 0),

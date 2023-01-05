@@ -16,9 +16,8 @@ interface Definition : SerializableCode, Comparable<Definition> {
     val type: Type
         get() = getValue(null).dynamicType
 
-    var docString: String
+    val docString: String
         get() = ""
-        set(_) = throw UnsupportedOperationException()
 
     var index: Int
         get() = -1

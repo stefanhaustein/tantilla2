@@ -13,6 +13,7 @@ class GlobalRuntimeContext(
     // Call with null to clear errors.
 
 ) {
+    var initializedTo = 0
     var stopRequested = false
     var activeThreads = 0
     var exception: TantillaRuntimeException? = null
@@ -124,12 +125,12 @@ class GlobalRuntimeContext(
 
 
     fun initialize(incremental: Boolean = false) {
-        val startIndex = if (incremental) userRootScope.initializedTo else 0
+        val startIndex = if (incremental) initializedTo else 0
         staticVariableValues.setSize(userRootScope.staticFieldDefinitions.size)
         for (index in startIndex until userRootScope.staticFieldDefinitions.size) {
             userRootScope.staticFieldDefinitions[index]?.initialize(staticVariableValues)
         }
-        userRootScope.initializedTo = userRootScope.staticFieldDefinitions.size
+        initializedTo = userRootScope.staticFieldDefinitions.size
     }
 
 }

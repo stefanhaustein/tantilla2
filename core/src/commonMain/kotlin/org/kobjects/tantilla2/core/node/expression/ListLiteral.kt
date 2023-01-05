@@ -22,8 +22,8 @@ class ListLiteral(
     override fun reconstruct(newChildren: List<Node>) = ListLiteral(newChildren)
 
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
-        writer.appendOpen('[')
-        writer.appendList(elements)
-        writer.appendClose(']')
+        writer.appendInBrackets("[", "]") {
+            writer.appendList(elements)
+        }
     }
 }

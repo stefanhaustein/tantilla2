@@ -17,12 +17,9 @@ import org.kobjects.konsole.compose.AnsiConverter.ansiToAnnotatedString
 import org.kobjects.konsole.compose.ComposeKonsole
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.parser.Parser
-import org.kobjects.tantilla2.core.definition.SystemRootScope
 import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.android.R
-import org.kobjects.tantilla2.core.definition.Definition
-import org.kobjects.tantilla2.core.definition.Scope
-import org.kobjects.tantilla2.core.definition.UserRootScope
+import org.kobjects.tantilla2.core.definition.*
 import org.kobjects.tantilla2.core.function.FunctionDefinition
 import java.io.File
 import java.nio.charset.StandardCharsets
@@ -196,7 +193,7 @@ class TantillaViewModel(
                         this.editingDefinition.value
                     )
                 } else {
-                    currentUserScope.value.docString = currentText.value.text
+                    (currentUserScope.value as DocStringUpdatable).docString = currentText.value.text
                 }
                 notifyCodeChangedAndSave()
             }

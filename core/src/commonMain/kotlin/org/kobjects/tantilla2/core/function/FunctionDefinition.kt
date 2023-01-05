@@ -1,9 +1,8 @@
 package org.kobjects.tantilla2.core.function
 
-import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
-import org.kobjects.tantilla2.core.classifier.Updatable
+import org.kobjects.tantilla2.core.definition.DefinitionUpdatable
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.definition.Scope
 import org.kobjects.tantilla2.core.node.Node
@@ -17,7 +16,7 @@ class FunctionDefinition (
     override val kind: Definition.Kind,
     override val name: String,
     definitionText: String,
-) : Scope(), Callable, Updatable {
+) : Scope(), Callable, DefinitionUpdatable {
     override var docString: String = ""
 
     private var resolvedType: FunctionType = UnresolvedType

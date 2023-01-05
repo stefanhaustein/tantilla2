@@ -1,9 +1,9 @@
 package org.kobjects.tantilla2.core.classifier
 
-import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.definition.Scope
+import org.kobjects.tantilla2.core.definition.DefinitionUpdatable
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.node.expression.UnresolvedNode
 import org.kobjects.tantilla2.core.parser.*
@@ -17,7 +17,7 @@ class FieldDefinition(
     definitionText: String = "",
     override val mutable: Boolean = false,
     override var docString: String = "",
-) : Definition, Updatable {
+) : Definition, DefinitionUpdatable {
     private var resolvedType: Type = UnresolvedType
     override var index: Int = -1
 

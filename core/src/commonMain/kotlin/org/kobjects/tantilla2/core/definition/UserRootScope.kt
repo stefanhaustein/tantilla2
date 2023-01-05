@@ -7,11 +7,10 @@ import org.kobjects.tantilla2.core.classifier.TraitDefinition
 
 class UserRootScope(
     override val parentScope: SystemRootScope,
-) : Scope(), ContextOwner {
+) : Scope(), ContextOwner, DocStringUpdatable {
     override var docString = ""
     val staticFieldDefinitions = mutableListOf<FieldDefinition?>()
 
-    var initializedTo = 0
     var classToTrait = mutableMapOf<Scope, MutableMap<TraitDefinition, ImplDefinition>>()
     var traitToClass = mutableMapOf<TraitDefinition, MutableMap<Scope, ImplDefinition>>()
     var definitionsWithErrors = mutableMapOf<Definition, List<Throwable>>()
@@ -43,7 +42,6 @@ class UserRootScope(
         definitionsWithErrors.clear()
 
         staticFieldDefinitions.clear()
-        initializedTo = 0
     }
 
 

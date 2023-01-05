@@ -20,7 +20,7 @@ class Parentesized(val expression: Node) : Node() {
         get() = expression.returnType
 
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
-        writer.appendInParens(expression)
+        writer.appendInBrackets("(", expression, ")")
     }
 
     override fun requireAssignability() = expression.requireAssignability()
