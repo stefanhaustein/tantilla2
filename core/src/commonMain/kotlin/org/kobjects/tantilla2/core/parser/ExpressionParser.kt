@@ -54,7 +54,7 @@ object ExpressionParser {
             } while(tokenizer.tryConsume(","))
             tokenizer.consume("]")
        //     tokenizer.enable(TokenType.LINE_BREAK)
-            return StaticReference(((base.returnType) as InstantiableMetaType).wrapped.withGenericsResolved(typeParameters) as Definition, true, false)
+            return StaticReference(((base.returnType) as InstantiableMetaType).wrapped.withGenericsResolved(typeParameters) as Definition, true)
             // GenericTypeNode(base, typeParameters)
         }
 
@@ -64,18 +64,18 @@ object ExpressionParser {
         return result
     }
 
-    fun reference(scope: Scope, definition: Definition, qualified: Boolean, raw: Boolean) =
+    fun reference(scope: Scope, definition: Definition, qualified: Boolean) =
         if (definition.kind == Definition.Kind.PROPERTY) {
             val depth = definition.depth(scope)
             LocalVariableReference(
-                definition.name, definition.type, depth, definition.index, definition.mutable, raw)
-        } else StaticReference(definition, qualified, raw)
+                definition.name, definition.type, depth, definition.index, definition.mutable)
+        } else StaticReference(definition, qualified)
 
     fun isCallable(definition: Definition) =
         definition.getValue(null) is Callable // Resolve imports
 
 
-    fun parseFreeIdentifier(tokenizer: TantillaTokenizer, context: ParsingContext, raw: Boolean): Node {
+    fun parseFreeIdentifier(tokenizer: TantillaTokenizer, context: ParsingContext): Node {
         val name = tokenizer.consume(TokenType.IDENTIFIER)
         val scope = context.scope
 
@@ -84,11 +84,10 @@ object ExpressionParser {
             return parseMaybeApply(
                 tokenizer,
                 context,
-                reference(scope, dynamicDefinition, false, raw),
+                reference(scope, dynamicDefinition, false),
                 self = null,
                 openingParenConsumed = false,
-                asMethod = false,
-                raw = raw)
+                asMethod = false)
         }
 
         val self = context.scope.resolveDynamic("self", fallBackToStatic = false)
@@ -96,7 +95,7 @@ object ExpressionParser {
         if (selfType is Scope) {
             val definition = selfType.resolveDynamic(name, fallBackToStatic = false)
             if (definition != null) {
-                return property(tokenizer, context, reference(scope, self, false, false), definition, raw)
+                return property(tokenizer, context, reference(scope, self, false), definition)
             }
         }
 
@@ -105,15 +104,14 @@ object ExpressionParser {
             return parseMaybeApply(
                 tokenizer,
                 context,
-                reference(scope, staticDefinition, false, raw),
+                reference(scope, staticDefinition, false),
                 self = null,
                 openingParenConsumed = false,
-                asMethod = false,
-                raw = raw)
+                asMethod = false)
         }
 
         // Method in function form
-        if (!raw && tokenizer.tryConsume("(")) {
+        if (tokenizer.tryConsume("(")) {
             val firstParameter = parseExpression(tokenizer, context)
             val baseType = firstParameter.returnType as Scope
             val definition = baseType[name]
@@ -124,12 +122,10 @@ object ExpressionParser {
                 return parseMaybeApply(
                     tokenizer,
                     context,
-                    reference(context.scope, definition, false, raw),
+                    reference(context.scope, definition, false),
                     firstParameter,
                     openingParenConsumed = true,
-                    asMethod = false,
-                    raw = false
-                )
+                    asMethod = false)
             }
         }
 
@@ -244,14 +240,10 @@ object ExpressionParser {
                     BoolNode.False
                 }
                 "lambda" -> parseLambda(tokenizer, context)
-                else -> parseFreeIdentifier(tokenizer, context, false)
+                else -> parseFreeIdentifier(tokenizer, context)
             }
             else -> {
                 when (tokenizer.current.text) {
-                    "::" -> {
-                        tokenizer.next()
-                        parseFreeIdentifier(tokenizer, context, true)
-                    }
                     "(" -> {
                         tokenizer.consume("(")
                                 //  tokenizer.disable(TokenType.LINE_BREAK)
@@ -304,13 +296,12 @@ object ExpressionParser {
         tokenizer: TantillaTokenizer,
         context: ParsingContext,
         base: Node,
-        raw: Boolean,
     ): Node {
         val name = tokenizer.consume(TokenType.IDENTIFIER)
         val baseType = base.returnType
         val definition = baseType.resolve(name)
             ?: throw tokenizer.exception("Property '$name' not found.")
-        return property(tokenizer, context, base, definition, raw)
+        return property(tokenizer, context, base, definition)
     }
 
     fun property(
@@ -318,19 +309,15 @@ object ExpressionParser {
         context: ParsingContext,
         base: Node,
         definition: Definition,
-        raw: Boolean,
     ): Node {
         var self: Node? = null
         val value = when (definition.kind) {
-            Definition.Kind.PROPERTY -> PropertyReference(base, definition, raw)
-            Definition.Kind.METHOD ->
-                if (raw) {
-                    PropertyReference(base, definition, true)
-                } else {
-                    self = base
-                    StaticReference(definition, false, false)
+            Definition.Kind.PROPERTY -> PropertyReference(base, definition)
+            Definition.Kind.METHOD -> {
+                 self = base
+                 StaticReference(definition, false)
                 }
-            else -> StaticReference(definition, true, raw)
+            else -> StaticReference(definition, true)
         }
         return parseMaybeApply(
             tokenizer,
@@ -338,8 +325,7 @@ object ExpressionParser {
             value,
             self,
             openingParenConsumed = false,
-            asMethod = self != null,
-            raw = raw)
+            asMethod = self != null)
     }
 
     fun parseMaybeApply(
@@ -349,12 +335,10 @@ object ExpressionParser {
         self: Node?,
         openingParenConsumed: Boolean,
         asMethod: Boolean,
-        raw: Boolean
     ): Node {
-        if (raw) {
-            require(!asMethod)
-            require(!openingParenConsumed)
-           return value
+        if (!openingParenConsumed && tokenizer.tryConsume("@")) {
+            require(!asMethod) { "Can't combine @ with methods." }
+           return RawNode(value)
         }
 
         val type = value.returnType
@@ -465,9 +449,9 @@ object ExpressionParser {
     val expressionParser =
         GreenspunExpressionParser<TantillaTokenizer, ParsingContext, Node>(
             GreenspunExpressionParser.suffix(Precedence.DOT, ".") {
-                tokenizer, context, _, base -> parseProperty(tokenizer, context, base, false) },
+                tokenizer, context, _, base -> parseProperty(tokenizer, context, base) },
             GreenspunExpressionParser.suffix(Precedence.DOT, "::") {
-                    tokenizer, context, _, base -> parseProperty(tokenizer, context, base, true) },
+                    tokenizer, context, _, base -> parseProperty(tokenizer, context, base) },
             GreenspunExpressionParser.suffix(Precedence.BRACKET, "[") {
                 tokenizer, context, _, base -> parseElementAt(tokenizer, context, base) },
             GreenspunExpressionParser.suffix(Precedence.BRACKET, "(") {
@@ -478,8 +462,7 @@ object ExpressionParser {
                     base,
                     self =null,
                     openingParenConsumed = true,
-                    asMethod = false,
-                    raw = false) },
+                    asMethod = false) },
             GreenspunExpressionParser.infix(Precedence.POW, "**") {
                     _, _, _, l, r -> FloatNode.Pow(l, r) },
             GreenspunExpressionParser.infix(Precedence.MULDIV, "*") {

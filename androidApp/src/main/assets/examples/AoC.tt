@@ -12,7 +12,7 @@ struct Monkey:
     for item in items:
       count += 1
       let level = operation(item)
-      if level % divisible:
+      if level % divisible == 0:
         monkeys[if_true].items.append(level)
       else:
         monkeys[if_false].items.append(level)
@@ -25,17 +25,19 @@ def parse(data: str) -> List[Monkey]:
   let lines = data.split("\n")
   while index < len(lines):
     let raw_items = lines[index + 1].split(":")[1].split(",")
-    let items = List[int].init(len(raw_items), int(raw_items[$0].strip()))
-    let raw_operation = lines[index + 2].split("=")[1].split(" ")
+    let items = MutableList[int].init(len(raw_items), int(raw_items[$0].strip()))
+    let raw_operation = lines[index + 2].split("=")[1].strip().split(" ")
     let mut operation = lambda(x: int) -> int: x * x
+    let operand2 = raw_operation[2]
     if raw_operation[1] == "+":
-      ::operation = $0 + int(raw_operation[2])
+      operation@ = $0 + int(operand2)
     elif raw_operation[2] != "old":
-      ::operation = $0 * int(raw_operation[2])
+      operation@ = $0 * int(operand2)
     let test = int(lines[index + 3].split(" ")[-1])
     let if_true = int(lines[index + 4].split(" ")[-1])
     let if_false = int(lines[index + 5].split(" ")[-1])
-    let monkey = Monkey(items, ::operation, test, if_true, if_false)
+    print operation(5)
+    let monkey = Monkey(items, operation($0), test, if_true, if_false)
     result.append(monkey)
     index += 7
   return result

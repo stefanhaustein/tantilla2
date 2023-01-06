@@ -71,7 +71,7 @@ interface Definition : SerializableCode, Comparable<Definition> {
         IMPORT, STATIC, FUNCTION, ENUM, ENUM_LITERAL, PROPERTY, METHOD, TRAIT, TYPE, STRUCT, UNIT, IMPL, UNPARSEABLE,
     }
 
-    fun serializeQualifiedName(writer: CodeWriter, raw: Boolean) {
+    fun serializeQualifiedName(writer: CodeWriter) {
         // Am I local or at root?
         if (writer.forTitle
             || parentScope == writer.scope
@@ -79,9 +79,6 @@ interface Definition : SerializableCode, Comparable<Definition> {
             || parentScope == AbsoluteRootScope
             || parentScope is UserRootScope
             || parentScope is SystemRootScope) {
-            if (raw) {
-                writer.append("::")
-            }
             writer.append(name)
         } else {
 
@@ -91,9 +88,6 @@ interface Definition : SerializableCode, Comparable<Definition> {
             while (scope != null && !found) {
                 for (definition in scope) {
                     if (definition is ImportDefinition && definition.getValue(null) == this) {
-                        if (raw) {
-                            writer.append("::")
-                        }
                         writer.append(definition.name)
                         found = true
                         break;
@@ -103,8 +97,8 @@ interface Definition : SerializableCode, Comparable<Definition> {
             }
 
             if (!found) {
-                parentScope!!.serializeQualifiedName(writer, false)
-                writer.append(if (raw) "::" else ".")
+                parentScope!!.serializeQualifiedName(writer)
+                writer.append('.')
                 writer.append(name)
             }
         }
@@ -116,7 +110,7 @@ interface Definition : SerializableCode, Comparable<Definition> {
 
     fun qualifiedName(raw: Boolean = false, relativeTo: Scope = AbsoluteRootScope): String {
         val writer = CodeWriter(scope = relativeTo)
-        serializeQualifiedName(writer, raw)
+        serializeQualifiedName(writer)
         return writer.toString()
     }
 

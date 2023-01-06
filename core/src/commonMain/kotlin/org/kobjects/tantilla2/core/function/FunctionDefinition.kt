@@ -1,5 +1,6 @@
 package org.kobjects.tantilla2.core.function
 
+import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.definition.DefinitionUpdatable
@@ -72,33 +73,43 @@ class FunctionDefinition (
         }
 
         val tokenizer = TantillaTokenizer(definitionText)
-        tokenizer.consume(TokenType.BOF)
+        try {
+            tokenizer.consume(TokenType.BOF)
 
-        tokenizer.tryConsume("static")
-        tokenizer.consume("def")
-        tokenizer.consume(TokenType.IDENTIFIER)
-        resolvedType = TypeParser.parseFunctionType(
-            tokenizer,
-            ParsingContext(parentScope, 0),
-           kind == Definition.Kind.METHOD)
+            tokenizer.tryConsume("static")
+            tokenizer.consume("def")
+            tokenizer.consume(TokenType.IDENTIFIER)
+            resolvedType = TypeParser.parseFunctionType(
+                tokenizer,
+                ParsingContext(parentScope, 0),
+                kind == Definition.Kind.METHOD
+            )
 
-        if (typeOnly) {
-            return
-        }
-
-        for (parameter in type.parameters) {
-            declareLocalVariable(parameter.name, parameter.type, false)
-        }
-        if (parentScope is TraitDefinition) {
-            if (tokenizer.tryConsume(":")) {
-                docString = Parser.readDocString(tokenizer)
+            if (typeOnly) {
+                return
             }
-            tokenizer.consume(TokenType.EOF, "Trait methods must not have function bodies.")
-            resolvedBody = TraitMethodBody(parentScope.traitIndex++)
-        } else {
-            tokenizer.consume(":")
-            docString = Parser.readDocString(tokenizer)
-            resolvedBody = Parser.parseDefinitionsAndStatements(tokenizer, ParsingContext(this, 1))
+
+            for (parameter in type.parameters) {
+                declareLocalVariable(parameter.name, parameter.type, false)
+            }
+            if (parentScope is TraitDefinition) {
+                if (tokenizer.tryConsume(":")) {
+                    docString = Parser.readDocString(tokenizer)
+                }
+                tokenizer.consume(TokenType.EOF, "Trait methods must not have function bodies.")
+                resolvedBody = TraitMethodBody(parentScope.traitIndex++)
+            } else {
+                tokenizer.consume(":")
+                docString = Parser.readDocString(tokenizer)
+                resolvedBody =
+                    Parser.parseDefinitionsAndStatements(tokenizer, ParsingContext(this, 1))
+            }
+        } catch (e: Exception) {
+            if (e is ParsingException) {
+                throw e
+            } else {
+                throw tokenizer.exception(e.toString())
+            }
         }
     }
 

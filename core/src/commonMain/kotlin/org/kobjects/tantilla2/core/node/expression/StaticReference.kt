@@ -6,7 +6,7 @@ import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.type.Type
 
 
-data class StaticReference(val definition: Definition, val qualified: Boolean, val raw: Boolean) : Node() {
+data class StaticReference(val definition: Definition, val qualified: Boolean) : Node() {
     override fun children() = emptyList<Node>()
 
     override fun eval(ctx: LocalRuntimeContext): Any = definition.getValue(ctx.globalRuntimeContext.staticVariableValues)
@@ -15,7 +15,7 @@ data class StaticReference(val definition: Definition, val qualified: Boolean, v
 
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
         if (qualified) {
-            definition.serializeQualifiedName(writer, raw)
+            definition.serializeQualifiedName(writer)
         } else {
             writer.append(definition.name)
         }
@@ -32,9 +32,4 @@ data class StaticReference(val definition: Definition, val qualified: Boolean, v
         }
     }
 
-    init {
-        if (!qualified) {
-            require(!raw) { "Can't combine !qualified with raw." }
-        }
-    }
 }

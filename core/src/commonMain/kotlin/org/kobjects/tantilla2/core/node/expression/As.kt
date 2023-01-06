@@ -28,7 +28,7 @@ class As(
         if (implicit) {
             sb.appendCode(base)
         } else {
-            sb.appendInfix(parentPrecedence, base, "as", Precedence.RELATIONAL, StaticReference(impl.trait,  true, false))
+            sb.appendInfix(parentPrecedence, base, "as", Precedence.RELATIONAL, StaticReference(impl.trait,  true))
         }
     }
 }

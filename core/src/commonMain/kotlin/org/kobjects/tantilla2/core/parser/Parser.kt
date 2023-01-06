@@ -1,5 +1,6 @@
 package org.kobjects.tantilla2.core.parser
 
+import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.core.classifier.*
 import org.kobjects.tantilla2.core.definition.*
 import org.kobjects.tantilla2.core.function.*
@@ -66,19 +67,27 @@ object Parser {
         statementsAllowed: Boolean = true
     ): Node {
         val tokenizer = TantillaTokenizer(source)
-        tokenizer.consume(TokenType.BOF)
-        if (!statementsAllowed && scope is DocStringUpdatable) {
-            scope.docString = readDocString(tokenizer)
+        try {
+            tokenizer.consume(TokenType.BOF)
+            if (!statementsAllowed && scope is DocStringUpdatable) {
+                scope.docString = readDocString(tokenizer)
+            }
+            // scope.docString = if (statementsAllowed) "" else readDocString(tokenizer)
+            val result = parseDefinitionsAndStatements(
+                tokenizer,
+                ParsingContext(scope, 0),
+                definitionsAllowed = definitionsAllowed,
+                statementsAllowed = statementsAllowed
+            )
+            tokenizer.consume(TokenType.EOF)
+            return result
+        } catch (e: Exception) {
+            if (e is ParsingException) {
+                throw e
+            } else {
+                throw tokenizer.exception(e.toString())
+            }
         }
-        // scope.docString = if (statementsAllowed) "" else readDocString(tokenizer)
-        val result = parseDefinitionsAndStatements(
-            tokenizer,
-            ParsingContext(scope, 0),
-            definitionsAllowed = definitionsAllowed,
-            statementsAllowed = statementsAllowed
-        )
-        tokenizer.consume(TokenType.EOF)
-        return result
     }
 
     fun parseStatements(tokenizer: TantillaTokenizer, context: ParsingContext) =
@@ -332,7 +341,7 @@ object Parser {
             else Definition.Kind.STATIC
         val text = consumeLine(tokenizer, startPos)
 
-        return FieldDefinition(context.scope, kind, name, definitionText = text)
+        return FieldDefinition(context.scope, kind, name, mutable = mutable, definitionText = text)
     }
 
     fun parseFailsafe(parentScope: Scope, code: String): Definition {

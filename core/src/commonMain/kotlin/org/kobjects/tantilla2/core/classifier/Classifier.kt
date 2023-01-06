@@ -11,7 +11,7 @@ import org.kobjects.tantilla2.core.type.Type
 abstract class Classifier : Scope(), Type, DocStringUpdatable {
 
     override fun serializeType(writer: CodeWriter) {
-        serializeQualifiedName(writer, false)
+        serializeQualifiedName(writer)
     }
 
     override val supportsMethods: Boolean
