@@ -58,7 +58,7 @@ object TypeParser {
         val rawType = parseType(tokenizer, context)
         val type = if (isVararg) ListType(rawType) else rawType
         val defaultValue: Node? = if (tokenizer.tryConsume("="))
-            ExpressionParser.matchType(context.scope,
+            ExpressionParser.matchType(
                 ExpressionParser.parseExpression(tokenizer, context), type)
         else null
 

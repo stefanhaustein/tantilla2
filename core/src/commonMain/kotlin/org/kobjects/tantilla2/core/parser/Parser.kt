@@ -320,7 +320,7 @@ object Parser {
             if (type == null) {
                 type = initializer.returnType
             } else {
-                initializer = ExpressionParser.matchType(scope, initializer, type)
+                initializer = ExpressionParser.matchType(initializer, type)
             }
         } else if (type == null) {
             throw tokenizer.exception("Explicit type or initializer expression required.")

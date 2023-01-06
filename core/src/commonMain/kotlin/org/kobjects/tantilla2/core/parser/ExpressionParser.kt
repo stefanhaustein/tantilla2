@@ -24,11 +24,11 @@ object ExpressionParser {
             return parseFunctionExpression(tokenizer, context, expectedType)
         }
         val result = expressionParser.parse(tokenizer, context)
-        return matchType(context.scope, result, expectedType)
+        return matchType(result, expectedType)
     }
 
 
-    fun matchType(context: Scope, expr: Node, expectedType: Type?): Node {
+    fun matchType(expr: Node, expectedType: Type?): Node {
         val actualType = expr.returnType
         if (expectedType == null || expectedType.isAssignableFrom(actualType)) {
             return expr
@@ -143,17 +143,7 @@ object ExpressionParser {
             val parameter = type.parameters[i]
             functionScope.declareLocalVariable("\$$i", parameter.type, false)
         }
-/*
-        val closureIndices = mutableListOf<Int>()
-        for (definition in context.scope) {
-            if (definition.kind == Definition.Kind.LOCAL_VARIABLE && !parameterNames.contains(definition.name)) {
-                functionScope.declareLocalVariable(definition.name, definition.type(), definition.mutable)
-                closureIndices.add(definition.index)
-            }
-        } */
-        // We don't expect a type here to permit function references.
-        val body = parseExpression(tokenizer, ParsingContext(functionScope, context.depth), null)
-
+        val body = parseExpression(tokenizer, ParsingContext(functionScope, context.depth), type.returnType)
         return LambdaReference(type, functionScope.locals.size, body, implicit = true)
     }
 
