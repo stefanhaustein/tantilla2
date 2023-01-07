@@ -1,5 +1,6 @@
 package org.kobjects.tantilla2.core.definition
 
+import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.classifier.*
@@ -47,15 +48,15 @@ abstract class Scope(
 
     fun sorted() = definitions.values.toList().sorted()
 
-    fun checkErrors(newProperty: String): List<Exception> {
+    fun checkErrors(newProperty: String): List<ParsingException> {
         val tokenizer = TantillaTokenizer(newProperty)
         tokenizer.next()
-        var replacement = try {
+        try {
             val result = Parser.parseDefinition(tokenizer, ParsingContext(this, 0))
             result.resolve()
         } catch (e: Exception) {
             e.printStackTrace()
-            return listOf(e)
+            return listOf(tokenizer.ensureParsingException(e))
         }
         while (tokenizer.current.type == TokenType.LINE_BREAK) {
             tokenizer.next()

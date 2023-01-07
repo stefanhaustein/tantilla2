@@ -107,6 +107,7 @@ class GlobalRuntimeContext(
             println("parsed: $parsed")
             userRootScope.resolveAll()
             println("resolved: $parsed")
+            initialize(incremental = true)
 
             val runtimeContext = LocalRuntimeContext(this, object : ContextOwner {
                 override val dynamicScopeSize: Int

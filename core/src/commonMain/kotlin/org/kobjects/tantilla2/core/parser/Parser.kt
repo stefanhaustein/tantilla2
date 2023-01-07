@@ -82,11 +82,7 @@ object Parser {
             tokenizer.consume(TokenType.EOF)
             return result
         } catch (e: Exception) {
-            if (e is ParsingException) {
-                throw e
-            } else {
-                throw tokenizer.exception(e.toString())
-            }
+            throw tokenizer.ensureParsingException(e)
         }
     }
 
@@ -101,7 +97,8 @@ object Parser {
         tokenizer: TantillaTokenizer,
         context: ParsingContext,
         statementsAllowed: Boolean = true,
-        definitionsAllowed: Boolean = true
+        definitionsAllowed: Boolean = true,
+        definitionScope: Scope = context.scope
     ): Node {
         val statements = mutableListOf<Node>()
         val scope = context.scope
@@ -129,15 +126,13 @@ object Parser {
                     val code = tokenizer.current.text
                     scope.add(parseFailsafe(scope, code.substring(4, code.length - 4)))
                     tokenizer.next()
-                } else if (DECLARATION_KEYWORDS.contains(tokenizer.current.text) ||
-                    (!statementsAllowed
-                            && tokenizer.current.type == TokenType.IDENTIFIER
-                            && (tokenizer.lookAhead(1).text == ":" || tokenizer.lookAhead(1).text == "="))
-                ) {
+            } else if (DECLARATION_KEYWORDS.contains(tokenizer.current.text)
+                || (!statementsAllowed && tokenizer.current.type == TokenType.IDENTIFIER
+                        && (tokenizer.lookAhead(1).text == ":" || tokenizer.lookAhead(1).text == "="))) {
                     if (!definitionsAllowed) {
                         throw tokenizer.exception("Definitions are not allowed here.")
                     }
-                    val definition = parseDefinition(tokenizer, ParsingContext(scope, localDepth))
+                    val definition = parseDefinition(tokenizer, ParsingContext(definitionScope, localDepth))
                     scope.add(definition)
                 } else if (statementsAllowed) {
                     val statement =
@@ -162,13 +157,17 @@ object Parser {
     fun parseDefinition(tokenizer: TantillaTokenizer, context: ParsingContext): Definition {
         val startPos = tokenizer.current.pos
         val explicitlyStatic = tokenizer.tryConsume("static")
-        val mutable = tokenizer.tryConsume("mut")
+        var mutable = tokenizer.tryConsume("mut")
         val scope = context.scope
 
-        if (tokenizer.current.type == TokenType.IDENTIFIER
-            && (tokenizer.lookAhead(1).text == "=" || tokenizer.lookAhead(1).text == ":")) {
+        if ((tokenizer.current.type == TokenType.IDENTIFIER
+                    && (tokenizer.lookAhead(1).text == "=" || tokenizer.lookAhead(1).text == ":"))) {
             val local = !explicitlyStatic && (scope is StructDefinition || scope is FunctionDefinition)
             return parseFieldDeclaration(tokenizer, context, startPos, local, mutable)
+        }
+
+        if (mutable) {
+            throw tokenizer.exception("'mut' seems to be misplaced here.")
         }
 
         return when (val kind = tokenizer.current.text) {
@@ -177,10 +176,24 @@ object Parser {
                 val isMethod = !explicitlyStatic
                         && (scope is StructDefinition || scope is TraitDefinition || scope is ImplDefinition)
                 tokenizer.consume("def")
-                val name = tokenizer.consume(TokenType.IDENTIFIER, "Function name expected.")
-                println("consuming def $name")
-                val text = consumeBody(tokenizer, startPos, context.depth)
-                FunctionDefinition(context.scope, if (isMethod) Definition.Kind.METHOD else Definition.Kind.FUNCTION, name, definitionText = text)
+                mutable = tokenizer.tryConsume("mut")
+                if (tokenizer.lookAhead(1).text == ":" || tokenizer.lookAhead(1).text == "=") {
+                    val local = !explicitlyStatic && (scope is StructDefinition || scope is FunctionDefinition)
+                    parseFieldDeclaration(tokenizer, context, startPos, local, mutable)
+                } else {
+                    if (mutable) {
+                        throw tokenizer.exception("'mut' seems to be misplaced here.")
+                    }
+                    val name = tokenizer.consume(TokenType.IDENTIFIER, "Name expected.")
+                    println("consuming def $name")
+                    val text = consumeBody(tokenizer, startPos, context.depth)
+                    FunctionDefinition(
+                        context.scope,
+                        if (isMethod) Definition.Kind.METHOD else Definition.Kind.FUNCTION,
+                        name,
+                        definitionText = text
+                    )
+                }
             }
             "import" -> {
                 tokenizer.consume(kind)

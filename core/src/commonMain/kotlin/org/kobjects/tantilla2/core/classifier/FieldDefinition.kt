@@ -89,8 +89,8 @@ class FieldDefinition(
         tokenizer.consume(TokenType.BOF)
 
         tokenizer.tryConsume("static")
+        tokenizer.tryConsume("def")
         tokenizer.tryConsume("mut")
-        tokenizer.tryConsume("var") || tokenizer.tryConsume("val") // var/val
 
         tokenizer.consume(name)
 

@@ -58,6 +58,8 @@ object StatementParser {
         val typeIsExplicit = resolved.second
         val initializer = resolved.third
 
+        require (context.scope is FunctionDefinition) { "Local variables are allowed in function definitions only."}
+
         val definition = LocalVariableDefinition(
             context.scope, name, type = type, mutable = mutable)
 
