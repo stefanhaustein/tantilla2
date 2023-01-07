@@ -52,8 +52,8 @@ object Parser {
         return s.length - lastBreak - 1
     }
 
-    fun parseShellInput(s: String, scope: UserRootScope): Node {
-        return parse(s, scope, definitionsAllowed = true, statementsAllowed = true)
+    fun parseShellInput(s: String, localScope: LambdaScope, scope: UserRootScope): Node {
+        return parse(s, localScope, definitionsAllowed = true, statementsAllowed = true, definitionScope = scope)
     }
 
     fun parseProgram(s: String, scope: UserRootScope) {
@@ -64,7 +64,8 @@ object Parser {
         source: String,
         scope: Scope,
         definitionsAllowed: Boolean = true,
-        statementsAllowed: Boolean = true
+        statementsAllowed: Boolean = true,
+        definitionScope: Scope = scope,
     ): Node {
         val tokenizer = TantillaTokenizer(source)
         try {
@@ -75,9 +76,11 @@ object Parser {
             // scope.docString = if (statementsAllowed) "" else readDocString(tokenizer)
             val result = parseDefinitionsAndStatements(
                 tokenizer,
-                ParsingContext(scope, 0),
+                0,
+                scope,
                 definitionsAllowed = definitionsAllowed,
-                statementsAllowed = statementsAllowed
+                statementsAllowed = statementsAllowed,
+                definitionScope = definitionScope
             )
             tokenizer.consume(TokenType.EOF)
             return result
@@ -87,22 +90,22 @@ object Parser {
     }
 
     fun parseStatements(tokenizer: TantillaTokenizer, context: ParsingContext) =
-        parseDefinitionsAndStatements(tokenizer, context, definitionsAllowed = false)
+        parseDefinitionsAndStatements(tokenizer, context.depth, context.scope, definitionsAllowed = false)
 
     fun parseDefinitions(tokenizer: TantillaTokenizer, context: ParsingContext) {
-        parseDefinitionsAndStatements(tokenizer, context, statementsAllowed = false)
+        parseDefinitionsAndStatements(tokenizer, context.depth, context.scope, statementsAllowed = false)
     }
 
     fun parseDefinitionsAndStatements(
         tokenizer: TantillaTokenizer,
-        context: ParsingContext,
+        depth: Int,
+        scope: Scope,
         statementsAllowed: Boolean = true,
         definitionsAllowed: Boolean = true,
-        definitionScope: Scope = context.scope
+        definitionScope: Scope = scope
     ): Node {
         val statements = mutableListOf<Node>()
-        val scope = context.scope
-        var localDepth = context.depth
+        var localDepth = depth
         while (tokenizer.current.type != TokenType.EOF
             && !VALID_AFTER_STATEMENT.contains(tokenizer.current.text)
         ) {
@@ -110,7 +113,7 @@ object Parser {
                 localDepth = getIndent(tokenizer.current.text)
 
                 // println("line break with depth $localDepth")
-                if (localDepth < context.depth) {
+                if (localDepth < depth) {
                     break
                 }
                 if (statementsAllowed) {
@@ -124,7 +127,7 @@ object Parser {
                         throw tokenizer.exception("Definitions are not allowed here.")
                     }
                     val code = tokenizer.current.text
-                    scope.add(parseFailsafe(scope, code.substring(4, code.length - 4)))
+                    definitionScope.add(parseFailsafe(definitionScope, code.substring(4, code.length - 4)))
                     tokenizer.next()
             } else if (DECLARATION_KEYWORDS.contains(tokenizer.current.text)
                 || (!statementsAllowed && tokenizer.current.type == TokenType.IDENTIFIER
@@ -133,7 +136,7 @@ object Parser {
                         throw tokenizer.exception("Definitions are not allowed here.")
                     }
                     val definition = parseDefinition(tokenizer, ParsingContext(definitionScope, localDepth))
-                    scope.add(definition)
+                    definitionScope.add(definition)
                 } else if (statementsAllowed) {
                     val statement =
                         StatementParser.parseStatement(tokenizer, ParsingContext(scope, localDepth))

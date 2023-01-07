@@ -5,6 +5,7 @@ import org.kobjects.tantilla2.core.function.LocalVariableDefinition
 import org.kobjects.tantilla2.core.node.*
 import org.kobjects.tantilla2.core.collection.ListType
 import org.kobjects.tantilla2.core.collection.RangeType
+import org.kobjects.tantilla2.core.function.LambdaScope
 import org.kobjects.tantilla2.core.type.VoidType
 import org.kobjects.tantilla2.core.node.statement.*
 
@@ -58,7 +59,7 @@ object StatementParser {
         val typeIsExplicit = resolved.second
         val initializer = resolved.third
 
-        require (context.scope is FunctionDefinition) { "Local variables are allowed in function definitions only."}
+        require (context.scope is FunctionDefinition || context.scope is LambdaScope) { "Local variables are allowed in function definitions only."}
 
         val definition = LocalVariableDefinition(
             context.scope, name, type = type, mutable = mutable)
@@ -89,7 +90,7 @@ object StatementParser {
         tokenizer.consume("while")
         val condition = ExpressionParser.parseExpression(tokenizer, context)
         tokenizer.consume(":")
-        return WhileNode(condition, Parser.parseDefinitionsAndStatements(tokenizer, context.indent()))
+        return WhileNode(condition, Parser.parseStatements(tokenizer, context.indent()))
     }
 
     fun parseFor(tokenizer: TantillaTokenizer, context: ParsingContext): ForNode {

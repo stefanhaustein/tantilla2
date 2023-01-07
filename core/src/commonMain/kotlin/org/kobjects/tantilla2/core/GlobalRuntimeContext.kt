@@ -4,7 +4,9 @@ import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.definition.ContextOwner
 import org.kobjects.tantilla2.core.definition.UserRootScope
 import org.kobjects.tantilla2.core.function.Callable
+import org.kobjects.tantilla2.core.function.FunctionDefinition
 import org.kobjects.tantilla2.core.function.FunctionType
+import org.kobjects.tantilla2.core.function.LambdaScope
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.parser.Parser
 
@@ -103,7 +105,8 @@ class GlobalRuntimeContext(
 
     fun processShellInput(line: String) {
         try {
-            var parsed = Parser.parseShellInput(line, userRootScope)
+            val localScope = LambdaScope(userRootScope)
+            val parsed = Parser.parseShellInput(line, localScope, userRootScope)
             println("parsed: $parsed")
             userRootScope.resolveAll()
             println("resolved: $parsed")
@@ -111,7 +114,7 @@ class GlobalRuntimeContext(
 
             val runtimeContext = LocalRuntimeContext(this, object : ContextOwner {
                 override val dynamicScopeSize: Int
-                    get() = 0
+                    get() = localScope.locals.size
 
             })
 
