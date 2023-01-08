@@ -17,7 +17,7 @@ class SquareTest() {
     @Test
     fun testSquare() {
         val userRootScope = TestSystemAbstraction.createScope()
-        Parser.parse(SQUARE, userRootScope)
+        Parser.parseProgram(SQUARE, userRootScope)
 
         val squareImpl = userRootScope["square"] as FunctionDefinition
 

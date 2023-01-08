@@ -1,6 +1,5 @@
 package org.kobjects.tantilla2.core.parser
 
-import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.core.classifier.*
 import org.kobjects.tantilla2.core.definition.*
 import org.kobjects.tantilla2.core.function.*
@@ -53,33 +52,29 @@ object Parser {
     }
 
     fun parseShellInput(s: String, localScope: LambdaScope, scope: UserRootScope): Node {
-        return parse(s, localScope, definitionsAllowed = true, statementsAllowed = true, definitionScope = scope)
+        return parse(s, statementScope = localScope, definitionScope = scope)
     }
 
-    fun parseProgram(s: String, scope: UserRootScope) {
-        parse(s, scope, definitionsAllowed = true, statementsAllowed = false)
+    fun parseProgram(code: String, userRootScope: UserRootScope) {
+        parse(code, statementScope = null, definitionScope = userRootScope)
     }
 
-    fun parse(
+    private fun parse(
         source: String,
-        scope: Scope,
-        definitionsAllowed: Boolean = true,
-        statementsAllowed: Boolean = true,
-        definitionScope: Scope = scope,
+        statementScope: Scope? = null,
+        definitionScope: Scope? = null,
     ): Node {
         val tokenizer = TantillaTokenizer(source)
         try {
             tokenizer.consume(TokenType.BOF)
-            if (!statementsAllowed && scope is DocStringUpdatable) {
-                scope.docString = readDocString(tokenizer)
+            if (definitionScope is DocStringUpdatable) {
+                definitionScope.docString = readDocString(tokenizer)
             }
             // scope.docString = if (statementsAllowed) "" else readDocString(tokenizer)
             val result = parseDefinitionsAndStatements(
                 tokenizer,
                 0,
-                scope,
-                definitionsAllowed = definitionsAllowed,
-                statementsAllowed = statementsAllowed,
+                statementScope = statementScope,
                 definitionScope = definitionScope
             )
             tokenizer.consume(TokenType.EOF)
@@ -90,20 +85,19 @@ object Parser {
     }
 
     fun parseStatements(tokenizer: TantillaTokenizer, context: ParsingContext) =
-        parseDefinitionsAndStatements(tokenizer, context.depth, context.scope, definitionsAllowed = false)
+        parseDefinitionsAndStatements(tokenizer, context.depth, statementScope = context.scope, definitionScope = null)
 
     fun parseDefinitions(tokenizer: TantillaTokenizer, context: ParsingContext) {
-        parseDefinitionsAndStatements(tokenizer, context.depth, context.scope, statementsAllowed = false)
+        parseDefinitionsAndStatements(tokenizer, context.depth, statementScope = null, definitionScope = context.scope)
     }
 
     fun parseDefinitionsAndStatements(
         tokenizer: TantillaTokenizer,
         depth: Int,
-        scope: Scope,
-        statementsAllowed: Boolean = true,
-        definitionsAllowed: Boolean = true,
-        definitionScope: Scope = scope
+        statementScope: Scope?,
+        definitionScope: Scope?
     ): Node {
+        require (statementScope != null || definitionScope != null)
         val statements = mutableListOf<Node>()
         var localDepth = depth
         while (tokenizer.current.type != TokenType.EOF
@@ -116,30 +110,30 @@ object Parser {
                 if (localDepth < depth) {
                     break
                 }
-                if (statementsAllowed) {
+                if (statementScope != null) {
                     for (i in 1 until tokenizer.current.text.count{ it == '\n'}) {
                         statements.add(Comment(null))
                     }
                 }
                 tokenizer.next()
             } else if (tokenizer.current.type == TokenType.DISABLED_CODE) {
-                    if (!definitionsAllowed) {
+                    if (definitionScope == null) {
                         throw tokenizer.exception("Definitions are not allowed here.")
                     }
                     val code = tokenizer.current.text
                     definitionScope.add(parseFailsafe(definitionScope, code.substring(4, code.length - 4)))
                     tokenizer.next()
             } else if (DECLARATION_KEYWORDS.contains(tokenizer.current.text)
-                || (!statementsAllowed && tokenizer.current.type == TokenType.IDENTIFIER
+                || (statementScope == null && tokenizer.current.type == TokenType.IDENTIFIER
                         && (tokenizer.lookAhead(1).text == ":" || tokenizer.lookAhead(1).text == "="))) {
-                    if (!definitionsAllowed) {
+                    if (definitionScope == null) {
                         throw tokenizer.exception("Definitions are not allowed here.")
                     }
                     val definition = parseDefinition(tokenizer, ParsingContext(definitionScope, localDepth))
                     definitionScope.add(definition)
-                } else if (statementsAllowed) {
+                } else if (statementScope != null) {
                     val statement =
-                        StatementParser.parseStatement(tokenizer, ParsingContext(scope, localDepth))
+                        StatementParser.parseStatement(tokenizer, ParsingContext(statementScope, localDepth))
                     statements.add(statement)
                 } else {
                     throw tokenizer.exception("Statements are not allowed here.")

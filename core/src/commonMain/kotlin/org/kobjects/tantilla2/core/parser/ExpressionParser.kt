@@ -203,7 +203,7 @@ object ExpressionParser {
 
 
 
-        val body = Parser.parseDefinitionsAndStatements(tokenizer, context.depth + 1, functionScope)
+        val body = Parser.parseDefinitionsAndStatements(tokenizer, context.depth + 1, functionScope, definitionScope = functionScope)
 
         println("*** Lambda body parsed: $body")
 

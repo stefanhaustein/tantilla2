@@ -102,7 +102,7 @@ class FunctionDefinition (
                 tokenizer.consume(":")
                 docString = Parser.readDocString(tokenizer)
                 resolvedBody =
-                    Parser.parseDefinitionsAndStatements(tokenizer, 1, this)
+                    Parser.parseDefinitionsAndStatements(tokenizer, 1, this, definitionScope = this)
             }
         } catch (e: Exception) {
             if (e is ParsingException) {

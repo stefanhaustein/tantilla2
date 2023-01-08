@@ -335,6 +335,9 @@ class TantillaViewModel(
     private fun loadCode(code: String) {
             try {
                 Parser.parseProgram(code, userRootScope)
+            } catch (e: ParsingException) {
+              e.printStackTrace()
+              dialogManager.showError(e.toString() + e.token)
             } catch (e: Exception) {
                 e.printStackTrace()
                 dialogManager.showError(e.toString())
