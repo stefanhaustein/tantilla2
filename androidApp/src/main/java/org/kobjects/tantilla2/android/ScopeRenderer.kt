@@ -33,13 +33,10 @@ fun RenderScope(viewModel: TantillaViewModel) {
         Scaffold(
             backgroundColor = Color.Transparent,
             topBar = {
-                RenderAppBar(
-                    viewModel, when (scope.parentScope) {
-                        null,
-                        is SystemRootScope -> viewModel.fileName.value
-                        else -> scope.name
-                    }
-                )
+                RenderAppBar(viewModel)
+            },
+            bottomBar = {
+
             }
         ) {
             LazyColumn(

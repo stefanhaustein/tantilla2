@@ -38,8 +38,6 @@ fun RenderKonsole(viewModel: TantillaViewModel) {
         Column() {
             RenderAppBar(
                 viewModel,
-                viewModel.fileName.value,
-
             )
             Box(Modifier.pointerInput(Unit) {
                 detectTapGestures(onTap = {

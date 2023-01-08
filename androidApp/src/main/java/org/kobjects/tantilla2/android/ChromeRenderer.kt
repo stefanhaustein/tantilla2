@@ -24,7 +24,6 @@ import org.kobjects.tantilla2.core.definition.SystemRootScope
 @Composable
 fun RenderAppBar(
     viewModel: TantillaViewModel,
-    title: String,
 ) {
 
     val showMenu = remember { mutableStateOf(false) }
