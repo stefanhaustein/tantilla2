@@ -3,7 +3,6 @@ package org.kobjects.tantilla2.core.parser
 import org.kobjects.tantilla2.core.node.expression.StrNode
 import org.kobjects.tantilla2.core.*
 import org.kobjects.parserlib.expressionparser.ExpressionParser as GreenspunExpressionParser
-import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
 import org.kobjects.tantilla2.core.classifier.InstantiableMetaType
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.definition.Definition
@@ -369,7 +368,7 @@ object ExpressionParser {
         var nameRequired = false
 
         val parseParameterList = if (parentesizedArgsList) !tokenizer.tryConsume(")")
-        else ((type.returnType == VoidType || type.hasRequiredParameters())
+        else ((type.returnType == NoneType || type.hasRequiredParameters())
                 && tokenizer.current.type != TokenType.EOF
                 && tokenizer.current.type != TokenType.LINE_BREAK
                 && tokenizer.current.text != ":"

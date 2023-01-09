@@ -3,7 +3,7 @@ package org.kobjects.tantilla2.core
 import org.kobjects.tantilla2.core.classifier.AdapterInstance
 import org.kobjects.tantilla2.core.node.LeafNode
 import org.kobjects.tantilla2.core.type.Type
-import org.kobjects.tantilla2.core.type.VoidType
+import org.kobjects.tantilla2.core.type.NoneType
 
 class TraitMethodBody(val index: Int): LeafNode() {
     override val returnType: Type
@@ -21,7 +21,7 @@ class TraitMethodBody(val index: Int): LeafNode() {
           methodImpl, {
               if (it == 0) self.instance
               else if (it < context.variables.size) context.variables[it]
-              else VoidType.None
+              else NoneType.None
           })
       return self.vmt[index].eval(methodContext)
     }

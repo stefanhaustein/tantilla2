@@ -9,7 +9,7 @@ import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.collection.ListType
-import org.kobjects.tantilla2.core.type.VoidType
+import org.kobjects.tantilla2.core.type.NoneType
 
 object TypeParser {
 
@@ -82,7 +82,7 @@ object TypeParser {
             val selfType: Type = when (context.scope) {
                 is StructDefinition -> context.scope
                 is TraitDefinition -> context.scope
-                is ImplDefinition -> if (context.scope.scope is Type) context.scope.scope as Type else VoidType
+                is ImplDefinition -> if (context.scope.scope is Type) context.scope.scope as Type else NoneType
                 else ->
                     throw IllegalStateException("self supported for structs, traits and implementations only; got: ${context}")
             }
@@ -106,7 +106,7 @@ object TypeParser {
             tokenizer.consume(")", ", or ) expected here while parsing the parameter list.")
         }
         tokenizer.enable(TokenType.LINE_BREAK)
-        val returnType = if (tokenizer.tryConsume("->")) parseType(tokenizer, context) else VoidType
+        val returnType = if (tokenizer.tryConsume("->")) parseType(tokenizer, context) else NoneType
         return FunctionType.Impl(returnType, parameters)
     }
 }

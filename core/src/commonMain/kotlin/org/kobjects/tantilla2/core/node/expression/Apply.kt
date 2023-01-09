@@ -6,7 +6,7 @@ import org.kobjects.tantilla2.core.Precedence
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.node.Node
-import org.kobjects.tantilla2.core.type.VoidType
+import org.kobjects.tantilla2.core.type.NoneType
 
 
 class Apply(
@@ -30,7 +30,7 @@ class Apply(
                 val result = parameters[it].eval(context)
                 // println("Result $result")
                 result
-            } else VoidType.None
+            } else NoneType.None
         }
         return callable.eval(functionContext)
     }

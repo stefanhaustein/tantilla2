@@ -2,11 +2,10 @@ package org.kobjects.tantilla2.stdlib.graphics
 
 import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.function.Parameter
-import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
 import org.kobjects.tantilla2.core.classifier.NativeTypeDefinition
 import org.kobjects.tantilla2.core.type.FloatType
 import org.kobjects.tantilla2.core.type.StrType
-import org.kobjects.tantilla2.core.type.VoidType
+import org.kobjects.tantilla2.core.type.NoneType
 
 class PenDefinition(graphicsScope: GraphicsScope) : NativeTypeDefinition(graphicsScope, "Pen"),
     Type {
@@ -15,7 +14,7 @@ class PenDefinition(graphicsScope: GraphicsScope) : NativeTypeDefinition(graphic
         defineNativeFunction(
             "line",
             "Draws a line between the given coordinates",
-            VoidType,
+            NoneType,
             Parameter("self", this),
             Parameter("x1", FloatType),
             Parameter("y1", FloatType),
@@ -29,7 +28,7 @@ class PenDefinition(graphicsScope: GraphicsScope) : NativeTypeDefinition(graphic
         defineNativeFunction(
             "rect",
             "Draws a rectangle starting at x,y with the given size.",
-            VoidType,
+            NoneType,
             Parameter("self", this),
             Parameter("x", FloatType),
             Parameter("y", FloatType),
@@ -43,7 +42,7 @@ class PenDefinition(graphicsScope: GraphicsScope) : NativeTypeDefinition(graphic
         defineNativeFunction(
             "circle",
             "Draws a circle with the given center (cx, cy) and radius (r).",
-            VoidType,
+            NoneType,
             Parameter("self", this),
             Parameter("cx", FloatType),
             Parameter("cy", FloatType),
@@ -56,7 +55,7 @@ class PenDefinition(graphicsScope: GraphicsScope) : NativeTypeDefinition(graphic
         defineNativeFunction(
             "text",
             "Draws text at the given baseline position.",
-            VoidType,
+            NoneType,
             Parameter("self", this),
             Parameter("x", FloatType),
             Parameter("y", FloatType),

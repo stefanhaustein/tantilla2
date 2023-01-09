@@ -5,7 +5,7 @@ import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.definition.UnitDefinition
 import org.kobjects.tantilla2.core.type.FloatType
 import org.kobjects.tantilla2.core.type.IntType
-import org.kobjects.tantilla2.core.type.VoidType
+import org.kobjects.tantilla2.core.type.NoneType
 import org.kobjects.tantilla2.core.classifier.NativePropertyDefinition
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.FunctionType
@@ -45,8 +45,8 @@ class ScreenDefinition(graphicsScope: GraphicsScope) : UnitDefinition(null, "scr
         defineNativeFunction(
             "add_tap_listener",
             "Called when the user taps on the screen.",
-            VoidType,
-            Parameter("callback", FunctionType.Impl(VoidType, listOf(Parameter("x", FloatType), Parameter("y", FloatType))))
+            NoneType,
+            Parameter("callback", FunctionType.Impl(NoneType, listOf(Parameter("x", FloatType), Parameter("y", FloatType))))
         ) { context ->
             context.globalRuntimeContext.tapListeners.add { x, y ->
                 context.globalRuntimeContext.activeThreads++
@@ -75,8 +75,8 @@ class ScreenDefinition(graphicsScope: GraphicsScope) : UnitDefinition(null, "scr
         defineNativeFunction(
             "request_animation_frame",
             "Calls the given function before refreshing the screen.",
-            VoidType,
-            Parameter("callback", FunctionType.Impl(VoidType, emptyList()))
+            NoneType,
+            Parameter("callback", FunctionType.Impl(NoneType, emptyList()))
         ) { context ->
             if (!context.globalRuntimeContext.stopRequested) {
                 context.globalRuntimeContext.activeThreads++

@@ -2,7 +2,7 @@ package org.kobjects.tantilla2.core.function
 
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.type.Type
-import org.kobjects.tantilla2.core.type.VoidType
+import org.kobjects.tantilla2.core.type.NoneType
 
 interface FunctionType : Type {
     val returnType: Type
@@ -64,7 +64,7 @@ interface FunctionType : Type {
             }
             val resultX = writer.x
             writer.append(')')
-            if (returnType != VoidType) {
+            if (returnType != NoneType) {
                 writer.append(" -> ")
                 writer.appendType(returnType)
             }

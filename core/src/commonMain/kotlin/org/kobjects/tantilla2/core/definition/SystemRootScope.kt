@@ -24,13 +24,14 @@ class SystemRootScope(
         add(MutableMapType(TypeVariable("K"), TypeVariable("V")))
         add(SetType(TypeVariable("E")))
         add(MutableSetType(TypeVariable("E")))
+        add(OptionalType(TypeVariable("V")))
         add(StrType)
 
         add(MathScope)
 
         defineNativeFunction("print",
                 "Print the value of the text parameter to the console.",
-                VoidType, Parameter("value", StringableType, isVararg = true)
+                NoneType, Parameter("value", StringableType, isVararg = true)
             ) {
                 val list = it[0] as Iterable<Any?>
                 systemAbstraction.write(list.joinToString(" "))
@@ -43,14 +44,14 @@ class SystemRootScope(
             }
 
         defineNativeFunction("assert", "Throws an exception if the argument does not evaluate to true.",
-            VoidType, Parameter("condition", BoolType), Parameter("message", StrType, StrNode.Const("Assertion failed"))) {
+            NoneType, Parameter("condition", BoolType), Parameter("message", StrType, StrNode.Const("Assertion failed"))) {
             if (!(it[0] as Boolean)) {
                 throw IllegalArgumentException(it[1] as String)
             }
         }
 
         defineNativeFunction("run", "Resets the program state and runs the main() function.",
-            VoidType) {
+            NoneType) {
             it.globalRuntimeContext.run(calledFromCode = true)
         }
 

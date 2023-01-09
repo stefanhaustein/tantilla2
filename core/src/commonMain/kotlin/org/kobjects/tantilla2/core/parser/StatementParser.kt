@@ -6,7 +6,7 @@ import org.kobjects.tantilla2.core.node.*
 import org.kobjects.tantilla2.core.collection.ListType
 import org.kobjects.tantilla2.core.collection.RangeType
 import org.kobjects.tantilla2.core.function.LambdaScope
-import org.kobjects.tantilla2.core.type.VoidType
+import org.kobjects.tantilla2.core.type.NoneType
 import org.kobjects.tantilla2.core.node.statement.*
 
 object StatementParser {
@@ -79,7 +79,7 @@ object StatementParser {
         if (context.scope !is FunctionDefinition) {
             throw tokenizer.exception("Function scope expected for 'return'")
         }
-        if (context.scope.type.returnType == VoidType) {
+        if (context.scope.type.returnType == NoneType) {
             return FlowControlNode(FlowSignal.Kind.RETURN)
         }
         val expression = ExpressionParser.parseExpression(tokenizer, context)

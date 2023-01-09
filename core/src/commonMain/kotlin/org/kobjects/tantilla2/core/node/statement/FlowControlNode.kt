@@ -4,7 +4,7 @@ import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.node.Node
-import org.kobjects.tantilla2.core.type.VoidType
+import org.kobjects.tantilla2.core.type.NoneType
 
 class FlowControlNode(
     val kind: FlowSignal.Kind,
@@ -16,7 +16,7 @@ class FlowControlNode(
         if (expression == null) emptyList() else listOf(expression)
 
     override fun eval(context: LocalRuntimeContext): FlowSignal {
-        val parameter = if (expression == null) VoidType.None else expression.eval(context)
+        val parameter = if (expression == null) NoneType.None else expression.eval(context)
         return FlowSignal(kind, parameter)
     }
 

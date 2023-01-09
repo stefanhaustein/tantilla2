@@ -14,7 +14,7 @@ class CompoundAssignment(
 ) : Node() {
 
     override val returnType: Type
-        get() = VoidType
+        get() = NoneType
 
     override fun children() = listOf(target, source)
 

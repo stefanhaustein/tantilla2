@@ -3,7 +3,7 @@ package org.kobjects.tantilla2.core.node.statement
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.type.Type
-import org.kobjects.tantilla2.core.type.VoidType
+import org.kobjects.tantilla2.core.type.NoneType
 import org.kobjects.tantilla2.core.node.Node
 
 class BlockNode(
@@ -11,11 +11,11 @@ class BlockNode(
 ): Node() {
 
     override val returnType: Type
-        get() = if (statements.isEmpty()) VoidType else statements.last().returnType
+        get() = if (statements.isEmpty()) NoneType else statements.last().returnType
 
 
     override fun eval(env: LocalRuntimeContext): Any {
-        var result: Any = VoidType.None
+        var result: Any = NoneType.None
         for (statement: Node in statements) {
             result = statement.eval(env)
             if (result is FlowSignal) {

@@ -1,18 +1,17 @@
 package org.kobjects.tantilla2.core.type
 
 import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
+import org.kobjects.tantilla2.core.classifier.NativeTypeDefinition
 import org.kobjects.tantilla2.core.collection.ListType
 import org.kobjects.tantilla2.core.collection.TypedList
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.node.expression.IntNode
 import org.kobjects.tantilla2.core.node.expression.StrNode
 
-object StrType : NativeStructDefinition(
+object StrType : NativeTypeDefinition(
     null,
     "Str",
-    "A character String. Use the constructor to convert a value to its string representation.",
-    { it[0].toString() },
-    Parameter("value", AnyType, defaultValueExpression = StrNode.Const("")),
+    "A sequence of characters (unicode code points).",
 )  {
     init {
         defineMethod("int",

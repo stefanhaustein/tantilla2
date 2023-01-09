@@ -2,13 +2,13 @@ package org.kobjects.tantilla2.core.node.statement
 
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.function.LocalVariableDefinition
-import org.kobjects.tantilla2.core.type.VoidType
+import org.kobjects.tantilla2.core.type.NoneType
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.type.Type
 
 class Let(val definition: LocalVariableDefinition, val type: Type, val typeIsExplicit: Boolean, val initializer: Node?) : Node() {
     override val returnType: Type
-        get() = VoidType
+        get() = NoneType
 
     override fun children() = if (initializer == null) emptyList() else listOf(initializer)
 
@@ -16,7 +16,7 @@ class Let(val definition: LocalVariableDefinition, val type: Type, val typeIsExp
         if (initializer != null) {
             context.variables[definition.index] = initializer.eval(context)
         }
-        return VoidType.None
+        return NoneType.None
     }
 
     override fun reconstruct(newChildren: List<Node>) =

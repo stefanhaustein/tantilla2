@@ -6,7 +6,7 @@ import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.type.IntType
 import org.kobjects.tantilla2.core.type.Type
-import org.kobjects.tantilla2.core.type.VoidType
+import org.kobjects.tantilla2.core.type.NoneType
 
 class MutableListType(
     elementType: Type
@@ -25,19 +25,19 @@ class MutableListType(
 
     init {
         defineMethod("append", "Appends an element to the list",
-            VoidType,
+            NoneType,
             Parameter("value", elementType)) {
             (it[0] as MutableTypedList).data.add(it[1])
         }
 
         defineMethod("clear", "Remove all elements from this list.",
-            VoidType
+            NoneType
         ) {
             (it[0] as MutableTypedList).data.clear()
         }
 
         defineMethod("insert", "Inserts an value into the list at the given index",
-            VoidType,
+            NoneType,
             Parameter("index", IntType),
             Parameter("value", elementType)
         ) {
@@ -50,7 +50,7 @@ class MutableListType(
         }
 
         defineMethod("sort", "Sort this list in place.",
-            VoidType
+            NoneType
         ) {
             ((it[0] as MutableTypedList).data as (MutableList<Comparable<Any>>)).sort()
         }

@@ -11,7 +11,7 @@ fun Type.commonType(other: Type): Type =
 
 fun commonType(types: List<Type>): Type {
     if (types.isEmpty()) {
-        return VoidType
+        return NoneType
     }
     var result = types[0]
     for (i in 1 until types.size) {
@@ -23,7 +23,7 @@ fun commonType(types: List<Type>): Type {
 
 val Any?.dynamicType: Type
     get() = when (this) {
-        null -> VoidType
+        null -> NoneType
         is Typed -> type
         is Double -> FloatType
         is Long -> IntType

@@ -1,12 +1,12 @@
 package org.kobjects.tantilla2.core
 
 import org.kobjects.tantilla2.core.definition.ContextOwner
-import org.kobjects.tantilla2.core.type.VoidType
+import org.kobjects.tantilla2.core.type.NoneType
 
 class LocalRuntimeContext(
     val globalRuntimeContext: GlobalRuntimeContext,
     val scope: ContextOwner,
-    initializer: (Int) -> Any = { VoidType.None },
+    initializer: (Int) -> Any = { NoneType.None },
 ) {
     val variables = MutableList(scope.dynamicScopeSize, initializer)
 
@@ -28,7 +28,7 @@ class LocalRuntimeContext(
             variables.removeAt(variables.size - 1)
         }
         while (variables.size < size) {
-            variables.add(VoidType.None)
+            variables.add(NoneType.None)
         }
     }
 

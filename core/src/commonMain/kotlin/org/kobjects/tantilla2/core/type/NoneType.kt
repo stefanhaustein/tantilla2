@@ -2,14 +2,14 @@ package org.kobjects.tantilla2.core.type
 
 import org.kobjects.tantilla2.core.CodeWriter
 
-object VoidType : Type {
+object NoneType : Type {
     override fun serializeType(writer: CodeWriter) {
-        writer.append("Void")
+        writer.append("None")
     }
 
     object None : Typed {
         override val type: Type
-            get() = VoidType
+            get() = NoneType
 
         override fun toString() = "None"
     }

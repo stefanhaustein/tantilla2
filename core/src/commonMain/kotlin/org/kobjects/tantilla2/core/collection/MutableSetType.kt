@@ -1,12 +1,8 @@
 package org.kobjects.tantilla2.core.collection
 
-import org.kobjects.tantilla2.core.LocalRuntimeContext
-import org.kobjects.tantilla2.core.function.Callable
-import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Parameter
-import org.kobjects.tantilla2.core.type.IntType
 import org.kobjects.tantilla2.core.type.Type
-import org.kobjects.tantilla2.core.type.VoidType
+import org.kobjects.tantilla2.core.type.NoneType
 
 class MutableSetType(
     elementType: Type
@@ -23,13 +19,13 @@ class MutableSetType(
 
     init {
         defineMethod("add", "Adds an element to this set",
-            VoidType,
+            NoneType,
             Parameter("value", elementType)) {
             (it[0] as MutableTypedSet).data.add(it[1]!!)
         }
 
         defineMethod("clear", "Remove all elements from this set.",
-            VoidType
+            NoneType
         ) {
             (it[0] as MutableTypedSet).data.clear()
         }
