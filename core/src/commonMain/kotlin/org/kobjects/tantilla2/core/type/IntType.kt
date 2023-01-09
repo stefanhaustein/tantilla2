@@ -12,7 +12,7 @@ import kotlin.math.min
 
 object IntType : NativeTypeDefinition(
     null,
-    "int",
+    "Int",
     "64 bit signed integer.",
 ) {
     init {

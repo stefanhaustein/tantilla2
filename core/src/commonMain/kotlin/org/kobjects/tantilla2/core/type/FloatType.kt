@@ -8,7 +8,7 @@ import kotlin.math.*
 
 object FloatType : NativeTypeDefinition(
     null,
-    "float",
+    "Float",
     "Floating point number. The constructor is able to parse strings and to convert ints.",
     /*ctorParams = listOf(Parameter("value", AnyType, defaultValueExpression = FloatNode.Const(0.0))),
     ctor = {

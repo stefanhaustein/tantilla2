@@ -17,14 +17,10 @@ fun String.quote(): String {
 
 fun Any.stringify() = when (this) {
     is String -> this
-    true -> "True"
-    false -> "False"
     else -> toString()
 }
 
 fun Any.toLiteral() = when (this) {
     is String -> quote()
-    true -> "True"
-    false -> "False"
     else -> toString()
 }

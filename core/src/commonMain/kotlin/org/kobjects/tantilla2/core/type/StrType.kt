@@ -9,7 +9,7 @@ import org.kobjects.tantilla2.core.node.expression.StrNode
 
 object StrType : NativeStructDefinition(
     null,
-    "str",
+    "Str",
     "A character String. Use the constructor to convert a value to its string representation.",
     { it[0].toString() },
     Parameter("value", AnyType, defaultValueExpression = StrNode.Const("")),

@@ -221,12 +221,12 @@ object ExpressionParser {
             TokenType.STRING -> StrNode.Const(tokenizer.next().text.unquote().unescape())
             TokenType.MULTILINE_STRING ->StrNode.Const(tokenizer.next().text.unquoteMultiline(), true)
             TokenType.IDENTIFIER ->  when (tokenizer.current.text) {
-                "True" -> {
-                    tokenizer.consume("True")
+                "True", "true" -> {
+                    tokenizer.next()
                     BoolNode.True
                 }
-                "False" -> {
-                    tokenizer.consume("False")
+                "False", "false" -> {
+                    tokenizer.next()
                     BoolNode.False
                 }
                 "lambda" -> parseLambda(tokenizer, context)

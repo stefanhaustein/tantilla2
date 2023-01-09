@@ -54,7 +54,12 @@ class SystemRootScope(
             it.globalRuntimeContext.run(calledFromCode = true)
         }
 
-
+        defineNativeFunction("str",
+            "Converts the value to a string.",
+            StrType, Parameter("value", StringableType)
+        ) {
+            it.get(0).toString()
+        }
 
     }
 

@@ -26,6 +26,15 @@ object TypeParser {
             scope = scope.resolveStaticOrError(name, scope == context.scope).getValue(null) as Scope
             name = tokenizer.consume(TokenType.IDENTIFIER)
         }
+
+        name = when (name) {
+            "bool" -> "Bool"
+            "float" -> "Float"
+            "int" -> "Int"
+            "str" -> "Str"
+            else -> name
+        }
+
         val type = scope.resolveStaticOrError(name, scope == context.scope).getValue(null) as Type
 
         if (type.genericParameterTypes.isNotEmpty() && tokenizer.tryConsume("[")) {
