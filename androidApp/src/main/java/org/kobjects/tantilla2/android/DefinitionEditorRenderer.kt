@@ -84,8 +84,8 @@ fun RenderDefinitionEditor(viewModel: TantillaViewModel) {
                 else listOf(viewModel.runtimeException.value!!) + errors.value
             Row() {
                 IconButton(
-                    enabled = errors.size > 1,
-                    onClick = { errorIndex.value-- }
+                    enabled = errorIndex.value > 0,
+                    onClick = { errorIndex.value--  }
                 ) {
                     Icon(Icons.Default.ArrowLeft, "Previous")
                 }
@@ -98,7 +98,7 @@ fun RenderDefinitionEditor(viewModel: TantillaViewModel) {
 
                     )
                 } else {
-                    val error = errors[errorIndex.value % errors.size]
+                    val error = errors[errorIndex.value]
                     val text = error.message ?: error.toString()
                     Text(text,
                         Modifier
@@ -111,7 +111,7 @@ fun RenderDefinitionEditor(viewModel: TantillaViewModel) {
                 }
 
                 IconButton(
-                    enabled = errors.size > 1,
+                    enabled = errorIndex.value < errors.size - 1,
                     onClick = { errorIndex.value++ }
                 ) {
                     Icon(Icons.Default.ArrowRight, "Next")

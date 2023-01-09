@@ -230,21 +230,19 @@ struct RayTracer:
     cam.forward.plus(cam.right.times(x / 200)).plus(cam.up.times(y / 200)).norm()
 
   def render(s: Scene, b: graphics.BitmapImage):
-    renderRow(s, b, 0)
-
-  def renderRow(s: Scene, b: graphics.BitmapImage, y: int):
+    let y0 = b.height // 2
     let scale = 150.0 / min(b.width, b.height)
-    let mut yy = y // 2
-    if y % 2 == 0:
-      yy = -yy-1
+    renderRow(s, b, scale, y0)
+    for y in range(0, y0):
+      renderRow(s, b, scale, y0 - y)
+      renderRow(s, b, scale, y0 + y)
 
+  def renderRow(s: Scene, b: graphics.BitmapImage, scale: float, y: int):
+    let cx = b.width//2
+    let cy = b.height//2
     for x in range(0, b.width):
-      let color = traceRay(Ray(s.camera.pos, getPoint((x - b.width/2) * scale, yy * scale, s.camera)), s, 0)
-      b.set(x, b.height / 2 - yy, color)
-
-    if (y < b.height - 2):
-      # screen.request_animation_frame(lambda: renderRow(s, b, y + 1))
-      renderRow(s, b, y + 1)
+      let color = traceRay(Ray(s.camera.pos, getPoint((x - cx) * scale, (cy - y) * scale, s.camera)), s, 0)
+      b.set(x, y, color)
 
 
 defaultThings = [Plane(Vector(0,1,0), 0, Checkerboard) as Thing, Sphere(Vector(0,1,-0.25), 1, Shiny) as Thing, Sphere(Vector(-1,0.5,1.5),0.5, Shiny) as Thing]
