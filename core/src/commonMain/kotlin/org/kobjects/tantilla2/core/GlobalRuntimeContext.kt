@@ -108,7 +108,7 @@ class GlobalRuntimeContext(
             val localScope = LambdaScope(userRootScope)
             val parsed = Parser.parseShellInput(line, localScope, userRootScope)
             println("parsed: $parsed")
-            userRootScope.resolveAll()
+            userRootScope.rebuild()
             println("resolved: $parsed")
             initialize(incremental = true)
 

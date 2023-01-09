@@ -40,6 +40,7 @@ interface Definition : SerializableCode, Comparable<Definition> {
     fun findNode(node: Node): Definition? = null
     fun isDynamic() = kind == Kind.METHOD || kind == Kind.PROPERTY
 
+    /*
     fun resolveAll(): Boolean {
         try {
             resolve()
@@ -49,12 +50,13 @@ interface Definition : SerializableCode, Comparable<Definition> {
             userRootScope().definitionsWithErrors[this] = listOf(e)
             return false
         }
-    }
+    }*/
 
     /**
      * Reset the compilation state
      */
-    fun reset() {
+    fun invalidate() {
+        userRootScope().unresolved.add(this)
     }
 
     /**
@@ -74,14 +76,13 @@ interface Definition : SerializableCode, Comparable<Definition> {
     fun serializeQualifiedName(writer: CodeWriter) {
         // Am I local or at root?
         if (writer.forTitle
-            || parentScope == writer.scope
             || parentScope == null
+            || parentScope == writer.scope
             || parentScope == AbsoluteRootScope
             || parentScope is UserRootScope
             || parentScope is SystemRootScope) {
             writer.append(name)
         } else {
-
             // Check for imports
             var scope: Scope? = writer.scope
             var found = false

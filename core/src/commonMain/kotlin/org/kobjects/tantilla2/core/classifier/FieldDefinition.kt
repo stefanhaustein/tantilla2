@@ -26,7 +26,7 @@ class FieldDefinition(
     override var definitionText
         get() = _definitionText
         set(value) {
-            reset()
+            invalidate()
             _definitionText = value
         }
 
@@ -158,10 +158,10 @@ class FieldDefinition(
         return null
     }
 
-    override fun reset() {
+    override fun invalidate() {
         resolvedInitializer = UnresolvedNode
         resolvedType = UnresolvedType
-        super.reset()
+        super.invalidate()
     }
 
     fun initialize(staticVariableContext: LocalRuntimeContext) {

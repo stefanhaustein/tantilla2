@@ -161,6 +161,18 @@ abstract class Scope(
         )
     }
 
+    fun recurse(action: (Definition) -> Unit) {
+        action(this)
+        for (child in this) {
+            if (child is Scope) {
+                child.recurse(action)
+            } else {
+                action(child)
+            }
+        }
+    }
+
+    /*
     override fun resolveAll(): Boolean {
         var childError = false
         for (definition in this) {
@@ -173,7 +185,7 @@ abstract class Scope(
             userRootScope().definitionsWithErrors.put(this, listOf())
         }
         return !childError && !localError
-    }
+    }*/
 
     open fun registerStatic(fieldDefinition: FieldDefinition): Int =
         parentScope!!.registerStatic(fieldDefinition)
@@ -248,9 +260,4 @@ abstract class Scope(
         return null
     }
 
-    override fun reset() {
-        for (definition in this) {
-            definition.reset()
-        }
-    }
 }

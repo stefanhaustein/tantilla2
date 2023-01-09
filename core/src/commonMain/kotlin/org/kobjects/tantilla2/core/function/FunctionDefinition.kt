@@ -27,7 +27,7 @@ class FunctionDefinition (
     override var definitionText: String
         get() = _definitionText
         set(value) {
-            reset()
+            invalidate()
             _definitionText = value
         }
 
@@ -173,8 +173,8 @@ class FunctionDefinition (
     override fun findNode(node: Node): Definition? =
         if (resolvedBody?.containsNode(node) ?: false) this else null
 
-    override fun reset() {
-        super.reset()
+    override fun invalidate() {
+        super.invalidate()
         resolvedType = UnresolvedType
         resolvedBody = UnresolvedNode
         locals.clear()

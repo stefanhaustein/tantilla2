@@ -278,7 +278,7 @@ object ExpressionParser {
     ): Node {
         val trait = parseType(tokenizer, context) as TraitDefinition
         val impl = trait.requireImplementationFor(base.returnType)
-        impl.resolveAll()
+        // impl.resolveAll()
         return As(base, impl, implicit = false)
     }
 

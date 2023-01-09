@@ -5,11 +5,6 @@ import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.definition.Scope
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.FunctionDefinition
-import org.kobjects.tantilla2.core.parser.Parser
-import org.kobjects.tantilla2.core.parser.ParsingContext
-import org.kobjects.tantilla2.core.parser.TantillaTokenizer
-import org.kobjects.tantilla2.core.parser.TokenType
-import org.kobjects.tantilla2.core.type.Type
 
 class ImplDefinition(
     override val parentScope: Scope,
@@ -44,7 +39,8 @@ class ImplDefinition(
     override val supportsMethods: Boolean
         get() = true
 
-    override fun reset() {
+    override fun invalidate() {
+        super.invalidate()
         resolvedScope = null
         resolvedTrait = null
         vmt = emptyList()
