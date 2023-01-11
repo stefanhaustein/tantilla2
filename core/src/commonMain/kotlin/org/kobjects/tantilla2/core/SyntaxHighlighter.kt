@@ -41,8 +41,7 @@ fun highlightSyntax(
 
 
                 when (token.type) {
-                    TokenType.EOF,
-                    TokenType.BOF -> {
+                    TokenType.EOF -> {
                     }
                     TokenType.MULTILINE_STRING,
                     TokenType.STRING ->

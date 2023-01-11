@@ -45,7 +45,7 @@ android {
 dependencies {
     implementation(project(":core"))
     implementation("org.kobjects.konsole:core:0.2.3")
-    implementation("org.kobjects.parserlib:core:0.4.1")
+    implementation("org.kobjects.parserlib:core:0.4.3")
     implementation("org.kobjects.konsole:compose:0.2.3")
     implementation("androidx.activity:activity-compose:1.6.1")
     implementation("androidx.compose.ui:ui:1.3.2")

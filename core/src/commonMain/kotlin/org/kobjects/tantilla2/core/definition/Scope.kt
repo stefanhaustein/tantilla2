@@ -50,7 +50,6 @@ abstract class Scope(
 
     fun checkErrors(newProperty: String): List<ParsingException> {
         val tokenizer = TantillaTokenizer(newProperty)
-        tokenizer.next()
         try {
             val result = Parser.parseDefinition(tokenizer, ParsingContext(this, 0))
             result.resolve()

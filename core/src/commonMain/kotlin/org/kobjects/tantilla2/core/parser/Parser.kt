@@ -66,7 +66,6 @@ object Parser {
     ): Node {
         val tokenizer = TantillaTokenizer(source)
         try {
-            tokenizer.consume(TokenType.BOF)
             if (definitionScope is DocStringUpdatable) {
                 definitionScope.docString = readDocString(tokenizer)
             }
@@ -356,7 +355,6 @@ object Parser {
 
     fun parseFailsafe(parentScope: Scope, code: String): Definition {
         val tokenizer = TantillaTokenizer(code)
-        tokenizer.next()
         var result: Definition
         try {
             result = parseDefinition(tokenizer, ParsingContext(parentScope, -1))

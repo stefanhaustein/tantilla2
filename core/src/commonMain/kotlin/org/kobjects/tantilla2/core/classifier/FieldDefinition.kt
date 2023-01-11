@@ -86,7 +86,6 @@ class FieldDefinition(
         }
 
         val tokenizer = TantillaTokenizer(definitionText)
-        tokenizer.consume(TokenType.BOF)
 
         tokenizer.tryConsume("static")
         tokenizer.tryConsume("def")

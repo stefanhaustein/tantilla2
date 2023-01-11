@@ -74,8 +74,6 @@ class FunctionDefinition (
 
         val tokenizer = TantillaTokenizer(definitionText)
         try {
-            tokenizer.consume(TokenType.BOF)
-
             tokenizer.tryConsume("static")
             tokenizer.consume("def")
             tokenizer.consume(TokenType.IDENTIFIER)

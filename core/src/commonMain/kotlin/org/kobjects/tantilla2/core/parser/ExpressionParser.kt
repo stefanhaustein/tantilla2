@@ -214,7 +214,7 @@ object ExpressionParser {
         if (s.contains('.') || s.contains('e') || s.contains('E'))
             FloatNode.Const(s.toDouble()) else IntNode.Const(s.toLong())
 
-    fun parsePrimary(tokenizer: TantillaTokenizer, context: ParsingContext) =
+    fun parsePrimary(tokenizer: TantillaTokenizer, context: ParsingContext): Node =
         when (tokenizer.current.type) {
             TokenType.NUMBER -> createNumberLiteral(tokenizer.next().text);
             TokenType.STRING -> StrNode.Const(tokenizer.next().text.unquote().unescape())

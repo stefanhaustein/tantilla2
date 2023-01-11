@@ -4,7 +4,7 @@ import org.kobjects.parserlib.tokenizer.Tokenizer
 import org.kobjects.parserlib.tokenizer.RegularExpressions
 
 enum class TokenType {
-    BOF, IDENTIFIER, NUMBER, SYMBOL, EOF, LINE_BREAK, STRING, MULTILINE_STRING, COMMENT, DISABLED_CODE
+   IDENTIFIER, NUMBER, SYMBOL, EOF, LINE_BREAK, STRING, MULTILINE_STRING, COMMENT, DISABLED_CODE
 }
 
 fun unquote(s: String): String {
@@ -17,7 +17,6 @@ fun unquote(s: String): String {
 
 class TantillaTokenizer(input: String, normalize: Boolean = true) : Tokenizer<TokenType>(
     input,
-    TokenType.BOF,
     TokenType.EOF,
     Regex("[ \\t\\r]+") to null,
     RegularExpressions.NUMBER to TokenType.NUMBER,
