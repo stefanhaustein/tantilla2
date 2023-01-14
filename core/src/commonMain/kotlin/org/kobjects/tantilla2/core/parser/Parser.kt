@@ -64,7 +64,7 @@ object Parser {
         statementScope: Scope? = null,
         definitionScope: Scope? = null,
     ): Node {
-        val tokenizer = TantillaTokenizer(source)
+        val tokenizer = TantillaScanner(source)
         try {
             if (definitionScope is DocStringUpdatable) {
                 definitionScope.docString = readDocString(tokenizer)
@@ -76,22 +76,22 @@ object Parser {
                 statementScope = statementScope,
                 definitionScope = definitionScope
             )
-            tokenizer.consume(TokenType.EOF)
+            tokenizer.requireEof()
             return result
         } catch (e: Exception) {
             throw tokenizer.ensureParsingException(e)
         }
     }
 
-    fun parseStatements(tokenizer: TantillaTokenizer, context: ParsingContext) =
+    fun parseStatements(tokenizer: TantillaScanner, context: ParsingContext) =
         parseDefinitionsAndStatements(tokenizer, context.depth, statementScope = context.scope, definitionScope = null)
 
-    fun parseDefinitions(tokenizer: TantillaTokenizer, context: ParsingContext) {
+    fun parseDefinitions(tokenizer: TantillaScanner, context: ParsingContext) {
         parseDefinitionsAndStatements(tokenizer, context.depth, statementScope = null, definitionScope = context.scope)
     }
 
     fun parseDefinitionsAndStatements(
-        tokenizer: TantillaTokenizer,
+        tokenizer: TantillaScanner,
         depth: Int,
         statementScope: Scope?,
         definitionScope: Scope?
@@ -114,14 +114,14 @@ object Parser {
                         statements.add(Comment(null))
                     }
                 }
-                tokenizer.next()
+                tokenizer.consume()
             } else if (tokenizer.current.type == TokenType.DISABLED_CODE) {
                     if (definitionScope == null) {
                         throw tokenizer.exception("Definitions are not allowed here.")
                     }
                     val code = tokenizer.current.text
                     definitionScope.add(parseFailsafe(definitionScope, code.substring(4, code.length - 4)))
-                    tokenizer.next()
+                    tokenizer.consume()
             } else if (DECLARATION_KEYWORDS.contains(tokenizer.current.text)
                 || (statementScope == null && tokenizer.current.type == TokenType.IDENTIFIER
                         && (tokenizer.lookAhead(1).text == ":" || tokenizer.lookAhead(1).text == "="))) {
@@ -143,14 +143,14 @@ object Parser {
             else BlockNode(*statements.toTypedArray())
     }
 
-    fun readDocString(tokenizer: TantillaTokenizer): String {
+    fun readDocString(tokenizer: TantillaScanner): String {
         if (tokenizer.current.type == TokenType.STRING || tokenizer.current.type == TokenType.MULTILINE_STRING) {
-            return unquote(tokenizer.next().text)
+            return unquote(tokenizer.consume())
         }
         return ""
     }
 
-    fun parseDefinition(tokenizer: TantillaTokenizer, context: ParsingContext): Definition {
+    fun parseDefinition(tokenizer: TantillaScanner, context: ParsingContext): Definition {
         val startPos = tokenizer.current.pos
         val explicitlyStatic = tokenizer.tryConsume("static")
         var mutable = tokenizer.tryConsume("mut")
@@ -232,7 +232,7 @@ object Parser {
         }
     }
 
-    fun parseEnum(tokenizer: TantillaTokenizer, parsingContext: ParsingContext): EnumDefinition {
+    fun parseEnum(tokenizer: TantillaScanner, parsingContext: ParsingContext): EnumDefinition {
         tokenizer.consume("enum")
         val name = tokenizer.consume(TokenType.IDENTIFIER)
         val enumDefinition = EnumDefinition(parsingContext.scope, name)
@@ -246,13 +246,13 @@ object Parser {
         return enumDefinition
     }
 
-    fun consumeInBrackets(tokenizer: TantillaTokenizer) {
+    fun consumeInBrackets(tokenizer: TantillaScanner) {
         val end: String
         when(tokenizer.current.text) {
             "=" -> {
-                tokenizer.next()
+                tokenizer.consume()
                 while(tokenizer.current.type == TokenType.LINE_BREAK) {
-                    tokenizer.next()
+                    tokenizer.consume()
                 }
                 return
             }
@@ -262,21 +262,21 @@ object Parser {
             else -> return
         }
         do {
-            tokenizer.next()
+            tokenizer.consume()
         } while (tokenizer.current.text != end
             && tokenizer.current.type != TokenType.EOF)
     }
 
-    fun consumeLine(tokenizer: TantillaTokenizer, startPos: Int): String {
+    fun consumeLine(tokenizer: TantillaScanner, startPos: Int): String {
         while (tokenizer.current.type != TokenType.EOF && tokenizer.current.type != TokenType.LINE_BREAK) {
             consumeInBrackets(tokenizer)
-            tokenizer.next()
+            tokenizer.consume()
         }
-        return tokenizer.input.substring(startPos, tokenizer.current.pos)
+        return tokenizer.code.substring(startPos, tokenizer.current.pos)
     }
 
     fun consumeBody(
-        tokenizer: TantillaTokenizer,
+        tokenizer: TantillaScanner,
         startPos: Int,
         returnDepth: Int
     ): String {
@@ -293,22 +293,22 @@ object Parser {
                 }
             }
             if (localDepth <= returnDepth) {
-                return tokenizer.input.substring(startPos, tokenizer.current.pos)
+                return tokenizer.code.substring(startPos, tokenizer.current.pos)
             }
-            tokenizer.next()
+            tokenizer.consume()
         }
-        return tokenizer.input.substring(startPos)
+        return tokenizer.code.substring(startPos)
     }
 
-    fun skipLineBreaks(tokenizer: TantillaTokenizer, currentDepth: Int) {
+    fun skipLineBreaks(tokenizer: TantillaScanner, currentDepth: Int) {
         while (tokenizer.current.type == TokenType.LINE_BREAK
             && getIndent(tokenizer.current.text) >= currentDepth) {
-            tokenizer.next()
+            tokenizer.consume()
         }
     }
 
 
-    fun resolveVariable(tokenizer: TantillaTokenizer, context: ParsingContext, typeOnly: Boolean = false):
+    fun resolveVariable(tokenizer: TantillaScanner, context: ParsingContext, typeOnly: Boolean = false):
             Triple<Type, Boolean, Node?> {
 
         val scope = context.scope
@@ -323,13 +323,13 @@ object Parser {
         }
         if (tokenizer.tryConsume("=")) {
             while (tokenizer.current.type == TokenType.LINE_BREAK) {
-                tokenizer.next()
+                tokenizer.consume()
             }
-            initializer = ExpressionParser.parseExpression(tokenizer, context)
+            initializer = TantillaExpressionParser.parseExpression(tokenizer, context)
             if (type == null) {
                 type = initializer.returnType
             } else {
-                initializer = ExpressionParser.matchType(initializer, type)
+                initializer = TantillaExpressionParser.matchType(initializer, type)
             }
         } else if (type == null) {
             throw tokenizer.exception("Explicit type or initializer expression required.")
@@ -339,7 +339,7 @@ object Parser {
 
 
     fun parseFieldDeclaration(
-        tokenizer: TantillaTokenizer,
+        tokenizer: TantillaScanner,
         context: ParsingContext,
         startPos: Int,
         local: Boolean,
@@ -354,13 +354,13 @@ object Parser {
     }
 
     fun parseFailsafe(parentScope: Scope, code: String): Definition {
-        val tokenizer = TantillaTokenizer(code)
+        val tokenizer = TantillaScanner(code)
         var result: Definition
         try {
             result = parseDefinition(tokenizer, ParsingContext(parentScope, -1))
 
             while (tokenizer.current.type == TokenType.LINE_BREAK) {
-                tokenizer.next()
+                tokenizer.consume()
             }
 
             if (tokenizer.current.type != TokenType.EOF) {

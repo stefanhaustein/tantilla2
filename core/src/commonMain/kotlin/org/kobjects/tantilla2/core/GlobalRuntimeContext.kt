@@ -4,11 +4,11 @@ import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.definition.ContextOwner
 import org.kobjects.tantilla2.core.definition.UserRootScope
 import org.kobjects.tantilla2.core.function.Callable
-import org.kobjects.tantilla2.core.function.FunctionDefinition
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.LambdaScope
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.parser.Parser
+import org.kobjects.tantilla2.system.ThreadHandle
 
 class GlobalRuntimeContext(
     val userRootScope: UserRootScope,
@@ -17,7 +17,7 @@ class GlobalRuntimeContext(
 ) {
     var initializedTo = 0
     var stopRequested = false
-    var activeThreads = 0
+    var activeThreads = mutableSetOf<ThreadHandle>()
     var exception: TantillaRuntimeException? = null
     val tapListeners = mutableListOf<(Double, Double) -> Unit>()
     val staticVariableValues = LocalRuntimeContext(this, userRootScope)
@@ -42,7 +42,7 @@ class GlobalRuntimeContext(
 
 
     fun run(calledFromCode: Boolean = false) {
-        if (activeThreads != 0 && !calledFromCode) {
+        if (activeThreads.isNotEmpty() && !calledFromCode) {
             exception = createException(null, null, "Already running.")
             return
         }
@@ -87,15 +87,15 @@ class GlobalRuntimeContext(
 
     private fun launch(task: () -> Unit) {
         userRootScope.parentScope.systemAbstraction.launch {
-            activeThreads++
+            activeThreads.add(it)
             try {
                 task()
             } catch (e: Exception) {
                 e.printStackTrace()
                 exception = wrapException(e)
             } finally {
-                activeThreads--
-                if (activeThreads == 0) {
+                activeThreads.remove(it)
+                if (activeThreads.isEmpty()) {
                     userRootScope.parentScope.runStateCallback(this)
                 }
             }
@@ -135,6 +135,13 @@ class GlobalRuntimeContext(
             userRootScope.staticFieldDefinitions[index]?.initialize(staticVariableValues)
         }
         initializedTo = userRootScope.staticFieldDefinitions.size
+    }
+
+    fun requestStop() {
+        stopRequested = true
+        for (handler in activeThreads) {
+            handler.cancel()
+        }
     }
 
 }

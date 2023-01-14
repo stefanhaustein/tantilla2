@@ -107,7 +107,7 @@ fun RenderAppBar(
                     Icon(Icons.Default.MoreVert, contentDescription = "More")
                     var menuItems = buildList {
                         key(viewModel.runstateUpdateTrigger.value) {
-                            if (viewModel.globalRuntimeContext.activeThreads == 0)
+                            if (viewModel.globalRuntimeContext.activeThreads.isEmpty())
                                 add("Run main()" to { viewModel.runMain() })
                             else add("Stop" to { viewModel.stop() })
                         }

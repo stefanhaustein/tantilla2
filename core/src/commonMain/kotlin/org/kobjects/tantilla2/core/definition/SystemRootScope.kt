@@ -6,6 +6,7 @@ import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.node.expression.StrNode
 import org.kobjects.tantilla2.core.type.*
 import org.kobjects.tantilla2.stdlib.math.MathScope
+import org.kobjects.tantilla2.system.SystemAbstraction
 
 class SystemRootScope(
     val systemAbstraction: SystemAbstraction,

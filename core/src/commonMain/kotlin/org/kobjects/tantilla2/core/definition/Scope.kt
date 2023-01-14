@@ -8,7 +8,7 @@ import org.kobjects.tantilla2.core.function.*
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.parser.Parser
 import org.kobjects.tantilla2.core.parser.ParsingContext
-import org.kobjects.tantilla2.core.parser.TantillaTokenizer
+import org.kobjects.tantilla2.core.parser.TantillaScanner
 import org.kobjects.tantilla2.core.parser.TokenType
 import org.kobjects.tantilla2.core.type.Type
 
@@ -49,7 +49,7 @@ abstract class Scope(
     fun sorted() = definitions.values.toList().sorted()
 
     fun checkErrors(newProperty: String): List<ParsingException> {
-        val tokenizer = TantillaTokenizer(newProperty)
+        val tokenizer = TantillaScanner(newProperty)
         try {
             val result = Parser.parseDefinition(tokenizer, ParsingContext(this, 0))
             result.resolve()
@@ -58,7 +58,7 @@ abstract class Scope(
             return listOf(tokenizer.ensureParsingException(e))
         }
         while (tokenizer.current.type == TokenType.LINE_BREAK) {
-            tokenizer.next()
+            tokenizer.consume()
         }
         if (tokenizer.current.type != TokenType.EOF) {
             return listOf(tokenizer.exception("End of input expected"))

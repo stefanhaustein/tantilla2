@@ -12,7 +12,7 @@ import org.kobjects.tantilla2.core.node.statement.*
 object StatementParser {
 
     fun parseStatement(
-        tokenizer: TantillaTokenizer,
+        tokenizer: TantillaScanner,
         context: ParsingContext,
     ) : Node =
         when (tokenizer.current.text) {
@@ -26,14 +26,14 @@ object StatementParser {
                 if (tokenizer.current.type == TokenType.COMMENT) {
                     Comment(tokenizer.consume(TokenType.COMMENT))
                 } else {
-                    var expr = ExpressionParser.parseExpression(tokenizer, context)
+                    var expr = TantillaExpressionParser.parseExpression(tokenizer, context)
                     val text = tokenizer.current.text
                     if (text.endsWith("=") && text != "!=" && text != "<=" && text != ">=") {
-                        tokenizer.next()
+                        tokenizer.consume()
                         while (tokenizer.current.type == TokenType.LINE_BREAK) {
-                            tokenizer.next()
+                            tokenizer.consume()
                         }
-                        val source = ExpressionParser.parseExpression(tokenizer, context, expr.returnType)
+                        val source = TantillaExpressionParser.parseExpression(tokenizer, context, expr.returnType)
                         expr = if (text == "=") Assignment(expr, source)
                         else CompoundAssignment.create(text, expr, source)
                     }
@@ -48,7 +48,7 @@ object StatementParser {
             }
         }
 
-    fun parseLet(tokenizer: TantillaTokenizer, context: ParsingContext): Node {
+    fun parseLet(tokenizer: TantillaScanner, context: ParsingContext): Node {
         tokenizer.consume("let")
 
         val mutable = tokenizer.tryConsume("mut")
@@ -69,12 +69,12 @@ object StatementParser {
         return Let(definition, type, typeIsExplicit, initializer)
     }
 
-    fun parseBreak(tokenizer: TantillaTokenizer, context: ParsingContext): Node {
+    fun parseBreak(tokenizer: TantillaScanner, context: ParsingContext): Node {
         tokenizer.consume("break")
         return FlowControlNode(FlowSignal.Kind.BREAK)
     }
 
-    fun parseReturn(tokenizer: TantillaTokenizer, context: ParsingContext): Node {
+    fun parseReturn(tokenizer: TantillaScanner, context: ParsingContext): Node {
         tokenizer.consume("return")
         if (context.scope !is FunctionDefinition) {
             throw tokenizer.exception("Function scope expected for 'return'")
@@ -82,22 +82,22 @@ object StatementParser {
         if (context.scope.type.returnType == NoneType) {
             return FlowControlNode(FlowSignal.Kind.RETURN)
         }
-        val expression = ExpressionParser.parseExpression(tokenizer, context)
+        val expression = TantillaExpressionParser.parseExpression(tokenizer, context)
         return FlowControlNode(FlowSignal.Kind.RETURN, expression)
     }
 
-    fun parseWhile(tokenizer: TantillaTokenizer, context: ParsingContext): WhileNode {
+    fun parseWhile(tokenizer: TantillaScanner, context: ParsingContext): WhileNode {
         tokenizer.consume("while")
-        val condition = ExpressionParser.parseExpression(tokenizer, context)
+        val condition = TantillaExpressionParser.parseExpression(tokenizer, context)
         tokenizer.consume(":")
         return WhileNode(condition, Parser.parseStatements(tokenizer, context.indent()))
     }
 
-    fun parseFor(tokenizer: TantillaTokenizer, context: ParsingContext): ForNode {
+    fun parseFor(tokenizer: TantillaScanner, context: ParsingContext): ForNode {
         tokenizer.consume("for")
         val iteratorName = tokenizer.consume(TokenType.IDENTIFIER, "Loop variable name expected.")
         tokenizer.consume("in")
-        val iterableExpression = ExpressionParser.parseExpression(tokenizer, context)
+        val iterableExpression = TantillaExpressionParser.parseExpression(tokenizer, context)
         tokenizer.consume(":")
         val iterableType = iterableExpression.returnType
         val iteratorType = when (iterableType) {
@@ -112,11 +112,11 @@ object StatementParser {
         return ForNode(iteratorName, iteratorIndex, iterableExpression, body)
     }
 
-    fun parseIf(tokenizer: TantillaTokenizer, context: ParsingContext): IfNode {
+    fun parseIf(tokenizer: TantillaScanner, context: ParsingContext): IfNode {
         tokenizer.consume("if")
         val expressions = mutableListOf<Node>()
         do {
-            val condition = ExpressionParser.parseExpression(tokenizer, context)
+            val condition = TantillaExpressionParser.parseExpression(tokenizer, context)
             expressions.add(condition)
             tokenizer.consume(":")
             val block = Parser.parseStatements(tokenizer, context.indent())

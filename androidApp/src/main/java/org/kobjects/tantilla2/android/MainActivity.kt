@@ -3,8 +3,6 @@ package org.kobjects.tantilla2.android
 import android.graphics.Bitmap
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.Colors
@@ -16,13 +14,12 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.lifecycle.coroutineScope
 import kotlinx.coroutines.runBlocking
 import org.kobjects.konsole.compose.ComposeKonsole
 import org.kobjects.tantilla2.android.model.Platform
 import org.kobjects.tantilla2.android.model.TantillaViewModel
-import org.kobjects.tantilla2.core.Lock
-import org.kobjects.tantilla2.core.Palette
+import org.kobjects.tantilla2.system.Lock
+import org.kobjects.tantilla2.system.ThreadHandle
 import java.io.File
 import java.lang.Math.abs
 
@@ -73,10 +70,6 @@ class MainActivity : AppCompatActivity() {
             bitmap,
             platform,
         )
-
-        //lifecycle.coroutineScope.launchWhenCreated {
-        //    viewModel.consoleLoop()
-        //}
 
         Thread { viewModel.consoleLoop() }.start()
 
@@ -136,8 +129,22 @@ class MainActivity : AppCompatActivity() {
             printImpl(s)
         }
 
-        override fun launch(task: () -> Unit) {
-            Thread(task).start()
+        override fun launch(task: (ThreadHandle) -> Unit): ThreadHandle {
+            val thread = Thread {
+                task(object : ThreadHandle {
+                    val self = Thread.currentThread()
+                    override fun cancel() {
+                        self.interrupt()
+                    }
+                })
+            }
+            thread.start()
+            return object : ThreadHandle {
+                override fun cancel() {
+                    thread.interrupt()
+                }
+
+            }
         }
 
         override fun createLock(): Lock {
@@ -147,6 +154,7 @@ class MainActivity : AppCompatActivity() {
         override fun input(): String = inputImpl()
 
     }
+
 
     companion object {
         val TYPOGRAPHY = Typography(

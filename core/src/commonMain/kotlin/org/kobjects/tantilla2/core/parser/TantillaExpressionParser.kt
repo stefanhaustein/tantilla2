@@ -16,9 +16,9 @@ import org.kobjects.tantilla2.core.node.expression.Apply
 import org.kobjects.tantilla2.core.parser.TypeParser.parseType
 import org.kobjects.tantilla2.core.type.*
 
-object ExpressionParser {
+object TantillaExpressionParser {
 
-    fun parseExpression(tokenizer: TantillaTokenizer, context: ParsingContext, expectedType: Type? = null): Node {
+    fun parseExpression(tokenizer: TantillaScanner, context: ParsingContext, expectedType: Type? = null): Node {
         if (expectedType is FunctionType) {
             return parseFunctionExpression(tokenizer, context, expectedType)
         }
@@ -41,7 +41,7 @@ object ExpressionParser {
         throw IllegalArgumentException("Can't convert $expr with type '${expr.returnType}' to '$expectedType'")
     }
 
-    fun parseElementAt(tokenizer: TantillaTokenizer, context: ParsingContext, base: Node): Node {
+    fun parseElementAt(tokenizer: TantillaScanner, context: ParsingContext, base: Node): Node {
         // tokenizer.disable(TokenType.LINE_BREAK)
 
         if (base.returnType is InstantiableMetaType
@@ -74,7 +74,7 @@ object ExpressionParser {
         definition.getValue(null) is Callable // Resolve imports
 
 
-    fun parseFreeIdentifier(tokenizer: TantillaTokenizer, context: ParsingContext): Node {
+    fun parseFreeIdentifier(tokenizer: TantillaScanner, context: ParsingContext): Node {
         val name = tokenizer.consume(TokenType.IDENTIFIER)
         val scope = context.scope
 
@@ -131,7 +131,7 @@ object ExpressionParser {
         throw tokenizer.exception("Symbol not found: '$name'.")
     }
 
-    fun parseFunctionExpression(tokenizer: TantillaTokenizer,
+    fun parseFunctionExpression(tokenizer: TantillaScanner,
                                 context: ParsingContext,
                                 type: FunctionType): Node {
         if (tokenizer.current.text == "lambda") {
@@ -149,7 +149,7 @@ object ExpressionParser {
 
     // Add support for known signature later
     fun parseLambda(
-        tokenizer: TantillaTokenizer,
+        tokenizer: TantillaScanner,
         context: ParsingContext,
         expectedType: FunctionType? = null
     ): Node {
@@ -214,18 +214,18 @@ object ExpressionParser {
         if (s.contains('.') || s.contains('e') || s.contains('E'))
             FloatNode.Const(s.toDouble()) else IntNode.Const(s.toLong())
 
-    fun parsePrimary(tokenizer: TantillaTokenizer, context: ParsingContext): Node =
+    fun parsePrimary(tokenizer: TantillaScanner, context: ParsingContext): Node =
         when (tokenizer.current.type) {
-            TokenType.NUMBER -> createNumberLiteral(tokenizer.next().text);
-            TokenType.STRING -> StrNode.Const(tokenizer.next().text.unquote().unescape())
-            TokenType.MULTILINE_STRING ->StrNode.Const(tokenizer.next().text.unquoteMultiline(), true)
+            TokenType.NUMBER -> createNumberLiteral(tokenizer.consume());
+            TokenType.STRING -> StrNode.Const(tokenizer.consume().unquote().unescape())
+            TokenType.MULTILINE_STRING ->StrNode.Const(tokenizer.consume().unquoteMultiline(), true)
             TokenType.IDENTIFIER ->  when (tokenizer.current.text) {
                 "True", "true" -> {
-                    tokenizer.next()
+                    tokenizer.consume()
                     BoolNode.True
                 }
                 "False", "false" -> {
-                    tokenizer.next()
+                    tokenizer.consume()
                     BoolNode.False
                 }
                 "lambda" -> parseLambda(tokenizer, context)
@@ -250,7 +250,7 @@ object ExpressionParser {
         }
 
     fun parseList(
-        tokenizer: TantillaTokenizer,
+        tokenizer: TantillaScanner,
         context: ParsingContext,
         startMarker: String,
         endMarker: String
@@ -271,7 +271,7 @@ object ExpressionParser {
     }
 
     fun parseAs(
-        tokenizer: TantillaTokenizer,
+        tokenizer: TantillaScanner,
         context: ParsingContext,
         base: Node,
     ): Node {
@@ -282,7 +282,7 @@ object ExpressionParser {
     }
 
     fun parseProperty(
-        tokenizer: TantillaTokenizer,
+        tokenizer: TantillaScanner,
         context: ParsingContext,
         base: Node,
     ): Node {
@@ -294,7 +294,7 @@ object ExpressionParser {
     }
 
     fun property(
-        tokenizer: TantillaTokenizer,
+        tokenizer: TantillaScanner,
         context: ParsingContext,
         base: Node,
         definition: Definition,
@@ -318,7 +318,7 @@ object ExpressionParser {
     }
 
     fun parseMaybeApply(
-        tokenizer: TantillaTokenizer,
+        tokenizer: TantillaScanner,
         context: ParsingContext,
         value: Node,
         self: Node?,
@@ -436,7 +436,7 @@ object ExpressionParser {
 
 
     val expressionParser =
-        GreenspunExpressionParser<TantillaTokenizer, ParsingContext, Node>(
+        GreenspunExpressionParser<TantillaScanner, ParsingContext, Node>(
             GreenspunExpressionParser.suffix(Precedence.DOT, ".") {
                 tokenizer, context, _, base -> parseProperty(tokenizer, context, base) },
             GreenspunExpressionParser.suffix(Precedence.DOT, "::") {

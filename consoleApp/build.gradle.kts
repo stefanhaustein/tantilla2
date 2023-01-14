@@ -17,8 +17,8 @@ repositories {
 
 dependencies {
     implementation(project(":core"))
-    implementation("org.kobjects.konsole:core:0.2.3")
-    implementation("org.kobjects.parserlib:core:0.4.3")
+    implementation("org.kobjects.konsole:core:0.2.4")
+    implementation("org.kobjects.parserlib:core:0.5.0")
 }
 
 tasks.named<JavaExec>("run") {

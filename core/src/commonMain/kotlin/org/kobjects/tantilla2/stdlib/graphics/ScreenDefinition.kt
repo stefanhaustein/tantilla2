@@ -2,6 +2,7 @@ package org.kobjects.tantilla2.stdlib.graphics
 
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.LocalRuntimeContext
+import org.kobjects.tantilla2.system.ThreadHandle
 import org.kobjects.tantilla2.core.definition.UnitDefinition
 import org.kobjects.tantilla2.core.type.FloatType
 import org.kobjects.tantilla2.core.type.IntType
@@ -49,21 +50,32 @@ class ScreenDefinition(graphicsScope: GraphicsScope) : UnitDefinition(null, "scr
             Parameter("callback", FunctionType.Impl(NoneType, listOf(Parameter("x", FloatType), Parameter("y", FloatType))))
         ) { context ->
             context.globalRuntimeContext.tapListeners.add { x, y ->
-                context.globalRuntimeContext.activeThreads++
+                val handle = object : ThreadHandle {
+                    var cancelled = false
+                    override fun cancel() {
+                        cancelled = true
+                    }
+                }
+                context.globalRuntimeContext.activeThreads.add(handle)
                 try {
-                    val fn = context[0] as Callable
-                    val functionContext = LocalRuntimeContext(
-                        context.globalRuntimeContext,
-                        fn,
-                        initializer = { when (it) {
-                            0 -> x
-                            1 -> y
-                            else -> throw IllegalArgumentException()
-                        } }
-                    )
-                    fn.eval(functionContext)
+                    if (!handle.cancelled) {
+                        val fn = context[0] as Callable
+                        val functionContext = LocalRuntimeContext(
+                            context.globalRuntimeContext,
+                            fn,
+                            initializer = {
+                                when (it) {
+                                    0 -> x
+                                    1 -> y
+                                    else -> throw IllegalArgumentException()
+                                }
+                            }
+                        )
+                        fn.eval(functionContext)
+                    }
                 } finally {
-                    if (--context.globalRuntimeContext.activeThreads <= 0) {
+                    context.globalRuntimeContext.activeThreads.remove(handle)
+                    if (context.globalRuntimeContext.activeThreads.isEmpty()) {
                         context.globalRuntimeContext.userRootScope.parentScope.runStateCallback(context.globalRuntimeContext)
                     }
                 }
@@ -79,17 +91,26 @@ class ScreenDefinition(graphicsScope: GraphicsScope) : UnitDefinition(null, "scr
             Parameter("callback", FunctionType.Impl(NoneType, emptyList()))
         ) { context ->
             if (!context.globalRuntimeContext.stopRequested) {
-                context.globalRuntimeContext.activeThreads++
+                val handle = object : ThreadHandle {
+                    var cancelled: Boolean = false
+                    override fun cancel() {
+                        cancelled = true
+                    }
+                }
+                context.globalRuntimeContext.activeThreads.add(handle)
                 graphicsScope.graphicsSystem.requestAnimationFrame {
                     try {
-                        val fn = context[0] as Callable
-                        val functionContext = LocalRuntimeContext(
-                            context.globalRuntimeContext,
-                            fn
-                        )
-                        fn.eval(functionContext)
+                        if (!handle.cancelled) {
+                            val fn = context[0] as Callable
+                            val functionContext = LocalRuntimeContext(
+                                context.globalRuntimeContext,
+                                fn
+                            )
+                            fn.eval(functionContext)
+                        }
                     } finally {
-                        if (--context.globalRuntimeContext.activeThreads <= 0) {
+                        context.globalRuntimeContext.activeThreads.remove(handle)
+                        if (context.globalRuntimeContext.activeThreads.isEmpty()) {
                             context.globalRuntimeContext.userRootScope.parentScope.runStateCallback(context.globalRuntimeContext)
                         }
                     }

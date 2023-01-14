@@ -1,6 +1,6 @@
 package org.kobjects.tantilla2.android.model
 
-import org.kobjects.tantilla2.core.SystemAbstraction
+import org.kobjects.tantilla2.system.SystemAbstraction
 import java.io.File
 
 interface Platform : SystemAbstraction {

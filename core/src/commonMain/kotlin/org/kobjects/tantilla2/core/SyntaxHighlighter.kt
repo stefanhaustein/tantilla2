@@ -1,7 +1,7 @@
 package org.kobjects.tantilla2.core
 
 import org.kobjects.parserlib.tokenizer.ParsingException
-import org.kobjects.tantilla2.core.parser.TantillaTokenizer
+import org.kobjects.tantilla2.core.parser.TantillaScanner
 import org.kobjects.tantilla2.core.parser.TokenType
 
 fun highlightSyntax(
@@ -22,14 +22,13 @@ fun highlightSyntax(
 
 
 
-
-        val tokenizer = TantillaTokenizer(code, false)
+        val tokenizer = TantillaScanner(code)
         var wasDecl = false
         var lastPos = 0
 
-        while (tokenizer.hasNext()) {
+        while (!tokenizer.eof) {
             val token = try {
-                tokenizer.next()
+                tokenizer.current.apply { tokenizer.consume() }
             } catch (e: Exception) {
                 e.printStackTrace()
                 writer.append(code.substring(lastPos))

@@ -72,7 +72,7 @@ class FunctionDefinition (
             return
         }
 
-        val tokenizer = TantillaTokenizer(definitionText)
+        val tokenizer = TantillaScanner(definitionText)
         try {
             tokenizer.tryConsume("static")
             tokenizer.consume("def")
@@ -94,7 +94,7 @@ class FunctionDefinition (
                 if (tokenizer.tryConsume(":")) {
                     docString = Parser.readDocString(tokenizer)
                 }
-                tokenizer.consume(TokenType.EOF, "Trait methods must not have function bodies.")
+                tokenizer.requireEof { "Trait methods must not have function bodies." }
                 resolvedBody = TraitMethodBody(parentScope.traitIndex++)
             } else {
                 tokenizer.consume(":")

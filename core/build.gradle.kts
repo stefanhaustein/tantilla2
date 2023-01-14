@@ -34,8 +34,8 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation("org.kobjects.konsole:core:0.2.3")
-                implementation("org.kobjects.parserlib:core:0.4.3")
+                implementation("org.kobjects.konsole:core:0.2.4")
+                implementation("org.kobjects.parserlib:core:0.5.0")
             }
         }
         val commonTest by getting {

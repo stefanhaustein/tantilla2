@@ -4,8 +4,9 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 
 import org.kobjects.tantilla2.core.GlobalRuntimeContext
-import org.kobjects.tantilla2.core.Lock
-import org.kobjects.tantilla2.core.SystemAbstraction
+import org.kobjects.tantilla2.system.Lock
+import org.kobjects.tantilla2.system.SystemAbstraction
+import org.kobjects.tantilla2.system.ThreadHandle
 import org.kobjects.tantilla2.core.definition.UserRootScope
 import org.kobjects.tantilla2.core.definition.SystemRootScope
 
@@ -18,8 +19,13 @@ fun main(args : Array<String>) {
             println(s)
         }
 
-        override fun launch(task: () -> Unit) {
-            task()
+        override fun launch(task: (ThreadHandle) -> Unit): ThreadHandle {
+            val handle = object : ThreadHandle {
+                override fun cancel() {
+                }
+            }
+            task(handle)
+            return handle
         }
 
         override fun createLock(): Lock {

@@ -57,6 +57,7 @@ class TantillaViewModel(
 
     val graphicsSystem = defineNatives(systemRootScope, bitmap, graphicsUpdateTrigger)
 
+
     private var editorLineLength = 40
 
     init {
@@ -68,6 +69,7 @@ class TantillaViewModel(
         } else {
             reset(false)
         }
+
     }
 
     fun definitionTitle(definition: Definition?) = when (definition) {
@@ -292,7 +294,7 @@ class TantillaViewModel(
     }
 
     fun stop() {
-        globalRuntimeContext.stopRequested = true
+        globalRuntimeContext.requestStop()
         runstateUpdateTrigger.value++
     }
 
@@ -408,9 +410,13 @@ class TantillaViewModel(
 
 
     fun consoleLoop() {
-        while (true) {
-            val input = runBlocking { konsole.read() }
-            globalRuntimeContext.processShellInput(input)
+        try {
+            while (true) {
+                val input = runBlocking { konsole.read() }
+                globalRuntimeContext.processShellInput(input)
+            }
+        } catch (e: Exception) {
+         e.printStackTrace()
         }
     }
 
