@@ -1,16 +1,13 @@
-def fizz_buzz(x: int):
+def fizz_buzz(x: int) -> Str:
   if x % 3 == 0:
     if x % 5 == 0:
-      print("FizzBuzz")
-    else:
-      print("Fizz")
-  elif x % 5 == 0:
-    print("Buzz")
-  else:
-    print(str(x))
+      return "FizzBuzz"
+    return "Fizz"
+  if x % 5 == 0:
+    return "Buzz"
+  return str(x)
 
 
 def main():
   while True:
-    print("Number?")
-    fizz_buzz(int(input()))
+    print(fizz_buzz(int(input("Number?"))))

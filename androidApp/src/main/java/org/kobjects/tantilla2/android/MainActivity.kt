@@ -18,8 +18,8 @@ import kotlinx.coroutines.runBlocking
 import org.kobjects.konsole.compose.ComposeKonsole
 import org.kobjects.tantilla2.android.model.Platform
 import org.kobjects.tantilla2.android.model.TantillaViewModel
-import org.kobjects.tantilla2.system.Lock
-import org.kobjects.tantilla2.system.ThreadHandle
+import org.kobjects.tantilla2.core.system.Lock
+import org.kobjects.tantilla2.core.system.ThreadHandle
 import java.io.File
 import java.lang.Math.abs
 
@@ -35,10 +35,10 @@ class MainActivity : AppCompatActivity() {
         val console = ComposeKonsole()
         val platform = AndroidPlatform(
             printImpl = { console.write(it) },
-            inputImpl = {
+            inputImpl = { label ->
                 var result: String
                 runBlocking {
-                    result = console.read()
+                    result = console.read(label)
                 }
                 result
             })
@@ -110,7 +110,7 @@ class MainActivity : AppCompatActivity() {
 
     inner class AndroidPlatform(
         val printImpl: (String) -> Unit,
-        val inputImpl: () -> String,
+        val inputImpl: (String?) -> String,
     ) : Platform {
 
         override val rootDirectory: File
@@ -151,7 +151,7 @@ class MainActivity : AppCompatActivity() {
             TODO("Not yet implemented")
         }
 
-        override fun input(): String = inputImpl()
+        override fun input(label: String?): String = inputImpl(label)
 
     }
 

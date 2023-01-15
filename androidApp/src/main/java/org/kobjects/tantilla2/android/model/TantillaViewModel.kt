@@ -412,7 +412,7 @@ class TantillaViewModel(
     fun consoleLoop() {
         try {
             while (true) {
-                val input = runBlocking { konsole.read() }
+                val input = runBlocking { konsole.read("Expression?") }
                 globalRuntimeContext.processShellInput(input)
             }
         } catch (e: Exception) {

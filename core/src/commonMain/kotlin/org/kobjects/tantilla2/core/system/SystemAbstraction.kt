@@ -1,4 +1,4 @@
-package org.kobjects.tantilla2.system
+package org.kobjects.tantilla2.core.system
 
 interface SystemAbstraction {
     fun write(s: String)
@@ -7,7 +7,7 @@ interface SystemAbstraction {
 
     fun createLock(): Lock
 
-    fun input(): String
+    fun input(label: String?): String
 
 
 }

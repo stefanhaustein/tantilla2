@@ -8,7 +8,7 @@ import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.LambdaScope
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.parser.Parser
-import org.kobjects.tantilla2.system.ThreadHandle
+import org.kobjects.tantilla2.core.system.ThreadHandle
 
 class GlobalRuntimeContext(
     val userRootScope: UserRootScope,

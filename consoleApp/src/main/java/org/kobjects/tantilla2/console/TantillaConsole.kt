@@ -4,9 +4,9 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 
 import org.kobjects.tantilla2.core.GlobalRuntimeContext
-import org.kobjects.tantilla2.system.Lock
-import org.kobjects.tantilla2.system.SystemAbstraction
-import org.kobjects.tantilla2.system.ThreadHandle
+import org.kobjects.tantilla2.core.system.Lock
+import org.kobjects.tantilla2.core.system.SystemAbstraction
+import org.kobjects.tantilla2.core.system.ThreadHandle
 import org.kobjects.tantilla2.core.definition.UserRootScope
 import org.kobjects.tantilla2.core.definition.SystemRootScope
 
@@ -36,7 +36,12 @@ fun main(args : Array<String>) {
             }
         }
 
-        override fun input() = throw UnsupportedOperationException()
+        override fun input(label: String?): String {
+            if (label != null) {
+                println(label)
+            }
+            return readln()
+        }
 
     }
 
@@ -44,10 +49,8 @@ fun main(args : Array<String>) {
     val userScope = UserRootScope(systemRootScope)
     val globalRuntimeContext = GlobalRuntimeContext(userScope)
 
-    val reader = BufferedReader(InputStreamReader(System.`in`))
-
     while (true) {
-        val line = reader.readLine()
+        val line = readLine() ?: break
         globalRuntimeContext.processShellInput(line)
     }
 }

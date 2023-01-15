@@ -2,7 +2,7 @@ package org.kobjects.tantilla2.stdlib.graphics
 
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.LocalRuntimeContext
-import org.kobjects.tantilla2.system.ThreadHandle
+import org.kobjects.tantilla2.core.system.ThreadHandle
 import org.kobjects.tantilla2.core.definition.UnitDefinition
 import org.kobjects.tantilla2.core.type.FloatType
 import org.kobjects.tantilla2.core.type.IntType
