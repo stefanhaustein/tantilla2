@@ -1,4 +1,5 @@
 mut monkeys = MutableList[Monkey]()
+mut mod = 1
 
 struct Monkey:
   items: MutableList[int]
@@ -11,7 +12,8 @@ struct Monkey:
   def process():
     for item in items:
       count += 1
-      let level = operation(item)
+      let mut level = operation(item)
+      level %= mod
       if level % divisible == 0:
         monkeys[if_true].items.append(level)
       else:
@@ -19,64 +21,107 @@ struct Monkey:
 
     items.clear()
 
+def parseOperation(op: List[Str]) -> (Int) -> Int:
+   let mut operation = lambda(x: int) -> int: x * x
+   let operand2 = op[2]
+   print(op)
+   if op[1] == "+":
+      operation@ = $0 + int(operand2)
+   elif op[2] != "old":
+      operation@ = $0 * int(operand2)
+   return operation@
+
 def parse(data: str) -> List[Monkey]:
   let result = MutableList[Monkey]()
   let mut index = 0
+  mod = 1
   let lines = data.split("\n")
   while index < len(lines):
     let raw_items = lines[index + 1].split(":")[1].split(",")
     let items = MutableList[int].init(len(raw_items), int(raw_items[$0].strip()))
     let raw_operation = lines[index + 2].split("=")[1].strip().split(" ")
-    let mut operation = lambda(x: int) -> int: x * x
-    let operand2 = raw_operation[2]
-    if raw_operation[1] == "+":
-      operation@ = $0 + int(operand2)
-    elif raw_operation[2] != "old":
-      operation@ = $0 * int(operand2)
     let test = int(lines[index + 3].split(" ")[-1])
     let if_true = int(lines[index + 4].split(" ")[-1])
     let if_false = int(lines[index + 5].split(" ")[-1])
-    print operation(5)
-    let monkey = Monkey(items, operation($0), test, if_true, if_false)
+    let monkey = Monkey(items, parseOperation(raw_operation), test, if_true, if_false)
     result.append(monkey)
+    mod *= test
     index += 7
   return result
 
 def main():
   monkeys = parse(DATA)
-  print(monkeys)
 
-  for monkey in monkeys:
-    monkey.process()
+  for r in range(0, 10000):
+    for i in range(0, len(monkeys)):
+      monkeys[i].process()
 
-  print(monkeys)
+  let mut most_active = 0
+  let mut most_active_2 = 0
+
+  for m in monkeys:
+    if m.count > most_active:
+      most_active = m.count
+
+  for m in monkeys:
+    if m.count > most_active_2 and m.count < most_active:
+      most_active_2 = m.count
+
+  print most_active, most_active_2, most_active * most_active_2
 
 
 DATA = '''Monkey 0:
-  Starting items: 79, 98
-  Operation: new = old * 19
-  Test: divisible by 23
-    If true: throw to monkey 2
-    If false: throw to monkey 3
+  Starting items: 83, 62, 93
+  Operation: new = old * 17
+  Test: divisible by 2
+    If true: throw to monkey 1
+    If false: throw to monkey 6
 
 Monkey 1:
-  Starting items: 54, 65, 75, 74
-  Operation: new = old + 6
-  Test: divisible by 19
-    If true: throw to monkey 2
-    If false: throw to monkey 0
-
-Monkey 2:
-  Starting items: 79, 60, 97
-  Operation: new = old * old
-  Test: divisible by 13
-    If true: throw to monkey 1
+  Starting items: 90, 55
+  Operation: new = old + 1
+  Test: divisible by 17
+    If true: throw to monkey 6
     If false: throw to monkey 3
 
-Monkey 3:
-  Starting items: 74
+Monkey 2:
+  Starting items: 91, 78, 80, 97, 79, 88
   Operation: new = old + 3
-  Test: divisible by 17
+  Test: divisible by 19
+    If true: throw to monkey 7
+    If false: throw to monkey 5
+
+Monkey 3:
+  Starting items: 64, 80, 83, 89, 59
+  Operation: new = old + 5
+  Test: divisible by 3
+    If true: throw to monkey 7
+    If false: throw to monkey 2
+
+Monkey 4:
+  Starting items: 98, 92, 99, 51
+  Operation: new = old * old
+  Test: divisible by 5
     If true: throw to monkey 0
     If false: throw to monkey 1
-'''
+
+Monkey 5:
+  Starting items: 68, 57, 95, 85, 98, 75, 98, 75
+  Operation: new = old + 2
+  Test: divisible by 13
+    If true: throw to monkey 4
+    If false: throw to monkey 0
+
+Monkey 6:
+  Starting items: 74
+  Operation: new = old + 4
+  Test: divisible by 7
+    If true: throw to monkey 3
+    If false: throw to monkey 2
+
+Monkey 7:
+  Starting items: 68, 64, 60, 68, 87, 80, 82
+  Operation: new = old * 19
+  Test: divisible by 11
+    If true: throw to monkey 4
+    If false: throw to monkey 5'''

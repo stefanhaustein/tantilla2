@@ -142,8 +142,15 @@ object TantillaExpressionParser {
             val parameter = type.parameters[i]
             functionScope.declareLocalVariable("\$$i", parameter.type, false)
         }
-        val body = parseExpression(tokenizer, ParsingContext(functionScope, context.depth), type.returnType)
-        return LambdaReference(type, functionScope.locals.size, body, implicit = true)
+        val body = parseExpression(tokenizer, ParsingContext(functionScope, context.depth), null)
+        if (body.returnType == type) {
+            // TODO: Check that anonymous variables are not touched.
+            return FakeLambda(body)
+        }
+        if (body.returnType == type.returnType) {
+            return LambdaReference(type, functionScope.locals.size, body, implicit = true)
+        }
+        throw tokenizer.exception("Expression return type ${body.returnType} doesn't match $type or ${type.returnType}")
     }
 
 
