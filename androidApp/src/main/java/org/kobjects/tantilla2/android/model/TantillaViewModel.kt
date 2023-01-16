@@ -64,12 +64,9 @@ class TantillaViewModel(
         val file = File(platform.rootDirectory, platform.fileName)
         if (file.exists()) {
             load(file)
-        } else if (platform.fileName == SCRATCH_FILE_NAME) {
-            reset(true)
         } else {
-            reset(false)
+            reset(platform.fileName == SCRATCH_FILE_NAME)
         }
-
     }
 
     fun definitionTitle(definition: Definition?) = when (definition) {
@@ -205,7 +202,7 @@ class TantillaViewModel(
 
     fun confirmReset() {
         dialogManager.showConfirmation("Full Reset", "Start from scratch? The current program will be deleted.") {
-            reset(addHello = true)
+            reset(overwriteScratch = true)
         }
     }
 
@@ -266,7 +263,7 @@ class TantillaViewModel(
     }
 
 
-    fun reset(addHello: Boolean = false) {
+    fun reset(overwriteScratch: Boolean = false) {
         globalRuntimeContext.stopRequested = true
         clearBitmap()
         clearConsole()
@@ -276,15 +273,7 @@ class TantillaViewModel(
         currentUserScope.value = userRootScope
         currentHelpScope.value = systemRootScope
 
-        if (addHello) {
-            userRootScope.add(
-                FunctionDefinition(
-                    userRootScope,
-                    Definition.Kind.FUNCTION,
-                    "main",
-                    DEFAULT_SCRATCH
-                )
-            )
+        if (overwriteScratch) {
             saveAs("Scratch.tt")
             scratchFileModified = false
         }
@@ -317,8 +306,7 @@ class TantillaViewModel(
                 val code = file.readText()
                 loadCode(code)
                 scratchFileModified = file.name == SCRATCH_FILE_NAME
-                        && code.trimEnd() != DEFAULT_SCRATCH
-                        && code.trimEnd() != "### $DEFAULT_SCRATCH ###"
+                        && code.isNotBlank()
             }
         }
     }
@@ -423,7 +411,6 @@ class TantillaViewModel(
 
     companion object {
         const val SCRATCH_FILE_NAME = "Scratch.tt"
-        const val DEFAULT_SCRATCH = "def main():\n  print(\"Hello World!\")"
         val MONOSPACE_FONT_FAMILY = FontFamily(
             Font(R.font.iosevka),
             //Font(R.font.mplus_1m_bold, weight = FontWeight.Bold)

@@ -156,13 +156,14 @@ fun RenderAppBar(
                     )
                     RenderDropDownMenu(
                         showExamplesMenu,
+                        "AoC" to { viewModel.loadExample("AoC.tt") },
+                        "CompilationError" to { viewModel.loadExample("CompilationError.tt") },
+                        "HelloWorld" to { viewModel.loadExample("HelloWorld.tt") },
                         "FizzBuzz" to { viewModel.loadExample("FizzBuzz.tt") },
                         "GraphicsDemo" to { viewModel.loadExample("GraphicsDemo.tt") },
                         "RayTracer" to { viewModel.loadExample("RayTracer.tt") },
                         "RuntimeError" to { viewModel.loadExample("RuntimeError.tt") },
-                        "CompilationError" to { viewModel.loadExample("CompilationError.tt") },
                         "Snake" to { viewModel.loadExample("Snake.tt") },
-                        "AoC" to { viewModel.loadExample("AoC.tt") },
                     )
                     RenderDropDownMenu(
                         showClearMenu,

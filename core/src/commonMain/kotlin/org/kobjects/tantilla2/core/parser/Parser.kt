@@ -8,36 +8,6 @@ import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.node.statement.Comment
 import org.kobjects.tantilla2.core.type.Type
 
-
-fun String.unquote() = this.substring(1, this.length - 1)
-
-fun String.unquoteMultiline() = this.substring(3, this.length - 3)
-
-fun String.unescape(): String {
-    val sb = StringBuilder()
-    var escaped = false
-    for (c in this) {
-        if (escaped) {
-            when (c) {
-                'n' -> sb.append('\n')
-                'r' -> sb.append('\r')
-                't' -> sb.append('\t')
-                '\\' -> sb.append('\\')
-                else -> throw IllegalArgumentException("Unsupported escape: $c")
-            }
-            escaped = false
-        } else if (c == '\\') {
-            escaped = true
-        } else {
-            sb.append(c)
-        }
-    }
-    if (escaped) {
-        throw IllegalArgumentException("Unterminated escape sequence.")
-    }
-    return sb.toString()
-}
-
 object Parser {
     val DECLARATION_KEYWORDS = setOf("def", "import", "struct", "trait", "unit", "impl", "static", "mut", "enum")
 
@@ -66,9 +36,6 @@ object Parser {
     ): Node {
         val tokenizer = TantillaScanner(source)
         try {
-            if (definitionScope is DocStringUpdatable) {
-                definitionScope.docString = readDocString(tokenizer)
-            }
             // scope.docString = if (statementsAllowed) "" else readDocString(tokenizer)
             val result = parseDefinitionsAndStatements(
                 tokenizer,
@@ -94,11 +61,16 @@ object Parser {
         tokenizer: TantillaScanner,
         depth: Int,
         statementScope: Scope?,
-        definitionScope: Scope?
+        definitionScope: Scope?,
     ): Node {
         require (statementScope != null || definitionScope != null)
         val statements = mutableListOf<Node>()
         var localDepth = depth
+
+        if (statementScope == null && definitionScope is DocStringUpdatable) {
+            definitionScope.docString = readDocString(tokenizer)
+        }
+
         while (tokenizer.current.type != TokenType.EOF
             && !VALID_AFTER_STATEMENT.contains(tokenizer.current.text)
         ) {
