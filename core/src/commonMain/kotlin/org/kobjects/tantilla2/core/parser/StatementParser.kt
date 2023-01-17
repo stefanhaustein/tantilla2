@@ -1,5 +1,6 @@
 package org.kobjects.tantilla2.core.parser
 
+import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.core.function.FunctionDefinition
 import org.kobjects.tantilla2.core.function.LocalVariableDefinition
 import org.kobjects.tantilla2.core.node.*
@@ -10,6 +11,27 @@ import org.kobjects.tantilla2.core.type.NoneType
 import org.kobjects.tantilla2.core.node.statement.*
 
 object StatementParser {
+
+    fun parseStatementFailsafe(
+        tokenizer: TantillaScanner,
+        context: ParsingContext,
+        errors: MutableList<ParsingException>?,
+    ) : Node {
+        if (errors == null) {
+            return parseStatement(tokenizer, context)
+        }
+        val startPos = tokenizer.current.pos
+        try {
+            return parseStatement(tokenizer, context)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            val parsingException = tokenizer.ensureParsingException(e)
+            errors.add(parsingException)
+            val body = Parser.consumeBody(tokenizer, startPos, context.depth)
+            return ErrorEvaluable(body, parsingException)
+        }
+    }
+
 
     fun parseStatement(
         tokenizer: TantillaScanner,

@@ -1,5 +1,6 @@
 package org.kobjects.tantilla2.core.definition
 
+import DefinitionParser
 import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.LocalRuntimeContext
@@ -51,7 +52,7 @@ abstract class Scope(
     fun checkErrors(newProperty: String): List<ParsingException> {
         val tokenizer = TantillaScanner(newProperty)
         try {
-            val result = Parser.parseDefinition(tokenizer, ParsingContext(this, 0))
+            val result = DefinitionParser.parseDefinition(tokenizer, ParsingContext(this, 0))
             result.resolve()
         } catch (e: Exception) {
             e.printStackTrace()
@@ -67,7 +68,7 @@ abstract class Scope(
     }
 
     fun update(newContent: String, oldDefinition: Definition? = null): Definition {
-        var replacement = Parser.parseFailsafe(this, newContent)
+        var replacement = DefinitionParser.parseFailsafe(this, newContent)
         if (oldDefinition != null) {
             try {
                 if (oldDefinition is DefinitionUpdatable && replacement is DefinitionUpdatable
