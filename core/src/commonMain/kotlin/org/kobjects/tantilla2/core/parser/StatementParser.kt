@@ -28,7 +28,7 @@ object StatementParser {
             val parsingException = tokenizer.ensureParsingException(e)
             errors.add(parsingException)
             val body = Parser.consumeBody(tokenizer, startPos, context.depth)
-            return ErrorEvaluable(body, parsingException)
+            return UnparseableStatement(body, parsingException)
         }
     }
 

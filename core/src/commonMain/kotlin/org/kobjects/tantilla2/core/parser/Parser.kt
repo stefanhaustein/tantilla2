@@ -59,6 +59,11 @@ object Parser {
         parseDefinitionsAndStatements(tokenizer, context.depth, statementScope = null, definitionScope = context.scope, errors = errors)
     }
 
+    /**
+     * If the error return parameter is set, it's used to report errors and this function shouldn't
+     * throw. If the error return parameter is null, an exception is thrown when the first
+     * error is encountered.
+     */
     fun parseDefinitionsAndStatements(
         tokenizer: TantillaScanner,
         depth: Int,
