@@ -23,6 +23,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.kobjects.tantilla2.android.model.TantillaViewModel
+import java.lang.Integer.min
 
 
 @Composable
@@ -98,7 +99,9 @@ fun RenderDefinitionEditor(viewModel: TantillaViewModel) {
 
                     )
                 } else {
-                    val error = errors[errorIndex.value]
+                    val errorList = errors.toList()
+                    val index = min(errorIndex.value, errorList.size - 1)
+                    val error = errorList[index]
                     val text = error.message ?: error.toString()
                     Text(text,
                         Modifier

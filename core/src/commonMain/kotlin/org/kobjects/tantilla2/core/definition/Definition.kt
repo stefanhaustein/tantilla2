@@ -1,5 +1,6 @@
 package org.kobjects.tantilla2.core.definition
 
+import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.SerializableCode
 import org.kobjects.tantilla2.core.node.Node
@@ -62,7 +63,7 @@ interface Definition : SerializableCode, Comparable<Definition> {
     /**
      * Fully resolve this definition. Called from resolveAll().
      */
-    fun resolve() {
+    fun resolve(applyOffset: Boolean = false, errorCollector: MutableList<ParsingException>? = null) {
     }
 
     fun isSummaryExpandable(): Boolean

@@ -4,7 +4,7 @@ import org.kobjects.parserlib.tokenizer.Lexer
 import org.kobjects.parserlib.tokenizer.RegularExpressions
 import org.kobjects.parserlib.tokenizer.Token
 
-class TantillaLexer(input: String) : Iterator<Token<TokenType>> {
+class TantillaLexer(input: String, offset: Token<TokenType>? = null) : Iterator<Token<TokenType>> {
 
     val inner = Lexer(
         input,
@@ -27,6 +27,8 @@ class TantillaLexer(input: String) : Iterator<Token<TokenType>> {
             RegularExpressions.DOUBLE_QUOTED_STRING to { TokenType.STRING },
             Regex("###(.|\\n)*?###") to { TokenType.DISABLED_CODE },
             Regex("#[^\\n]*") to { TokenType.COMMENT },
+        Regex("\\S+") to { TokenType.UNRECOGNIZED },
+        offset = offset
     )
 
     var previous: Token<TokenType>? = null

@@ -1,8 +1,11 @@
 package org.kobjects.tantilla2.core.parser
 
-fun String.unquote() = this.substring(1, this.length - 1)
 
-fun String.unquoteMultiline() = this.substring(3, this.length - 3)
+
+fun String.unquote() =
+    if (startsWith("\"\"\"") || startsWith("'''")) substring(3, length -3)
+    else substring(1, length - 1)
+
 
 fun String.unescape(): String {
     val sb = StringBuilder()
@@ -28,3 +31,4 @@ fun String.unescape(): String {
     }
     return sb.toString()
 }
+

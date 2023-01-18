@@ -1,6 +1,8 @@
 package org.kobjects.tantilla2.core.classifier
 
+import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.core.*
+import org.kobjects.tantilla2.core.definition.CodeFragment
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.definition.Scope
 import org.kobjects.tantilla2.core.definition.DefinitionUpdatable
@@ -14,7 +16,7 @@ class FieldDefinition(
     override val parentScope: Scope,
     override val kind: Definition.Kind,
     override val name: String,
-    definitionText: String = "",
+    definitionText: CodeFragment,
     override val mutable: Boolean = false,
     override var docString: String = "",
 ) : Definition, DefinitionUpdatable {
@@ -52,7 +54,7 @@ class FieldDefinition(
 
     override val type: Type
         get() {
-            resolve(typeOnly = true)
+            resolve(typeOnly = true, null, false)
             return resolvedType
         }
 
@@ -72,11 +74,11 @@ class FieldDefinition(
         return resolvedInitializer
     }
 
-    override fun resolve() {
-        resolve(false)
+    override fun resolve(applyOffset: Boolean, errorCollector: MutableList<ParsingException>?) {
+        resolve(false, errorCollector, applyOffset)
     }
 
-    private fun resolve(typeOnly: Boolean) {
+    private fun resolve(typeOnly: Boolean, errorCollector: MutableList<ParsingException>?, applyOffset: Boolean) {
         if (typeOnly) {
             if (resolvedType != UnresolvedType) {
                 return
@@ -85,7 +87,7 @@ class FieldDefinition(
             return
         }
 
-        val tokenizer = TantillaScanner(definitionText)
+        val tokenizer = TantillaScanner(definitionText.code)
 
         tokenizer.tryConsume("static")
         tokenizer.tryConsume("def")
@@ -130,7 +132,7 @@ class FieldDefinition(
         } else if (resolvedInitializer != UnresolvedNode) {
             serializeDeclaration(writer)
         } else {
-            writer.appendUnparsed(definitionText.split("\n").first())
+            writer.appendUnparsed(definitionText.code.split("\n").first())
         }
     }
 
@@ -143,7 +145,7 @@ class FieldDefinition(
                 writer.appendCode(resolvedInitializer)
             }
         } else {
-            writer.appendUnparsed(definitionText, userRootScope().definitionsWithErrors[this] ?: emptyList())
+            writer.appendUnparsed(definitionText.code, userRootScope().definitionsWithErrors[this] ?: emptyList())
         }
     }
 

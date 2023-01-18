@@ -10,7 +10,6 @@ import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.parser.Parser
 import org.kobjects.tantilla2.core.parser.ParsingContext
 import org.kobjects.tantilla2.core.parser.TantillaScanner
-import org.kobjects.tantilla2.core.parser.TokenType
 import org.kobjects.tantilla2.core.type.Type
 
 abstract class Scope(
@@ -51,20 +50,18 @@ abstract class Scope(
 
     fun checkErrors(newProperty: String): List<ParsingException> {
         val tokenizer = TantillaScanner(newProperty)
-        try {
-            val result = DefinitionParser.parseDefinition(tokenizer, ParsingContext(this, 0))
-            result.resolve()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return listOf(tokenizer.ensureParsingException(e))
-        }
-        while (tokenizer.current.type == TokenType.LINE_BREAK) {
-            tokenizer.consume()
-        }
-        if (tokenizer.current.type != TokenType.EOF) {
-            return listOf(tokenizer.exception("End of input expected"))
-        }
-        return emptyList()
+        val errors = mutableListOf<ParsingException>()
+        Parser.parseDefinitions(tokenizer, ParsingContext(this, 0), errorCollector = errors, definitionCallback =  {
+            try {
+                val offset = tokenizer.current
+                println("****** Resolve: $it")
+                it.resolve(applyOffset = true, errorCollector = errors)
+            } catch (e: Exception) {
+                println("****** Resolving failed: $e")
+                errors.add(tokenizer.ensureParsingException(e))
+            }
+        })
+        return errors.toList()
     }
 
     fun update(newContent: String, oldDefinition: Definition? = null): Definition {

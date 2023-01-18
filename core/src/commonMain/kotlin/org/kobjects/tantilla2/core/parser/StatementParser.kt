@@ -20,7 +20,7 @@ object StatementParser {
         if (errors == null) {
             return parseStatement(tokenizer, context)
         }
-        val startPos = tokenizer.current.pos
+        val startPos = tokenizer.current
         try {
             return parseStatement(tokenizer, context)
         } catch (e: Exception) {

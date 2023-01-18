@@ -3,6 +3,7 @@ package org.kobjects.tantilla2.core.function
 import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
+import org.kobjects.tantilla2.core.definition.CodeFragment
 import org.kobjects.tantilla2.core.definition.DefinitionUpdatable
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.definition.Scope
@@ -16,7 +17,7 @@ class FunctionDefinition (
     override val parentScope: Scope,
     override val kind: Definition.Kind,
     override val name: String,
-    definitionText: String,
+    definitionText: CodeFragment,
 ) : Scope(), Callable, DefinitionUpdatable {
     override var docString: String = ""
 
@@ -24,7 +25,7 @@ class FunctionDefinition (
     private var resolvedBody: Node = UnresolvedNode
 
     var _definitionText = definitionText
-    override var definitionText: String
+    override var definitionText: CodeFragment
         get() = _definitionText
         set(value) {
             invalidate()
@@ -49,7 +50,7 @@ class FunctionDefinition (
 
     override val type: FunctionType
         get() {
-            resolve(typeOnly = true)
+            resolveImpl(applyOffset = false, typeOnly = true, errorCollector = null)
             return resolvedType
         }
 
@@ -57,8 +58,8 @@ class FunctionDefinition (
         return this
     }
 
-    override fun resolve() {
-        resolve(false)
+    override fun resolve(applyOffset: Boolean, errorCollector: MutableList<ParsingException>?) {
+        resolveImpl(applyOffset = applyOffset, typeOnly = false,  errorCollector = errorCollector)
     }
 
     fun body(): Node {
@@ -66,14 +67,21 @@ class FunctionDefinition (
         return resolvedBody!!
     }
 
-    private fun resolve(typeOnly: Boolean) {
+    private fun resolveImpl(applyOffset: Boolean, typeOnly: Boolean, errorCollector: MutableList<ParsingException>?) {
         if (resolvedBody != UnresolvedNode
             || (typeOnly && resolvedType != UnresolvedType)) {
             return
         }
 
-        val tokenizer = TantillaScanner(definitionText)
+
+        if (applyOffset) {
+            println("######### Creating tokenizer with '${definitionText}'")
+        }
+        val tokenizer = TantillaScanner(definitionText.code, if (applyOffset) definitionText.startPos else null)
         try {
+            if (applyOffset) {
+                println("######### first token: ${tokenizer.current}")
+            }
             tokenizer.tryConsume("static")
             tokenizer.consume("def")
             tokenizer.consume(TokenType.IDENTIFIER)
@@ -100,14 +108,10 @@ class FunctionDefinition (
                 tokenizer.consume(":")
                 docString = Parser.readDocString(tokenizer)
                 resolvedBody =
-                    Parser.parseDefinitionsAndStatements(tokenizer, 1, this, definitionScope = this)
+                    Parser.parseDefinitionsAndStatements(tokenizer, 1, this, definitionScope = this, errorCollector = errorCollector)
             }
         } catch (e: Exception) {
-            if (e is ParsingException) {
-                throw e
-            } else {
-                throw tokenizer.exception(e.toString())
-            }
+            throw tokenizer.ensureParsingException(e)
         }
     }
 
@@ -133,7 +137,7 @@ class FunctionDefinition (
         if (length == Definition.SummaryKind.EXPANDED) {
             serializeCode(writer)
         } else if (resolvedType == UnresolvedType) {
-            writer.appendUnparsed(definitionText.split('\n').first(), userRootScope().definitionsWithErrors[this] ?: emptyList())
+            writer.appendUnparsed(definitionText.code.split('\n').first(), userRootScope().definitionsWithErrors[this] ?: emptyList())
         } else {
             if (parentScope.supportsMethods && kind == Definition.Kind.FUNCTION) {
                 writer.appendKeyword("static ")
@@ -145,7 +149,7 @@ class FunctionDefinition (
 
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
         if (resolvedBody == UnresolvedNode) {
-            writer.appendUnparsed(definitionText, userRootScope().definitionsWithErrors[this] ?: emptyList())
+            writer.appendUnparsed(definitionText.code, userRootScope().definitionsWithErrors[this] ?: emptyList())
         } else {
             if (parentScope.supportsMethods && !isDynamic()) {
                 writer.appendKeyword("static ")

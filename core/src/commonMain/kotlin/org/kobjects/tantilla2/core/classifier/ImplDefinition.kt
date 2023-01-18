@@ -1,5 +1,6 @@
 package org.kobjects.tantilla2.core.classifier
 
+import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.definition.Scope
@@ -47,7 +48,7 @@ class ImplDefinition(
     }
 
 
-    override fun resolve() {
+    override fun resolve(applyOffset: Boolean, errorCollector: MutableList<ParsingException>?) {
         // TODO: Move VMT creation to trait?
         val vmt = Array<Callable?>(trait.traitIndex) { null }
         for (definition in trait) {

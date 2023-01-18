@@ -2,7 +2,7 @@ package org.kobjects.tantilla2.core.parser
 
 import DefinitionParser
 import org.kobjects.parserlib.tokenizer.ParsingException
-import org.kobjects.tantilla2.core.classifier.*
+import org.kobjects.parserlib.tokenizer.Token
 import org.kobjects.tantilla2.core.definition.*
 import org.kobjects.tantilla2.core.function.*
 import org.kobjects.tantilla2.core.node.statement.BlockNode
@@ -53,15 +53,15 @@ object Parser {
     }
 
     fun parseStatements(tokenizer: TantillaScanner, context: ParsingContext, errors: MutableList<ParsingException>? = null) =
-        parseDefinitionsAndStatements(tokenizer, context.depth, statementScope = context.scope, definitionScope = null, errors = errors)
+        parseDefinitionsAndStatements(tokenizer, context.depth, statementScope = context.scope, definitionScope = null, errorCollector = errors)
 
     fun parseDefinitions(
         tokenizer: TantillaScanner,
         context: ParsingContext,
         definitionCallback: (Definition) -> Unit = { context.scope!!.add(it) },
-        errors: MutableList<ParsingException>? = null
+        errorCollector: MutableList<ParsingException>? = null
     ) {
-        parseDefinitionsAndStatements(tokenizer, context.depth, statementScope = null, definitionScope = context.scope, definitionCallback = definitionCallback, errors = errors)
+        parseDefinitionsAndStatements(tokenizer, context.depth, statementScope = null, definitionScope = context.scope, definitionCallback = definitionCallback, errorCollector = errorCollector)
     }
 
     /**
@@ -75,7 +75,7 @@ object Parser {
         statementScope: Scope?,
         definitionScope: Scope?,
         definitionCallback: (Definition) -> Unit = { definitionScope!!.add(it) },
-        errors: MutableList<ParsingException>? = null,
+        errorCollector: MutableList<ParsingException>? = null,
     ): Node {
         require (statementScope != null || definitionScope != null)
         val statements = mutableListOf<Node>()
@@ -110,10 +110,10 @@ object Parser {
                 tokenizer.consume()
             } else if (definitionScope != null && (DECLARATION_KEYWORDS.contains(tokenizer.current.text)
                         || statementScope == null)) {
-                val definition = DefinitionParser.parseDefinitionFailsafe(tokenizer, ParsingContext(definitionScope, localDepth), errors)
-                definitionScope.add(definition)
+                val definition = DefinitionParser.parseDefinitionFailsafe(tokenizer, ParsingContext(definitionScope, localDepth), errorCollector)
+                definitionCallback(definition)
             } else {
-                val statement = StatementParser.parseStatementFailsafe(tokenizer, ParsingContext(statementScope!!, localDepth), errors)
+                val statement = StatementParser.parseStatementFailsafe(tokenizer, ParsingContext(statementScope!!, localDepth), errorCollector)
                 statements.add(statement)
             }
         }
@@ -123,7 +123,7 @@ object Parser {
 
     fun readDocString(tokenizer: TantillaScanner): String {
         if (tokenizer.current.type == TokenType.STRING || tokenizer.current.type == TokenType.MULTILINE_STRING) {
-            return unquote(tokenizer.consume())
+            return tokenizer.consume().unquote()
         }
         return ""
     }
@@ -150,19 +150,19 @@ object Parser {
             && tokenizer.current.type != TokenType.EOF)
     }
 
-    fun consumeLine(tokenizer: TantillaScanner, startPos: Int): String {
+    fun consumeLine(tokenizer: TantillaScanner, startPos: Token<TokenType>): CodeFragment {
         while (tokenizer.current.type != TokenType.EOF && tokenizer.current.type != TokenType.LINE_BREAK) {
             consumeInBrackets(tokenizer)
             tokenizer.consume()
         }
-        return tokenizer.code.substring(startPos, tokenizer.current.pos)
+        return CodeFragment(startPos, tokenizer.code.substring(startPos.localPos, tokenizer.current.localPos))
     }
 
     fun consumeBody(
         tokenizer: TantillaScanner,
-        startPos: Int,
+        startPos: Token<TokenType>,
         returnDepth: Int
-    ): String {
+    ): CodeFragment {
         var localDepth = returnDepth + 1
         while (tokenizer.current.type != TokenType.EOF) {
             if (tokenizer.current.type == TokenType.LINE_BREAK) {
@@ -176,11 +176,11 @@ object Parser {
                 }
             }
             if (localDepth <= returnDepth) {
-                return tokenizer.code.substring(startPos, tokenizer.current.pos)
+                return CodeFragment(startPos, tokenizer.code.substring(startPos.localPos, tokenizer.current.localPos))
             }
             tokenizer.consume()
         }
-        return tokenizer.code.substring(startPos)
+        return CodeFragment(startPos, tokenizer.code.substring(startPos.localPos))
     }
 
     fun skipLineBreaks(tokenizer: TantillaScanner, currentDepth: Int) {

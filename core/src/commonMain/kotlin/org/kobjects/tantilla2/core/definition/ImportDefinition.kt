@@ -1,5 +1,6 @@
 package org.kobjects.tantilla2.core.definition
 
+import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.core.CodeWriter
 
 class ImportDefinition(
@@ -19,7 +20,7 @@ class ImportDefinition(
         return resolved!!
     }
 
-    override fun resolve() {
+    override fun resolve(applyOffset: Boolean, errorCollector: MutableList<ParsingException>?) {
         if (resolved == null) {
             var result = parentScope.resolveStatic(path[0], true)
             for (i in 1 until path.size) {

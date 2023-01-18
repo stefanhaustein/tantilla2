@@ -1,4 +1,5 @@
 import org.kobjects.parserlib.tokenizer.ParsingException
+import org.kobjects.parserlib.tokenizer.Token
 import org.kobjects.tantilla2.core.classifier.FieldDefinition
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
 import org.kobjects.tantilla2.core.classifier.StructDefinition
@@ -14,6 +15,7 @@ object DefinitionParser {
 
     fun parseFailsafe(parentScope: Scope, code: String): Definition {
         val tokenizer = TantillaScanner(code)
+        val startPos = tokenizer.current
         var result: Definition
         try {
             result = parseDefinition(tokenizer, ParsingContext(parentScope, -1))
@@ -23,14 +25,14 @@ object DefinitionParser {
             }
 
             if (tokenizer.current.type != TokenType.EOF) {
-                result = UnparseableDefinition(parentScope, result.name, code)
+                result = UnparseableDefinition(parentScope, result.name, CodeFragment(startPos, code))
             }
         } catch (e: Exception) {
             e.printStackTrace()
             //            val name = oldDefinition?.name ?: "[error]"
             result = UnparseableDefinition(
                 parentScope,
-                definitionText = code
+                definitionText = CodeFragment(startPos, code)
             )
         }
         return result
@@ -40,7 +42,7 @@ object DefinitionParser {
         if (errors == null) {
             return parseDefinition(tokenizer, context)
         }
-        val startPos = tokenizer.current.pos
+        val startPos = tokenizer.current
         try {
             return parseDefinition(tokenizer, context)
         } catch (e: Exception) {
@@ -53,7 +55,7 @@ object DefinitionParser {
     }
 
     fun parseDefinition(tokenizer: TantillaScanner, context: ParsingContext): Definition {
-        val startPos = tokenizer.current.pos
+        val startPos = tokenizer.current
         val explicitlyStatic = tokenizer.tryConsume("static")
         var mutable = tokenizer.tryConsume("mut")
         val scope = context.scope
@@ -154,7 +156,7 @@ object DefinitionParser {
     fun parseFieldDeclaration(
         tokenizer: TantillaScanner,
         context: ParsingContext,
-        startPos: Int,
+        startPos: Token<TokenType>,
         local: Boolean,
         mutable: Boolean,
     ) : FieldDefinition {

@@ -225,7 +225,7 @@ object TantillaExpressionParser {
         when (tokenizer.current.type) {
             TokenType.NUMBER -> createNumberLiteral(tokenizer.consume());
             TokenType.STRING -> StrNode.Const(tokenizer.consume().unquote().unescape())
-            TokenType.MULTILINE_STRING ->StrNode.Const(tokenizer.consume().unquoteMultiline(), true)
+            TokenType.MULTILINE_STRING ->StrNode.Const(tokenizer.consume().unquote(), true)
             TokenType.IDENTIFIER ->  when (tokenizer.current.text) {
                 "True", "true" -> {
                     tokenizer.consume()
