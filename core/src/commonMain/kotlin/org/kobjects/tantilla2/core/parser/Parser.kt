@@ -55,8 +55,13 @@ object Parser {
     fun parseStatements(tokenizer: TantillaScanner, context: ParsingContext, errors: MutableList<ParsingException>? = null) =
         parseDefinitionsAndStatements(tokenizer, context.depth, statementScope = context.scope, definitionScope = null, errors = errors)
 
-    fun parseDefinitions(tokenizer: TantillaScanner, context: ParsingContext, errors: MutableList<ParsingException>? = null) {
-        parseDefinitionsAndStatements(tokenizer, context.depth, statementScope = null, definitionScope = context.scope, errors = errors)
+    fun parseDefinitions(
+        tokenizer: TantillaScanner,
+        context: ParsingContext,
+        definitionCallback: (Definition) -> Unit = { context.scope!!.add(it) },
+        errors: MutableList<ParsingException>? = null
+    ) {
+        parseDefinitionsAndStatements(tokenizer, context.depth, statementScope = null, definitionScope = context.scope, definitionCallback = definitionCallback, errors = errors)
     }
 
     /**
@@ -69,6 +74,7 @@ object Parser {
         depth: Int,
         statementScope: Scope?,
         definitionScope: Scope?,
+        definitionCallback: (Definition) -> Unit = { definitionScope!!.add(it) },
         errors: MutableList<ParsingException>? = null,
     ): Node {
         require (statementScope != null || definitionScope != null)
@@ -100,7 +106,7 @@ object Parser {
                     throw tokenizer.exception("Definitions are not allowed here.")
                 }
                 val code = tokenizer.current.text
-                definitionScope.add(DefinitionParser.parseFailsafe(definitionScope, code.substring(4, code.length - 4)))
+                definitionCallback(DefinitionParser.parseFailsafe(definitionScope, code.substring(4, code.length - 4)))
                 tokenizer.consume()
             } else if (definitionScope != null && (DECLARATION_KEYWORDS.contains(tokenizer.current.text)
                         || statementScope == null)) {
