@@ -26,10 +26,11 @@ data class StaticReference(val definition: Definition, val qualified: Boolean) :
     override val returnType: Type
         get() = definition.type
 
-    override fun requireAssignability() {
+    override fun requireAssignability(): Node {
         if (!definition.mutable) {
             throw IllegalStateException("Definition $definition is not mutable.")
         }
+        return this
     }
 
 }

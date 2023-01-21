@@ -11,6 +11,7 @@ import org.kobjects.tantilla2.core.definition.Scope
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.LambdaScope
+import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.node.expression.*
 import org.kobjects.tantilla2.core.node.expression.Apply
@@ -82,7 +83,7 @@ object TantillaExpressionParser {
 
         val dynamicDefinition = scope.resolveDynamic(name, fallBackToStatic = false)
         if (dynamicDefinition != null && dynamicDefinition.isDynamic()) {
-            return parseMaybeApply(
+            return ApplyParser.parseMaybeApply(
                 tokenizer,
                 context,
                 reference(scope, dynamicDefinition, false),
@@ -102,7 +103,7 @@ object TantillaExpressionParser {
 
         val staticDefinition = scope.resolveStatic(name, fallBackToParent = true)
         if (staticDefinition != null && (tokenizer.current.text != "(" || isCallable(staticDefinition)) ) {
-            return parseMaybeApply(
+            return ApplyParser.parseMaybeApply(
                 tokenizer,
                 context,
                 reference(scope, staticDefinition, false),
@@ -120,7 +121,7 @@ object TantillaExpressionParser {
                 throw tokenizer.exception("Comma or closing paren expected after first parameter.")
             }
             if (definition != null) {
-                return parseMaybeApply(
+                return ApplyParser.parseMaybeApply(
                     tokenizer,
                     context,
                     reference(context.scope, definition, false),
@@ -317,7 +318,7 @@ object TantillaExpressionParser {
                 }
             else -> StaticReference(definition, true)
         }
-        return parseMaybeApply(
+        return ApplyParser.parseMaybeApply(
             tokenizer,
             context,
             value,
@@ -326,122 +327,7 @@ object TantillaExpressionParser {
             asMethod = self != null)
     }
 
-    fun parseMaybeApply(
-        tokenizer: TantillaScanner,
-        context: ParsingContext,
-        value: Node,
-        self: Node?,
-        openingParenConsumed: Boolean,
-        asMethod: Boolean,
-    ): Node {
-        if (!openingParenConsumed && tokenizer.tryConsume("@")) {
-            require(!asMethod) { "Can't combine @ with methods." }
-           return RawNode(value)
-        }
 
-        val type = value.returnType
-
-        if (type !is FunctionType) {
-            // Not a function, just skip () and error otherwise
-
-            if (openingParenConsumed || tokenizer.tryConsume("(")) {
-                tokenizer.consume(")") { "Empty parameter list expected." }
-            }
-            return value
-        }
-
-        // Don't imply constructor calls.
-        val parentesizedArgsList = openingParenConsumed || tokenizer.tryConsume("(")
-        if (!parentesizedArgsList && type is InstantiableMetaType) {
-            return value
-        }
-
-        val expectedParameters = type.parameters
-        val parameterExpressions = MutableList<Node?>(expectedParameters.size) { null }
-        val parameterSerialization = mutableListOf<Apply.ParameterSerialization>()
-        var index = 0
-        if (self != null) {
-            parameterExpressions[index++] = self
-            if (!asMethod) {
-                parameterSerialization.add(Apply.ParameterSerialization("", self))
-            }
-        }
-
-        val indexMap = mutableMapOf<String, Int>()
-        for (i in expectedParameters.indices) {
-            indexMap[expectedParameters[i].name] = i
-        }
-
-        val varargs = mutableListOf<Node>()
-        var varargIndex = -1
-        var nameRequired = false
-
-        val parseParameterList = if (parentesizedArgsList) !tokenizer.tryConsume(")")
-        else ((type.returnType == NoneType || type.hasRequiredParameters())
-                && tokenizer.current.type != TokenType.EOF
-                && tokenizer.current.type != TokenType.LINE_BREAK
-                && tokenizer.current.text != ":"
-                && !asMethod
-                && self == null)
-
-        if (parseParameterList)  {
-            do {
-                var name = ""
-                if (tokenizer.current.type == TokenType.IDENTIFIER && tokenizer.lookAhead(1).text == "=") {
-                    name = tokenizer.consume(TokenType.IDENTIFIER).text
-                    tokenizer.consume("=")
-                    nameRequired = true
-                    index = indexMap[name] ?: throw tokenizer.exception("Parameter name '$name' not found.")
-                } else if (nameRequired) {
-                    throw tokenizer.exception("Named parameter required here.")
-                } else if (index >= expectedParameters.size) {
-                    throw tokenizer.exception("Expected parameters $expectedParameters exceeded; index: $index")
-                }
-                val expectedParameter = expectedParameters[index]
-                val expression =
-                    parseExpression(tokenizer, context, expectedParameter.type)
-
-                parameterSerialization.add(Apply.ParameterSerialization(name, expression))
-                if (expectedParameter.isVararg) {
-                    varargs.add(expression)
-                    varargIndex = index
-                } else {
-                    parameterExpressions[index++] = expression
-                }
-            } while (tokenizer.tryConsume(","))
-
-            if (parentesizedArgsList) {
-                tokenizer.consume(")")
-            }
-        }
-
-        if (varargIndex != -1) {
-            parameterExpressions[varargIndex] = ListLiteral(varargs)
-        }
-
-        for (i in expectedParameters.indices) {
-            val expectedParameter = expectedParameters[i]
-            if (parameterExpressions[i] == null) {
-                if (expectedParameter.defaultValueExpression == null) {
-                    if (expectedParameter.isVararg) {
-                        parameterExpressions[i] = ListLiteral(varargs)
-                    } else {
-                        throw tokenizer.exception("Parameter '${expectedParameter.name}' is missing.")
-                    }
-                } else {
-                    parameterExpressions[i] = expectedParameter.defaultValueExpression
-                }
-            }
-        }
-
-        return Apply(
-            value,
-            List(parameterExpressions.size) { parameterExpressions[it]!!},
-            parameterSerialization.toList(),
-            parentesizedArgsList,
-            asMethod
-        )
-    }
 
 
     val expressionParser =
@@ -454,7 +340,7 @@ object TantillaExpressionParser {
                 tokenizer, context, _, base -> parseElementAt(tokenizer, context, base) },
             GreenspunExpressionParser.suffix(Precedence.BRACKET, "(") {
                 tokenizer, context, _, base ->
-                parseMaybeApply(
+                ApplyParser.parseMaybeApply(
                     tokenizer,
                     context,
                     base,

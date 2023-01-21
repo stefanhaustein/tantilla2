@@ -29,7 +29,7 @@ abstract class Node : Evaluable, SerializableCode {
         return false
     }
 
-    open fun requireAssignability(): Unit = throw UnsupportedOperationException("Target '$this' is not assignable.")
+    open fun requireAssignability(): Node = throw UnsupportedOperationException("Target '$this' is not assignable.")
 
     open fun assign(context: LocalRuntimeContext, value: Any): Unit =
         throw UnsupportedOperationException()

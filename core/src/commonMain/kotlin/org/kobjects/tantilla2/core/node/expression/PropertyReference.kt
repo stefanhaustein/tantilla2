@@ -33,9 +33,10 @@ class PropertyReference(
         writer.appendInfix(parentPrecedence, base, ".", Precedence.DOT, Identifier(definition.name))
     }
 
-    override fun requireAssignability() {
+    override fun requireAssignability(): Node {
         if (!definition.mutable) {
             throw IllegalStateException("Property $definition is not mutable.")
         }
+        return this
     }
 }

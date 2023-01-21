@@ -7,9 +7,10 @@ import org.kobjects.tantilla2.core.type.NoneType
 import org.kobjects.tantilla2.core.node.Node
 
 class Assignment(
-    val target: Node,
+    target: Node,
     val source: Node
 ) : Node() {
+    val target = target.requireAssignability()
 
     override val returnType: Type
         get() = NoneType
@@ -28,7 +29,6 @@ class Assignment(
     }
 
     init {
-        target.requireAssignability()
         require(source.returnType.isAssignableFrom(target.returnType)) {
             "Can't assign source type ${source.returnType} to an expression of type ${target.returnType}."
         }

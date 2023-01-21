@@ -3,8 +3,10 @@ package org.kobjects.tantilla2.core.node.expression
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.Precedence
+import org.kobjects.tantilla2.core.classifier.FieldDefinition
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Callable
+import org.kobjects.tantilla2.core.function.FunctionDefinition
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.type.NoneType
 
@@ -87,5 +89,21 @@ class Apply(
         val named: String,
         val node: Node,
     )
+
+    override fun requireAssignability(): Node {
+        require(asMethod) { "Method required for assignment." }
+        require(parameters.size == 1)  { "No parameters permitted for assignment." }
+
+        if (base !is StaticReference) {
+            throw IllegalArgumentException("Method required for assignment; got $base")
+        }
+        val setMethodName = "set_" + base.definition.name
+        val setMethod = parameters[0].returnType.resolve(setMethodName)
+        if (setMethod !is FunctionDefinition) {
+            throw IllegalArgumentException("Can't resolve '$setMethodName'")
+        }
+
+        return SetMethodCall(setMethod, parameters[0])
+    }
 
 }
