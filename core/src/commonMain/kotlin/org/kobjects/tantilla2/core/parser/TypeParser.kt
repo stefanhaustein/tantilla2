@@ -18,13 +18,13 @@ object TypeParser {
         if (tokenizer.current.text == "(") {
             return parseFunctionType(tokenizer, context, false)
         }
-        var name = tokenizer.consume(TokenType.IDENTIFIER)
+        var name = tokenizer.consume(TokenType.IDENTIFIER).text
         var scope = context.scope
 
         // Note that getValue() below is required to resolve imports!
         while (tokenizer.tryConsume(".")) {
             scope = scope.resolveStaticOrError(name, scope == context.scope).getValue(null) as Scope
-            name = tokenizer.consume(TokenType.IDENTIFIER)
+            name = tokenizer.consume(TokenType.IDENTIFIER).text
         }
 
         name = when (name) {
@@ -54,11 +54,8 @@ object TypeParser {
         val isVararg = tokenizer.tryConsume("*")
         val name: String
         if (tokenizer.current.type == TokenType.IDENTIFIER && tokenizer.lookAhead(1).text == ":") {
-            name = tokenizer.consume(TokenType.IDENTIFIER)
-            tokenizer.consume(
-                ":",
-                "Colon expected, separating the parameter type from the parameter name."
-            )
+            name = tokenizer.consume(TokenType.IDENTIFIER).text
+            tokenizer.consume(":") { "Colon expected, separating the parameter type from the parameter name." }
         } else {
             name = "\$$index"
         }
@@ -100,7 +97,7 @@ object TypeParser {
                 }
             }
 
-            tokenizer.consume(")", ", or ) expected here while parsing the parameter list.")
+            tokenizer.consume(")") { "',' or ')' expected here while parsing the parameter list." }
         }
         val returnType = if (tokenizer.tryConsume("->")) parseType(tokenizer, context) else NoneType
         return FunctionType.Impl(returnType, parameters)

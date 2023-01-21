@@ -35,7 +35,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation("org.kobjects.konsole:core:0.3.0")
-                implementation("org.kobjects.parserlib:core:0.5.1")
+                implementation("org.kobjects.parserlib:core:0.6.0")
             }
         }
         val commonTest by getting {

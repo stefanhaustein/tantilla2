@@ -53,7 +53,6 @@ abstract class Scope(
         val errors = mutableListOf<ParsingException>()
         Parser.parseDefinitions(tokenizer, ParsingContext(this, 0), errorCollector = errors, definitionCallback =  {
             try {
-                val offset = tokenizer.current
                 println("****** Resolve: $it")
                 it.resolve(applyOffset = true, errorCollector = errors)
             } catch (e: Exception) {
@@ -64,25 +63,26 @@ abstract class Scope(
         return errors.toList()
     }
 
-    fun update(newContent: String, oldDefinition: Definition? = null): Definition {
-        var replacement = DefinitionParser.parseFailsafe(this, newContent)
-        if (oldDefinition != null) {
-            try {
-                if (oldDefinition is DefinitionUpdatable && replacement is DefinitionUpdatable
-                    && oldDefinition.type == replacement.type
-                    && oldDefinition.kind == replacement.kind
-                ) {
-                    oldDefinition.definitionText = replacement.definitionText
-                    return oldDefinition
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-            definitions.remove(oldDefinition.name)
-        }
-        definitions[replacement.name] = replacement
+    fun update(newContent: String, oldDefinition: Definition? = null) {
+        val newDefinitions = mutableMapOf<String, Definition>()
+        val tokenizer = TantillaScanner(newContent)
+        Parser.parseDefinitions(tokenizer, ParsingContext(this, 0), errorCollector = mutableListOf(), definitionCallback =  {
+            newDefinitions[it.name] = it
+        })
 
-        return replacement
+        if (oldDefinition != null) {
+            val replacement = newDefinitions[oldDefinition.name] ?: newDefinitions.values.firstOrNull()
+            if (oldDefinition is DefinitionUpdatable && replacement is DefinitionUpdatable && oldDefinition.type == replacement.type && replacement.kind == oldDefinition.kind) {
+                oldDefinition.definitionText = replacement.definitionText
+                newDefinitions.remove(replacement.name)
+            } else {
+                definitions.remove(oldDefinition.name)
+            }
+        }
+
+        for (definition in newDefinitions.values) {
+            add(definition)
+        }
     }
 
 

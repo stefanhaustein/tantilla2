@@ -167,8 +167,12 @@ fun RenderAppBar(
                     )
                     RenderDropDownMenu(
                         showClearMenu,
-                        "Clear text output" to { (viewModel.clearConsole()) },
-                        "Clear bitmap" to { viewModel.clearBitmap() },
+                        "Clear screen" to {
+                            viewModel.clearConsole()
+                            viewModel.clearBitmap()
+                                          },
+                        "Clear text output only" to { viewModel.clearConsole() },
+                        "Clear graphics only" to { viewModel.clearBitmap() },
 
                         )
                     RenderFileSelector(viewModel, showLoadMenu)

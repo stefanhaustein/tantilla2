@@ -1,5 +1,6 @@
 package org.kobjects.tantilla2.core.parser
 
+import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.core.node.expression.StrNode
 import org.kobjects.tantilla2.core.*
 import org.kobjects.parserlib.expressionparser.ExpressionParser as GreenspunExpressionParser
@@ -75,7 +76,8 @@ object TantillaExpressionParser {
 
 
     fun parseFreeIdentifier(tokenizer: TantillaScanner, context: ParsingContext): Node {
-        val name = tokenizer.consume(TokenType.IDENTIFIER)
+        val nameToken = tokenizer.consume(TokenType.IDENTIFIER)
+        val name = nameToken.text
         val scope = context.scope
 
         val dynamicDefinition = scope.resolveDynamic(name, fallBackToStatic = false)
@@ -110,7 +112,7 @@ object TantillaExpressionParser {
         }
 
         // Method in function form
-        if (tokenizer.tryConsume("(")) {
+        if (tokenizer.tryConsume("(") && tokenizer.current.text != ")") {
             val firstParameter = parseExpression(tokenizer, context)
             val baseType = firstParameter.returnType as Scope
             val definition = baseType[name]
@@ -128,7 +130,7 @@ object TantillaExpressionParser {
             }
         }
 
-        throw tokenizer.exception("Symbol not found: '$name'.")
+        throw ParsingException(nameToken, "Symbol not found: '$name'.")
     }
 
     fun parseFunctionExpression(tokenizer: TantillaScanner,
@@ -178,7 +180,7 @@ object TantillaExpressionParser {
             val names = mutableListOf<String>()
             if (tokenizer.current.text != ":") {
               do {
-                  names.add(tokenizer.consume(TokenType.IDENTIFIER))
+                  names.add(tokenizer.consume(TokenType.IDENTIFIER).text)
               } while (tokenizer.tryConsume(","))
             }
             if (names.size > type.parameters.size) {
@@ -223,9 +225,9 @@ object TantillaExpressionParser {
 
     fun parsePrimary(tokenizer: TantillaScanner, context: ParsingContext): Node =
         when (tokenizer.current.type) {
-            TokenType.NUMBER -> createNumberLiteral(tokenizer.consume());
-            TokenType.STRING -> StrNode.Const(tokenizer.consume().unquote().unescape())
-            TokenType.MULTILINE_STRING ->StrNode.Const(tokenizer.consume().unquote(), true)
+            TokenType.NUMBER -> createNumberLiteral(tokenizer.consume().text);
+            TokenType.STRING -> StrNode.Const(tokenizer.consume().text.unquote().unescape())
+            TokenType.MULTILINE_STRING ->StrNode.Const(tokenizer.consume().text.unquote(), true)
             TokenType.IDENTIFIER ->  when (tokenizer.current.text) {
                 "True", "true" -> {
                     tokenizer.consume()
@@ -271,7 +273,7 @@ object TantillaExpressionParser {
                 result.add(parseExpression(tokenizer, context))
             } while (tokenizer.tryConsume(","))
         }
-        tokenizer.consume(endMarker, "$endMarker or , expected")
+        tokenizer.consume(endMarker) { "'$endMarker' or ',' expected here." }
        // tokenizer.enable(TokenType.LINE_BREAK)
 
         return result.toList()
@@ -293,7 +295,7 @@ object TantillaExpressionParser {
         context: ParsingContext,
         base: Node,
     ): Node {
-        val name = tokenizer.consume(TokenType.IDENTIFIER)
+        val name = tokenizer.consume(TokenType.IDENTIFIER).text
         val baseType = base.returnType
         val definition = baseType.resolve(name)
             ?: throw tokenizer.exception("Property '$name' not found.")
@@ -343,7 +345,7 @@ object TantillaExpressionParser {
             // Not a function, just skip () and error otherwise
 
             if (openingParenConsumed || tokenizer.tryConsume("(")) {
-                tokenizer.consume(")", "Empty parameter list expected.")
+                tokenizer.consume(")") { "Empty parameter list expected." }
             }
             return value
         }
@@ -386,7 +388,7 @@ object TantillaExpressionParser {
             do {
                 var name = ""
                 if (tokenizer.current.type == TokenType.IDENTIFIER && tokenizer.lookAhead(1).text == "=") {
-                    name = tokenizer.consume(TokenType.IDENTIFIER)
+                    name = tokenizer.consume(TokenType.IDENTIFIER).text
                     tokenizer.consume("=")
                     nameRequired = true
                     index = indexMap[name] ?: throw tokenizer.exception("Parameter name '$name' not found.")

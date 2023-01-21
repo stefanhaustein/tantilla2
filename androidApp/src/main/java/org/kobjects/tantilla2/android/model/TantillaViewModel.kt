@@ -104,34 +104,8 @@ class TantillaViewModel(
 
     fun addDefinition(kind: Definition.Kind) {
         when (kind) {
-            Definition.Kind.FUNCTION -> {
-                if (currentUserScope.value.supportsMethods) {
-                    dialogManager.showCustom(
-                        "Add Function",
-                        "",
-                        listOf(InputLine("Static", false), InputLine("Name", ""))
-                    ) {
-                        editNewDefinition("${if (it[0] == true) "static " else "" }def ${it[1]}():") }
-                } else {
-                    dialogManager.showPrompt("Add Function", "Name", "") {
-                        editNewDefinition("def $it():")
-                    }
-                }
-            }
-            Definition.Kind.PROPERTY -> {
-                if (currentUserScope.value.supportsLocalVariables) {
-                    dialogManager.showCustom(
-                        "Add Field",
-                        "",
-                        listOf(InputLine("Static", false), InputLine("Name", ""))
-                    ) {
-                        editNewDefinition("${if (it[0] == true) "static " else "" }${it[1]} =") }
-                } else {
-                    dialogManager.showPrompt("Add Field", "Name", "") {
-                        editNewDefinition("$it = ")
-                    }
-                }
-            }
+            Definition.Kind.FUNCTION -> editNewDefinition("def f():")
+            Definition.Kind.PROPERTY -> editNewDefinition("v = ")
             Definition.Kind.IMPL -> editNewDefinition("impl ")
             else -> {
                 val lowercase = kind.toString().lowercase()

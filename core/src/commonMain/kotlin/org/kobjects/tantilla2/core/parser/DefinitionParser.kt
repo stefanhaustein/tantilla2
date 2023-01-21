@@ -84,7 +84,7 @@ object DefinitionParser {
                     if (mutable) {
                         throw tokenizer.exception("'mut' seems to be misplaced here.")
                     }
-                    val name = tokenizer.consume(TokenType.IDENTIFIER, "Name expected.")
+                    val name = tokenizer.consume(TokenType.IDENTIFIER) { "Name expected." }.text
                     println("consuming def $name")
                     val text = Parser.consumeBody(tokenizer, startPos, context.depth)
                     FunctionDefinition(
@@ -99,7 +99,7 @@ object DefinitionParser {
                 tokenizer.consume(kind)
                 val path = mutableListOf<String>()
                 do {
-                    path.add(tokenizer.consume(TokenType.IDENTIFIER))
+                    path.add(tokenizer.consume(TokenType.IDENTIFIER).text)
                 } while (tokenizer.tryConsume("."))
                 ImportDefinition(context.scope, path)
             }
@@ -107,8 +107,8 @@ object DefinitionParser {
             "struct",
             "trait"-> {
                 tokenizer.consume(kind)
-                val name = tokenizer.consume(TokenType.IDENTIFIER, "Struct name expected.")
-                tokenizer.consume(":")
+                val name = tokenizer.consume(TokenType.IDENTIFIER) { "'${it.text}' is not a valid name for $kind" }.text
+                tokenizer.consume(":") { "Colon expected after the $kind name."}
                 val docString = Parser.readDocString(tokenizer)
                 val definition = when (kind) {
                     "struct" -> StructDefinition(context.scope, name, docString = docString)
@@ -120,10 +120,10 @@ object DefinitionParser {
             }
             "impl" -> {
                 tokenizer.consume("impl")
-                val traitName = tokenizer.consume(TokenType.IDENTIFIER, "Trait name expected.")
-                tokenizer.consume("for", "'for' expected after trait name for impl")
-                val scopeName = tokenizer.consume(TokenType.IDENTIFIER, "Class name expected.")
-                tokenizer.consume(":", "':' expected after 'for <struct name>' for impl")
+                val traitName = tokenizer.consume(TokenType.IDENTIFIER) { "Trait name expected." }.text
+                tokenizer.consume("for") { "'for' expected after trait name for impl." }
+                val scopeName = tokenizer.consume(TokenType.IDENTIFIER) { "Struct name expected after 'for'." }.text
+                tokenizer.consume(":") { "Colon expected after 'for ${scopeName}' for impl." }
                 val docString = Parser.readDocString(tokenizer)
                 val impl = ImplDefinition(
                     context.scope,
@@ -140,13 +140,13 @@ object DefinitionParser {
 
     fun parseEnum(tokenizer: TantillaScanner, parsingContext: ParsingContext): EnumDefinition {
         tokenizer.consume("enum")
-        val name = tokenizer.consume(TokenType.IDENTIFIER)
+        val name = tokenizer.consume(TokenType.IDENTIFIER).text
         val enumDefinition = EnumDefinition(parsingContext.scope, name)
 
         tokenizer.consume(":")
         while (tokenizer.current.type == TokenType.LINE_BREAK && Parser.getIndent(tokenizer.current.text) > parsingContext.depth) {
             tokenizer.consume(TokenType.LINE_BREAK)
-            val literalName = tokenizer.consume(TokenType.IDENTIFIER)
+            val literalName = tokenizer.consume(TokenType.IDENTIFIER).text
             enumDefinition.add(EnumLiteral(enumDefinition, literalName))
         }
         return enumDefinition
@@ -160,7 +160,7 @@ object DefinitionParser {
         local: Boolean,
         mutable: Boolean,
     ) : FieldDefinition {
-        val name = tokenizer.consume(TokenType.IDENTIFIER)
+        val name = tokenizer.consume(TokenType.IDENTIFIER).text
         val kind = if (local) Definition.Kind.PROPERTY
         else Definition.Kind.STATIC
         val text = Parser.consumeLine(tokenizer, startPos)

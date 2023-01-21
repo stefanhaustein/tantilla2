@@ -123,7 +123,7 @@ object Parser {
 
     fun readDocString(tokenizer: TantillaScanner): String {
         if (tokenizer.current.type == TokenType.STRING || tokenizer.current.type == TokenType.MULTILINE_STRING) {
-            return tokenizer.consume().unquote()
+            return tokenizer.consume().text.unquote()
         }
         return ""
     }

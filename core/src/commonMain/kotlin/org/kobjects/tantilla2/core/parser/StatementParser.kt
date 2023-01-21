@@ -46,7 +46,7 @@ object StatementParser {
             "while" -> parseWhile(tokenizer, context)
             else -> {
                 if (tokenizer.current.type == TokenType.COMMENT) {
-                    Comment(tokenizer.consume(TokenType.COMMENT))
+                    Comment(tokenizer.consume(TokenType.COMMENT).text)
                 } else {
                     var expr = TantillaExpressionParser.parseExpression(tokenizer, context)
                     val text = tokenizer.current.text
@@ -74,7 +74,7 @@ object StatementParser {
         tokenizer.consume("let")
 
         val mutable = tokenizer.tryConsume("mut")
-        val name = tokenizer.consume(TokenType.IDENTIFIER)
+        val name = tokenizer.consume(TokenType.IDENTIFIER).text
         val resolved = Parser.resolveVariable(tokenizer, context)
 
         val type = resolved.first
@@ -117,7 +117,7 @@ object StatementParser {
 
     fun parseFor(tokenizer: TantillaScanner, context: ParsingContext): ForNode {
         tokenizer.consume("for")
-        val iteratorName = tokenizer.consume(TokenType.IDENTIFIER, "Loop variable name expected.")
+        val iteratorName = tokenizer.consume(TokenType.IDENTIFIER) { "Loop variable name expected." }.text
         tokenizer.consume("in")
         val iterableExpression = TantillaExpressionParser.parseExpression(tokenizer, context)
         tokenizer.consume(":")
