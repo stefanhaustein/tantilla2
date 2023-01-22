@@ -1,44 +1,15 @@
 package org.kobjects.tantilla2.core.parser
 
 import org.kobjects.tantilla2.core.classifier.InstantiableMetaType
+import org.kobjects.tantilla2.core.collection.PairType
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.LambdaScope
 import org.kobjects.tantilla2.core.node.Node
-import org.kobjects.tantilla2.core.node.expression.Apply
-import org.kobjects.tantilla2.core.node.expression.LambdaReference
-import org.kobjects.tantilla2.core.node.expression.ListLiteral
-import org.kobjects.tantilla2.core.node.expression.RawNode
+import org.kobjects.tantilla2.core.node.expression.*
 import org.kobjects.tantilla2.core.type.NoneType
+import org.kobjects.tantilla2.core.type.Type
 
 object ApplyParser {
-
-    fun parseTrailingClosure(
-        tokenizer: TantillaScanner,
-        context: ParsingContext,
-        expectedType: FunctionType,
-    ): Node {
-        val parameterNames: List<String>
-        if (tokenizer.current.text == "(") {
-            val type = TypeParser.parseFunctionType(tokenizer, context, isMethod = false)
-            if (!expectedType.isAssignableFrom(type)) {
-                throw tokenizer.exception("Function type $type does not match expected type $expectedType")
-            }
-            parameterNames = type.parameters.map { it.name }
-            tokenizer.consume(":")
-        } else {
-            parameterNames = List(expectedType.parameters.size) { "${'$'}$it" }
-        }
-
-        val lamnbdaScope = LambdaScope(context.scope) // resolvedType = type)
-        for (i in expectedType.parameters.indices) {
-            val parameter = expectedType.parameters[i]
-            lamnbdaScope.declareLocalVariable(parameterNames[i], parameter.type, false)
-        }
-
-        val body = Parser.parseDefinitionsAndStatements(tokenizer, context.depth + 1, lamnbdaScope, definitionScope = lamnbdaScope)
-
-        return LambdaReference(expectedType, lamnbdaScope.locals.size, body, implicit = false)
-    }
 
     fun parseMaybeApply(
         tokenizer: TantillaScanner,
@@ -133,30 +104,56 @@ object ApplyParser {
             }
         }
 
-        if (varargIndex != -1) {
-            parameterExpressions[varargIndex] = ListLiteral(varargs)
-        }
 
-        var missingFunctionParameter = false
+        var missingFunctionParameter = mutableMapOf<String, Int>()
         for (i in expectedParameters.indices) {
-            if (parameterExpressions[i] == null && expectedParameters[i].type is FunctionType) {
-                missingFunctionParameter = true
+            if ((parameterExpressions[i] == null || i == varargIndex) && isFunctionOrFunctionPairType(expectedParameters[i].type)) {
+                missingFunctionParameter[expectedParameters[i].name] = i
                 break
             }
         }
 
-        if (missingFunctionParameter && tokenizer.tryConsume(":")) {
-            var found = false
-            for (i in expectedParameters.indices) {
-                if (parameterExpressions[i] == null && expectedParameters[i].type is FunctionType) {
-                    found = true
-                    parameterExpressions[i] = parseTrailingClosure(tokenizer, context, expectedParameters[i].type as FunctionType)
-                    break
+        while (missingFunctionParameter.isNotEmpty()) {
+            if (tokenizer.tryConsume(":")) {
+                for (i in expectedParameters.indices) {
+                    // The null check excludes varargs, the type check excludes lambda pairs
+                    if (parameterExpressions[i] == null && expectedParameters[i].type is FunctionType) {
+                        parameterExpressions[i] = parseTrailingClosure(
+                            tokenizer,
+                            context,
+                            expectedParameters[i].type as FunctionType
+                        )
+                        missingFunctionParameter.remove(expectedParameters[i].name)
+                        break
+                    }
+                }
+            } else {
+                val name = tryConsumeNamedLambdaPrefix(tokenizer, missingFunctionParameter.keys) ?: break
+                val index = missingFunctionParameter[name]!!
+                val type = expectedParameters[index].type
+                val expression = if (type is PairType) {
+                    val exprA = TantillaExpressionParser.parseExpression(tokenizer, context, type.typeA)
+                    tokenizer.consume(":")
+                    val exprB = parseTrailingClosure(tokenizer, context, type.typeB as FunctionType)
+                    PairNode(type, exprA, exprB)
+                } else {
+                    tokenizer.consume(":") { "Colon expected after trailing closure parameter name." }
+                    parseTrailingClosure(
+                        tokenizer,
+                        context,
+                        expectedParameters[index].type as FunctionType
+                    )
+                }
+                if (index == varargIndex) {
+                    varargs.add(expression)
+                } else {
+                    missingFunctionParameter.remove(name)
                 }
             }
-            if (!found) {
-                throw tokenizer.exception("No missing lambda parameter found fo assign trailing closure to.")
-            }
+        }
+
+        if (varargIndex != -1) {
+            parameterExpressions[varargIndex] = ListLiteral(varargs)
         }
 
         for (i in expectedParameters.indices) {
@@ -182,5 +179,57 @@ object ApplyParser {
             asMethod
         )
     }
+
+    fun isFunctionOrFunctionPairType(type: Type) =
+        type is FunctionType
+        || (type is PairType &&
+                type.typeA is FunctionType && type.typeB is FunctionType)
+
+
+    fun parseTrailingClosure(
+        tokenizer: TantillaScanner,
+        context: ParsingContext,
+        expectedType: FunctionType,
+    ): Node {
+        val parameterNames: List<String>
+        if (tokenizer.current.text == "(") {
+            val type = TypeParser.parseFunctionType(tokenizer, context, isMethod = false)
+            if (!expectedType.isAssignableFrom(type)) {
+                throw tokenizer.exception("Function type $type does not match expected type $expectedType")
+            }
+            parameterNames = type.parameters.map { it.name }
+            tokenizer.consume(":")
+        } else {
+            parameterNames = List(expectedType.parameters.size) { "${'$'}$it" }
+        }
+
+        val lambdaScope = LambdaScope(context.scope) // resolvedType = type)
+        for (i in expectedType.parameters.indices) {
+            val parameter = expectedType.parameters[i]
+            lambdaScope.declareLocalVariable(parameterNames[i], parameter.type, false)
+        }
+
+        val body = Parser.parseDefinitionsAndStatements(tokenizer, context.depth + 1, lambdaScope, definitionScope = lambdaScope)
+
+        return LambdaReference(expectedType, lambdaScope.locals.size, body, implicit = false)
+    }
+
+    fun tryConsumeNamedLambdaPrefix(tokenizer: TantillaScanner, names: Set<String>): String? {
+        var i = 0
+        while (tokenizer.lookAhead(i).type == TokenType.COMMENT || tokenizer.lookAhead(i).type == TokenType.LINE_BREAK) {
+            i++
+        }
+        val name = tokenizer.lookAhead(i).text
+        if (name in names) {
+            for (j in 0 until i) {
+                tokenizer.consume()
+            }
+            return name
+        }
+        return null
+    }
+
+
+
 
 }
