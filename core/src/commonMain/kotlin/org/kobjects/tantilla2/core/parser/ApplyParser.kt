@@ -109,7 +109,6 @@ object ApplyParser {
         for (i in expectedParameters.indices) {
             if ((parameterExpressions[i] == null || i == varargIndex) && isFunctionOrFunctionPairType(expectedParameters[i].type)) {
                 missingFunctionParameter[expectedParameters[i].name] = i
-                break
             }
         }
 
@@ -221,7 +220,7 @@ object ApplyParser {
         }
         val name = tokenizer.lookAhead(i).text
         if (name in names) {
-            for (j in 0 until i) {
+            for (j in 0 .. i) {
                 tokenizer.consume()
             }
             return name

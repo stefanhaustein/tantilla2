@@ -2,7 +2,11 @@ package org.kobjects.tantilla2.core.definition
 
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.collection.*
+import org.kobjects.tantilla2.core.function.Callable
+import org.kobjects.tantilla2.core.function.CallableImpl
+import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Parameter
+import org.kobjects.tantilla2.core.node.LeafNode
 import org.kobjects.tantilla2.core.node.expression.StrNode
 import org.kobjects.tantilla2.core.type.*
 import org.kobjects.tantilla2.stdlib.math.MathScope
@@ -63,6 +67,45 @@ class SystemRootScope(
         ) {
             it.get(0).toString()
         }
+
+        defineNativeFunction("iif",
+            "Conditional",
+            NoneType,
+            Parameter("condition", BoolType),
+            Parameter("then", FunctionType.Impl(NoneType, emptyList())),
+            Parameter("elseif", PairType(FunctionType.Impl(BoolType, emptyList()), FunctionType.Impl(NoneType, emptyList())), isVararg = true),
+            Parameter("else", FunctionType.Impl(NoneType, emptyList()), object : LeafNode() {
+                override fun eval(context: LocalRuntimeContext) = CallableImpl(FunctionType.Impl(NoneType, emptyList()), 0, body = object : Evaluable {
+                    override fun eval(context: LocalRuntimeContext): Any {
+                        return NoneType.None
+                    }
+
+                    override val returnType: Type
+                        get() = NoneType
+                })
+                override val returnType: Type
+                    get() = FunctionType.Impl(NoneType, emptyList())
+
+                override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
+                    writer.appendCode("# Default parameter")
+                }
+            }),
+        ) {
+            if (it[0] as Boolean) {
+                val then = it[1] as Callable
+                val ctx = LocalRuntimeContext(it.globalRuntimeContext, then)
+                then.eval(ctx)
+            } else {
+                val elze = it[3] as Callable
+                val ctx = LocalRuntimeContext(it.globalRuntimeContext, elze)
+                elze.eval(ctx)
+            }
+
+        }
+
+
+
+
 
     }
 

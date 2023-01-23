@@ -7,4 +7,5 @@ data class ParsingContext(
     val depth: Int
 ) {
     fun indent() = ParsingContext(scope, depth + 1)
+
 }
