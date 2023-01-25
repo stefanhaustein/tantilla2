@@ -117,12 +117,14 @@ object ApplyParser {
                 for (i in expectedParameters.indices) {
                     // The null check excludes varargs, the type check excludes lambda pairs
                     if (parameterExpressions[i] == null && expectedParameters[i].type is FunctionType) {
-                        parameterExpressions[i] = parseTrailingClosure(
+                        val node = parseTrailingClosure(
                             tokenizer,
                             context,
                             expectedParameters[i].type as FunctionType
                         )
+                        parameterExpressions[i] = node
                         missingFunctionParameter.remove(expectedParameters[i].name)
+                        parameterSerialization.add(Apply.ParameterSerialization("", node, true))
                         break
                     }
                 }
@@ -134,7 +136,7 @@ object ApplyParser {
                     val exprA = TantillaExpressionParser.parseExpression(tokenizer, context, type.typeA)
                     tokenizer.consume(":")
                     val exprB = parseTrailingClosure(tokenizer, context, type.typeB as FunctionType)
-                    PairNode(type, exprA, exprB)
+                    PairNode(exprA, exprB)
                 } else {
                     tokenizer.consume(":") { "Colon expected after trailing closure parameter name." }
                     parseTrailingClosure(
@@ -143,9 +145,12 @@ object ApplyParser {
                         expectedParameters[index].type as FunctionType
                     )
                 }
-                if (index == varargIndex) {
+                parameterSerialization.add(Apply.ParameterSerialization(name, expression, true))
+                if (expectedParameters[index].isVararg) {
+                    varargIndex = index
                     varargs.add(expression)
                 } else {
+                    parameterExpressions[index] = expression
                     missingFunctionParameter.remove(name)
                 }
             }
@@ -210,7 +215,7 @@ object ApplyParser {
 
         val body = Parser.parseDefinitionsAndStatements(tokenizer, context.depth + 1, lambdaScope, definitionScope = lambdaScope)
 
-        return LambdaReference(expectedType, lambdaScope.locals.size, body, implicit = false)
+        return LambdaReference(expectedType, lambdaScope.locals.size, body, implicit = true)
     }
 
     fun tryConsumeNamedLambdaPrefix(tokenizer: TantillaScanner, names: Set<String>): String? {

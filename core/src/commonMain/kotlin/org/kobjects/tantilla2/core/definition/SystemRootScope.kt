@@ -73,7 +73,10 @@ class SystemRootScope(
             NoneType,
             Parameter("condition", BoolType),
             Parameter("then", FunctionType.Impl(NoneType, emptyList())),
-            Parameter("elseif", PairType(FunctionType.Impl(BoolType, emptyList()), FunctionType.Impl(NoneType, emptyList())), isVararg = true),
+            Parameter(
+                "elif",
+                PairType(FunctionType.Impl(BoolType, emptyList()), FunctionType.Impl(NoneType, emptyList())),
+                isVararg = true),
             Parameter("else", FunctionType.Impl(NoneType, emptyList()), object : LeafNode() {
                 override fun eval(context: LocalRuntimeContext) = CallableImpl(FunctionType.Impl(NoneType, emptyList()), 0, body = object : Evaluable {
                     override fun eval(context: LocalRuntimeContext): Any {
@@ -96,9 +99,26 @@ class SystemRootScope(
                 val ctx = LocalRuntimeContext(it.globalRuntimeContext, then)
                 then.eval(ctx)
             } else {
-                val elze = it[3] as Callable
-                val ctx = LocalRuntimeContext(it.globalRuntimeContext, elze)
-                elze.eval(ctx)
+                var found: Any? = null
+                for (rawElif in it[2] as TypedList) {
+                    val elif = rawElif as TypedPair
+                    val condition = elif.a as Callable
+                    val conditionContext = LocalRuntimeContext(it.globalRuntimeContext, condition)
+                    val result = condition.eval(conditionContext)
+                    if (result as Boolean) {
+                        val then = elif.b as Callable
+                        val thenContet = LocalRuntimeContext(it.globalRuntimeContext, then)
+                        found = then.eval(thenContet)
+                        break
+                    }
+                }
+                if (found != null) {
+                    found
+                } else {
+                    val elze = it[3] as Callable
+                    val ctx = LocalRuntimeContext(it.globalRuntimeContext, elze)
+                    elze.eval(ctx)
+                }
             }
 
         }

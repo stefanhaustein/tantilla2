@@ -66,13 +66,14 @@ class Apply(
         val nodeList = mutableListOf<Node>()
         val prefixList = mutableListOf<String>()
 
-        for (i in parameterSerialization.indices) {
-            val parameter = parameterSerialization[i]
-            nodeList.add(parameter.node)
-            if (parameter.named.isNotEmpty()) {
-                prefixList.add(parameter.named + " = ")
-            } else {
-                prefixList.add("")
+        for (parameter in parameterSerialization) {
+            if (!parameter.asTrailingClosure) {
+                nodeList.add(parameter.node)
+                if (parameter.named.isNotEmpty()) {
+                    prefixList.add(parameter.named + " = ")
+                } else {
+                    prefixList.add("")
+                }
             }
         }
         if (parens) {
@@ -83,11 +84,36 @@ class Apply(
             writer.append(" ")
             writer.appendList(nodeList, prefixList)
         }
+        for (parameter in parameterSerialization) {
+            if (parameter.asTrailingClosure) {
+                if (parameter.named.isNotEmpty()) {
+                    writer.newline()
+                    writer.append(parameter.named)
+                }
+
+                if (parameter.node is PairNode) {
+                    writer.append(' ')
+                    writer.appendCode(parameter.node.a)
+                    writer.append(":")
+                    writer.indent()
+                    writer.newline()
+                    writer.appendCode(parameter.node.b)
+                    writer.outdent()
+                } else {
+                    writer.append(":")
+                    writer.indent()
+                    writer.newline()
+                    writer.appendCode(parameter.node)
+                    writer.outdent()
+                }
+            }
+        }
     }
 
-    class ParameterSerialization(
+    data class ParameterSerialization(
         val named: String,
         val node: Node,
+        val asTrailingClosure: Boolean = false
     )
 
     override fun requireAssignability(): Node {
