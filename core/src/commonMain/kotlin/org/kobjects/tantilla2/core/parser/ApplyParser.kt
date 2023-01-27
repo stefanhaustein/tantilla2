@@ -6,6 +6,7 @@ import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.LambdaScope
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.node.expression.*
+import org.kobjects.tantilla2.core.parser.Parser.indent
 import org.kobjects.tantilla2.core.type.NoneType
 import org.kobjects.tantilla2.core.type.Type
 
@@ -129,7 +130,7 @@ object ApplyParser {
                     }
                 }
             } else {
-                val name = tryConsumeNamedLambdaPrefix(tokenizer, missingFunctionParameter.keys) ?: break
+                val name = tryConsumeNamedLambdaPrefix(tokenizer, context.depth, missingFunctionParameter.keys) ?: break
                 val index = missingFunctionParameter[name]!!
                 val type = expectedParameters[index].type
                 val expression = if (type is PairType) {
@@ -218,9 +219,16 @@ object ApplyParser {
         return LambdaReference(expectedType, lambdaScope.locals.size, body, implicit = true)
     }
 
-    fun tryConsumeNamedLambdaPrefix(tokenizer: TantillaScanner, names: Set<String>): String? {
+    fun tryConsumeNamedLambdaPrefix(tokenizer: TantillaScanner, indent: Int, names: Set<String>): String? {
         var i = 0
-        while (tokenizer.lookAhead(i).type == TokenType.COMMENT || tokenizer.lookAhead(i).type == TokenType.LINE_BREAK) {
+        while (true) {
+            val token = tokenizer.lookAhead(i)
+            val ok = token.type == TokenType.COMMENT
+                    || (token.type == TokenType.LINE_BREAK
+                    && token.text.indent() >= indent)
+            if (!ok) {
+                break
+            }
             i++
         }
         val name = tokenizer.lookAhead(i).text

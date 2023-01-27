@@ -7,6 +7,7 @@ import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.definition.*
 import org.kobjects.tantilla2.core.function.FunctionDefinition
 import org.kobjects.tantilla2.core.parser.Parser
+import org.kobjects.tantilla2.core.parser.Parser.indent
 import org.kobjects.tantilla2.core.parser.ParsingContext
 import org.kobjects.tantilla2.core.parser.TantillaScanner
 import org.kobjects.tantilla2.core.parser.TokenType
@@ -144,7 +145,7 @@ object DefinitionParser {
         val enumDefinition = EnumDefinition(parsingContext.scope, name)
 
         tokenizer.consume(":")
-        while (tokenizer.current.type == TokenType.LINE_BREAK && Parser.getIndent(tokenizer.current.text) > parsingContext.depth) {
+        while (tokenizer.current.type == TokenType.LINE_BREAK && tokenizer.current.text.indent() > parsingContext.depth) {
             tokenizer.consume(TokenType.LINE_BREAK)
             val literalName = tokenizer.consume(TokenType.IDENTIFIER).text
             enumDefinition.add(EnumLiteral(enumDefinition, literalName))

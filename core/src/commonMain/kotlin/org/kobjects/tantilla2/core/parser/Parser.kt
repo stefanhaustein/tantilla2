@@ -15,12 +15,12 @@ object Parser {
 
     val VALID_AFTER_STATEMENT = setOf(")", ",", "]", "}", "<|")
 
-    fun getIndent(s: String): Int {
-        val lastBreak = s.lastIndexOf('\n')
+    fun String.indent(): Int {
+        val lastBreak = lastIndexOf('\n')
         if (lastBreak == -1) {
             throw IllegalArgumentException("Line break expected")
         }
-        return s.length - lastBreak - 1
+        return length - lastBreak - 1
     }
 
     fun parseShellInput(s: String, localScope: LambdaScope, scope: UserRootScope): Node {
@@ -89,7 +89,7 @@ object Parser {
             && !VALID_AFTER_STATEMENT.contains(tokenizer.current.text)
         ) {
             if (tokenizer.current.type == TokenType.LINE_BREAK) {
-                localDepth = getIndent(tokenizer.current.text)
+                localDepth = tokenizer.current.text.indent()
 
                 // println("line break with depth $localDepth")
                 if (localDepth < depth) {
@@ -166,7 +166,7 @@ object Parser {
         var localDepth = returnDepth + 1
         while (tokenizer.current.type != TokenType.EOF) {
             if (tokenizer.current.type == TokenType.LINE_BREAK) {
-                localDepth = getIndent(tokenizer.current.text)
+                localDepth = tokenizer.current.text.indent()
            //     println("- new local depth: $localDepth")
             } else {
                 when (tokenizer.current.text) {
@@ -185,7 +185,7 @@ object Parser {
 
     fun skipLineBreaks(tokenizer: TantillaScanner, currentDepth: Int) {
         while (tokenizer.current.type == TokenType.LINE_BREAK
-            && getIndent(tokenizer.current.text) >= currentDepth) {
+            && tokenizer.current.text.indent() >= currentDepth) {
             tokenizer.consume()
         }
     }
