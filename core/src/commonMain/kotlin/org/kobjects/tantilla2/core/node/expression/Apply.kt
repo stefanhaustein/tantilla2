@@ -9,10 +9,12 @@ import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.FunctionDefinition
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.type.NoneType
+import org.kobjects.tantilla2.core.type.Type
 
 
 class Apply(
     val base: Node,
+    override val returnType: Type,
     val parameters: List<Node>,
     val parameterSerialization: List<ParameterSerialization>,
     val parens: Boolean,
@@ -42,10 +44,7 @@ class Apply(
     }
 
     override fun reconstruct(newChildren: List<Node>): Node =
-        Apply(newChildren[0], newChildren.subList(1, newChildren.size), parameterSerialization, parens, asMethod)
-
-    override val returnType
-        get() = (base.returnType as FunctionType).returnType
+        Apply(newChildren[0], returnType, newChildren.subList(1, newChildren.size), parameterSerialization, parens, asMethod)
 
     override fun serializeCode(writer: CodeWriter, parentPrcedence: Int) {
         if (asMethod) {

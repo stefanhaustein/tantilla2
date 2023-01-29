@@ -1,7 +1,6 @@
 package org.kobjects.tantilla2.core.type
 
 import org.kobjects.tantilla2.core.CodeWriter
-import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.definition.Definition
 
 
@@ -43,20 +42,16 @@ interface Type {
     }
 
     fun resolveGenerics(
-        expectedType: Type,
+        actualType: Type?,
         map: GenericTypeMap,
         allowNoneMatch: Boolean = false,
         allowAs: Boolean = false,
     ): Type {
-        if (expectedType is TypeVariable) {
-            map.map[expectedType] = GenericTypeMap.Entry(this, allowNoneMatch)
-            return this
-        }
-        if (expectedType != this) {
-            if (allowAs && expectedType.isAssignableFrom(this, true)) {
-                return expectedType
+        if (actualType != this && actualType != null) {
+            if (allowAs && isAssignableFrom(actualType, true)) {
+                return this
             }
-            throw IllegalArgumentException("Type mismatch. Expected: $expectedType actual: $this")
+            throw IllegalArgumentException("Type mismatch. Expected: $this actual: $actualType")
         }
         return this
     }

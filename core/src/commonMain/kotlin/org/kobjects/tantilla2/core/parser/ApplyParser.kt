@@ -7,6 +7,7 @@ import org.kobjects.tantilla2.core.function.LambdaScope
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.node.expression.*
 import org.kobjects.tantilla2.core.parser.Parser.indent
+import org.kobjects.tantilla2.core.parser.TantillaExpressionParser.matchType
 import org.kobjects.tantilla2.core.type.GenericTypeMap
 import org.kobjects.tantilla2.core.type.NoneType
 import org.kobjects.tantilla2.core.type.Type
@@ -87,12 +88,11 @@ object ApplyParser {
                     throw tokenizer.exception("Expected parameters $expectedParameters exceeded; index: $index")
                 }
                 val expectedParameter = expectedParameters[index]
-                val expression =
-                    TantillaExpressionParser.parseExpression(
+                val expression = TantillaExpressionParser.parseExpression(
                         tokenizer,
                         context,
-                        expectedParameter.type
-                    )
+                        expectedParameter.type,
+                        genericTypeMap)
 
                 parameterSerialization.add(Apply.ParameterSerialization(name, expression))
                 if (expectedParameter.isVararg) {
@@ -183,6 +183,7 @@ object ApplyParser {
 
         return Apply(
             operation,
+            type.returnType.resolveGenerics(null, genericTypeMap),
             List(parameterExpressions.size) { parameterExpressions[it]!!},
             parameterSerialization.toList(),
             parentesizedArgsList,
@@ -222,9 +223,9 @@ object ApplyParser {
 
         val body = Parser.parseDefinitionsAndStatements(tokenizer, context.depth + 1, lambdaScope, definitionScope = lambdaScope)
 
-        body.returnType.resolveGenerics(expectedType.returnType, genericTypeMap, true)
+        val matchedBody = matchType(body, expectedType.returnType, genericTypeMap)
 
-        return LambdaReference(expectedType, lambdaScope.locals.size, body, implicit = true)
+        return LambdaReference(expectedType.resolveGenerics(null, genericTypeMap), lambdaScope.locals.size, matchedBody, implicit = true)
     }
 
     fun tryConsumeNamedLambdaPrefix(tokenizer: TantillaScanner, indent: Int, names: Set<String>): String? {

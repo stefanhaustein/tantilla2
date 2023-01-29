@@ -11,36 +11,47 @@ import org.kobjects.tantilla2.core.definition.Scope
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.LambdaScope
-import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.node.expression.*
-import org.kobjects.tantilla2.core.node.expression.Apply
 import org.kobjects.tantilla2.core.parser.TypeParser.parseType
 import org.kobjects.tantilla2.core.type.*
 
 object TantillaExpressionParser {
 
-    fun parseExpression(tokenizer: TantillaScanner, context: ParsingContext, expectedType: Type? = null): Node {
+    fun parseExpression(tokenizer: TantillaScanner, context: ParsingContext, expectedType: Type? = null, genericTypeMap: GenericTypeMap? = null): Node {
         if (expectedType is FunctionType) {
-            return parseFunctionExpression(tokenizer, context, expectedType)
+            return parseFunctionExpression(tokenizer, context, expectedType, genericTypeMap)
         }
         val result = expressionParser.parse(tokenizer, context)
-        return matchType(result, expectedType)
+        return matchType(result, expectedType, genericTypeMap)
     }
 
 
-    fun matchType(expr: Node, expectedType: Type?): Node {
+    fun matchType(expr: Node, expectedType: Type?, genericTypeMap: GenericTypeMap? = null): Node {
+
+        if (expectedType == null) {
+            return expr
+        }
         val actualType = expr.returnType
-        if (expectedType == null || expectedType.isAssignableFrom(actualType)) {
+
+        val resolvedExpectedType = if (genericTypeMap != null) {
+            println("Expression:")
+            println(expr)
+            expectedType.resolveGenerics(actualType, genericTypeMap, true, true)
+        } else {
+            expectedType
+        }
+
+        if (resolvedExpectedType.isAssignableFrom(actualType, false) || resolvedExpectedType == NoneType) {
             return expr
         }
 
-        if (expectedType is TraitDefinition) {
-            val impl = expectedType.requireImplementationFor(actualType)
+        if (resolvedExpectedType is TraitDefinition) {
+            val impl = resolvedExpectedType.requireImplementationFor(actualType)
             return As(expr, impl, implicit = true)
         }
 
-        throw IllegalArgumentException("Can't convert $expr with type '${expr.returnType}' to '$expectedType'")
+        throw IllegalArgumentException("Can't convert $expr with type '${expr.returnType}' to '$resolvedExpectedType'")
     }
 
     fun parseElementAt(tokenizer: TantillaScanner, context: ParsingContext, base: Node): Node {
@@ -136,24 +147,26 @@ object TantillaExpressionParser {
 
     fun parseFunctionExpression(tokenizer: TantillaScanner,
                                 context: ParsingContext,
-                                type: FunctionType): Node {
+                                expectedType: FunctionType,
+                                genericTypeMap: GenericTypeMap? = null,
+    ): Node {
         if (tokenizer.current.text == "lambda") {
-            return parseLambda(tokenizer, context, type)
+            return parseLambda(tokenizer, context, expectedType)
         }
         val functionScope = LambdaScope(context.scope) // resolvedType = type)
-        for (i in type.parameters.indices) {
-            val parameter = type.parameters[i]
+        for (i in expectedType.parameters.indices) {
+            val parameter = expectedType.parameters[i]
             functionScope.declareLocalVariable("\$$i", parameter.type, false)
         }
         val body = parseExpression(tokenizer, ParsingContext(functionScope, context.depth), null)
-        if (body.returnType == type) {
+        if (body.returnType is FunctionType) {
             // TODO: Check that anonymous variables are not touched.
-            return FakeLambda(body)
+            val matchedBody = matchType(body, expectedType, genericTypeMap)
+            return FakeLambda(matchedBody)
         }
-        if (body.returnType == type.returnType) {
-            return LambdaReference(type, functionScope.locals.size, body, implicit = true)
-        }
-        throw tokenizer.exception("Expression return type ${body.returnType} doesn't match $type or ${type.returnType}")
+
+        val matchedBody = matchType(body, expectedType.returnType, genericTypeMap)
+        return LambdaReference(expectedType, functionScope.locals.size, matchedBody, implicit = true)
     }
 
 

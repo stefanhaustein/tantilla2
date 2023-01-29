@@ -40,22 +40,34 @@ interface FunctionType : Type {
     }
 
 
-    override fun resolveGenerics(expectedType: Type, map: GenericTypeMap, allowNoneMatch: Boolean, allowAs: Boolean): Type {
-        if (expectedType !is FunctionType) {
-            return super.resolveGenerics(expectedType, map, allowNoneMatch, allowAs)
+    override fun resolveGenerics(actualType: Type?, map: GenericTypeMap, allowNoneMatch: Boolean, allowAs: Boolean): FunctionType {
+        if (actualType == null) {
+            val resolvedParameters = List<Parameter>(parameters.size) {
+                val parameter = parameters[it]
+                val type = parameter.type.resolveGenerics(null, map, false, false)
+                Parameter(parameter.name, type, parameter.defaultValueExpression, parameter.isVararg)
+            }
+
+            val resolvedReturnType = returnType.resolveGenerics(null, map, false, false)
+
+            return Impl(resolvedReturnType, resolvedParameters)
         }
 
-        if (expectedType.parameters.size != parameters.size) {
-            throw IllegalArgumentException("Parameter count mismatch. expected: ${expectedType.parameters.size} in $expectedType; actual: ${parameters.size} in $this")
+        if (actualType !is FunctionType) {
+            return super.resolveGenerics(actualType, map, allowNoneMatch, allowAs) as FunctionType
+        }
+
+        if (actualType.parameters.size != parameters.size) {
+            throw IllegalArgumentException("Parameter count mismatch. expected: ${actualType.parameters.size} in $actualType; actual: ${parameters.size} in $this")
         }
 
         val resolvedParameters = List<Parameter>(parameters.size) {
             val parameter = parameters[it]
-            val type = parameter.type.resolveGenerics(expectedType.parameters[it].type, map, false, false)
+            val type = parameter.type.resolveGenerics(actualType.parameters[it].type, map, false, false)
             Parameter(parameter.name, type, parameter.defaultValueExpression, parameter.isVararg)
         }
 
-        val resolvedReturnType = returnType.resolveGenerics(expectedType.returnType, map, false, false)
+        val resolvedReturnType = returnType.resolveGenerics(actualType.returnType, map, false, false)
 
         return Impl(resolvedReturnType, resolvedParameters)
     }
