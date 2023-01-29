@@ -7,6 +7,7 @@ import org.kobjects.tantilla2.core.function.LambdaScope
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.node.expression.*
 import org.kobjects.tantilla2.core.parser.Parser.indent
+import org.kobjects.tantilla2.core.type.GenericTypeMap
 import org.kobjects.tantilla2.core.type.NoneType
 import org.kobjects.tantilla2.core.type.Type
 
@@ -20,6 +21,8 @@ object ApplyParser {
         openingParenConsumed: Boolean,
         asMethod: Boolean,
     ): Node {
+        val genericTypeMap = GenericTypeMap()
+
         if (!openingParenConsumed && tokenizer.tryConsume("@")) {
             require(!asMethod) { "Can't combine @ with methods." }
             return RawNode(operation)
@@ -121,7 +124,8 @@ object ApplyParser {
                         val node = parseTrailingClosure(
                             tokenizer,
                             context,
-                            expectedParameters[i].type as FunctionType
+                            expectedParameters[i].type as FunctionType,
+                            genericTypeMap
                         )
                         parameterExpressions[i] = node
                         missingFunctionParameter.remove(expectedParameters[i].name)
@@ -136,14 +140,15 @@ object ApplyParser {
                 val expression = if (type is PairType) {
                     val exprA = TantillaExpressionParser.parseExpression(tokenizer, context, type.typeA)
                     tokenizer.consume(":")
-                    val exprB = parseTrailingClosure(tokenizer, context, type.typeB as FunctionType)
+                    val exprB = parseTrailingClosure(tokenizer, context, type.typeB as FunctionType, genericTypeMap)
                     PairNode(exprA, exprB)
                 } else {
                     tokenizer.consume(":") { "Colon expected after trailing closure parameter name." }
                     parseTrailingClosure(
                         tokenizer,
                         context,
-                        expectedParameters[index].type as FunctionType
+                        expectedParameters[index].type as FunctionType,
+                        genericTypeMap
                     )
                 }
                 parameterSerialization.add(Apply.ParameterSerialization(name, expression, true))
@@ -195,6 +200,7 @@ object ApplyParser {
         tokenizer: TantillaScanner,
         context: ParsingContext,
         expectedType: FunctionType,
+        genericTypeMap: GenericTypeMap
     ): Node {
         val parameterNames: List<String>
         if (tokenizer.current.text == "(") {
@@ -215,6 +221,8 @@ object ApplyParser {
         }
 
         val body = Parser.parseDefinitionsAndStatements(tokenizer, context.depth + 1, lambdaScope, definitionScope = lambdaScope)
+
+        body.returnType.resolveGenerics(expectedType.returnType, genericTypeMap, true)
 
         return LambdaReference(expectedType, lambdaScope.locals.size, body, implicit = true)
     }

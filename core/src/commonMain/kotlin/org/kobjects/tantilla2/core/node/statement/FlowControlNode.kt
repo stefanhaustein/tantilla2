@@ -10,7 +10,7 @@ class FlowControlNode(
     val kind: FlowSignal.Kind,
     val expression: Node? = null) : Node() {
     override val returnType: Type
-        get() = TODO("Not yet implemented")
+        get() = NoneType
 
     override fun children(): List<Node> =
         if (expression == null) emptyList() else listOf(expression)
@@ -25,7 +25,7 @@ class FlowControlNode(
 
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
         if (expression == null) {
-            writer.append("return")
+            writer.append(kind.name.lowercase())
         } else {
             writer.append("return ")
             writer.appendCode(expression)

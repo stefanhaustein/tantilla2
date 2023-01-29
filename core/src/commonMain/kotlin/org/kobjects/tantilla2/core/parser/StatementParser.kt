@@ -39,11 +39,11 @@ object StatementParser {
     ) : Node =
         when (tokenizer.current.text) {
             "for" -> parseFor(tokenizer, context)
-            "if" -> parseIf(tokenizer, context)
+      //      "if" -> parseIf(tokenizer, context)
             "let" -> parseLet(tokenizer, context)
             "return" -> parseReturn(tokenizer, context)
             "break" -> parseBreak(tokenizer, context)
-            "while" -> parseWhile(tokenizer, context)
+   //         "while" -> parseWhile(tokenizer, context)
             else -> {
                 if (tokenizer.current.type == TokenType.COMMENT) {
                     Comment(tokenizer.consume(TokenType.COMMENT).text)
@@ -98,10 +98,16 @@ object StatementParser {
 
     fun parseReturn(tokenizer: TantillaScanner, context: ParsingContext): Node {
         tokenizer.consume("return")
-        if (context.scope !is FunctionDefinition) {
+        // TODO: Fix this!
+        var scope = context.scope
+        while (scope is LambdaScope) {
+            scope = scope.parentScope!!
+        }
+
+        if (scope !is FunctionDefinition) {
             throw tokenizer.exception("Function scope expected for 'return'")
         }
-        if (context.scope.type.returnType == NoneType) {
+        if (scope.type.returnType == NoneType) {
             return FlowControlNode(FlowSignal.Kind.RETURN)
         }
         val expression = TantillaExpressionParser.parseExpression(tokenizer, context)

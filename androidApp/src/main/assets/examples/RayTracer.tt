@@ -144,7 +144,7 @@ impl Surface for Checkerboard:
     150
 
   def diffuse(pos: Vector) -> Color:
-    if (int(1000 + pos.z) + int(1000 + pos.x)) % 2 != 0 :
+    if ((int(1000 + pos.z) + int(1000 + pos.x)) % 2 != 0) :
       Color.WHITE
     else:
       Color.BLACK
@@ -153,7 +153,7 @@ impl Surface for Checkerboard:
    Color.WHITE
 
  def reflect(pos: Vector) -> float:
-   if (int(1000 + pos.z) + int(1000 + pos.x)) % 2 != 0 :
+   if ((int(1000 + pos.z) + int(1000 + pos.x)) % 2 != 0) :
      0.1
    else:
      0.7

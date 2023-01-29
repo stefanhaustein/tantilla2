@@ -8,6 +8,7 @@ import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.node.LeafNode
 import org.kobjects.tantilla2.core.node.expression.StrNode
+import org.kobjects.tantilla2.core.node.statement.FlowSignal
 import org.kobjects.tantilla2.core.type.*
 import org.kobjects.tantilla2.stdlib.math.MathScope
 import org.kobjects.tantilla2.core.system.SystemAbstraction
@@ -68,16 +69,40 @@ class SystemRootScope(
             it.get(0).toString()
         }
 
-        defineNativeFunction("iif",
-            "Conditional",
+        val typeVariable = TypeVariable("T")
+
+        defineNativeFunction(
+            "while",
+            "Execute the 2nd argument while the first argument is true.",
             NoneType,
+            Parameter("condition", FunctionType.Impl(BoolType, emptyList())),
+            Parameter("body", FunctionType.Impl(NoneType, emptyList())),
+        ) {
+            val condition = it[0] as Callable
+            val body = it[1] as Callable
+            var ctrl : Any = NoneType.None
+            do {
+                val conditionContext = LocalRuntimeContext(it.globalRuntimeContext, condition)
+                val result = condition.eval(conditionContext) as Boolean
+                if (!result) {
+                    break
+                }
+                val bodyContext = LocalRuntimeContext(it.globalRuntimeContext, body)
+                ctrl = body.eval(bodyContext)
+            } while (ctrl !is FlowSignal)
+            if (ctrl is FlowSignal && ctrl.kind == FlowSignal.Kind.BREAK) NoneType.None else ctrl
+        }
+
+        defineNativeFunction("if",
+            "Conditional",
+            typeVariable,
             Parameter("condition", BoolType),
-            Parameter("then", FunctionType.Impl(NoneType, emptyList())),
+            Parameter("then", FunctionType.Impl(typeVariable, emptyList())),
             Parameter(
                 "elif",
-                PairType(FunctionType.Impl(BoolType, emptyList()), FunctionType.Impl(NoneType, emptyList())),
+                PairType(FunctionType.Impl(BoolType, emptyList()), FunctionType.Impl(typeVariable, emptyList())),
                 isVararg = true),
-            Parameter("else", FunctionType.Impl(NoneType, emptyList()), object : LeafNode() {
+            Parameter("else", FunctionType.Impl(typeVariable, emptyList()), object : LeafNode() {
                 override fun eval(context: LocalRuntimeContext) = CallableImpl(FunctionType.Impl(NoneType, emptyList()), 0, body = object : Evaluable {
                     override fun eval(context: LocalRuntimeContext): Any {
                         return NoneType.None
@@ -90,7 +115,7 @@ class SystemRootScope(
                     get() = FunctionType.Impl(NoneType, emptyList())
 
                 override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
-                    writer.appendCode("# Default parameter")
+                    writer.appendCode("None")
                 }
             }),
         ) {
@@ -107,8 +132,8 @@ class SystemRootScope(
                     val result = condition.eval(conditionContext)
                     if (result as Boolean) {
                         val then = elif.b as Callable
-                        val thenContet = LocalRuntimeContext(it.globalRuntimeContext, then)
-                        found = then.eval(thenContet)
+                        val thenContent = LocalRuntimeContext(it.globalRuntimeContext, then)
+                        found = then.eval(thenContent)
                         break
                     }
                 }

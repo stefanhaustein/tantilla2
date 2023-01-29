@@ -15,8 +15,8 @@ def test_day_04_a():
     let end1 = int(range1[1])
     let start2 = int(range2[0])
     let end2 = int(range2[1])
-    if (start1 <= start2 and end1 >= end2) or (start2 <= start1 and end2 >= end1):
-      count = count + 1
+    if ((start1 <= start2 and end1 >= end2) or (start2 <= start1 and end2 >= end1)):
+      count += 1
 
   assert count == 2
 

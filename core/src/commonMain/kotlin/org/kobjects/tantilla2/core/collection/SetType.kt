@@ -30,7 +30,7 @@ open class SetType(
 
     override fun withGenericsResolved(types: List<Type>) = SetType(types.first())
 
-    override fun isAssignableFrom(other: Type) = other is SetType && other.elementType == elementType
+    override fun isAssignableFrom(other: Type, allowAs: Boolean) = other is SetType && other.elementType == elementType
 
     override fun equals(other: Any?): Boolean =
         other is SetType && other.elementType == elementType && other !is MutableSetType

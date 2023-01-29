@@ -31,10 +31,14 @@ class LocalVariableReference(
         this
 
     override fun assign(context: LocalRuntimeContext, value: Any) {
-        if (index >= context.variables.size) {
+        var varCtx = context
+        for (i in 0 until depth) {
+            varCtx = varCtx.scope.closure!!
+        }
+        if (index >= varCtx.variables.size) {
             throw IllegalStateException("Variable $name index $index not found!")
         }
-        context.variables[index] = value
+        varCtx.variables[index] = value
     }
 
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {

@@ -15,15 +15,24 @@ class TraitDefinition(
     var traitIndex = 0
 
 
-    override fun isAssignableFrom(type: Type): Boolean {
-        return type == this || (type is ImplDefinition && type.trait == this)
+    override fun isAssignableFrom(type: Type, allowAs: Boolean): Boolean {
+        if (type == this || (type is ImplDefinition && type.trait == this)) {
+            return true
+        }
+        if (allowAs && getImplementationForTypeOrNull(type) != null) {
+            return true
+        }
+        return false
     }
 
     override val kind: Definition.Kind
         get() = Definition.Kind.TRAIT
 
 
-    fun requireImplementationFor(type: Type): ImplDefinition {
+    fun requireImplementationFor(type: Type): ImplDefinition =
+        getImplementationForTypeOrNull(type) ?: throw IllegalStateException("$typeName for ${type.typeName} not found.")
+
+    fun getImplementationForTypeOrNull(type: Type): ImplDefinition? {
         val userRootScope = userRootScope()
         val unresolvedImpls = userRootScope.unresolvedImpls.toList()
 
@@ -42,6 +51,6 @@ class TraitDefinition(
         // TODO: Figure out how to fix this properly.
         val scope = if (type is Scope) type else (type as ScopeType).scope
 
-        return userRootScope.traitToClass[this]?.get(scope) ?: throw IllegalStateException("$typeName for ${type.typeName} not found.")
+        return userRootScope.traitToClass[this]?.get(scope)
     }
 }

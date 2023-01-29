@@ -23,7 +23,7 @@ class CallableImpl(
         }
 
         val result = body.eval(context)
-        if (result is FlowSignal) {
+        if (result is FlowSignal && closure == null) {
             if (result.kind == FlowSignal.Kind.RETURN) {
                 return result.value
             }

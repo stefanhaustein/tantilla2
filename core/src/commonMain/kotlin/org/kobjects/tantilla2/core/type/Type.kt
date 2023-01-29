@@ -1,6 +1,7 @@
 package org.kobjects.tantilla2.core.type
 
 import org.kobjects.tantilla2.core.CodeWriter
+import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.definition.Definition
 
 
@@ -12,7 +13,7 @@ import org.kobjects.tantilla2.core.definition.Definition
 
 interface Type {
 
-    fun isAssignableFrom(type: Type) = type == this
+    fun isAssignableFrom(type: Type, allowAs: Boolean = false) = type == this
 
     fun serializeType(writer: CodeWriter)
 
@@ -39,6 +40,25 @@ interface Type {
             }
             writer.append(']')
         }
+    }
+
+    fun resolveGenerics(
+        expectedType: Type,
+        map: GenericTypeMap,
+        allowNoneMatch: Boolean = false,
+        allowAs: Boolean = false,
+    ): Type {
+        if (expectedType is TypeVariable) {
+            map.map[expectedType] = GenericTypeMap.Entry(this, allowNoneMatch)
+            return this
+        }
+        if (expectedType != this) {
+            if (allowAs && expectedType.isAssignableFrom(this, true)) {
+                return expectedType
+            }
+            throw IllegalArgumentException("Type mismatch. Expected: $expectedType actual: $this")
+        }
+        return this
     }
 
 }

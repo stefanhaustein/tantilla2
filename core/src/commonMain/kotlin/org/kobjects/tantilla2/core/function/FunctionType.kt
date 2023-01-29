@@ -1,6 +1,7 @@
 package org.kobjects.tantilla2.core.function
 
 import org.kobjects.tantilla2.core.CodeWriter
+import org.kobjects.tantilla2.core.type.GenericTypeMap
 import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.type.NoneType
 
@@ -19,7 +20,7 @@ interface FunctionType : Type {
         return false
     }
 
-    override fun isAssignableFrom(other: Type): Boolean {
+    override fun isAssignableFrom(other: Type, allowAs: Boolean): Boolean {
         if (other !is FunctionType) {
             return false
         }
@@ -37,6 +38,29 @@ interface FunctionType : Type {
         }
         return true
     }
+
+
+    override fun resolveGenerics(expectedType: Type, map: GenericTypeMap, allowNoneMatch: Boolean, allowAs: Boolean): Type {
+        if (expectedType !is FunctionType) {
+            return super.resolveGenerics(expectedType, map, allowNoneMatch, allowAs)
+        }
+
+        if (expectedType.parameters.size != parameters.size) {
+            throw IllegalArgumentException("Parameter count mismatch. expected: ${expectedType.parameters.size} in $expectedType; actual: ${parameters.size} in $this")
+        }
+
+        val resolvedParameters = List<Parameter>(parameters.size) {
+            val parameter = parameters[it]
+            val type = parameter.type.resolveGenerics(expectedType.parameters[it].type, map, false, false)
+            Parameter(parameter.name, type, parameter.defaultValueExpression, parameter.isVararg)
+        }
+
+        val resolvedReturnType = returnType.resolveGenerics(expectedType.returnType, map, false, false)
+
+        return Impl(resolvedReturnType, resolvedParameters)
+    }
+
+
 
     companion object {
         fun FunctionType.serializeTypeImpl(

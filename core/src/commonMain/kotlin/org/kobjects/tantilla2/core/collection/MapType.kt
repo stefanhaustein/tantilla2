@@ -22,7 +22,7 @@ open class MapType(
 
     override fun withGenericsResolved(types: List<Type>) = MapType(types[0], types[1])
 
-    override fun isAssignableFrom(other: Type) =
+    override fun isAssignableFrom(other: Type, allowAs: Boolean) =
         other is MapType && other.keyType == keyType && other.valueType == valueType
 
     override fun equals(other: Any?): Boolean =

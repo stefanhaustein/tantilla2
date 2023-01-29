@@ -2,9 +2,12 @@ package org.kobjects.tantilla2.core.type
 
 class GenericTypeMap {
 
-    val map = mutableMapOf<TypeVariable, Type>()
+    val map = mutableMapOf<TypeVariable, Entry>()
 
-    fun resolve(declaredType: Type, actualType: Type): Type {
-        
-    }
+
+    data class Entry(
+        val type: Type,
+        var rootLevel: Boolean
+    )
+
 }
