@@ -7,13 +7,13 @@ import org.kobjects.tantilla2.core.type.Type
 class UnparseableDefinition(
     override val parentScope: Scope?,
     override val name: String = "<Unparseable ${parentScope?.count() ?: 1}>",
-    val definitionText: CodeFragment
-) : Definition {
+    override var definitionText: CodeFragment
+) : Definition, DefinitionUpdatable {
 
     override val kind: Definition.Kind
         get() = Definition.Kind.UNPARSEABLE
 
-    override fun getValue(self: Any?) = throw UnsupportedOperationException()
+    override fun getValue(self: Any?) = this
 
     override val type: Type
         get() = throw UnsupportedOperationException()

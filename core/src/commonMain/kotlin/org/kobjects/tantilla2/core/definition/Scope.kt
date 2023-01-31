@@ -1,6 +1,5 @@
 package org.kobjects.tantilla2.core.definition
 
-import DefinitionParser
 import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.LocalRuntimeContext
@@ -48,11 +47,14 @@ abstract class Scope(
 
     fun sorted() = definitions.values.toList().sorted()
 
-    fun checkErrors(newProperty: String): List<ParsingException> {
-        val tokenizer = TantillaScanner(newProperty)
+    fun checkErrors(newContent: String, oldDefinition: Definition?): List<ParsingException> {
+        val tokenizer = TantillaScanner(newContent)
         val errors = mutableListOf<ParsingException>()
-        Parser.parseDefinitions(tokenizer, ParsingContext(this, 0), errorCollector = errors, definitionCallback =  {
+        Parser.parseDefinitions(tokenizer, ParsingContext(this, 0), errorCollector = errors, definitionCallback = { startToken, it ->
             try {
+                if (definitions.containsKey(it.name) && it.name != oldDefinition?.name) {
+                    errors.add(ParsingException(startToken, "A property named '${it.name}' already exists in this scope."))
+                }
                 println("****** Resolve: $it")
                 it.resolve(applyOffset = true, errorCollector = errors)
             } catch (e: Exception) {
@@ -66,22 +68,45 @@ abstract class Scope(
     fun update(newContent: String, oldDefinition: Definition? = null) {
         val newDefinitions = mutableMapOf<String, Definition>()
         val tokenizer = TantillaScanner(newContent)
-        Parser.parseDefinitions(tokenizer, ParsingContext(this, 0), errorCollector = mutableListOf(), definitionCallback =  {
-            newDefinitions[it.name] = it
+
+        Parser.parseDefinitions(tokenizer, ParsingContext(this, 0), errorCollector = mutableListOf(), definitionCallback =  { startToken, it ->
+            if (definitions.containsKey(it.name) && it.name != oldDefinition?.name) {
+                val unparseable = UnparseableDefinition(this, definitionText = CodeFragment(startToken, CodeWriter(highlighting = CodeWriter.defaultHighlighting).appendCode(it).toString()))
+                newDefinitions[unparseable.name] = unparseable
+            } else {
+                newDefinitions[it.name] = it
+            }
         })
 
         if (oldDefinition != null) {
             val replacement = newDefinitions[oldDefinition.name] ?: newDefinitions.values.firstOrNull()
-            if (oldDefinition is DefinitionUpdatable && replacement is DefinitionUpdatable && oldDefinition.type == replacement.type && replacement.kind == oldDefinition.kind) {
-                oldDefinition.definitionText = replacement.definitionText
-                newDefinitions.remove(replacement.name)
-            } else {
+            var remove = true
+            // There may be issues with resolving the type or resolve.
+            try {
+                if (oldDefinition is DefinitionUpdatable
+                    && replacement is DefinitionUpdatable
+                    && oldDefinition.name == replacement.name
+                    && oldDefinition.type == replacement.type
+                    && replacement.kind == oldDefinition.kind
+                ) {
+                    oldDefinition.definitionText = replacement.definitionText
+                    newDefinitions.remove(replacement.name)
+                    remove = false
+                    oldDefinition.invalidate()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+            if (remove) {
                 definitions.remove(oldDefinition.name)
             }
         }
 
-        for (definition in newDefinitions.values) {
-            add(definition)
+        if (newDefinitions.isNotEmpty()) {
+            for (definition in newDefinitions.values) {
+                add(definition)
+            }
+            userRootScope().invalidateAll()
         }
     }
 

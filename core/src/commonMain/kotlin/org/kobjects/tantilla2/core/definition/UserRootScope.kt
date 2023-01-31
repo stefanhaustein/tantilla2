@@ -34,7 +34,7 @@ class UserRootScope(
         return staticFieldDefinitions.size - 1
     }
 
-    override fun invalidate() {
+    fun invalidateAll() {
         unresolvedImpls.addAll(classToTrait.values.flatMap { it.values })
 
         classToTrait.clear()
@@ -43,12 +43,12 @@ class UserRootScope(
 
         staticFieldDefinitions.clear()
 
-        super.invalidate()
+        recurse { it.invalidate() }
     }
 
 
     fun rebuild() {
-        recurse { it.invalidate() }
+        invalidateAll()
         // resolveAll()
 
         while (rebuildOne()) {

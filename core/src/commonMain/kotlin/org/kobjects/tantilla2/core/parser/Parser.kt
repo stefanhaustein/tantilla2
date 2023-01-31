@@ -58,7 +58,7 @@ object Parser {
     fun parseDefinitions(
         tokenizer: TantillaScanner,
         context: ParsingContext,
-        definitionCallback: (Definition) -> Unit = { context.scope!!.add(it) },
+        definitionCallback: (Token<TokenType>, Definition) -> Unit = { _, defitinition -> context.scope!!.add(defitinition) },
         errorCollector: MutableList<ParsingException>? = null
     ) {
         parseDefinitionsAndStatements(tokenizer, context.depth, statementScope = null, definitionScope = context.scope, definitionCallback = definitionCallback, errorCollector = errorCollector)
@@ -74,7 +74,7 @@ object Parser {
         depth: Int,
         statementScope: Scope?,
         definitionScope: Scope?,
-        definitionCallback: (Definition) -> Unit = { definitionScope!!.add(it) },
+        definitionCallback: (Token<TokenType>, Definition) -> Unit = { _, definition -> definitionScope!!.add(definition) },
         errorCollector: MutableList<ParsingException>? = null,
     ): Node {
         require (statementScope != null || definitionScope != null)
@@ -88,6 +88,7 @@ object Parser {
         while (tokenizer.current.type != TokenType.EOF
             && !VALID_AFTER_STATEMENT.contains(tokenizer.current.text)
         ) {
+            val startToken = tokenizer.current
             if (tokenizer.current.type == TokenType.LINE_BREAK) {
                 localDepth = tokenizer.current.text.indent()
 
@@ -106,12 +107,12 @@ object Parser {
                     throw tokenizer.exception("Definitions are not allowed here.")
                 }
                 val code = tokenizer.current.text
-                definitionCallback(DefinitionParser.parseFailsafe(definitionScope, code.substring(4, code.length - 4)))
+                definitionCallback(startToken, DefinitionParser.parseFailsafe(definitionScope, code.substring(4, code.length - 4)))
                 tokenizer.consume()
             } else if (definitionScope != null && (DECLARATION_KEYWORDS.contains(tokenizer.current.text)
                         || statementScope == null)) {
                 val definition = DefinitionParser.parseDefinitionFailsafe(tokenizer, ParsingContext(definitionScope, localDepth), errorCollector)
-                definitionCallback(definition)
+                definitionCallback(startToken, definition)
             } else {
                 val statement = StatementParser.parseStatementFailsafe(tokenizer, ParsingContext(statementScope!!, localDepth), errorCollector)
                 statements.add(statement)

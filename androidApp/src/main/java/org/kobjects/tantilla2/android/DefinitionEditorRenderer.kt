@@ -135,7 +135,7 @@ fun RenderDefinitionEditor(viewModel: TantillaViewModel) {
                 value = viewModel.currentText.value,
                 onValueChange = {
                     if (it.text != viewModel.currentText.value.text) {
-                        errors.value = scope.checkErrors(it.text)
+                        errors.value = scope.checkErrors(it.text, viewModel.editingDefinition.value)
                     }
                     viewModel.currentText.value = it.copy(
                         annotatedString = viewModel.annotatedCode(it.text, errors.value),

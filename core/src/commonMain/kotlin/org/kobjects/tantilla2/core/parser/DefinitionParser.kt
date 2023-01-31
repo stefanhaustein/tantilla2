@@ -26,7 +26,7 @@ object DefinitionParser {
             }
 
             if (tokenizer.current.type != TokenType.EOF) {
-                result = UnparseableDefinition(parentScope, result.name, CodeFragment(startPos, code))
+                result = UnparseableDefinition(parentScope, /* result.name,*/ definitionText = CodeFragment(startPos, code))
             }
         } catch (e: Exception) {
             e.printStackTrace()

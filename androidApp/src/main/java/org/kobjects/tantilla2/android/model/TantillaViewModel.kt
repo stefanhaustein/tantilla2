@@ -222,6 +222,7 @@ class TantillaViewModel(
             && definition.kind != Definition.Kind.METHOD
             && definition.kind != Definition.Kind.STATIC
             && definition.kind != Definition.Kind.IMPORT
+            && definition.kind != Definition.Kind.UNPARSEABLE
         ) {
             mode.value = if (definition.isBuiltin()) Mode.HELP else Mode.HIERARCHY
             scope().value = definition.getValue(null) as Scope
