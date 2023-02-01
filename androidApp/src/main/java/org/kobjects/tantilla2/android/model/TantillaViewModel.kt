@@ -10,6 +10,9 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.kobjects.dialog.DialogManager
 import org.kobjects.dialog.InputLine
@@ -349,7 +352,21 @@ class TantillaViewModel(
         if (fileName.value == SCRATCH_FILE_NAME) {
             scratchFileModified = true
         }
+
+        val scope = MainScope()
+        scope.launch {
+            rebuildIncrementally()
+        }
+
     }
+
+    suspend fun rebuildIncrementally() {
+        while (userRootScope.rebuildOne()) {
+            delay(100)
+        }
+        codeUpdateTrigger.value++
+    }
+
 
     fun clearConsole() {
        konsole.entries.clear()
