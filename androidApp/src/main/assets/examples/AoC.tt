@@ -1,6 +1,29 @@
 
+MAP = RAW_MAP.split("\n")
 
-MAP = '''Sabqponm
+distances = List[List[Int]].init(len(MAP)): List[Int].init(len(MAP[$0])): 100000
+
+def find(c: Str) -> Pair[Int, Int]:
+  for y in range(0, len(MAP)):
+    let row = MAP[y]
+    for x in range(0, len(row)):
+      if row[x] == c:
+        return Pair[Int, Int](x, y)
+
+  Pair[Int, Int](-1, -1)
+
+def main():
+  let start = find("S")
+  let end = find("E")
+
+  let mut x = start.a
+  let mut y = start.b
+
+
+
+
+
+RAW_MAP = '''Sabqponm
 abcryxxl
 accszExk
 acctuvwj

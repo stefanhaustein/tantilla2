@@ -8,7 +8,7 @@ import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.node.LeafNode
 import org.kobjects.tantilla2.core.node.expression.StrNode
-import org.kobjects.tantilla2.core.node.statement.FlowSignal
+import org.kobjects.tantilla2.core.control.FlowSignal
 import org.kobjects.tantilla2.core.type.*
 import org.kobjects.tantilla2.stdlib.math.MathScope
 import org.kobjects.tantilla2.core.system.SystemAbstraction

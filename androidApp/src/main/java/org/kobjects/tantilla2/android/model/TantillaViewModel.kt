@@ -15,13 +15,13 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.kobjects.dialog.DialogManager
-import org.kobjects.dialog.InputLine
 import org.kobjects.konsole.compose.AnsiConverter.ansiToAnnotatedString
 import org.kobjects.konsole.compose.ComposeKonsole
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.parser.Parser
 import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.android.R
+import org.kobjects.tantilla2.core.control.TantillaRuntimeException
 import org.kobjects.tantilla2.core.definition.*
 import org.kobjects.tantilla2.core.function.FunctionDefinition
 import java.io.File

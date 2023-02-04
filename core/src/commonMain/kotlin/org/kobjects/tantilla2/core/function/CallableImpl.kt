@@ -4,7 +4,7 @@ import org.kobjects.tantilla2.core.Evaluable
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.SerializableCode
-import org.kobjects.tantilla2.core.node.statement.FlowSignal
+import org.kobjects.tantilla2.core.control.FlowSignal
 
 class CallableImpl(
     override val type: FunctionType,

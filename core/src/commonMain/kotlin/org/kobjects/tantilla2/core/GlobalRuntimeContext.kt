@@ -1,5 +1,6 @@
 package org.kobjects.tantilla2.core
 
+import org.kobjects.tantilla2.core.control.TantillaRuntimeException
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.definition.ContextOwner
 import org.kobjects.tantilla2.core.definition.UserRootScope

@@ -9,7 +9,7 @@ import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.definition.Scope
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.node.expression.UnresolvedNode
-import org.kobjects.tantilla2.core.node.statement.FlowSignal
+import org.kobjects.tantilla2.core.control.FlowSignal
 import org.kobjects.tantilla2.core.parser.*
 import org.kobjects.tantilla2.core.type.UnresolvedType
 

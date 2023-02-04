@@ -1,5 +1,6 @@
-package org.kobjects.tantilla2.core
+package org.kobjects.tantilla2.core.control
 
+import org.kobjects.tantilla2.core.Evaluable
 import org.kobjects.tantilla2.core.definition.Definition
 
 open class TantillaRuntimeException(
