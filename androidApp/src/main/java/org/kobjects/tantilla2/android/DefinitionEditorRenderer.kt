@@ -102,7 +102,7 @@ fun RenderDefinitionEditor(viewModel: TantillaViewModel) {
                     val errorList = errors.toList()
                     val index = min(errorIndex.value, errorList.size - 1)
                     val error = errorList[index]
-                    val text = error.message ?: error.toString()
+                    val text = error.toString()
                     Text(text,
                         Modifier
                             .weight(1f)

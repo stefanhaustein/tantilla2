@@ -2,7 +2,7 @@ package org.kobjects.tantilla2.core.node.statement
 
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.LocalRuntimeContext
-import org.kobjects.tantilla2.core.control.FlowSignal
+import org.kobjects.tantilla2.core.control.LoopControlSignal
 import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.type.NoneType
 import org.kobjects.tantilla2.core.node.Node
@@ -17,11 +17,10 @@ class WhileNode(
     override fun eval(env: LocalRuntimeContext): Any {
         while (condition.eval(env) as Boolean) {
             val result = body.eval(env)
-            if (result is FlowSignal) {
+            if (result is LoopControlSignal) {
                 when (result.kind) {
-                    FlowSignal.Kind.BREAK -> break
-                    FlowSignal.Kind.CONTINUE -> continue
-                    FlowSignal.Kind.RETURN -> return result
+                    LoopControlSignal.Kind.BREAK -> break
+                    LoopControlSignal.Kind.CONTINUE -> continue
                 }
             }
         }

@@ -2,7 +2,9 @@ package org.kobjects.tantilla2.core.node.statement
 
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.LocalRuntimeContext
-import org.kobjects.tantilla2.core.control.FlowSignal
+import org.kobjects.tantilla2.core.control.LoopControlSignal
+import org.kobjects.tantilla2.core.control.TantillaControlSignal
+import org.kobjects.tantilla2.core.control.TantillaRuntimeException
 import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.type.NoneType
 import org.kobjects.tantilla2.core.node.Node
@@ -18,9 +20,17 @@ class BlockNode(
     override fun eval(env: LocalRuntimeContext): Any {
         var result: Any = NoneType.None
         for (statement: Node in statements) {
-            result = statement.eval(env)
-            if (result is FlowSignal) {
-                return result
+            try {
+                result = statement.eval(env)
+                if (result is LoopControlSignal) {
+                    return result
+                }
+            } catch (e: TantillaControlSignal) {
+                throw e
+            } catch (e: TantillaRuntimeException) {
+                throw e
+            } catch (e: Exception) {
+                throw env.globalRuntimeContext.createException(null, this, null, e)
             }
         }
         return result
@@ -32,11 +42,11 @@ class BlockNode(
         BlockNode(statements = newChildren.toTypedArray())
 
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
-        if (statements.size > 0) {
+        if (statements.isNotEmpty()) {
             writer.appendCode(statements[0])
             for (i in 1 until statements.size) {
                writer.newline()
-                writer.appendCode(statements[i])
+               writer.appendCode(statements[i])
             }
         }
     }

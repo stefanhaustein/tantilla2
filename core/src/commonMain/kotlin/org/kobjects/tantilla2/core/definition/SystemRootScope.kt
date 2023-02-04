@@ -8,7 +8,7 @@ import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.node.LeafNode
 import org.kobjects.tantilla2.core.node.expression.StrNode
-import org.kobjects.tantilla2.core.control.FlowSignal
+import org.kobjects.tantilla2.core.control.LoopControlSignal
 import org.kobjects.tantilla2.core.type.*
 import org.kobjects.tantilla2.stdlib.math.MathScope
 import org.kobjects.tantilla2.core.system.SystemAbstraction
@@ -81,16 +81,23 @@ class SystemRootScope(
             val condition = it[0] as Callable
             val body = it[1] as Callable
             var ctrl : Any = NoneType.None
-            do {
+            while (true) {
                 val conditionContext = LocalRuntimeContext(it.globalRuntimeContext, condition)
-                val result = condition.eval(conditionContext) as Boolean
-                if (!result) {
+                val conditionResult = condition.eval(conditionContext) as Boolean
+                if (!conditionResult) {
                     break
                 }
                 val bodyContext = LocalRuntimeContext(it.globalRuntimeContext, body)
-                ctrl = body.eval(bodyContext)
-            } while (ctrl !is FlowSignal)
-            if (ctrl is FlowSignal && ctrl.kind == FlowSignal.Kind.BREAK) NoneType.None else ctrl
+                try {
+                    body.eval(bodyContext)
+                } catch (signal: LoopControlSignal) {
+                    when(signal.kind) {
+                        LoopControlSignal.Kind.BREAK -> break
+                        LoopControlSignal.Kind.CONTINUE -> continue
+                    }
+                }
+            }
+            NoneType.None
         }
 
         defineNativeFunction("if",

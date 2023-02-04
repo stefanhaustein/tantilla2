@@ -4,7 +4,7 @@ import org.kobjects.tantilla2.core.Evaluable
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.SerializableCode
-import org.kobjects.tantilla2.core.control.FlowSignal
+import org.kobjects.tantilla2.core.control.ReturnSignal
 
 class CallableImpl(
     override val type: FunctionType,
@@ -22,14 +22,14 @@ class CallableImpl(
             throw RuntimeException("closure mismatch")
         }
 
-        val result = body.eval(context)
-        if (result is FlowSignal && closure == null) {
-            if (result.kind == FlowSignal.Kind.RETURN) {
-                return result.value
-            }
-            throw IllegalStateException("Unexpected signal: $result")
+        if (closure != null) {
+            return body.eval(context)
         }
-        return result
+        try {
+            return body.eval(context)
+        } catch (e: ReturnSignal) {
+            return e.value
+        }
     }
 
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {

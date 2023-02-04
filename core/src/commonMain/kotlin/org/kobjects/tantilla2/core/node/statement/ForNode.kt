@@ -2,7 +2,7 @@ package org.kobjects.tantilla2.core.node.statement
 
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.LocalRuntimeContext
-import org.kobjects.tantilla2.core.control.FlowSignal
+import org.kobjects.tantilla2.core.control.LoopControlSignal
 import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.type.NoneType
 import org.kobjects.tantilla2.core.node.Node
@@ -23,12 +23,12 @@ class ForNode(
         for (i in iterable) {
             ctx.checkState(this)
             ctx.variables[iteratorIndex] = i
-            val value = bodyExpression.eval(ctx)
-            if (value is FlowSignal) {
-                when (value.kind) {
-                    FlowSignal.Kind.BREAK -> break
-                    FlowSignal.Kind.CONTINUE -> continue
-                    FlowSignal.Kind.RETURN -> return value.value
+            try {
+                bodyExpression.eval(ctx)
+            } catch (signal: LoopControlSignal) {
+                when (signal.kind) {
+                    LoopControlSignal.Kind.BREAK -> break
+                    LoopControlSignal.Kind.CONTINUE -> continue
                 }
             }
         }

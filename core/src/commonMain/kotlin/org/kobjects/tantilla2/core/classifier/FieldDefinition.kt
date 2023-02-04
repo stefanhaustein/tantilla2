@@ -166,9 +166,15 @@ class FieldDefinition(
     }
 
     fun initialize(staticVariableContext: LocalRuntimeContext) {
-        resolve()
-        if (kind == Definition.Kind.STATIC) {
-           staticVariableContext.variables[index] = resolvedInitializer!!.eval(staticVariableContext)
+        try {
+            resolve()
+            if (kind == Definition.Kind.STATIC) {
+                staticVariableContext.variables[index] =
+                    resolvedInitializer!!.eval(staticVariableContext)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            throw staticVariableContext.globalRuntimeContext.ensureTantillaRuntimeException(e, this, resolvedInitializer)
         }
     }
 }

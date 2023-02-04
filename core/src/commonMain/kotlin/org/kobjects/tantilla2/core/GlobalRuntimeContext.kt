@@ -24,15 +24,15 @@ class GlobalRuntimeContext(
     val staticVariableValues = LocalRuntimeContext(this, userRootScope)
 
 
-    fun createException(definition: Definition?, node: Node?, message: String?, cause: Exception? = null) =
+    fun createException(definition: Definition?, node: Node?, message: String?, cause: Throwable? = null) =
         TantillaRuntimeException(
             if (definition == null && node != null) userRootScope.findNode(node) else definition,
             node,
             message,
             cause)
 
-    fun wrapException(e: Exception): TantillaRuntimeException =
-        if (e is TantillaRuntimeException) e else createException(null, null, null, e)
+    fun ensureTantillaRuntimeException(e: Exception, definition: Definition? = null, node: Node? = null): TantillaRuntimeException =
+        if (e is TantillaRuntimeException) e else createException(definition, node, null, e)
 
 
     fun onTap(x: Double, y: Double) {
@@ -82,7 +82,7 @@ class GlobalRuntimeContext(
             }
         } catch (e: RuntimeException) {
             e.printStackTrace()
-            exception = wrapException(e)
+            exception = ensureTantillaRuntimeException(e, definition)
         }
     }
 
@@ -93,7 +93,7 @@ class GlobalRuntimeContext(
                 task()
             } catch (e: Exception) {
                 e.printStackTrace()
-                exception = wrapException(e)
+                exception = ensureTantillaRuntimeException(e)
             } finally {
                 activeThreads.remove(it)
                 if (activeThreads.isEmpty()) {

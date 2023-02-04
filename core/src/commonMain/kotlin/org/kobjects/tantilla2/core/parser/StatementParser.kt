@@ -6,7 +6,7 @@ import org.kobjects.tantilla2.core.function.LocalVariableDefinition
 import org.kobjects.tantilla2.core.node.*
 import org.kobjects.tantilla2.core.collection.ListType
 import org.kobjects.tantilla2.core.collection.RangeType
-import org.kobjects.tantilla2.core.control.FlowSignal
+import org.kobjects.tantilla2.core.control.LoopControlSignal
 import org.kobjects.tantilla2.core.function.LambdaScope
 import org.kobjects.tantilla2.core.type.NoneType
 import org.kobjects.tantilla2.core.node.statement.*
@@ -94,7 +94,7 @@ object StatementParser {
 
     fun parseBreak(tokenizer: TantillaScanner, context: ParsingContext): Node {
         tokenizer.consume("break")
-        return FlowControlNode(FlowSignal.Kind.BREAK)
+        return LoopSignalNode(LoopControlSignal.Kind.BREAK)
     }
 
     fun parseReturn(tokenizer: TantillaScanner, context: ParsingContext): Node {
@@ -109,10 +109,10 @@ object StatementParser {
             throw tokenizer.exception("Function scope expected for 'return'")
         }
         if (scope.type.returnType == NoneType) {
-            return FlowControlNode(FlowSignal.Kind.RETURN)
+            return ReturnStatement()
         }
         val expression = TantillaExpressionParser.parseExpression(tokenizer, context)
-        return FlowControlNode(FlowSignal.Kind.RETURN, expression)
+        return ReturnStatement(expression)
     }
 
     fun parseWhile(tokenizer: TantillaScanner, context: ParsingContext): WhileNode {

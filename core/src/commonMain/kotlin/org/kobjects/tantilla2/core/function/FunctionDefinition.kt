@@ -9,7 +9,7 @@ import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.definition.Scope
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.node.expression.UnresolvedNode
-import org.kobjects.tantilla2.core.control.FlowSignal
+import org.kobjects.tantilla2.core.control.ReturnSignal
 import org.kobjects.tantilla2.core.parser.*
 import org.kobjects.tantilla2.core.type.UnresolvedType
 
@@ -117,14 +117,11 @@ class FunctionDefinition (
 
     override fun eval(context: LocalRuntimeContext): Any {
         resolve()
-        val result = resolvedBody!!.eval(context)
-        if (result is FlowSignal) {
-            if (result.kind == FlowSignal.Kind.RETURN) {
-                return result.value
-            }
-            throw IllegalStateException("Unexpected signal: $result")
+        try {
+            return resolvedBody!!.eval(context)
+        } catch (e: ReturnSignal) {
+            return e.value
         }
-        return result
     }
 
     // Avoid calling serialization here, as this might lead to recursive crashes in error

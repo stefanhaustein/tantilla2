@@ -118,8 +118,8 @@ object Parser {
                 statements.add(statement)
             }
         }
-        return if (statements.size == 1) statements[0]
-            else BlockNode(*statements.toTypedArray())
+        return /*if (statements.size == 1) statements[0]
+            else */ BlockNode(*statements.toTypedArray())
     }
 
     fun readDocString(tokenizer: TantillaScanner): String {
