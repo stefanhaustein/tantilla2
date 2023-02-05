@@ -33,4 +33,11 @@ abstract class Node : Evaluable, SerializableCode {
 
     open fun assign(context: LocalRuntimeContext, value: Any): Unit =
         throw UnsupportedOperationException()
+
+    fun recurse(task: (Node) -> Unit) {
+        for (child in children()) {
+            child.recurse(task)
+        }
+        task(this)
+    }
 }

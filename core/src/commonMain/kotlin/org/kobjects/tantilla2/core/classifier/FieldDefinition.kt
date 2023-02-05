@@ -7,6 +7,7 @@ import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.definition.Scope
 import org.kobjects.tantilla2.core.definition.DefinitionUpdatable
 import org.kobjects.tantilla2.core.node.Node
+import org.kobjects.tantilla2.core.node.expression.StaticReference
 import org.kobjects.tantilla2.core.node.expression.UnresolvedNode
 import org.kobjects.tantilla2.core.parser.*
 import org.kobjects.tantilla2.core.type.Type
@@ -102,7 +103,15 @@ class FieldDefinition(
         }
 
         resolvedInitializer = resolved.third
+
         if (kind == Definition.Kind.STATIC) {
+            // Make sure dependencies are resolved first and get a lower index
+            resolvedInitializer?.recurse {
+                if (it is StaticReference) {
+                    it.definition.resolve(errorCollector = errorCollector)
+                }
+            }
+
             index = parentScope.registerStatic(this)
         }
     }

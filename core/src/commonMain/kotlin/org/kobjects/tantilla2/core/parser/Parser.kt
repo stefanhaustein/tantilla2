@@ -8,6 +8,7 @@ import org.kobjects.tantilla2.core.function.*
 import org.kobjects.tantilla2.core.node.statement.BlockNode
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.node.statement.Comment
+import org.kobjects.tantilla2.core.node.statement.WrappedStatement
 import org.kobjects.tantilla2.core.type.Type
 
 object Parser {
@@ -118,8 +119,8 @@ object Parser {
                 statements.add(statement)
             }
         }
-        return /*if (statements.size == 1) statements[0]
-            else */ BlockNode(*statements.toTypedArray())
+        return if (statements.size == 1) WrappedStatement(statements[0])
+            else BlockNode(*statements.toTypedArray())
     }
 
     fun readDocString(tokenizer: TantillaScanner): String {

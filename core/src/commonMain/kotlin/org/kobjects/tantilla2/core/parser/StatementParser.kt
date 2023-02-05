@@ -43,7 +43,8 @@ object StatementParser {
       //      "if" -> parseIf(tokenizer, context)
             "let" -> parseLet(tokenizer, context)
             "return" -> parseReturn(tokenizer, context)
-            "break" -> parseBreak(tokenizer, context)
+            "break" -> parseLoopSignal(tokenizer, LoopControlSignal.Kind.BREAK)
+            "continue" -> parseLoopSignal(tokenizer, LoopControlSignal.Kind.CONTINUE)
    //         "while" -> parseWhile(tokenizer, context)
             else -> {
                 if (tokenizer.current.type == TokenType.COMMENT) {
@@ -92,9 +93,9 @@ object StatementParser {
         return Let(definition, type, typeIsExplicit, initializer)
     }
 
-    fun parseBreak(tokenizer: TantillaScanner, context: ParsingContext): Node {
-        tokenizer.consume("break")
-        return LoopSignalNode(LoopControlSignal.Kind.BREAK)
+    fun parseLoopSignal(tokenizer: TantillaScanner, kind: LoopControlSignal.Kind): Node {
+        tokenizer.consume(TokenType.IDENTIFIER)
+        return LoopSignalNode(kind)
     }
 
     fun parseReturn(tokenizer: TantillaScanner, context: ParsingContext): Node {
