@@ -20,7 +20,7 @@ object TantillaExpressionParser {
 
     fun parseExpression(tokenizer: TantillaScanner, context: ParsingContext, expectedType: Type? = null, genericTypeMap: GenericTypeMap? = null): Node {
         if (expectedType is FunctionType) {
-            return parseFunctionExpression(tokenizer, context, expectedType, genericTypeMap)
+            return LambdaParser.parseFunctionExpression(tokenizer, context, expectedType, genericTypeMap)
         }
         val result = expressionParser.parse(tokenizer, context)
         return matchType(result, expectedType, genericTypeMap)
@@ -145,93 +145,7 @@ object TantillaExpressionParser {
         throw ParsingException(nameToken, "Symbol not found: '$name'.")
     }
 
-    fun parseFunctionExpression(tokenizer: TantillaScanner,
-                                context: ParsingContext,
-                                expectedType: FunctionType,
-                                genericTypeMap: GenericTypeMap? = null,
-    ): Node {
-        if (tokenizer.current.text == "lambda") {
-            return parseLambda(tokenizer, context, expectedType)
-        }
-        val functionScope = LambdaScope(context.scope) // resolvedType = type)
-        for (i in expectedType.parameters.indices) {
-            val parameter = expectedType.parameters[i]
-            functionScope.declareLocalVariable("\$$i", parameter.type, false)
-        }
-        val body = parseExpression(tokenizer, ParsingContext(functionScope, context.depth), null)
-        if (body.returnType is FunctionType) {
-            // TODO: Check that anonymous variables are not touched.
-            val matchedBody = matchType(body, expectedType, genericTypeMap)
-            return FakeLambda(matchedBody)
-        }
 
-        val matchedBody = matchType(body, expectedType.returnType, genericTypeMap)
-        return LambdaReference(expectedType, functionScope.locals.size, matchedBody, implicit = true)
-    }
-
-
-    // Add support for known signature later
-    fun parseLambda(
-        tokenizer: TantillaScanner,
-        context: ParsingContext,
-        expectedType: FunctionType? = null
-    ): Node {
-        tokenizer.consume("lambda")
-
-        val type: FunctionType
-        val parameterNames: List<String>
-        if (tokenizer.current.text == "(") {
-            type = TypeParser.parseFunctionType(tokenizer, context, isMethod = false)
-            if (expectedType != null && !expectedType.isAssignableFrom(type)) {
-                throw tokenizer.exception("Function type $type does not match expected type $expectedType")
-            }
-            parameterNames = type.parameters.map { it.name }
-        } else {
-            if (expectedType == null) {
-                throw tokenizer.exception("For lambdas with unknown type, a full parameter list starting with '(' is expected.")
-            }
-            type = expectedType
-            val names = mutableListOf<String>()
-            if (tokenizer.current.text != ":") {
-              do {
-                  names.add(tokenizer.consume(TokenType.IDENTIFIER).text)
-              } while (tokenizer.tryConsume(","))
-            }
-            if (names.size > type.parameters.size) {
-                throw tokenizer.exception("${names.size} parameters provided, but only ${type.parameters.size} parameters expected (type: $type).")
-            }
-            while (names.size < type.parameters.size) {
-                names.add("$${names.size}")
-            }
-            parameterNames = names.toList()
-        }
-
-        println("*** Lambda type parsed: $type")
-
-        tokenizer.consume(":")
-        val functionScope = LambdaScope(context.scope) // resolvedType = type)
-        for (i in type.parameters.indices) {
-            val parameter = type.parameters[i]
-            functionScope.declareLocalVariable(parameterNames[i], parameter.type, false)
-        }
-/*
-        val closureIndices = mutableListOf<Int>()
-        for (definition in context.scope) {
-            if (definition.kind == Definition.Kind.LOCAL_VARIABLE && !parameterNames.contains(definition.name)) {
-                functionScope.declareLocalVariable(definition.name, definition.type(), definition.mutable)
-                closureIndices.add(definition.index)
-            }
-        } */
-
-
-
-        val body = Parser.parseDefinitionsAndStatements(tokenizer, context.depth + 1, functionScope, definitionScope = functionScope)
-
-        println("*** Lambda body parsed: $body")
-
-
-        return LambdaReference(type, functionScope.locals.size, body, implicit = false)
-    }
 
     fun createNumberLiteral(s: String) =
         if (s.contains('.') || s.contains('e') || s.contains('E'))
@@ -251,7 +165,7 @@ object TantillaExpressionParser {
                     tokenizer.consume()
                     BoolNode.False
                 }
-                "lambda" -> parseLambda(tokenizer, context)
+                "lambda" -> LambdaParser.parseLambda(tokenizer, context)
                 else -> parseFreeIdentifier(tokenizer, context)
             }
             else -> {

@@ -12,10 +12,10 @@ class TantillaLexer(input: String, offset: Token<TokenType>? = null) : Iterator<
         RegularExpressions.NUMBER to { TokenType.NUMBER },
         Regex("\\+=|-=|\\*=|\\*\\*=|/=|//=|&=|\\|=|%=|>>=|<<=|\\^="
                 + "|<=|<\\||<<|<|>=|>>|>|==|=|!=|->"
-                + "|-|\\+|\\*\\*|\\*|%|&|\\||//|/|,|\\^|\\.")
+                + "|-|\\+|\\*\\*|\\*|%|&|\\||//|/|,|\\^|\\.|::|:")
                  to { TokenType.SYMBOL_INFIX },
         Regex("\\(|\\[|\\{|!|~") to { TokenType.SYMBOL_PREFIX },
-        Regex("]|\\}|\\)|@|:") to { TokenType.SYMBOL_POSTFIX },
+        Regex("]|\\}|\\)|@") to { TokenType.SYMBOL_POSTFIX },
         RegularExpressions.IDENTIFIER to { when (it) {
             "and", "or", "in", "as" -> TokenType.SYMBOL_INFIX
             "not" -> TokenType.SYMBOL_PREFIX

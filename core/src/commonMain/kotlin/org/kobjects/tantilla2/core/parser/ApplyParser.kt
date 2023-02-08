@@ -117,11 +117,11 @@ object ApplyParser {
         }
 
         while (missingFunctionParameter.isNotEmpty()) {
-            if (tokenizer.tryConsume(":")) {
+            if (tokenizer.current.text == ":" || tokenizer.current.text == "::") {
                 for (i in expectedParameters.indices) {
                     // The null check excludes varargs, the type check excludes lambda pairs
                     if (parameterExpressions[i] == null && expectedParameters[i].type is FunctionType) {
-                        val node = parseTrailingClosure(
+                        val node = LambdaParser.parseTrailingClosure(
                             tokenizer,
                             context,
                             expectedParameters[i].type as FunctionType,
@@ -139,12 +139,10 @@ object ApplyParser {
                 val type = expectedParameters[index].type
                 val expression = if (type is PairType) {
                     val exprA = TantillaExpressionParser.parseExpression(tokenizer, context, type.typeA)
-                    tokenizer.consume(":")
-                    val exprB = parseTrailingClosure(tokenizer, context, type.typeB as FunctionType, genericTypeMap)
+                    val exprB = LambdaParser.parseTrailingClosure(tokenizer, context, type.typeB as FunctionType, genericTypeMap)
                     PairNode(exprA, exprB)
                 } else {
-                    tokenizer.consume(":") { "Colon expected after trailing closure parameter name." }
-                    parseTrailingClosure(
+                    LambdaParser.parseTrailingClosure(
                         tokenizer,
                         context,
                         expectedParameters[index].type as FunctionType,
@@ -196,37 +194,6 @@ object ApplyParser {
         || (type is PairType &&
                 type.typeA is FunctionType && type.typeB is FunctionType)
 
-
-    fun parseTrailingClosure(
-        tokenizer: TantillaScanner,
-        context: ParsingContext,
-        expectedType: FunctionType,
-        genericTypeMap: GenericTypeMap
-    ): Node {
-        val parameterNames: List<String>
-        if (tokenizer.current.text == "(") {
-            val type = TypeParser.parseFunctionType(tokenizer, context, isMethod = false)
-            if (!expectedType.isAssignableFrom(type)) {
-                throw tokenizer.exception("Function type $type does not match expected type $expectedType")
-            }
-            parameterNames = type.parameters.map { it.name }
-            tokenizer.consume(":")
-        } else {
-            parameterNames = List(expectedType.parameters.size) { "${'$'}$it" }
-        }
-
-        val lambdaScope = LambdaScope(context.scope) // resolvedType = type)
-        for (i in expectedType.parameters.indices) {
-            val parameter = expectedType.parameters[i]
-            lambdaScope.declareLocalVariable(parameterNames[i], parameter.type, false)
-        }
-
-        val body = Parser.parseDefinitionsAndStatements(tokenizer, context.depth + 1, lambdaScope, definitionScope = lambdaScope)
-
-        val matchedBody = matchType(body, expectedType.returnType, genericTypeMap)
-
-        return LambdaReference(expectedType.resolveGenerics(null, genericTypeMap), lambdaScope.locals.size, matchedBody, implicit = true)
-    }
 
     fun tryConsumeNamedLambdaPrefix(tokenizer: TantillaScanner, indent: Int, names: Set<String>): String? {
         var i = 0

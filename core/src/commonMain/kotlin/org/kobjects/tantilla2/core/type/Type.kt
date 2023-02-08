@@ -41,10 +41,11 @@ interface Type {
         }
     }
 
+    /** Resolve generics in this type. Actual is the type implied by code, if available */
     fun resolveGenerics(
         actualType: Type?,
         map: GenericTypeMap,
-        allowNoneMatch: Boolean = false,
+        allowNoneMatch: Boolean = false, //
         allowAs: Boolean = false,
     ): Type {
         if (actualType != this && actualType != null) {

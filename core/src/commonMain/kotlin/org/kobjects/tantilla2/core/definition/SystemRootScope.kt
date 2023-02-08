@@ -1,14 +1,12 @@
 package org.kobjects.tantilla2.core.definition
 
 import org.kobjects.tantilla2.core.*
+import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.collection.*
-import org.kobjects.tantilla2.core.function.Callable
-import org.kobjects.tantilla2.core.function.CallableImpl
-import org.kobjects.tantilla2.core.function.FunctionType
-import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.node.LeafNode
 import org.kobjects.tantilla2.core.node.expression.StrNode
 import org.kobjects.tantilla2.core.control.LoopControlSignal
+import org.kobjects.tantilla2.core.function.*
 import org.kobjects.tantilla2.core.type.*
 import org.kobjects.tantilla2.stdlib.math.MathScope
 import org.kobjects.tantilla2.core.system.SystemAbstraction
@@ -155,10 +153,24 @@ class SystemRootScope(
 
         }
 
+        val iteratorTypeVariable = TypeVariable("T")
+        val iteratorTrait = TraitDefinition(this,"Iterator", "Is able to provide an iterator", listOf(TypeVariable("T")))
+        val iteratorHasNext = NativeFunctionDefinition(iteratorTrait, Definition.Kind.METHOD, "has_next", "True if more items are available",
+            FunctionType.Impl(BoolType, listOf())) {}
+        iteratorTrait.add(iteratorHasNext)
+        val iteratorNext = NativeFunctionDefinition(iteratorTrait, Definition.Kind.METHOD, "next", "Returns the next item and advances.",
+            FunctionType.Impl(iteratorTypeVariable, listOf())) {}
+        iteratorTrait.add(iteratorNext)
+        add(iteratorTrait)
 
-
-
-
+        val iterableTrait = TraitDefinition(this,"Iterable", "Is able to provide an iterator", listOf(iteratorTypeVariable))
+        val iteratorMethod = NativeFunctionDefinition(
+            iterableTrait,
+            Definition.Kind.METHOD,
+            "iterator", "Returns an iterator.",
+            FunctionType.Impl(iteratorTrait, listOf())) {}
+        iterableTrait.add(iteratorMethod)
+        add(iterableTrait)
     }
 
 
