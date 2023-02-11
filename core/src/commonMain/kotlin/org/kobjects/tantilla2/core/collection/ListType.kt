@@ -5,6 +5,7 @@ import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Parameter
+import org.kobjects.tantilla2.core.type.GenericTypeMap
 import org.kobjects.tantilla2.core.type.IntType
 import org.kobjects.tantilla2.core.type.Type
 
@@ -55,7 +56,7 @@ open class ListType(
 
     override val genericParameterTypes: List<Type> = listOf(elementType)
 
-    override fun withGenericsResolved(types: List<Type>) = ListType(types.first())
+    override fun withGenericsResolved(genericTypeMap: GenericTypeMap) = ListType(genericTypeMap.map[elementType]!!.type)
 
     override fun isAssignableFrom(other: Type, allowAs: Boolean) = other is ListType && other.elementType == elementType
 

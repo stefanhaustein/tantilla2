@@ -1,7 +1,7 @@
 import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.parserlib.tokenizer.Token
 import org.kobjects.tantilla2.core.classifier.FieldDefinition
-import org.kobjects.tantilla2.core.classifier.ImplDefinition
+import org.kobjects.tantilla2.core.classifier.LazyImplDefinition
 import org.kobjects.tantilla2.core.classifier.StructDefinition
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.definition.*
@@ -75,7 +75,7 @@ object DefinitionParser {
             "enum" -> parseEnum(tokenizer, context)
             "def" -> {
                 val isMethod = !explicitlyStatic
-                        && (scope is StructDefinition || scope is TraitDefinition || scope is ImplDefinition)
+                        && (scope is StructDefinition || scope is TraitDefinition || scope is LazyImplDefinition)
                 tokenizer.consume("def")
                 mutable = tokenizer.tryConsume("mut")
                 if (tokenizer.lookAhead(1).text == ":" || tokenizer.lookAhead(1).text == "=") {
@@ -126,7 +126,7 @@ object DefinitionParser {
                 val scopeName = tokenizer.consume(TokenType.IDENTIFIER) { "Struct name expected after 'for'." }.text
                 tokenizer.consume(":") { "Colon expected after 'for ${scopeName}' for impl." }
                 val docString = Parser.readDocString(tokenizer)
-                val impl = ImplDefinition(
+                val impl = LazyImplDefinition(
                     context.scope,
                     traitName = traitName,
                     scopeName = scopeName,

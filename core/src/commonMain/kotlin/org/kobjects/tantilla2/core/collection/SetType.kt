@@ -3,6 +3,7 @@ package org.kobjects.tantilla2.core.collection
 import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
 import org.kobjects.tantilla2.core.function.Parameter
+import org.kobjects.tantilla2.core.type.GenericTypeMap
 import org.kobjects.tantilla2.core.type.IntType
 import org.kobjects.tantilla2.core.type.Type
 
@@ -28,7 +29,7 @@ open class SetType(
 
     override val genericParameterTypes: List<Type> = listOf(elementType)
 
-    override fun withGenericsResolved(types: List<Type>) = SetType(types.first())
+    override fun withGenericsResolved(genericTypeMap: GenericTypeMap) = SetType(genericTypeMap.resolve(elementType))
 
     override fun isAssignableFrom(other: Type, allowAs: Boolean) = other is SetType && other.elementType == elementType
 

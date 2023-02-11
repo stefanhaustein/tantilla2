@@ -2,6 +2,7 @@ package org.kobjects.tantilla2.core.collection
 
 import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
 import org.kobjects.tantilla2.core.function.Parameter
+import org.kobjects.tantilla2.core.type.GenericTypeMap
 import org.kobjects.tantilla2.core.type.Type
 
 open class PairType(
@@ -18,7 +19,8 @@ open class PairType(
 
     override val genericParameterTypes: List<Type> = listOf(typeA, typeB)
 
-    override fun withGenericsResolved(types: List<Type>) = PairType(types[0], types[1])
+    override fun withGenericsResolved(genericTypeMap: GenericTypeMap) =
+        PairType(genericTypeMap.resolve(typeA), genericTypeMap.resolve(typeB))
 
     override fun equals(other: Any?): Boolean =
         other is PairType && other.typeA == typeA && other.typeB == typeB

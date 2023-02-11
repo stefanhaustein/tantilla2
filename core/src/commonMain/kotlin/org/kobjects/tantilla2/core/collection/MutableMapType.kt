@@ -1,5 +1,6 @@
 package org.kobjects.tantilla2.core.collection
 
+import org.kobjects.tantilla2.core.type.GenericTypeMap
 import org.kobjects.tantilla2.core.type.Type
 
 class MutableMapType(
@@ -16,5 +17,7 @@ class MutableMapType(
     override fun equals(other: Any?): Boolean =
         other is MutableMapType && other.keyType == keyType && other.valueType == valueType
 
-    override fun withGenericsResolved(types: List<Type>) = MutableMapType(types[0], types[1])
+    override fun withGenericsResolved(genericTypeMap: GenericTypeMap) =
+        MutableMapType(
+            genericTypeMap.resolve(keyType), genericTypeMap.resolve(valueType))
 }

@@ -2,14 +2,16 @@ package org.kobjects.tantilla2.core.parser
 
 import org.kobjects.tantilla2.core.definition.Scope
 import org.kobjects.tantilla2.core.type.Type
-import org.kobjects.tantilla2.core.classifier.ImplDefinition
+import org.kobjects.tantilla2.core.classifier.LazyImplDefinition
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.classifier.StructDefinition
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.collection.ListType
+import org.kobjects.tantilla2.core.type.GenericTypeMap
 import org.kobjects.tantilla2.core.type.NoneType
+import org.kobjects.tantilla2.core.type.TypeVariable
 
 object TypeParser {
 
@@ -38,15 +40,27 @@ object TypeParser {
         val type = scope.resolveStaticOrError(name, scope == context.scope).getValue(null) as Type
 
         if (type.genericParameterTypes.isNotEmpty() && tokenizer.tryConsume("[")) {
-            val arguments = mutableListOf<Type>()
-            do {
-                arguments.add(parseType(tokenizer, context))
-            } while (tokenizer.tryConsume(","))
-            tokenizer.consume("]")
-            return type.withGenericsResolved(arguments)
+            val genericTypeMap = parseGenericTypeMap(tokenizer, context, type.genericParameterTypes)
+            return type.withGenericsResolved(genericTypeMap)
         }
 
         return type
+    }
+
+    /** Precondition: "[" consumed. */
+    fun parseGenericTypeMap(
+        tokenizer: TantillaScanner,
+        context: ParsingContext,
+        genericParameterTypes: List<Type>,
+        genericTypeMap: GenericTypeMap = GenericTypeMap()
+    ): GenericTypeMap {
+        var index = 0
+        do {
+            val resolved = parseType(tokenizer, context)
+            genericTypeMap.put(genericParameterTypes[index++] as TypeVariable, resolved)
+        } while (tokenizer.tryConsume(","))
+        tokenizer.consume("]")
+        return genericTypeMap
     }
 
 
@@ -76,7 +90,7 @@ object TypeParser {
             val selfType: Type = when (context.scope) {
                 is StructDefinition -> context.scope
                 is TraitDefinition -> context.scope
-                is ImplDefinition -> if (context.scope.scope is Type) context.scope.scope as Type else NoneType
+                is LazyImplDefinition -> if (context.scope.scope is Type) context.scope.scope as Type else NoneType
                 else ->
                     throw IllegalStateException("self supported for structs, traits and implementations only; got: ${context}")
             }

@@ -1,6 +1,7 @@
 package org.kobjects.tantilla2.core.collection
 
 import org.kobjects.tantilla2.core.function.Parameter
+import org.kobjects.tantilla2.core.type.GenericTypeMap
 import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.type.NoneType
 
@@ -12,7 +13,8 @@ class MutableSetType(
     "A mutable set of elements.",
     { MutableTypedSet(elementType, (it.get(0) as TypedList).data.toMutableSet()) }
 ) {
-    override fun withGenericsResolved(types: List<Type>) = MutableSetType(types.first())
+    override fun withGenericsResolved(genericTypeMap: GenericTypeMap) =
+        MutableSetType(genericTypeMap.resolve(elementType))
 
     override fun equals(other: Any?): Boolean =
         other is MutableSetType && other.elementType == elementType

@@ -9,6 +9,7 @@ import org.kobjects.tantilla2.core.function.NativeFunctionDefinition
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.type.Type
 
+/** Basically a native type with a constructor */
 open class NativeStructDefinition(
     parentScope: Scope?,
     name: String,

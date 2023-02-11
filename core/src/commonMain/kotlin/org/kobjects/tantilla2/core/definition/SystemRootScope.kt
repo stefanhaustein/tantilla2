@@ -153,24 +153,8 @@ class SystemRootScope(
 
         }
 
-        val iteratorTypeVariable = TypeVariable("T")
-        val iteratorTrait = TraitDefinition(this,"Iterator", "Is able to provide an iterator", listOf(TypeVariable("T")))
-        val iteratorHasNext = NativeFunctionDefinition(iteratorTrait, Definition.Kind.METHOD, "has_next", "True if more items are available",
-            FunctionType.Impl(BoolType, listOf())) {}
-        iteratorTrait.add(iteratorHasNext)
-        val iteratorNext = NativeFunctionDefinition(iteratorTrait, Definition.Kind.METHOD, "next", "Returns the next item and advances.",
-            FunctionType.Impl(iteratorTypeVariable, listOf())) {}
-        iteratorTrait.add(iteratorNext)
-        add(iteratorTrait)
-
-        val iterableTrait = TraitDefinition(this,"Iterable", "Is able to provide an iterator", listOf(iteratorTypeVariable))
-        val iteratorMethod = NativeFunctionDefinition(
-            iterableTrait,
-            Definition.Kind.METHOD,
-            "iterator", "Returns an iterator.",
-            FunctionType.Impl(iteratorTrait, listOf())) {}
-        iterableTrait.add(iteratorMethod)
-        add(iterableTrait)
+        add(IteratorTrait())
+        add(IterableTrait())
     }
 
 

@@ -4,6 +4,7 @@ import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Parameter
+import org.kobjects.tantilla2.core.type.GenericTypeMap
 import org.kobjects.tantilla2.core.type.IntType
 import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.type.NoneType
@@ -16,7 +17,8 @@ class MutableListType(
     "A mutable list of elements.",
     { MutableTypedList(elementType, (it.get(0) as TypedList).data.toMutableList()) }
 ) {
-    override fun withGenericsResolved(types: List<Type>) = MutableListType(types.first())
+    override fun withGenericsResolved(genericTypeMap: GenericTypeMap) = MutableListType(
+        genericTypeMap.resolve(elementType))
 
     override fun create(size: Int, init: (Int) -> Any) = MutableTypedList(this, MutableList(size, init))
 

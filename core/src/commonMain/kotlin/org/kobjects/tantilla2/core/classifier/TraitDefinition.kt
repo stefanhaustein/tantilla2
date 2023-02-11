@@ -5,8 +5,8 @@ import org.kobjects.tantilla2.core.definition.Scope
 import org.kobjects.tantilla2.core.type.ScopeType
 import org.kobjects.tantilla2.core.type.Type
 
-class TraitDefinition(
-    override val parentScope: Scope,
+open class TraitDefinition(
+    override val parentScope: Scope?,
     override val name: String,
     override var docString: String,
     override val genericParameterTypes: List<Type> = listOf(),

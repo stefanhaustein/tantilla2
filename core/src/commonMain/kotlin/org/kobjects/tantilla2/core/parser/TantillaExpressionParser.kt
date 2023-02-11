@@ -55,23 +55,14 @@ object TantillaExpressionParser {
     }
 
     fun parseElementAt(tokenizer: TantillaScanner, context: ParsingContext, base: Node): Node {
-        // tokenizer.disable(TokenType.LINE_BREAK)
-
         if (base.returnType is InstantiableMetaType
             && (base.returnType as InstantiableMetaType).wrapped.genericParameterTypes.isNotEmpty()
         ) {
-            val typeParameters = mutableListOf<Type>()
-            do {
-                typeParameters.add(TypeParser.parseType(tokenizer, context))
-            } while(tokenizer.tryConsume(","))
-            tokenizer.consume("]")
-       //     tokenizer.enable(TokenType.LINE_BREAK)
-            return StaticReference(((base.returnType) as InstantiableMetaType).wrapped.withGenericsResolved(typeParameters) as Definition, true)
-            // GenericTypeNode(base, typeParameters)
+            val type = (base.returnType as InstantiableMetaType).wrapped
+            val genericTypeMap = TypeParser.parseGenericTypeMap(tokenizer, context, type.genericParameterTypes)
+            return StaticReference(type.withGenericsResolved(genericTypeMap) as Definition, true)
         }
-
         val result = ElementAt(base, parseExpression(tokenizer, context))
-        //tokenizer.enable(TokenType.LINE_BREAK)
         tokenizer.consume("]")
         return result
     }
