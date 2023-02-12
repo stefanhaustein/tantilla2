@@ -1,7 +1,9 @@
 package org.kobjects.tantilla2.core.classifier
 
+import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.definition.Scope
+import org.kobjects.tantilla2.core.type.NoneType
 import org.kobjects.tantilla2.core.type.ScopeType
 import org.kobjects.tantilla2.core.type.Type
 
@@ -12,6 +14,7 @@ open class TraitDefinition(
     override val genericParameterTypes: List<Type> = listOf(),
 ) : Classifier() {
 
+    // The current vmt index. Determines the vmt size
     var traitIndex = 0
 
 
@@ -52,5 +55,21 @@ open class TraitDefinition(
         val scope = if (type is Scope) type else (type as ScopeType).scope
 
         return userRootScope.traitToClass[this]?.get(scope)
+    }
+
+    companion object {
+        fun evalMethod(context: LocalRuntimeContext, vmtIndex: Int): Any {
+            // TODO: Move to trait for this and TraitMethodBody?
+            val self = context.variables[0] as AdapterInstance
+            val methodImpl = self.vmt[vmtIndex]
+
+            val methodContext = LocalRuntimeContext(context.globalRuntimeContext,
+                methodImpl, {
+                    if (it == 0) self.instance
+                    else if (it < context.variables.size) context.variables[it]
+                    else NoneType.None
+                })
+            return self.vmt[vmtIndex].eval(methodContext)
+        }
     }
 }

@@ -1,5 +1,6 @@
 package org.kobjects.tantilla2.core.collection
 
+import org.kobjects.tantilla2.core.classifier.NativeTraitMethodDefinition
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.function.FunctionType
@@ -19,19 +20,17 @@ class IteratorTrait(
     }
 
     init {
-        add(NativeFunctionDefinition(
+        add(NativeTraitMethodDefinition(
             this,
-            Definition.Kind.METHOD,
             "has_next",
             "True if more items are available",
-            FunctionType.Impl(BoolType, listOf())) {})
+            FunctionType.Impl(BoolType, listOf())))
 
-        add(NativeFunctionDefinition(
+        add(NativeTraitMethodDefinition(
             this,
-            Definition.Kind.METHOD,
            "next",
            "Returns the next item and advances.",
-            FunctionType.Impl(elementType, listOf())) {})
+            FunctionType.Impl(elementType, listOf())))
     }
 
 }

@@ -1,11 +1,10 @@
 package org.kobjects.tantilla2.core
 
-import org.kobjects.tantilla2.core.classifier.AdapterInstance
+import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.node.LeafNode
 import org.kobjects.tantilla2.core.type.Type
-import org.kobjects.tantilla2.core.type.NoneType
 
-class TraitMethodBody(val index: Int): LeafNode() {
+class TraitMethodBody(val vmtIndex: Int): LeafNode() {
     override val returnType: Type
         get() = throw UnsupportedOperationException()
 
@@ -13,16 +12,5 @@ class TraitMethodBody(val index: Int): LeafNode() {
         writer.append("<TraitMethodBody>")
     }
 
-    override fun eval(context: LocalRuntimeContext): Any {
-      val self = context.variables[0] as AdapterInstance
-      val methodImpl = self.vmt[index]
-
-      val methodContext = LocalRuntimeContext(context.globalRuntimeContext,
-          methodImpl, {
-              if (it == 0) self.instance
-              else if (it < context.variables.size) context.variables[it]
-              else NoneType.None
-          })
-      return self.vmt[index].eval(methodContext)
-    }
+    override fun eval(context: LocalRuntimeContext) = TraitDefinition.evalMethod(context, vmtIndex)
 }

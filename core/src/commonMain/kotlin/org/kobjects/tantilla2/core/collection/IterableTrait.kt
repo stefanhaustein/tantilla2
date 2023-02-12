@@ -1,5 +1,7 @@
 package org.kobjects.tantilla2.core.collection
 
+import org.kobjects.tantilla2.core.TraitMethodBody
+import org.kobjects.tantilla2.core.classifier.NativeTraitMethodDefinition
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.function.FunctionType
@@ -19,12 +21,13 @@ class IterableTrait(
     }
 
     init {
-        add(NativeFunctionDefinition(
+        add(
+            NativeTraitMethodDefinition(
             this,
-            Definition.Kind.METHOD,
             "iterator",
             "True if more items are available",
-            FunctionType.Impl(IteratorTrait(elementType), listOf())) {})
+            FunctionType.Impl(IteratorTrait(elementType), listOf()))
+        )
     }
 
 }

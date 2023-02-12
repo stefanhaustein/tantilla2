@@ -31,7 +31,7 @@ abstract class ImplDefinition(
         // TODO: Move VMT creation to trait?
         val vmt = Array<Callable?>(trait.traitIndex) { null }
         for (definition in trait) {
-            val index = ((definition as FunctionDefinition).body() as TraitMethodBody).index
+            val index = ((definition as FunctionDefinition).body() as TraitMethodBody).vmtIndex
             val resolved = resolve(definition.name)
                 ?: throw RuntimeException("Can't resolve '${definition.name}' for '${this.name}'")
             vmt[index] = resolved.getValue(null) as Callable
