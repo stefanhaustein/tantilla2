@@ -58,7 +58,7 @@ object LambdaParser {
             context: ParsingContext,
             expectedType: FunctionType? = null,
             implicit: Boolean,
-            genericTypeMap: GenericTypeMap = GenericTypeMap()
+            genericTypeMap: GenericTypeMap = GenericTypeMap(context.scope.userRootScope())
     ): Node {
         val parsedParameters = parseLambdaParameterList(tokenizer, context, expectedType)
         val type = parsedParameters.first

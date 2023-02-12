@@ -52,7 +52,7 @@ object TypeParser {
         tokenizer: TantillaScanner,
         context: ParsingContext,
         genericParameterTypes: List<Type>,
-        genericTypeMap: GenericTypeMap = GenericTypeMap()
+        genericTypeMap: GenericTypeMap = GenericTypeMap(context.scope.userRootScope())
     ): GenericTypeMap {
         var index = 0
         do {

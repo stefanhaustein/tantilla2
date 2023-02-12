@@ -1,6 +1,8 @@
 package org.kobjects.tantilla2.core.type
 
-class GenericTypeMap {
+import org.kobjects.tantilla2.core.definition.UserRootScope
+
+class GenericTypeMap(val userRootScope: UserRootScope) {
 
     val map = mutableMapOf<TypeVariable, Entry>()
 

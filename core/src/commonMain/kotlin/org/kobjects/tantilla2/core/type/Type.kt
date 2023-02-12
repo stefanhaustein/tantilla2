@@ -1,6 +1,7 @@
 package org.kobjects.tantilla2.core.type
 
 import org.kobjects.tantilla2.core.CodeWriter
+import org.kobjects.tantilla2.core.classifier.TraitDefinition.Companion.isConvertibleFrom
 import org.kobjects.tantilla2.core.definition.Definition
 
 
@@ -49,7 +50,7 @@ interface Type {
         allowAs: Boolean = false,
     ): Type {
         if (actualType != this && actualType != null) {
-            if (allowAs && isAssignableFrom(actualType)) {
+            if (allowAs && isConvertibleFrom(actualType, map.userRootScope)) {
                 return this
             }
             throw IllegalArgumentException("Type mismatch. Expected: $this actual: $actualType")
