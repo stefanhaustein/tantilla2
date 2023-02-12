@@ -158,6 +158,7 @@ fun RenderAppBar(
                         showExamplesMenu,
                         "AoC" to { viewModel.loadExample("AoC.tt") },
                         "CompilationError" to { viewModel.loadExample("CompilationError.tt") },
+                        "FeatureDevelopment" to { viewModel.loadExample("FeatureDevelopment.tt") },
                         "HelloWorld" to { viewModel.loadExample("HelloWorld.tt") },
                         "FizzBuzz" to { viewModel.loadExample("FizzBuzz.tt") },
                         "GraphicsDemo" to { viewModel.loadExample("GraphicsDemo.tt") },

@@ -65,7 +65,7 @@ object FloatType : NativeTypeDefinition(
 
     }
 
-    override fun isAssignableFrom(type: Type, allowAs: Boolean): Boolean {
+    override fun isAssignableFrom(type: Type): Boolean {
         return type == FloatType || type == IntType
     }
 

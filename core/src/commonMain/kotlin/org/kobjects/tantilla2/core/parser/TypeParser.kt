@@ -77,7 +77,7 @@ object TypeParser {
         val type = if (isVararg) ListType(rawType) else rawType
         val defaultValue: Node? = if (tokenizer.tryConsume("="))
             TantillaExpressionParser.matchType(
-                TantillaExpressionParser.parseExpression(tokenizer, context), type)
+                context, TantillaExpressionParser.parseExpression(tokenizer, context), type)
         else null
 
         return Parameter(name, type, defaultValue, isVararg)

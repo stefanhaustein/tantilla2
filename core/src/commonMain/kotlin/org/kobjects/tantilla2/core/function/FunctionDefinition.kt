@@ -111,6 +111,7 @@ class FunctionDefinition (
                     Parser.parseDefinitionsAndStatements(tokenizer, 1, this, definitionScope = this, errorCollector = errorCollector)
             }
         } catch (e: Exception) {
+            e.printStackTrace()
             throw tokenizer.ensureParsingException(e)
         }
     }

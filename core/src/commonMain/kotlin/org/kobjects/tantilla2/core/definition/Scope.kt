@@ -58,6 +58,7 @@ abstract class Scope(
                 println("****** Resolve: $it")
                 it.resolve(applyOffset = true, errorCollector = errors)
             } catch (e: Exception) {
+                e.printStackTrace()
                 println("****** Resolving failed: $e")
                 errors.add(tokenizer.ensureParsingException(e))
             }

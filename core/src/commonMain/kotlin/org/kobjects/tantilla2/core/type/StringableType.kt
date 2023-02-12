@@ -23,5 +23,5 @@ object StringableType : NativeTypeDefinition(
 
     }
 
-    override fun isAssignableFrom(type: Type, allowAs: Boolean) = true
+    override fun isAssignableFrom(type: Type) = true
 }

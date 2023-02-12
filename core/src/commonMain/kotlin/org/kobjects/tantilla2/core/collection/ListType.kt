@@ -58,7 +58,7 @@ open class ListType(
 
     override fun withGenericsResolved(genericTypeMap: GenericTypeMap) = ListType(genericTypeMap.map[elementType]!!.type)
 
-    override fun isAssignableFrom(other: Type, allowAs: Boolean) = other is ListType && other.elementType == elementType
+    override fun isAssignableFrom(other: Type) = other is ListType && other.elementType == elementType
 
     override fun equals(other: Any?): Boolean =
         other is ListType && other.elementType == elementType && other !is MutableListType

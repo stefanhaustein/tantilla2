@@ -31,7 +31,7 @@ open class SetType(
 
     override fun withGenericsResolved(genericTypeMap: GenericTypeMap) = SetType(genericTypeMap.resolve(elementType))
 
-    override fun isAssignableFrom(other: Type, allowAs: Boolean) = other is SetType && other.elementType == elementType
+    override fun isAssignableFrom(other: Type) = other is SetType && other.elementType == elementType
 
     override fun equals(other: Any?): Boolean =
         other is SetType && other.elementType == elementType && other !is MutableSetType

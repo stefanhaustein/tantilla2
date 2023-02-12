@@ -23,11 +23,11 @@ object TantillaExpressionParser {
             return LambdaParser.parseFunctionExpression(tokenizer, context, expectedType, genericTypeMap)
         }
         val result = expressionParser.parse(tokenizer, context)
-        return matchType(result, expectedType, genericTypeMap)
+        return matchType(context, result, expectedType, genericTypeMap)
     }
 
 
-    fun matchType(expr: Node, expectedType: Type?, genericTypeMap: GenericTypeMap? = null): Node {
+    fun matchType(context: ParsingContext, expr: Node, expectedType: Type?, genericTypeMap: GenericTypeMap? = null): Node {
 
         if (expectedType == null) {
             return expr
@@ -42,12 +42,12 @@ object TantillaExpressionParser {
             expectedType
         }
 
-        if (resolvedExpectedType.isAssignableFrom(actualType, false) || resolvedExpectedType == NoneType) {
+        if (resolvedExpectedType.isAssignableFrom(actualType) || resolvedExpectedType == NoneType) {
             return expr
         }
 
         if (resolvedExpectedType is TraitDefinition) {
-            val impl = resolvedExpectedType.requireImplementationFor(actualType)
+            val impl = resolvedExpectedType.requireImplementationFor(context.scope.userRootScope(), actualType)
             return As(expr, impl, implicit = true)
         }
 
@@ -204,7 +204,7 @@ object TantillaExpressionParser {
         base: Node,
     ): Node {
         val trait = parseType(tokenizer, context) as TraitDefinition
-        val impl = trait.requireImplementationFor(base.returnType)
+        val impl = trait.requireImplementationFor(context.scope.userRootScope(), base.returnType)
         // impl.resolveAll()
         return As(base, impl, implicit = false)
     }

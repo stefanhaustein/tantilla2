@@ -214,7 +214,7 @@ object Parser {
             if (type == null) {
                 type = initializer.returnType
             } else {
-                initializer = TantillaExpressionParser.matchType(initializer, type)
+                initializer = TantillaExpressionParser.matchType(context, initializer, type)
             }
         } else if (type == null) {
             throw tokenizer.exception("Explicit type or initializer expression required.")

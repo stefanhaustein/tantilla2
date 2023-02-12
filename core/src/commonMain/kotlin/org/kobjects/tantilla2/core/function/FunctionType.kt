@@ -20,7 +20,7 @@ interface FunctionType : Type {
         return false
     }
 
-    override fun isAssignableFrom(other: Type, allowAs: Boolean): Boolean {
+    override fun isAssignableFrom(other: Type): Boolean {
         if (other !is FunctionType) {
             return false
         }

@@ -12,7 +12,7 @@ import org.kobjects.tantilla2.core.definition.Definition
 
 interface Type {
 
-    fun isAssignableFrom(type: Type, allowAs: Boolean = false) = type == this
+    fun isAssignableFrom(type: Type) = type == this
 
     fun serializeType(writer: CodeWriter)
 
@@ -49,7 +49,7 @@ interface Type {
         allowAs: Boolean = false,
     ): Type {
         if (actualType != this && actualType != null) {
-            if (allowAs && isAssignableFrom(actualType, true)) {
+            if (allowAs && isAssignableFrom(actualType)) {
                 return this
             }
             throw IllegalArgumentException("Type mismatch. Expected: $this actual: $actualType")

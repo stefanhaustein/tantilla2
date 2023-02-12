@@ -89,7 +89,7 @@ object LambdaParser {
     ): Node {
         val body = Parser.parseDefinitionsAndStatements(tokenizer, context.depth + 1, lambdaScope, definitionScope = lambdaScope)
 
-        val refinedBody = TantillaExpressionParser.matchType(body, expectedReturnType, genericTypeMap)
+        val refinedBody = TantillaExpressionParser.matchType(context, body, expectedReturnType, genericTypeMap)
 
         val refinedType = if (expectedReturnType == null) FunctionType.Impl(refinedBody.returnType, functionType.parameters)
           else functionType
@@ -142,12 +142,12 @@ object LambdaParser {
         )
         if (body.returnType is FunctionType) {
             // TODO: Check that anonymous variables are not touched.
-            val matchedBody = TantillaExpressionParser.matchType(body, expectedType, genericTypeMap)
+            val matchedBody = TantillaExpressionParser.matchType(context, body, expectedType, genericTypeMap)
             return FakeLambda(matchedBody)
         }
 
         val matchedBody =
-            TantillaExpressionParser.matchType(body, expectedType.returnType, genericTypeMap)
+            TantillaExpressionParser.matchType(context, body, expectedType.returnType, genericTypeMap)
         return LambdaReference(expectedType, functionScope.locals.size, matchedBody, implicit = true)
     }
 

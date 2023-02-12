@@ -26,7 +26,7 @@ open class MapType(
             genericTypeMap.map[keyType]!!.type,
             genericTypeMap.map[valueType]!!.type)
 
-    override fun isAssignableFrom(other: Type, allowAs: Boolean) =
+    override fun isAssignableFrom(other: Type) =
         other is MapType && other.keyType == keyType && other.valueType == valueType
 
     override fun equals(other: Any?): Boolean =

@@ -72,6 +72,7 @@ class UserRootScope(
                 parent = parent.parentScope
             }
         } catch (e: Exception) {
+            e.printStackTrace()
             definitionsWithErrors[definition] = listOf(e)
             var parent = definition.parentScope
             while (parent != null && parent !is SystemRootScope) {
