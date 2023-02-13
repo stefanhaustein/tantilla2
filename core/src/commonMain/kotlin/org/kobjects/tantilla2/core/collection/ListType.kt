@@ -33,6 +33,15 @@ open class ListType(
             (it[0] as TypedList).data.indexOf(it[1]).toLong()
         }
 
+        defineMethod(
+            "iterator",
+            "Returns an iterator for this list",
+            IteratorType(elementType)
+        ) {
+            (it[0] as TypedList).iterator()
+        }
+
+
         defineNativeFunction(
             "init",
             "Create a list of the given size, filled using the function parameter",

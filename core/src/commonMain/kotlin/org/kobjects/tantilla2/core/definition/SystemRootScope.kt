@@ -22,7 +22,9 @@ class SystemRootScope(
         add(IntType)
         add(StringableType)
         add(PairType(TypeVariable("A"), TypeVariable("B")))
-        add(ListType(TypeVariable("E")))
+
+        val listType = ListType(TypeVariable("E"))
+        add(listType)
         add(MutableListType(TypeVariable("E")))
         add(MapType(TypeVariable("K"), TypeVariable("V")))
         add(MutableMapType(TypeVariable("K"), TypeVariable("V")))
@@ -150,11 +152,16 @@ class SystemRootScope(
                     elze.eval(ctx)
                 }
             }
-
         }
 
-        add(IteratorTrait())
-        add(IterableTrait())
+        add(IteratorType())
+
+        val iterableTrait = IterableTrait()
+
+        add(iterableTrait)
+
+        add(IterableImpl(this, iterableTrait, listType, ""))
+
     }
 
 

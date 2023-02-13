@@ -2,6 +2,7 @@ package org.kobjects.tantilla2.core.classifier
 
 import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.core.*
+import org.kobjects.tantilla2.core.classifier.TraitDefinition.Companion.vmtIndex
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.definition.Scope
 import org.kobjects.tantilla2.core.function.Callable
@@ -31,7 +32,7 @@ abstract class ImplDefinition(
         // TODO: Move VMT creation to trait?
         val vmt = Array<Callable?>(trait.traitIndex) { null }
         for (definition in trait) {
-            val index = ((definition as FunctionDefinition).body() as TraitMethodBody).vmtIndex
+            val index = definition.vmtIndex
             val resolved = resolve(definition.name)
                 ?: throw RuntimeException("Can't resolve '${definition.name}' for '${this.name}'")
             vmt[index] = resolved.getValue(null) as Callable
@@ -43,8 +44,6 @@ abstract class ImplDefinition(
         get() = Definition.Kind.IMPL
 
 
-    init {
-        userRootScope().unresolvedImpls.add(this)
-    }
+
 
 }

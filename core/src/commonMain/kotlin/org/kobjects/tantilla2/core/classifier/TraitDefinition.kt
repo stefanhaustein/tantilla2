@@ -1,9 +1,11 @@
 package org.kobjects.tantilla2.core.classifier
 
 import org.kobjects.tantilla2.core.LocalRuntimeContext
+import org.kobjects.tantilla2.core.TraitMethodBody
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.definition.Scope
 import org.kobjects.tantilla2.core.definition.UserRootScope
+import org.kobjects.tantilla2.core.function.FunctionDefinition
 import org.kobjects.tantilla2.core.type.NoneType
 import org.kobjects.tantilla2.core.type.ScopeType
 import org.kobjects.tantilla2.core.type.Type
@@ -78,6 +80,12 @@ open class TraitDefinition(
             }
             return false
         }
+
+        val Definition.vmtIndex: Int
+            get() = if (this is NativeTraitMethodDefinition) this.vmtIndex else
+                ((this as FunctionDefinition).body() as TraitMethodBody).vmtIndex
+
+
 
     }
 

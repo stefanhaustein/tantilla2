@@ -1,6 +1,12 @@
 def main():
   let list = List[Int](1, 2, 3)
 
-  let iterator = list as Iterable[Int]
-
   print list
+
+  let iterable = list as Iterable[Int]
+
+  let iterator = iterable.iterator()
+
+  print iterator.next
+  print iterator.next
+

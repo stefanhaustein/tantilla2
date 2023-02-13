@@ -27,7 +27,7 @@ class IterableTrait(
             this,
             "iterator",
             "True if more items are available",
-            FunctionType.Impl(IteratorTrait(elementType), listOf()))
+            FunctionType.Impl(IteratorType(elementType), listOf()))
         )
     }
 

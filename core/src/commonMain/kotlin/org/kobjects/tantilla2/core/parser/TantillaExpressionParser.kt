@@ -48,7 +48,7 @@ object TantillaExpressionParser {
 
         if (resolvedExpectedType is TraitDefinition) {
             val impl = resolvedExpectedType.requireImplementationFor(context.scope.userRootScope(), actualType)
-            return As(expr, impl, implicit = true)
+            return As(expr, impl, explicitType = null)
         }
 
         throw IllegalArgumentException("Can't convert $expr with type '${expr.returnType}' to '$resolvedExpectedType'")
@@ -206,7 +206,7 @@ object TantillaExpressionParser {
         val trait = parseType(tokenizer, context) as TraitDefinition
         val impl = trait.requireImplementationFor(context.scope.userRootScope(), base.returnType)
         // impl.resolveAll()
-        return As(base, impl, implicit = false)
+        return As(base, impl, trait)
     }
 
     fun parseProperty(

@@ -1,10 +1,7 @@
 package org.kobjects.tantilla2.core.definition
 
 import org.kobjects.tantilla2.core.CodeWriter
-import org.kobjects.tantilla2.core.classifier.FieldDefinition
-import org.kobjects.tantilla2.core.classifier.ImplDefinition
-import org.kobjects.tantilla2.core.classifier.LazyImplDefinition
-import org.kobjects.tantilla2.core.classifier.TraitDefinition
+import org.kobjects.tantilla2.core.classifier.*
 
 class UserRootScope(
     override val parentScope: SystemRootScope,
@@ -45,6 +42,13 @@ class UserRootScope(
         staticFieldDefinitions.clear()
 
         recurse { it.invalidate() }
+
+        for (definition in parentScope) {
+            if (definition is NativeImplDefinition) {
+                unresolvedImpls.add(definition)
+            }
+        }
+
     }
 
 

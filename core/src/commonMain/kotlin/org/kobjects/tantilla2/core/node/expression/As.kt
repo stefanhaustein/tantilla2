@@ -6,12 +6,13 @@ import org.kobjects.tantilla2.core.Precedence
 import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.classifier.AdapterInstance
 import org.kobjects.tantilla2.core.classifier.ImplDefinition
+import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.node.Node
 
 class As(
     val base: Node,
     val impl: ImplDefinition,
-    val implicit: Boolean,
+    val explicitType: TraitDefinition?,
 ) : Node() {
     override val returnType: Type
         get() = impl.trait
@@ -22,13 +23,13 @@ class As(
         AdapterInstance(impl.vmt, base.eval(ctx))
 
     override fun reconstruct(newChildren: List<Node>) =
-        As(newChildren[0], impl, implicit)
+        As(newChildren[0], impl, explicitType)
 
     override fun serializeCode(sb: CodeWriter, parentPrecedence: Int) {
-        if (implicit) {
+        if (explicitType == null) {
             sb.appendCode(base)
         } else {
-            sb.appendInfix(parentPrecedence, base, "as", Precedence.RELATIONAL, StaticReference(impl.trait,  true))
+            sb.appendInfix(parentPrecedence, base, "as", Precedence.RELATIONAL, StaticReference(explicitType,  true))
         }
     }
 }

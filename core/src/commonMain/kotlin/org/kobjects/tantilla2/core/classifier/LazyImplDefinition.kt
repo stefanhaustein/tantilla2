@@ -40,6 +40,8 @@ class LazyImplDefinition(
         resolvedScope = null
         resolvedTrait = null
     }
-
+    init {
+        userRootScope().unresolvedImpls.add(this)
+    }
 
 }
