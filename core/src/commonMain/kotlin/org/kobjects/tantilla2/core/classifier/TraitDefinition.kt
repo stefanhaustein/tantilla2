@@ -45,10 +45,12 @@ open class TraitDefinition(
             }
         }
 
-        // TODO: Figure out how to fix this properly.
-        val scope = if (type is Scope) type else (type as ScopeType).scope
+        // TODO: Figure out how to fix this properly for the static case
+        val scope = if (type is Scope) type.unparameterized ?: type else (type as ScopeType).scope
 
-        return userRootScope.traitToClass[this]?.get(scope)
+        val impl = userRootScope.traitToClass[this.unparameterized ?: this]?.get(scope)
+
+        return impl
     }
 
     companion object {

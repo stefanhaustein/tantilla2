@@ -11,6 +11,7 @@ open class MapType(
     val valueType: Type,
     name: String = "Map",
     docString: String = "An immutable map of keys to values.",
+    unparameterized: MapType? = null,
     ctor: (LocalRuntimeContext) -> Any = { TypedMap(keyType, valueType) },
 ) : NativeStructDefinition(
     null,
@@ -24,7 +25,8 @@ open class MapType(
     override fun withGenericsResolved(genericTypeMap: GenericTypeMap) =
         MapType(
             genericTypeMap.map[keyType]!!.type,
-            genericTypeMap.map[valueType]!!.type)
+            genericTypeMap.map[valueType]!!.type,
+            unparameterized = this)
 
     override fun isAssignableFrom(other: Type) =
         other is MapType && other.keyType == keyType && other.valueType == valueType

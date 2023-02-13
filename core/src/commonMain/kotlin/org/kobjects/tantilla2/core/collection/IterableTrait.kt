@@ -12,12 +12,13 @@ import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.type.TypeVariable
 
 class IterableTrait(
-    val elementType: Type = TypeVariable("T")
+    val elementType: Type = TypeVariable("T"),
+    override val unparameterized: IterableTrait? = null,
 ) : TraitDefinition(null,"Iterable", "Is able to provide an iterator", listOf(
     elementType
 )) {
     override fun withGenericsResolved(genericTypeMap: GenericTypeMap): Type {
-        return IterableTrait(genericTypeMap.resolve(elementType))
+        return IterableTrait(genericTypeMap.resolve(elementType), this)
     }
 
     init {

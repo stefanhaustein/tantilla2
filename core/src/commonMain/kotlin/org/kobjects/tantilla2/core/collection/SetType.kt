@@ -11,6 +11,7 @@ open class SetType(
     val elementType: Type,
     name: String = "Set",
     docString: String = "An immutable set of elements.",
+    override val unparameterized: Type? = null,
     ctor:  (LocalRuntimeContext) -> Any = { TypedSet(elementType, (it.get(0) as List<Any>).toSet()) }
 ) : NativeStructDefinition(
     null,
@@ -29,7 +30,8 @@ open class SetType(
 
     override val genericParameterTypes: List<Type> = listOf(elementType)
 
-    override fun withGenericsResolved(genericTypeMap: GenericTypeMap) = SetType(genericTypeMap.resolve(elementType))
+    override fun withGenericsResolved(genericTypeMap: GenericTypeMap) =
+        SetType(genericTypeMap.resolve(elementType), unparameterized = unparameterized)
 
     override fun isAssignableFrom(other: Type) = other is SetType && other.elementType == elementType
 

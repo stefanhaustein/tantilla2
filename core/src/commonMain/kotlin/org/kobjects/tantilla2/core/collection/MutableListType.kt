@@ -10,15 +10,17 @@ import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.type.NoneType
 
 class MutableListType(
-    elementType: Type
+    elementType: Type,
+    unparameterized: MutableListType? = null
 ) : ListType(
     elementType,
     "MutableList",
     "A mutable list of elements.",
+    unparameterized,
     { MutableTypedList(elementType, (it.get(0) as TypedList).data.toMutableList()) }
 ) {
     override fun withGenericsResolved(genericTypeMap: GenericTypeMap) = MutableListType(
-        genericTypeMap.resolve(elementType))
+        genericTypeMap.resolve(elementType), this)
 
     override fun create(size: Int, init: (Int) -> Any) = MutableTypedList(this, MutableList(size, init))
 

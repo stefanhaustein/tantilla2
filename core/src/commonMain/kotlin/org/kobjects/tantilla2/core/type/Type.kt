@@ -29,6 +29,9 @@ interface Type {
     fun withGenericsResolved(genericTypeMap: GenericTypeMap): Type =
         throw UnsupportedOperationException()
 
+    val unparameterized: Type?
+        get() = null
+    
     fun serializeGenerics(writer: CodeWriter) {
         val generics = genericParameterTypes
         if (generics.isNotEmpty()) {

@@ -13,6 +13,7 @@ open class ListType(
     val elementType: Type,
     name: String = "List",
     docString: String = "An immutable list of elements.",
+    override val unparameterized: ListType? = null,
     ctor:  (LocalRuntimeContext) -> Any = { TypedList(elementType, (it.get(0) as TypedList).data) }
 ) : NativeStructDefinition(
     null,
@@ -56,7 +57,8 @@ open class ListType(
 
     override val genericParameterTypes: List<Type> = listOf(elementType)
 
-    override fun withGenericsResolved(genericTypeMap: GenericTypeMap) = ListType(genericTypeMap.map[elementType]!!.type)
+    override fun withGenericsResolved(genericTypeMap: GenericTypeMap) =
+        ListType(genericTypeMap.map[elementType]!!.type, unparameterized = this)
 
     override fun isAssignableFrom(other: Type) = other is ListType && other.elementType == elementType
 
