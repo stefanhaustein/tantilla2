@@ -10,7 +10,7 @@ import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.definition.Scope
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.FunctionType
-import org.kobjects.tantilla2.core.function.LambdaScope
+import org.kobjects.tantilla2.core.function.LocalVariableDefinition
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.node.expression.*
 import org.kobjects.tantilla2.core.parser.TypeParser.parseType
@@ -67,11 +67,11 @@ object TantillaExpressionParser {
         return result
     }
 
+    /** A reference that doesn't require a "special" context -- either static or a local variable */
     fun reference(scope: Scope, definition: Definition, qualified: Boolean) =
         if (definition.kind == Definition.Kind.PROPERTY) {
             val depth = definition.depth(scope)
-            LocalVariableReference(
-                definition.name, definition.type, depth, definition.index, definition.mutable)
+            LocalVariableReference(definition as LocalVariableDefinition, depth)
         } else StaticReference(definition, qualified)
 
     fun isCallable(definition: Definition) =

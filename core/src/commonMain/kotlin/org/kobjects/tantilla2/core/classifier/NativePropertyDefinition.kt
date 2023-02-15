@@ -16,9 +16,6 @@ class NativePropertyDefinition(
     private val setter: ((self: Any?, newValue: Any) -> Unit)? = null,
 ) : Definition {
 
-    override var index: Int
-        get() = -1
-        set(value) = throw UnsupportedOperationException()
 
     override fun getValue(self: Any?) = getter(self)
 

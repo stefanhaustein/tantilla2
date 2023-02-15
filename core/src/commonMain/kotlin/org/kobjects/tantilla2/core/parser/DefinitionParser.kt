@@ -1,6 +1,6 @@
 import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.parserlib.tokenizer.Token
-import org.kobjects.tantilla2.core.classifier.FieldDefinition
+import org.kobjects.tantilla2.core.definition.FieldDefinition
 import org.kobjects.tantilla2.core.classifier.LazyImplDefinition
 import org.kobjects.tantilla2.core.classifier.StructDefinition
 import org.kobjects.tantilla2.core.classifier.TraitDefinition

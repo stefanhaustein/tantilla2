@@ -3,8 +3,6 @@ package org.kobjects.tantilla2.core.node.expression
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.Precedence
-import org.kobjects.tantilla2.core.classifier.FieldDefinition
-import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.FunctionDefinition
 import org.kobjects.tantilla2.core.node.Node

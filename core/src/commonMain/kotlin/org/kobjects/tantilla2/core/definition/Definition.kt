@@ -20,9 +20,9 @@ interface Definition : SerializableCode, Comparable<Definition> {
     val docString: String
         get() = ""
 
-    var index: Int
+  /*  var index: Int
         get() = -1
-        set(_) = throw UnsupportedOperationException()
+        set(_) = throw UnsupportedOperationException() */
 
     fun getValue(self: Any?): Any
 
@@ -118,10 +118,6 @@ interface Definition : SerializableCode, Comparable<Definition> {
 
     override fun compareTo(other: Definition): Int {
         var d = kind.compareTo(other.kind)
-        if (d != 0) {
-            return d
-        }
-        d = index.compareTo(other.index)
         if (d != 0) {
             return d
         }

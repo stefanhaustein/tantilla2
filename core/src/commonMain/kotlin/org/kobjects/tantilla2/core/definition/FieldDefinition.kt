@@ -1,11 +1,7 @@
-package org.kobjects.tantilla2.core.classifier
+package org.kobjects.tantilla2.core.definition
 
 import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.core.*
-import org.kobjects.tantilla2.core.definition.CodeFragment
-import org.kobjects.tantilla2.core.definition.Definition
-import org.kobjects.tantilla2.core.definition.Scope
-import org.kobjects.tantilla2.core.definition.DefinitionUpdatable
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.node.expression.StaticReference
 import org.kobjects.tantilla2.core.node.expression.UnresolvedNode
@@ -20,7 +16,7 @@ class FieldDefinition(
     definitionText: CodeFragment,
     override val mutable: Boolean = false,
     override var docString: String = "",
-) : Definition, DefinitionUpdatable {
+) : AbstractFieldDefinition() , DefinitionUpdatable {
     private var resolvedType: Type = UnresolvedType
     override var index: Int = -1
 
@@ -52,6 +48,15 @@ class FieldDefinition(
         }
     }
 
+    override fun compareTo(other: Definition): Int {
+        if (other is FieldDefinition && other.kind == kind && kind == Definition.Kind.PROPERTY) {
+            val d = index.compareTo(other.index)
+            if (d != 0) {
+                return d
+            }
+        }
+        return super.compareTo(other)
+    }
 
     override val type: Type
         get() {
@@ -116,7 +121,6 @@ class FieldDefinition(
         }
     }
 
-    override fun toString() = serializeCode()
 
     // Used internally, only called when resolved
     private fun serializeDeclaration(writer: CodeWriter) {
@@ -157,8 +161,6 @@ class FieldDefinition(
             writer.appendUnparsed(definitionText.code, userRootScope().definitionsWithErrors[this] ?: emptyList())
         }
     }
-
-    override fun isDynamic() = kind == Definition.Kind.PROPERTY
 
     override fun findNode(node: Node): Definition? {
         val rid = resolvedInitializer

@@ -3,7 +3,6 @@ package org.kobjects.tantilla2.core.definition
 import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.LocalRuntimeContext
-import org.kobjects.tantilla2.core.classifier.*
 import org.kobjects.tantilla2.core.function.*
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.parser.Parser
@@ -24,7 +23,7 @@ abstract class Scope(
 
     fun add(definition: Definition) {
         definitions[definition.name] = definition
-        if (definition.kind == Definition.Kind.PROPERTY && definition !is NativePropertyDefinition && definition.index == -1) {
+        if (definition.kind == Definition.Kind.PROPERTY && definition is AbstractFieldDefinition) {
             definition.index = locals.size
             locals.add(definition.name)
         }
@@ -132,10 +131,10 @@ abstract class Scope(
 
     fun remove(name: String) {
         val removed = definitions.remove(name)
-        if (removed != null && removed.index != -1) {
+        if (removed is AbstractFieldDefinition && removed.index != -1 && removed.kind == Definition.Kind.PROPERTY) {
             locals.remove(name)
             for (definition in this) {
-                if (definition.index > removed.index) {
+                if (definition.kind == Definition.Kind.PROPERTY &&  definition is AbstractFieldDefinition && definition.index > removed.index) {
                     definition.index--
                 }
             }
