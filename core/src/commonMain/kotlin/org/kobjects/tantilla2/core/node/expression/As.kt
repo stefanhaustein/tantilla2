@@ -12,10 +12,11 @@ import org.kobjects.tantilla2.core.node.Node
 class As(
     val base: Node,
     val impl: ImplDefinition,
-    val explicitType: TraitDefinition?,
+    val trait: TraitDefinition,
+    val implicit: Boolean = false,
 ) : Node() {
     override val returnType: Type
-        get() = impl.trait
+        get() = trait
 
     override fun children() = listOf(base)
 
@@ -23,13 +24,13 @@ class As(
         AdapterInstance(impl.vmt, base.eval(ctx))
 
     override fun reconstruct(newChildren: List<Node>) =
-        As(newChildren[0], impl, explicitType)
+        As(newChildren[0], impl, trait, implicit)
 
     override fun serializeCode(sb: CodeWriter, parentPrecedence: Int) {
-        if (explicitType == null) {
+        if (implicit) {
             sb.appendCode(base)
         } else {
-            sb.appendInfix(parentPrecedence, base, "as", Precedence.RELATIONAL, StaticReference(explicitType,  true))
+            sb.appendInfix(parentPrecedence, base, "as", Precedence.RELATIONAL, StaticReference(trait,  true))
         }
     }
 }

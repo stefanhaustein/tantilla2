@@ -16,7 +16,7 @@ class IterableImpl(
     docString: String
 ) : NativeImplDefinition(parentScope, trait, scope, docString)  {
 
-    init {
+  /*  init {
         val vmt = Array<Callable?>(trait.traitIndex) { null }
         for (definition in trait) {
             val index =  definition.vmtIndex
@@ -25,6 +25,10 @@ class IterableImpl(
             vmt[index] = resolved.getValue(null) as Callable
         }
         this.vmt = vmt.toList() as List<Callable>
+    }*/
+
+    init {
+        resolve()
     }
 
 }

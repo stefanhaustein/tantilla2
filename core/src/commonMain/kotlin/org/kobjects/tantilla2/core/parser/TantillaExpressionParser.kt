@@ -48,7 +48,7 @@ object TantillaExpressionParser {
 
         if (resolvedExpectedType is TraitDefinition) {
             val impl = resolvedExpectedType.requireImplementationFor(context.scope.userRootScope(), actualType)
-            return As(expr, impl, explicitType = null)
+            return As(expr, impl, resolvedExpectedType, implicit = true)
         }
 
         throw IllegalArgumentException("Can't convert $expr with type '${expr.returnType}' to '$resolvedExpectedType'")

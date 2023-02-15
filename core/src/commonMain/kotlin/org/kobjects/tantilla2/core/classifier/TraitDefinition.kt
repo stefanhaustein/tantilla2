@@ -2,9 +2,11 @@ package org.kobjects.tantilla2.core.classifier
 
 import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.TraitMethodBody
+import org.kobjects.tantilla2.core.classifier.TraitDefinition.Companion.vmtIndex
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.definition.Scope
 import org.kobjects.tantilla2.core.definition.UserRootScope
+import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.FunctionDefinition
 import org.kobjects.tantilla2.core.type.NoneType
 import org.kobjects.tantilla2.core.type.ScopeType
@@ -54,6 +56,17 @@ open class TraitDefinition(
 
         return impl
     }
+
+    fun createVmt(resolveMethod: (Definition) -> Callable): List<Callable> {
+        val vmt = Array<Callable?>(traitIndex) { null }
+        for (traitMethod in this) {
+            val index = traitMethod.vmtIndex
+            vmt[index] = resolveMethod(traitMethod)
+
+        }
+        return vmt.toList() as List<Callable>
+    }
+
 
     companion object {
         fun evalMethod(context: LocalRuntimeContext, vmtIndex: Int): Any {

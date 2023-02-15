@@ -7,6 +7,7 @@ import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.definition.Scope
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.FunctionDefinition
+import org.kobjects.tantilla2.core.type.Type
 
 abstract class ImplDefinition(
     override val parentScope: Scope,
@@ -30,14 +31,16 @@ abstract class ImplDefinition(
 
     override fun resolve(applyOffset: Boolean, errorCollector: MutableList<ParsingException>?) {
         // TODO: Move VMT creation to trait?
-        val vmt = Array<Callable?>(trait.traitIndex) { null }
-        for (definition in trait) {
-            val index = definition.vmtIndex
-            val resolved = resolve(definition.name)
-                ?: throw RuntimeException("Can't resolve '${definition.name}' for '${this.name}'")
-            vmt[index] = resolved.getValue(null) as Callable
+
+        vmt = trait.createVmt { traitMethod ->
+            var resolved = resolve(traitMethod.name)
+            if (resolved == null && scope is Type) {
+                resolved = (scope as Type).resolve(traitMethod.name)
+            }
+            if (resolved == null) { throw IllegalArgumentException("No implementation found for trait method $name") }
+         //   if (resolved.type != traitMethod.type)
+            resolved.getValue(null) as Callable
         }
-        this.vmt = vmt.toList() as List<Callable>
     }
 
     override val kind: Definition.Kind

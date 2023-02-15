@@ -6,6 +6,7 @@ import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.NativeFunctionDefinition
+import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.type.BoolType
 import org.kobjects.tantilla2.core.type.GenericTypeMap
 import org.kobjects.tantilla2.core.type.Type
@@ -27,7 +28,7 @@ class IterableTrait(
             this,
             "iterator",
             "True if more items are available",
-            FunctionType.Impl(IteratorType(elementType), listOf()))
+            FunctionType.Impl(IteratorType(elementType), listOf(Parameter("self", this))))
         )
     }
 
