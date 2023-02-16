@@ -12,12 +12,45 @@ def find(c: Str) -> Pair[Int, Int]:
 
   Pair[Int, Int](-1, -1)
 
+struct Candidate:
+  x: Int
+  y: Int
+  elevation: Int
+  distance: Int
+
+candidates = MutableList[Candidate]()
+
+
+def check(candidate: Candidate):
+  let x = candidate.x
+  let y = candidate.x
+  let distance = candidate.distance
+  if distance < distances[y][x]
+    distances[y][x] = distance
+    add_candidate(x + 1, y, elevation, distance)
+    add_candidate(x - 1, y, elevation, distance)
+    add_candidate(x, y + 1, elevation, distance)
+    add_candidate(x, y - 1, elevation, distance)
+
+def add_candidate(x: Int, y: Int, elevation: Int, distance: Int)
+  if x >= 0 and y >= 0 and y < length(MAP) and x < length(MAP[0])
+    val target_elevation = ord(MAP[y][x])
+    if abs(elevation - target_elevation) <= 1:
+      candidates.append(Candidate(x, y, target_elevation, distance + 1))
+
 def main():
   let start = find("S")
   let end = find("E")
 
   let mut x = start.a
   let mut y = start.b
+
+  check(Candidate(start.a, start.b, 0, 0))
+
+  while len(candidates) > 0:
+    let candidate = candidates.remove(0)
+    check(candidate)
+
 
 
 
