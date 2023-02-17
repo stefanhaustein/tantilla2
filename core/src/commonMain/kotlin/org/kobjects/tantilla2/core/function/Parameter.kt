@@ -8,6 +8,7 @@ import org.kobjects.tantilla2.core.type.Type
 data class Parameter(
     val name: String,
     val type: Type,
+    // Inserted at callsite
     val defaultValueExpression: Node? = null,
     val isVararg: Boolean = false,
 ) {

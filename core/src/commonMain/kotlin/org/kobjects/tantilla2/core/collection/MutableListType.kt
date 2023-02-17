@@ -4,6 +4,7 @@ import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Parameter
+import org.kobjects.tantilla2.core.node.expression.IntNode
 import org.kobjects.tantilla2.core.type.GenericTypeMap
 import org.kobjects.tantilla2.core.type.IntType
 import org.kobjects.tantilla2.core.type.Type
@@ -49,8 +50,12 @@ class MutableListType(
         }
 
         defineMethod("pop", "Remove the last element in this list and return it.",
-            elementType) {
-            (it[0] as MutableTypedList).data.removeLast()
+            elementType,
+            Parameter("index", IntType, IntNode.Const(-1))
+            ) {
+            val list = it[0] as MutableTypedList
+            val index = it.i32(1)
+            list.data.removeAt(if (index < 0) list.size - index else index)
         }
 
         defineMethod("sort", "Sort this list in place.",
