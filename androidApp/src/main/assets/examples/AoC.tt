@@ -52,8 +52,6 @@ def main():
     let candidate = candidates.pop(0)
     check(candidate)
 
-  print(distances)
-
   print(distances[end.b][end.a])
 
 
