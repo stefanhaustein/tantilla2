@@ -1,6 +1,7 @@
 package org.kobjects.tantilla2.core.definition
 
 import org.kobjects.tantilla2.core.CodeWriter
+import org.kobjects.tantilla2.core.type.Type
 
 class EnumLiteral(
     override val parentScope: EnumDefinition,
@@ -23,4 +24,7 @@ class EnumLiteral(
         writer.append(name)
         writer.newline()
     }
+
+    override val type: Type
+        get() = parentScope
 }

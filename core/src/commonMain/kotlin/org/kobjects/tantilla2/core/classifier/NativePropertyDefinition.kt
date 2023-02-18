@@ -4,7 +4,6 @@ import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.definition.Scope
 import org.kobjects.tantilla2.core.type.Type
-import org.kobjects.tantilla2.core.type.dynamicType
 
 class NativePropertyDefinition(
     override val parentScope: Scope,
@@ -65,7 +64,7 @@ class NativePropertyDefinition(
             parentScope: Scope,
             name: String,
             value: Any,
-            type: Type = value.dynamicType,
+            type: Type,
             docString: String = "",
         ) = NativePropertyDefinition(
             parentScope,

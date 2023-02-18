@@ -8,7 +8,6 @@ open class UnitDefinition(
     override val name: String = "",
     override var docString: String = "",
 ) : Scope(), Typed, DocStringUpdatable {
-    override val type = ScopeType(this)
     override val kind: Definition.Kind
         get() = Definition.Kind.UNIT
 }

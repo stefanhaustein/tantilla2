@@ -6,37 +6,37 @@ import org.kobjects.tantilla2.core.type.GenericTypeMap
 import org.kobjects.tantilla2.core.type.Type
 
 open class PairType(
-    val typeA: Type,
-    val typeB: Type,
+    val firstType: Type,
+    val secondType: Type,
     override val unparameterized: PairType? = null,
 ) : NativeStructDefinition(
     null,
     "Pair",
     "An immutable pair of two values",
-    { TypedPair(typeA, typeB, it.get(0)!!, it.get(1)!!) },
-    Parameter("a", typeA),
-    Parameter("b", typeB),
+    { TypedPair(firstType, secondType, it.get(0)!!, it.get(1)!!) },
+    Parameter("a", firstType),
+    Parameter("b", secondType),
 ), CollectionType {
 
-    override val genericParameterTypes: List<Type> = listOf(typeA, typeB)
+    override val genericParameterTypes: List<Type> = listOf(firstType, secondType)
 
     override fun withGenericsResolved(genericTypeMap: GenericTypeMap) =
-        PairType(genericTypeMap.resolve(typeA), genericTypeMap.resolve(typeB), this)
+        PairType(genericTypeMap.resolve(firstType), genericTypeMap.resolve(secondType), this)
 
     override fun equals(other: Any?): Boolean =
-        other is PairType && other.typeA == typeA && other.typeB == typeB
+        other is PairType && other.firstType == firstType && other.secondType == secondType
 
     init {
         defineMethod(
             "a", "Element a of the pair",
-            typeA
+            firstType
         ) {
             (it[0] as TypedPair).a
         }
 
         defineMethod(
             "b", "Element b of the pair",
-            typeB
+            secondType
         ) {
             (it[0] as TypedPair).b
         }

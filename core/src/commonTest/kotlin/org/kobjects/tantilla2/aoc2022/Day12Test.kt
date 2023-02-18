@@ -22,8 +22,6 @@ struct Candidate:
   elevation: Int
   distance: Int
 
-
-
 def check(candidate: Candidate, distances: List[MutableList[Int]], target: Str) -> Int:
   let x = candidate.x
   let y = candidate.y

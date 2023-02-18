@@ -3,11 +3,9 @@ package org.kobjects.tantilla2.core.parser
 import org.kobjects.tantilla2.core.classifier.InstantiableMetaType
 import org.kobjects.tantilla2.core.collection.PairType
 import org.kobjects.tantilla2.core.function.FunctionType
-import org.kobjects.tantilla2.core.function.LambdaScope
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.node.expression.*
 import org.kobjects.tantilla2.core.parser.Parser.indent
-import org.kobjects.tantilla2.core.parser.TantillaExpressionParser.matchType
 import org.kobjects.tantilla2.core.type.GenericTypeMap
 import org.kobjects.tantilla2.core.type.NoneType
 import org.kobjects.tantilla2.core.type.Type
@@ -138,8 +136,8 @@ object ApplyParser {
                 val index = missingFunctionParameter[name]!!
                 val type = expectedParameters[index].type
                 val expression = if (type is PairType) {
-                    val exprA = TantillaExpressionParser.parseExpression(tokenizer, context, type.typeA)
-                    val exprB = LambdaParser.parseTrailingClosure(tokenizer, context, type.typeB as FunctionType, genericTypeMap)
+                    val exprA = TantillaExpressionParser.parseExpression(tokenizer, context, type.firstType)
+                    val exprB = LambdaParser.parseTrailingClosure(tokenizer, context, type.secondType as FunctionType, genericTypeMap)
                     PairNode(exprA, exprB)
                 } else {
                     LambdaParser.parseTrailingClosure(
@@ -192,7 +190,7 @@ object ApplyParser {
     fun isFunctionOrFunctionPairType(type: Type) =
         type is FunctionType
         || (type is PairType &&
-                type.typeA is FunctionType && type.typeB is FunctionType)
+                type.firstType is FunctionType && type.secondType is FunctionType)
 
 
     fun tryConsumeNamedLambdaPrefix(tokenizer: TantillaScanner, indent: Int, names: Set<String>): String? {

@@ -5,24 +5,17 @@ import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.SerializableCode
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.type.Type
-import org.kobjects.tantilla2.core.type.dynamicType
+import org.kobjects.tantilla2.core.type.Typed
 
-interface Definition : SerializableCode, Comparable<Definition> {
+interface Definition : SerializableCode, Typed, Comparable<Definition> {
     val parentScope: Scope?
     val kind: Kind
     val name: String
     val mutable: Boolean
         get() = false
 
-    val type: Type
-        get() = getValue(null).dynamicType
-
     val docString: String
         get() = ""
-
-  /*  var index: Int
-        get() = -1
-        set(_) = throw UnsupportedOperationException() */
 
     fun getValue(self: Any?): Any
 

@@ -2,6 +2,8 @@ package org.kobjects.tantilla2.core.definition
 
 import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.core.CodeWriter
+import org.kobjects.tantilla2.core.type.NoneType
+import org.kobjects.tantilla2.core.type.Type
 
 class ImportDefinition(
     override val parentScope: Scope,
@@ -37,4 +39,10 @@ class ImportDefinition(
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
         writer.appendKeyword("import ").append(path.joinToString("."))
     }
+
+    override val type: Type
+        get() {
+            resolve()
+            return resolved!!.type
+        }
 }

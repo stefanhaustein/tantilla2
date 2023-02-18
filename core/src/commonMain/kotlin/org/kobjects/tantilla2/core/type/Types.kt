@@ -20,14 +20,3 @@ fun commonType(types: List<Type>): Type {
     return result
 }
 
-
-val Any?.dynamicType: Type
-    get() = when (this) {
-        null -> NoneType
-        is Typed -> type
-        is Double -> FloatType
-        is Long -> IntType
-        is Type -> MetaType(this)
-        is String -> StrType
-        else -> throw IllegalArgumentException("Can't determine type of $this")
-    }

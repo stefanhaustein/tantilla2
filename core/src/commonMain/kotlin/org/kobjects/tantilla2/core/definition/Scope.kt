@@ -8,6 +8,9 @@ import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.parser.Parser
 import org.kobjects.tantilla2.core.parser.ParsingContext
 import org.kobjects.tantilla2.core.parser.TantillaScanner
+import org.kobjects.tantilla2.core.type.MetaType
+import org.kobjects.tantilla2.core.type.NoneType
+import org.kobjects.tantilla2.core.type.ScopeType
 import org.kobjects.tantilla2.core.type.Type
 
 abstract class Scope(
@@ -282,4 +285,6 @@ abstract class Scope(
         return null
     }
 
+    override val type: Type
+        get() = ScopeType(this)
 }
