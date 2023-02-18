@@ -2,30 +2,32 @@ package org.kobjects.tantilla2.core.classifier
 
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.definition.Definition
-import org.kobjects.tantilla2.core.definition.Scope
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.FunctionType
-import org.kobjects.tantilla2.core.type.NoneType
 
 class NativeTraitMethodDefinition(
     override val parentScope: TraitDefinition,
     override val name: String,
     override var docString: String,
-    override val type: FunctionType,
+    override var type: FunctionType
+
 ) : Callable, Definition {
 
     val vmtIndex = parentScope.traitIndex++
 
     override val kind: Definition.Kind
         get() = Definition.Kind.METHOD
+
     /*override val name: String
         get() = "(${type.parameters}) -> ${type.returnType}"
 */
-    override fun eval(context: LocalRuntimeContext) = TraitDefinition.evalMethod(context, vmtIndex)
+    override fun eval(context: LocalRuntimeContext) =
+        context.getAdapter().evalMethod(vmtIndex, context)
 
     override fun getValue(self: Any?): NativeTraitMethodDefinition = this
 
-    override fun isSummaryExpandable(): Boolean = docString.isNotEmpty() || type.parameters.isNotEmpty()
+    override fun isSummaryExpandable(): Boolean =
+        docString.isNotEmpty() || type.parameters.isNotEmpty()
 
     override fun serializeSummary(writer: CodeWriter, length: Definition.SummaryKind) {
         writer.appendKeyword("def ")
@@ -37,7 +39,8 @@ class NativeTraitMethodDefinition(
         }
     }
 
-    override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) = throw UnsupportedOperationException()
+    override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) =
+        throw UnsupportedOperationException()
 
     override fun toString() = "def $name$type"
 }

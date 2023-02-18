@@ -1,7 +1,9 @@
 package org.kobjects.tantilla2.core
 
+import org.kobjects.tantilla2.core.classifier.Adapter
 import org.kobjects.tantilla2.core.control.ProgramStoppedException
 import org.kobjects.tantilla2.core.definition.ContextOwner
+import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.type.NoneType
 
 class LocalRuntimeContext(
@@ -11,6 +13,8 @@ class LocalRuntimeContext(
 ) {
     val variables = MutableList(scope.dynamicScopeSize, initializer)
 
+    fun getAdapter() = variables[0] as Adapter
+
     operator fun get(i: Int) = variables[i]
 
     fun f64(i: Int) = (variables[i] as Number).toDouble()
@@ -18,7 +22,7 @@ class LocalRuntimeContext(
     fun i32(i: Int) = (variables[i] as Number).toInt()
     fun str(i: Int) = variables[i] as String
 
-    fun checkState(node: Evaluable) {
+    fun checkState(node: Node) {
         if (globalRuntimeContext.stopRequested) {
             throw ProgramStoppedException(node)
         }

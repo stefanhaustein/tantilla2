@@ -30,7 +30,6 @@ abstract class ImplDefinition(
 
 
     override fun resolve(applyOffset: Boolean, errorCollector: MutableList<ParsingException>?) {
-        // TODO: Move VMT creation to trait?
 
         vmt = trait.createVmt { traitMethod ->
             var resolved = resolve(traitMethod.name)

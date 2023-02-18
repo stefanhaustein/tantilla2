@@ -13,7 +13,7 @@ class CodeWriter(
     var forTitle: Boolean = false,
     var scope: Scope = AbsoluteRootScope,
     val highlighting: Map<Kind, Pair<String, String>> = emptyMap(),
-    val errorNode: Evaluable? = null,
+    val errorNode: Node? = null,
     val errors: List<Pair<IntRange, Throwable>> = emptyList(),
     var lineLength: Int = Int.MAX_VALUE,
 ) : Appendable {

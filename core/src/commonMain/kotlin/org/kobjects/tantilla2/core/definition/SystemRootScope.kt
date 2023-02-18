@@ -114,8 +114,8 @@ class SystemRootScope(
                         return NoneType.None
                     }
 
-                    override val returnType: Type
-                        get() = NoneType
+           /*         override val returnType: Type
+                        get() = NoneType */
                 })
                 override val returnType: Type
                     get() = FunctionType.Impl(NoneType, emptyList())
@@ -153,10 +153,7 @@ class SystemRootScope(
             }
         }
 
-        add(IteratorType())
-
-        val iterableTrait = IterableTrait()
-
+        add(iteratorTrait)
         add(iterableTrait)
 
         add(IterableImpl(this, iterableTrait, listType, ""))
@@ -176,5 +173,11 @@ class SystemRootScope(
     override var docString: String
         get() = ""
         set(_) = throw UnsupportedOperationException()
+
+
+    companion object {
+        val iteratorTrait = IteratorTrait()
+        val iterableTrait = IterableTrait()
+    }
 
 }

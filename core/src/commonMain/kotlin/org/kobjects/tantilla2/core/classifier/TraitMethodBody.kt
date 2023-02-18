@@ -1,10 +1,9 @@
 package org.kobjects.tantilla2.core
 
-import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.node.LeafNode
 import org.kobjects.tantilla2.core.type.Type
 
-class TraitMethodBody(val vmtIndex: Int): LeafNode() {
+class TraitMethodBody(val vmtIndex: Int) : LeafNode() {
     override val returnType: Type
         get() = throw UnsupportedOperationException()
 
@@ -12,5 +11,6 @@ class TraitMethodBody(val vmtIndex: Int): LeafNode() {
         writer.append("<TraitMethodBody>")
     }
 
-    override fun eval(context: LocalRuntimeContext) = TraitDefinition.evalMethod(context, vmtIndex)
+    override fun eval(context: LocalRuntimeContext) =
+        context.getAdapter().evalMethod(vmtIndex, context)
 }

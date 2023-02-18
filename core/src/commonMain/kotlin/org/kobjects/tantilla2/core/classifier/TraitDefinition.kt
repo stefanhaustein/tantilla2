@@ -2,12 +2,14 @@ package org.kobjects.tantilla2.core.classifier
 
 import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.TraitMethodBody
-import org.kobjects.tantilla2.core.classifier.TraitDefinition.Companion.vmtIndex
+import org.kobjects.tantilla2.core.definition.ContextOwner
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.definition.Scope
 import org.kobjects.tantilla2.core.definition.UserRootScope
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.FunctionDefinition
+import org.kobjects.tantilla2.core.function.FunctionType
+import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.type.NoneType
 import org.kobjects.tantilla2.core.type.ScopeType
 import org.kobjects.tantilla2.core.type.Type
@@ -30,6 +32,16 @@ open class TraitDefinition(
     override val kind: Definition.Kind
         get() = Definition.Kind.TRAIT
 
+
+    fun defineMethod(
+        name: String,
+        docString: String,
+        returnType: Type,
+        vararg parameters: Parameter
+    ): TraitDefinition {
+        add(NativeTraitMethodDefinition(this, name, docString, FunctionType.Impl(returnType, listOf(Parameter("self", this)) + listOf(*parameters))))
+        return this
+    }
 
     fun requireImplementationFor(userRootScope: UserRootScope, type: Type): ImplDefinition =
         getImplementationForTypeOrNull(userRootScope, type) ?: throw IllegalStateException("$typeName for ${type.typeName} not found.")
@@ -60,8 +72,8 @@ open class TraitDefinition(
     fun createVmt(resolveMethod: (Definition) -> Callable): List<Callable> {
         val vmt = Array<Callable?>(traitIndex) { null }
         for (traitMethod in this) {
-            val index = traitMethod.vmtIndex
-            vmt[index] = resolveMethod(traitMethod)
+            val vmtIndex = traitMethod.vmtIndex
+            vmt[vmtIndex] = resolveMethod(traitMethod)
 
         }
         return vmt.toList() as List<Callable>
@@ -69,20 +81,7 @@ open class TraitDefinition(
 
 
     companion object {
-        fun evalMethod(context: LocalRuntimeContext, vmtIndex: Int): Any {
-            val self = context.variables[0] as AdapterInstance
-            val methodImpl = self.vmt[vmtIndex]
 
-            val methodContext = LocalRuntimeContext(
-                context.globalRuntimeContext,
-                methodImpl,
-            ) {
-                if (it == 0) self.instance
-                else if (it < context.variables.size) context.variables[it]
-                else NoneType.None
-            }
-            return self.vmt[vmtIndex].eval(methodContext)
-        }
 
         fun Type.isConvertibleFrom(type: Type, userRootScope: UserRootScope): Boolean {
             if (isAssignableFrom(type)) {

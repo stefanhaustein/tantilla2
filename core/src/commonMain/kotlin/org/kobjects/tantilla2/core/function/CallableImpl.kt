@@ -5,6 +5,7 @@ import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.SerializableCode
 import org.kobjects.tantilla2.core.control.ReturnSignal
+import org.kobjects.tantilla2.core.node.Node
 
 class CallableImpl(
     override val type: FunctionType,

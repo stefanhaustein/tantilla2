@@ -20,7 +20,7 @@ class SetMethodCall(
     }
 
     override val returnType: Type
-        get()= definition.returnType
+        get()= definition.type.returnType
 
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
         writer.appendCode(base)

@@ -6,6 +6,6 @@ abstract class LeafNode : Node() {
 
     override fun children(): List<Node> = emptyList()
 
-    override fun reconstruct(newChildren: List<Node>): Evaluable = this
+    override fun reconstruct(newChildren: List<Node>) = this
 
 }

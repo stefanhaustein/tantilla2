@@ -1,13 +1,8 @@
 package org.kobjects.tantilla2.core.collection
 
-import org.kobjects.tantilla2.core.TraitMethodBody
-import org.kobjects.tantilla2.core.classifier.NativeTraitMethodDefinition
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
-import org.kobjects.tantilla2.core.definition.Definition
-import org.kobjects.tantilla2.core.function.FunctionType
-import org.kobjects.tantilla2.core.function.NativeFunctionDefinition
+import org.kobjects.tantilla2.core.definition.SystemRootScope
 import org.kobjects.tantilla2.core.function.Parameter
-import org.kobjects.tantilla2.core.type.BoolType
 import org.kobjects.tantilla2.core.type.GenericTypeMap
 import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.type.TypeVariable
@@ -18,18 +13,18 @@ class IterableTrait(
 ) : TraitDefinition(null,"Iterable", "Is able to provide an iterator", listOf(
     elementType
 )) {
-    override fun withGenericsResolved(genericTypeMap: GenericTypeMap): Type {
-        return IterableTrait(genericTypeMap.resolve(elementType), this)
-    }
+
+    fun withElementType(elementType: Type) = IterableTrait(
+        elementType, unparameterized ?: this)
+
+    override fun withGenericsResolved(genericTypeMap: GenericTypeMap) =
+        withElementType(genericTypeMap.resolve(elementType))
 
     init {
-        add(
-            NativeTraitMethodDefinition(
-            this,
+        defineMethod(
             "iterator",
             "True if more items are available",
-            FunctionType.Impl(IteratorType(elementType), listOf(Parameter("self", this))))
-        )
+            SystemRootScope.iteratorTrait.withElementType(elementType))
     }
 
 }

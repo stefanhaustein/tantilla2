@@ -7,7 +7,7 @@ import org.kobjects.tantilla2.core.type.Type
 /**
  * Common super interface of Callable and Node
  */
-interface Evaluable {
+fun interface Evaluable {
     fun eval(context: LocalRuntimeContext): Any
 
     fun evalF64(context: LocalRuntimeContext): Double {
@@ -19,20 +19,8 @@ interface Evaluable {
     }
 
 
-    val returnType: Type
+  // val returnType: Type
 
 
-
-    /*
-    override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
-        if (parentPrecedence > precedence) {
-            writer.append('(')
-            serializeCode(writer)
-            writer.append(')')
-        } else {
-            serializeCode(writer)
-        }
-    }
-     */
 
 }
