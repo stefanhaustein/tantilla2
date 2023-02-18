@@ -1,7 +1,6 @@
 package org.kobjects.tantilla2.core.definition
 
 import org.kobjects.tantilla2.core.*
-import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.collection.*
 import org.kobjects.tantilla2.core.node.LeafNode
 import org.kobjects.tantilla2.core.node.expression.StrNode
@@ -133,12 +132,12 @@ class SystemRootScope(
             } else {
                 var found: Any? = null
                 for (rawElif in it[2] as TypedList) {
-                    val elif = rawElif as TypedPair
-                    val condition = elif.a as Callable
+                    val elif = rawElif as Pair<Any, Any>
+                    val condition = elif.first as Callable
                     val conditionContext = LocalRuntimeContext(it.globalRuntimeContext, condition)
                     val result = condition.eval(conditionContext)
                     if (result as Boolean) {
-                        val then = elif.b as Callable
+                        val then = elif.second as Callable
                         val thenContent = LocalRuntimeContext(it.globalRuntimeContext, then)
                         found = then.eval(thenContent)
                         break

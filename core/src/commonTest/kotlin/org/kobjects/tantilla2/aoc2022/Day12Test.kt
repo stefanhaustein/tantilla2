@@ -53,7 +53,7 @@ def find_distance(target: Str) -> Int:
   let end = find("E")
 
   candidates.clear()
-  candidates.append(Candidate(end.a, end.b, ord("z"), 0))
+  candidates.append(Candidate(end.first, end.second, ord("z"), 0))
 
   while len(candidates) > 0:
     let candidate = candidates.pop(0)

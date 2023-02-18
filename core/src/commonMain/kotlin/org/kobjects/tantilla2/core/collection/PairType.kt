@@ -13,9 +13,9 @@ open class PairType(
     null,
     "Pair",
     "An immutable pair of two values",
-    { TypedPair(firstType, secondType, it.get(0)!!, it.get(1)!!) },
-    Parameter("a", firstType),
-    Parameter("b", secondType),
+    { Pair(it.get(0), it.get(1)) },
+    Parameter("first", firstType),
+    Parameter("second", secondType),
 ), CollectionType {
 
     override val genericParameterTypes: List<Type> = listOf(firstType, secondType)
@@ -28,17 +28,17 @@ open class PairType(
 
     init {
         defineMethod(
-            "a", "Element a of the pair",
+            "first", "First element the pair",
             firstType
         ) {
-            (it[0] as TypedPair).a
+            (it[0] as Pair<Any, Any>).first
         }
 
         defineMethod(
-            "b", "Element b of the pair",
+            "second", "Second element of the pair",
             secondType
         ) {
-            (it[0] as TypedPair).b
+            (it[0] as Pair<Any, Any>).second
         }
     }
 }
