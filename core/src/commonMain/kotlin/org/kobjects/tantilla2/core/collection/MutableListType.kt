@@ -55,7 +55,7 @@ class MutableListType(
             ) {
             val list = it[0] as MutableTypedList
             val index = it.i32(1)
-            list.data.removeAt(if (index < 0) list.size - index else index)
+            list.data.removeAt(if (index < 0) list.size + index else index)
         }
 
         defineMethod("sort", "Sort this list in place.",
