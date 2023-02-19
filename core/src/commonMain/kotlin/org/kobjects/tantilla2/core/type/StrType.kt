@@ -1,12 +1,9 @@
 package org.kobjects.tantilla2.core.type
 
-import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
 import org.kobjects.tantilla2.core.classifier.NativeTypeDefinition
 import org.kobjects.tantilla2.core.collection.ListType
-import org.kobjects.tantilla2.core.collection.TypedList
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.node.expression.IntNode
-import org.kobjects.tantilla2.core.node.expression.StrNode
 
 object StrType : NativeTypeDefinition(
     null,
@@ -49,7 +46,7 @@ object StrType : NativeTypeDefinition(
             StrType,
             Parameter("list", ListType(StrType))
         ) {
-            (it[1] as TypedList).data.joinToString(it[0] as String)
+            (it[1] as List<Any>).joinToString(it[0] as String)
         }
         defineMethod(
             "ord",
@@ -64,7 +61,7 @@ object StrType : NativeTypeDefinition(
             ListType(StrType),
             Parameter("delimiter", StrType)
         ) {
-            TypedList(StrType, (it[0] as String).split(it[1] as String))
+            (it[0] as String).split(it[1] as String)
         }
     }
 }

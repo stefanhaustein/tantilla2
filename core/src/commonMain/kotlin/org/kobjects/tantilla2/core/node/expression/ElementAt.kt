@@ -36,9 +36,9 @@ class ElementAt(
 
     override fun assign(context: LocalRuntimeContext, value: Any) {
         val target = baseExpr.eval(context)
-        if (target is MutableTypedList) {
+        if (target is MutableList<*>) {
             val index = keyExpr.evalF64(context).toInt()
-            target[index] = value
+            (target as MutableList<Any>)[index] = value
         } else if (target is MutableTypedMap) {
             val key = keyExpr.eval(context)
             (target as MutableTypedMap).data[key] = value
@@ -70,7 +70,7 @@ class ElementAt(
                 }
                 return base.substring(index, index + 1)
             } else {
-                val list = base as TypedList
+                val list = base as List<Any>
                 if (index < 0) {
                     index = list.size + index
                 }

@@ -18,12 +18,12 @@ class MutableListType(
     "MutableList",
     "A mutable list of elements.",
     unparameterized,
-    { MutableTypedList(elementType, (it.get(0) as TypedList).data.toMutableList()) }
+    {  (it.get(0) as List<*>).toMutableList() }
 ) {
     override fun withGenericsResolved(genericTypeMap: GenericTypeMap) = MutableListType(
         genericTypeMap.resolve(elementType), this)
 
-    override fun create(size: Int, init: (Int) -> Any) = MutableTypedList(this, MutableList(size, init))
+    override fun create(size: Int, init: (Int) -> Any) = MutableList(size, init)
 
     override fun equals(other: Any?): Boolean =
         other is MutableListType && other.elementType == elementType
@@ -32,13 +32,13 @@ class MutableListType(
         defineMethod("append", "Appends an element to the list",
             NoneType,
             Parameter("value", elementType)) {
-            (it[0] as MutableTypedList).data.add(it[1])
+            (it[0] as MutableList<Any>).add(it[1])
         }
 
         defineMethod("clear", "Remove all elements from this list.",
             NoneType
         ) {
-            (it[0] as MutableTypedList).data.clear()
+            (it[0] as MutableList<*>).clear()
         }
 
         defineMethod("insert", "Inserts an value into the list at the given index",
@@ -46,22 +46,22 @@ class MutableListType(
             Parameter("index", IntType),
             Parameter("value", elementType)
         ) {
-            (it[0] as MutableTypedList).data.add(it.i32(1), it[2])
+            (it[0] as MutableList<Any>).add(it.i32(1), it[2])
         }
 
         defineMethod("pop", "Remove the last element in this list and return it.",
             elementType,
             Parameter("index", IntType, IntNode.Const(-1))
             ) {
-            val list = it[0] as MutableTypedList
+            val list = it[0] as MutableList<Any>
             val index = it.i32(1)
-            list.data.removeAt(if (index < 0) list.size + index else index)
+            list.removeAt(if (index < 0) list.size + index else index)
         }
 
         defineMethod("sort", "Sort this list in place.",
             NoneType
         ) {
-            ((it[0] as MutableTypedList).data as (MutableList<Comparable<Any>>)).sort()
+            (it[0] as (MutableList<Comparable<Any>>)).sort()
         }
 
         defineNativeFunction(
@@ -77,10 +77,10 @@ class MutableListType(
                 context.globalRuntimeContext,
                 fn,
             )
-            MutableTypedList(elementType, MutableList(size) {
+            MutableList(size) {
                 functionContext.variables[0] = it.toLong()
                 fn.eval(functionContext)
-            } )
+            }
         }
 
     }

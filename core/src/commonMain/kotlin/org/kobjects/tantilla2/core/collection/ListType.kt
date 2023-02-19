@@ -17,7 +17,7 @@ open class ListType(
     name: String = "List",
     docString: String = "An immutable list of elements.",
     override val unparameterized: ListType? = null,
-    ctor:  (LocalRuntimeContext) -> Any = { TypedList(elementType, (it.get(0) as TypedList).data) }
+    ctor:  (LocalRuntimeContext) -> Any = { it.get(0) }
 ) : NativeStructDefinition(
     null,
     name,
@@ -28,12 +28,12 @@ open class ListType(
 
     init {
         defineMethod("len", "Returns the length of the list", IntType) {
-            (it[0] as TypedList).size.toLong()
+            (it[0] as List<*>).size.toLong()
         }
 
         defineMethod("index", "Returns the index of the value in the list, or -1 if not found.",
             IntType, Parameter("value", elementType)) {
-            (it[0] as TypedList).data.indexOf(it[1]).toLong()
+            (it[0] as List<*>).indexOf(it[1]).toLong()
         }
 
         defineMethod(
@@ -41,7 +41,7 @@ open class ListType(
             "Returns an iterator for this list",
             SystemRootScope.iteratorTrait.withElementType(elementType)
         ) {
-            IteratorTrait.createAdapter((it[0] as TypedList).iterator())
+            IteratorTrait.createAdapter((it[0] as List<Any>).iterator())
         }
 
         defineNativeFunction(
@@ -57,14 +57,14 @@ open class ListType(
                 context.globalRuntimeContext,
                 fn
             )
-            TypedList(elementType, List(size) {
+            List(size) {
                 functionContext.variables[0] = it.toLong()
                 fn.eval(functionContext)!!
-            } )
+            }
         }
     }
 
-    open fun create(size: Int, init: (Int) -> Any) = TypedList(this, MutableList(size, init))
+    open fun create(size: Int, init: (Int) -> Any) = MutableList(size, init)
 
     override val genericParameterTypes: List<Type> = listOf(elementType)
 

@@ -13,7 +13,7 @@ class MutableSetType(
     "MutableSet",
     "A mutable set of elements.",
     unparameterized,
-    { MutableTypedSet(elementType, (it.get(0) as TypedList).data.toMutableSet()) }
+    { MutableTypedSet(elementType, (it.get(0) as List<Any>).toMutableSet()) }
 ) {
     override fun withGenericsResolved(genericTypeMap: GenericTypeMap) =
         MutableSetType(genericTypeMap.resolve(elementType), this)

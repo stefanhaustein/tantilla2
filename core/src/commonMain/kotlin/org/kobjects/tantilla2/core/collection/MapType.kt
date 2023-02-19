@@ -47,7 +47,7 @@ open class MapType(
         defineMethod("values", "Returns a list of the values contained in this map.",
             ListType(valueType)
         ) {
-            TypedList(valueType, (it[0] as TypedMap).data.values.toList())
+            (it[0] as TypedMap).data.values.toList()
         }
     }
 }

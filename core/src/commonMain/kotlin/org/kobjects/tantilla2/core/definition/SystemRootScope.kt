@@ -131,7 +131,7 @@ class SystemRootScope(
                 then.eval(ctx)
             } else {
                 var found: Any? = null
-                for (rawElif in it[2] as TypedList) {
+                for (rawElif in it[2] as List<*>) {
                     val elif = rawElif as Pair<Any, Any>
                     val condition = elif.first as Callable
                     val conditionContext = LocalRuntimeContext(it.globalRuntimeContext, condition)
