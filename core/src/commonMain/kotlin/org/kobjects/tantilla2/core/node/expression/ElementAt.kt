@@ -39,9 +39,9 @@ class ElementAt(
         if (target is MutableList<*>) {
             val index = keyExpr.evalF64(context).toInt()
             (target as MutableList<Any>)[index] = value
-        } else if (target is MutableTypedMap) {
+        } else if (target is MutableMap<*, *>) {
             val key = keyExpr.eval(context)
-            (target as MutableTypedMap).data[key] = value
+            (target as MutableMap<Any, Any>)[key] = value
         } else {
             throw RuntimeException("Can't assign to type ${baseExpr.returnType}")
         }
@@ -59,9 +59,9 @@ class ElementAt(
 
     override fun eval(context: LocalRuntimeContext): Any {
         val base = baseExpr.eval(context)
-        if (base is TypedMap) {
+        if (base is Map<*,*>) {
             val key = keyExpr.eval(context)
-            return base[key!!]
+            return (base as Map<Any, Any>)[key]!!
         } else {
             var index = keyExpr.evalI64(context).toInt()
             if (base is String) {

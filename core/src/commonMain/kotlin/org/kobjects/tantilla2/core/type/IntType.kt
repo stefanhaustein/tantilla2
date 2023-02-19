@@ -1,11 +1,8 @@
 package org.kobjects.tantilla2.core.type
 
-import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
 import org.kobjects.tantilla2.core.classifier.NativeTypeDefinition
-import org.kobjects.tantilla2.core.collection.Range
 import org.kobjects.tantilla2.core.collection.RangeType
 import org.kobjects.tantilla2.core.function.Parameter
-import org.kobjects.tantilla2.core.node.expression.IntNode
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -57,7 +54,7 @@ object IntType : NativeTypeDefinition(
             RangeType,
             Parameter("start", IntType),
             Parameter("end", IntType)
-        ) { Range(it.i64(0), it.i64(1)) }
+        ) { LongRange(it.i64(0), it.i64(1) - 1) }
     }
 
 

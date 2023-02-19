@@ -12,7 +12,7 @@ open class MapType(
     name: String = "Map",
     docString: String = "An immutable map of keys to values.",
     override val unparameterized: MapType? = null,
-    ctor: (LocalRuntimeContext) -> Any = { TypedMap(keyType, valueType) },
+    ctor: (LocalRuntimeContext) -> Any = { LinkedHashMap<Any, Any>() },
 ) : NativeStructDefinition(
     null,
     name,
@@ -40,14 +40,14 @@ open class MapType(
             "len", "Returns the length of the list",
             IntType
         ) {
-            (it[0] as TypedMap).size.toLong()
+            (it[0] as Map<*,*>).size.toLong()
         }
 
 
         defineMethod("values", "Returns a list of the values contained in this map.",
             ListType(valueType)
         ) {
-            (it[0] as TypedMap).data.values.toList()
+            (it[0] as Map<Any,Any>).values.toList()
         }
     }
 }

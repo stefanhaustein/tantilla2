@@ -13,7 +13,7 @@ class MutableMapType(
     "MutableMap",
     "A mutable map.",
     unparameterized,
-     { MutableTypedMap(keyType, valueType) },
+     { mutableMapOf<Any, Any>() },
 ) {
 
     override fun equals(other: Any?): Boolean =

@@ -4,7 +4,6 @@ import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.Precedence
 import org.kobjects.tantilla2.core.collection.CollectionType
-import org.kobjects.tantilla2.core.collection.TypedCollection
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.type.BoolType
 import org.kobjects.tantilla2.core.type.Type
@@ -19,8 +18,14 @@ object CollectionNode {
 
         override fun reconstruct(newChildren: List<Node>) = In(newChildren[0], newChildren[1])
 
-        override fun eval(context: LocalRuntimeContext) = (collectionExpr.eval(context) as TypedCollection).contains(valueExpr.eval(context)!!)
-
+        override fun eval(context: LocalRuntimeContext): Boolean {
+           val haystack = collectionExpr.eval(context)
+            val needle = valueExpr.eval(context)
+            if (haystack is Map<*,*>) {
+               return (haystack as Map<Any, Any>).containsKey(valueExpr.eval(context))
+            }
+            return (haystack as Collection<Any>).contains(needle)
+        }
         override val returnType: Type
             get() = BoolType
 

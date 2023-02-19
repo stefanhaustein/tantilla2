@@ -12,7 +12,7 @@ open class SetType(
     name: String = "Set",
     docString: String = "An immutable set of elements.",
     override val unparameterized: Type? = null,
-    ctor:  (LocalRuntimeContext) -> Any = { TypedSet(elementType, (it.get(0) as List<Any>).toSet()) }
+    ctor:  (LocalRuntimeContext) -> Any = { (it.get(0) as List<Any>).toSet() }
 ) : NativeStructDefinition(
     null,
     name,
@@ -23,7 +23,7 @@ open class SetType(
 
     init {
         defineMethod("len", "Returns the size of this set", IntType) {
-            (it[0] as TypedSet).size.toLong()
+            (it[0] as Set<*>).size.toLong()
         }
 
     }

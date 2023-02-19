@@ -13,7 +13,7 @@ class MutableSetType(
     "MutableSet",
     "A mutable set of elements.",
     unparameterized,
-    { MutableTypedSet(elementType, (it.get(0) as List<Any>).toMutableSet()) }
+    { (it.get(0) as List<Any>).toMutableSet() }
 ) {
     override fun withGenericsResolved(genericTypeMap: GenericTypeMap) =
         MutableSetType(genericTypeMap.resolve(elementType), this)
@@ -25,13 +25,13 @@ class MutableSetType(
         defineMethod("add", "Adds an element to this set",
             NoneType,
             Parameter("value", elementType)) {
-            (it[0] as MutableTypedSet).data.add(it[1]!!)
+            (it[0] as MutableSet<Any>).add(it[1]!!)
         }
 
         defineMethod("clear", "Remove all elements from this set.",
             NoneType
         ) {
-            (it[0] as MutableTypedSet).data.clear()
+            (it[0] as MutableSet<*>).clear()
         }
 
     }
