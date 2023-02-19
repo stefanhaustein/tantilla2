@@ -156,8 +156,7 @@ class SystemRootScope(
         add(iteratorTrait)
         add(iterableTrait)
 
-        add(IterableImpl(this, iterableTrait, listType, ""))
-
+        add(IterableImpl(this, listType, ""))
     }
 
 
