@@ -16,6 +16,7 @@ import org.kobjects.tantilla2.android.model.TantillaViewModel
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.classifier.StructDefinition
+import org.kobjects.tantilla2.core.definition.AbsoluteRootScope
 import org.kobjects.tantilla2.core.definition.SystemRootScope
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
@@ -48,7 +49,7 @@ fun RenderScope(viewModel: TantillaViewModel) {
                     }
                 }
                 for (kind in Definition.Kind.values().toList()  + listOf(null)) {
-                    val list: List<Definition>
+                    var list: List<Definition>
                     val title: String
                     if (kind == null) {
                         title = "IMPL (defined elsewhere)"
@@ -66,7 +67,13 @@ fun RenderScope(viewModel: TantillaViewModel) {
                             (if (kind == Definition.Kind.PROPERTY && viewModel.mode.value == TantillaViewModel.Mode.HIERARCHY)
                                 scope.locals.map { scope[it]!! }
                             else
-                                definitions).filter { it.kind == kind }
+                                definitions)
+
+                        if (scope == viewModel.systemRootScope) {
+                            list = (list + AbsoluteRootScope.iterator().asSequence().toList()).sorted()
+                        }
+
+                        list = list.filter { it.kind == kind }
                     }
                     if (list.isNotEmpty()) {
                         item {

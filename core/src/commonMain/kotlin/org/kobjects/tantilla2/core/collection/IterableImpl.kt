@@ -5,6 +5,7 @@ import org.kobjects.tantilla2.core.classifier.LazyImplDefinition
 import org.kobjects.tantilla2.core.classifier.NativeImplDefinition
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.classifier.TraitDefinition.Companion.vmtIndex
+import org.kobjects.tantilla2.core.definition.AbsoluteRootScope
 import org.kobjects.tantilla2.core.definition.Scope
 import org.kobjects.tantilla2.core.definition.SystemRootScope
 import org.kobjects.tantilla2.core.function.Callable
@@ -14,7 +15,7 @@ class IterableImpl(
     parentScope: Scope,
     scope: Scope,
     docString: String
-) : NativeImplDefinition(parentScope, SystemRootScope.iterableTrait, scope, docString)  {
+) : NativeImplDefinition(parentScope, AbsoluteRootScope.iterableTrait, scope, docString)  {
 
   /*  init {
         val vmt = Array<Callable?>(trait.traitIndex) { null }

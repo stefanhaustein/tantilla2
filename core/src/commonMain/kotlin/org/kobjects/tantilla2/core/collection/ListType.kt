@@ -4,6 +4,7 @@ import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.classifier.AdapterInstance
 import org.kobjects.tantilla2.core.classifier.NativeAdapter
 import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
+import org.kobjects.tantilla2.core.definition.AbsoluteRootScope
 import org.kobjects.tantilla2.core.definition.SystemRootScope
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.FunctionType
@@ -39,7 +40,7 @@ open class ListType(
         defineMethod(
             "iterator",
             "Returns an iterator for this list",
-            SystemRootScope.iteratorTrait.withElementType(elementType)
+            AbsoluteRootScope.iteratorTrait.withElementType(elementType)
         ) {
             IteratorTrait.createAdapter((it[0] as List<Any>).iterator())
         }

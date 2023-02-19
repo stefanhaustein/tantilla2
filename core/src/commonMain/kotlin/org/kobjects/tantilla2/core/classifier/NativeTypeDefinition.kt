@@ -1,6 +1,7 @@
 package org.kobjects.tantilla2.core.classifier
 
 import org.kobjects.tantilla2.core.*
+import org.kobjects.tantilla2.core.definition.AbsoluteRootScope
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.definition.Scope
 import org.kobjects.tantilla2.core.function.Callable
@@ -10,13 +11,15 @@ import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.type.Type
 
 open class NativeTypeDefinition(
-    override val parentScope: Scope?,
+    private val parentScope_: Scope?,
     override val name: String,
     override var docString: String = "",
 ) : Classifier() {
     override val kind: Definition.Kind
         get() = Definition.Kind.TYPE
 
+    override val parentScope: Scope
+        get() = parentScope_ ?: AbsoluteRootScope
 
     fun defineMethod(
         name: String,
