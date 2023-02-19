@@ -1,5 +1,6 @@
 package org.kobjects.tantilla2.core.collection
 
+import org.kobjects.tantilla2.core.classifier.NativeAdapter
 import org.kobjects.tantilla2.core.classifier.NativeTraitMethodDefinition
 import org.kobjects.tantilla2.core.classifier.NativeTypeDefinition
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
@@ -36,4 +37,14 @@ class IteratorTrait(
             elementType)
     }
 
+    companion object {
+        fun createAdapter(iterator: Iterator<Any>) =
+            NativeAdapter(iterator) { self, index, _ ->
+                when(index) {
+                    0 -> self.hasNext()
+                    1 -> self.next()
+                    else -> throw IllegalArgumentException()
+                }
+            }
+    }
 }

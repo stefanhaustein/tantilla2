@@ -2,6 +2,7 @@ package org.kobjects.tantilla2.core.collection
 
 import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.classifier.AdapterInstance
+import org.kobjects.tantilla2.core.classifier.NativeAdapter
 import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
 import org.kobjects.tantilla2.core.definition.SystemRootScope
 import org.kobjects.tantilla2.core.function.Callable
@@ -40,15 +41,8 @@ open class ListType(
             "Returns an iterator for this list",
             SystemRootScope.iteratorTrait.withElementType(elementType)
         ) {
-            AdapterInstance(
-                listOf(
-                    (NativeIteratorType(elementType)["has_next"]) as Callable,
-                    (NativeIteratorType(elementType)["next"]) as Callable
-                ),
-                (it[0] as TypedList).iterator()
-                )
+            IteratorTrait.createAdapter((it[0] as TypedList).iterator())
         }
-
 
         defineNativeFunction(
             "init",
