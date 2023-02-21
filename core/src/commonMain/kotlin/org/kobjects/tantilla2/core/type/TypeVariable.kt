@@ -1,6 +1,7 @@
 package org.kobjects.tantilla2.core.type
 
 import org.kobjects.tantilla2.core.CodeWriter
+import org.kobjects.tantilla2.core.definition.UserRootScope
 
 class TypeVariable(val name: String): Type {
     override fun serializeType(writer: CodeWriter) {
@@ -11,18 +12,26 @@ class TypeVariable(val name: String): Type {
 
 
 
-    override fun resolveGenerics(actualType: Type?, map: GenericTypeMap, allowNoneMatch: Boolean, allowAs: Boolean): Type {
-        val resolved = map.map[this]
+    override fun resolveGenerics(
+        actualType: Type?,
+        map: GenericTypeMap,
+        allowNoneMatch: Boolean,
+        allowAs: UserRootScope?,  // If present (!= null), allow a trait impl to fullfill the type match.
+    ): Type {
+        val resolved = map[this]
         if (resolved == null) {
+            if (map.fallback != null) {
+                return map.fallback
+            }
             if (actualType == null) {
                 throw IllegalStateException("Unable to resolve type variable $name")
             }
-            map.map[this] = GenericTypeMap.Entry(actualType, allowNoneMatch)
+            map.put(this, actualType, allowNoneMatch)
             return actualType
         }
         if (actualType != null && resolved.type != actualType) {
             if (allowNoneMatch && resolved.rootLevel) {
-                map.map[this] = GenericTypeMap.Entry(NoneType, true)
+                map.put(this, NoneType, true)
                 return NoneType
             }
             throw IllegalArgumentException("Conflicting resolution for $this: Current: ${resolved.type}; expected: $actualType ")

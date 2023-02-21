@@ -24,8 +24,8 @@ open class MapType(
 
     override fun withGenericsResolved(genericTypeMap: GenericTypeMap) =
         MapType(
-            genericTypeMap.map[keyType]!!.type,
-            genericTypeMap.map[valueType]!!.type,
+            genericTypeMap.resolve(keyType),
+            genericTypeMap.resolve(valueType),
             unparameterized = unparameterized ?: this)
 
     override fun isAssignableFrom(other: Type) =

@@ -37,7 +37,7 @@ object TantillaExpressionParser {
         val resolvedExpectedType = if (genericTypeMap != null) {
             println("Expression:")
             println(expr)
-            expectedType.resolveGenerics(actualType, genericTypeMap, true, true)
+            expectedType.resolveGenerics(actualType, genericTypeMap, true, context.scope.userRootScope())
         } else {
             expectedType
         }

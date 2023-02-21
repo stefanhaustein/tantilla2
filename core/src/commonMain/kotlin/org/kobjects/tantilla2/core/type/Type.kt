@@ -1,8 +1,10 @@
 package org.kobjects.tantilla2.core.type
 
 import org.kobjects.tantilla2.core.CodeWriter
+import org.kobjects.tantilla2.core.classifier.Classifier
 import org.kobjects.tantilla2.core.classifier.TraitDefinition.Companion.isConvertibleFrom
 import org.kobjects.tantilla2.core.definition.Definition
+import org.kobjects.tantilla2.core.definition.UserRootScope
 
 
 /**
@@ -45,15 +47,18 @@ interface Type {
         }
     }
 
+    fun equalsIgnoringTypeVariables(other: Type) =
+        this is TypeVariable || other is TypeVariable || this == other || this.genericParameterTypes.isNotEmpty() || other.genericParameterTypes.isNotEmpty()
+
     /** Resolve generics in this type. Actual is the type implied by code, if available */
     fun resolveGenerics(
         actualType: Type?,
         map: GenericTypeMap,
         allowNoneMatch: Boolean = false, //
-        allowAs: Boolean = false,
+        allowAs: UserRootScope? = null,
     ): Type {
         if (actualType != this && actualType != null) {
-            if (allowAs && isConvertibleFrom(actualType, map.userRootScope)) {
+            if (allowAs != null && isConvertibleFrom(actualType, allowAs)) {
                 return this
             }
             throw IllegalArgumentException("Type mismatch. Expected: $this actual: $actualType")

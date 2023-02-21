@@ -1,9 +1,11 @@
 package org.kobjects.tantilla2.core.function
 
 import org.kobjects.tantilla2.core.CodeWriter
+import org.kobjects.tantilla2.core.definition.UserRootScope
 import org.kobjects.tantilla2.core.type.GenericTypeMap
 import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.type.NoneType
+import org.kobjects.tantilla2.core.type.PlaceHolderType
 
 interface FunctionType : Type {
     val returnType: Type
@@ -18,6 +20,24 @@ interface FunctionType : Type {
             }
         }
         return false
+    }
+
+    fun requireTraitMethodTypeMatch(name: String, traitMethodType: FunctionType) {
+
+         if (!returnType.equalsIgnoringTypeVariables(traitMethodType.returnType)) {
+            throw IllegalArgumentException("Return type ${returnType} for $name doesn't match trait method return type ${traitMethodType.returnType}")
+        }
+
+        if (parameters.size != traitMethodType.parameters.size) {
+            throw IllegalArgumentException("$name has ${parameters.size} parameters in the implementation but ${traitMethodType.parameters.size} are required for the trait method.")
+        }
+
+        for (i in 1 until parameters.size) {
+            if (!parameters[i].type.equalsIgnoringTypeVariables(traitMethodType.parameters[i].type)) {
+                throw IllegalArgumentException("Parameter ${parameters[i]} of the implementation of $name doesn't match expected parameter type ${traitMethodType.parameters[i].type}")
+            }
+        }
+
     }
 
     override fun isAssignableFrom(other: Type): Boolean {
@@ -40,15 +60,20 @@ interface FunctionType : Type {
     }
 
 
-    override fun resolveGenerics(actualType: Type?, map: GenericTypeMap, allowNoneMatch: Boolean, allowAs: Boolean): FunctionType {
+    override fun resolveGenerics(
+        actualType: Type?,
+        map: GenericTypeMap,
+        allowNoneMatch: Boolean,
+        allowAs: UserRootScope?,
+    ): FunctionType {
         if (actualType == null) {
             val resolvedParameters = List<Parameter>(parameters.size) {
                 val parameter = parameters[it]
-                val type = parameter.type.resolveGenerics(null, map, false, false)
+                val type = parameter.type.resolveGenerics(null, map, false)
                 Parameter(parameter.name, type, parameter.defaultValueExpression, parameter.isVararg)
             }
 
-            val resolvedReturnType = returnType.resolveGenerics(null, map, false, false)
+            val resolvedReturnType = returnType.resolveGenerics(null, map, false)
 
             return Impl(resolvedReturnType, resolvedParameters)
         }
@@ -63,11 +88,11 @@ interface FunctionType : Type {
 
         val resolvedParameters = List<Parameter>(parameters.size) {
             val parameter = parameters[it]
-            val type = parameter.type.resolveGenerics(actualType.parameters[it].type, map, false, false)
+            val type = parameter.type.resolveGenerics(actualType.parameters[it].type, map)
             Parameter(parameter.name, type, parameter.defaultValueExpression, parameter.isVararg)
         }
 
-        val resolvedReturnType = returnType.resolveGenerics(actualType.returnType, map, false, false)
+        val resolvedReturnType = returnType.resolveGenerics(actualType.returnType, map)
 
         return Impl(resolvedReturnType, resolvedParameters)
     }

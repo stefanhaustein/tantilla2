@@ -7,6 +7,7 @@ import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.definition.Scope
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.FunctionDefinition
+import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.type.Type
 
 abstract class ImplDefinition(
@@ -37,8 +38,12 @@ abstract class ImplDefinition(
                 resolved = (scope as Type).resolve(traitMethod.name)
             }
             if (resolved == null) { throw IllegalArgumentException("No implementation found for trait method $name") }
-         //   if (resolved.type != traitMethod.type)
-            resolved.getValue(null) as Callable
+
+            val resolvedMethod = resolved.getValue(null) as Callable
+
+            resolvedMethod.type.requireTraitMethodTypeMatch(name, traitMethod.type as FunctionType)
+
+            resolvedMethod
         }
     }
 

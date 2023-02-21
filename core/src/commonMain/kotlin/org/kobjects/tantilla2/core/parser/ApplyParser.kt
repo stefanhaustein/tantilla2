@@ -20,7 +20,7 @@ object ApplyParser {
         openingParenConsumed: Boolean,
         asMethod: Boolean,
     ): Node {
-        val genericTypeMap = GenericTypeMap(context.scope.userRootScope())
+        val genericTypeMap = GenericTypeMap()
 
         if (!openingParenConsumed && tokenizer.tryConsume("@")) {
             require(!asMethod) { "Can't combine @ with methods." }
