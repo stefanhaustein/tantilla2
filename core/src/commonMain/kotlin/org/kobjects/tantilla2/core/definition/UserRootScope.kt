@@ -48,7 +48,11 @@ class UserRootScope(
                 unresolvedImpls.add(definition)
             }
         }
-
+        for (definition in AbsoluteRootScope) {
+            if (definition is NativeImplDefinition) {
+                unresolvedImpls.add(definition)
+            }
+        }
     }
 
 

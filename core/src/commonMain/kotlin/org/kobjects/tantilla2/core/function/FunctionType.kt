@@ -37,7 +37,6 @@ interface FunctionType : Type {
                 throw IllegalArgumentException("Parameter ${parameters[i]} of the implementation of $name doesn't match expected parameter type ${traitMethodType.parameters[i].type}")
             }
         }
-
     }
 
     override fun isAssignableFrom(other: Type): Boolean {

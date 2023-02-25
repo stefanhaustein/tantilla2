@@ -3,6 +3,7 @@ package org.kobjects.tantilla2.core.definition
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.Evaluable
 import org.kobjects.tantilla2.core.LocalRuntimeContext
+import org.kobjects.tantilla2.core.classifier.Adapter
 import org.kobjects.tantilla2.core.collection.*
 import org.kobjects.tantilla2.core.control.LoopControlSignal
 import org.kobjects.tantilla2.core.function.Callable
@@ -41,9 +42,12 @@ object AbsoluteRootScope : Scope() {
         add(MutableSetType(TypeVariable("E")))
         add(OptionalType(TypeVariable("V")))
         add(StrType)
-
         add(MathScope)
 
+        add(iteratorTrait)
+        add(iterableTrait)
+
+        add(IterableImpl(this, listType, ""))
 
         defineNativeFunction("str",
             "Converts the value to a string.",
@@ -51,8 +55,6 @@ object AbsoluteRootScope : Scope() {
         ) {
             it.get(0).toString()
         }
-
-        val typeVariable = TypeVariable("T")
 
         defineNativeFunction(
             "while",
@@ -83,16 +85,18 @@ object AbsoluteRootScope : Scope() {
             NoneType.None
         }
 
+
+        val ifTypeVariable = TypeVariable("T")
         defineNativeFunction("if",
             "Conditional",
-            typeVariable,
+            ifTypeVariable,
             Parameter("condition", BoolType),
-            Parameter("then", FunctionType.Impl(typeVariable, emptyList())),
+            Parameter("then", FunctionType.Impl(ifTypeVariable, emptyList())),
             Parameter(
                 "elif",
-                PairType(FunctionType.Impl(BoolType, emptyList()), FunctionType.Impl(typeVariable, emptyList())),
+                PairType(FunctionType.Impl(BoolType, emptyList()), FunctionType.Impl(ifTypeVariable, emptyList())),
                 isVararg = true),
-            Parameter("else", FunctionType.Impl(typeVariable, emptyList()), object : LeafNode() {
+            Parameter("else", FunctionType.Impl(ifTypeVariable, emptyList()), object : LeafNode() {
                 override fun eval(context: LocalRuntimeContext) = CallableImpl(FunctionType.Impl(NoneType, emptyList()), 0, body = object : Evaluable {
                     override fun eval(context: LocalRuntimeContext): Any {
                         return NoneType.None
@@ -137,6 +141,32 @@ object AbsoluteRootScope : Scope() {
             }
         }
 
+        defineNativeFunction(
+            "for2",
+            "Iterate over the loop expression in the body.",
+            NoneType,
+            Parameter("iterable", iterableTrait),
+            Parameter("body", FunctionType.Impl(NoneType, listOf(Parameter("i", iterableTrait.elementType)))),
+        ) {
+            val iterable = it[0] as Adapter
+            val body = it[1] as Callable
+            val iterator = iterable.evalMethod(0, it) as Adapter
+
+            while (iterator.evalMethod(0, it) as Boolean) {
+                val item = iterator.evalMethod(1, it)
+                val bodyContext = LocalRuntimeContext(it.globalRuntimeContext, body) { item }
+                try {
+                    body.eval(bodyContext)
+                } catch (signal: LoopControlSignal) {
+                    when(signal.kind) {
+                        LoopControlSignal.Kind.BREAK -> break
+                        LoopControlSignal.Kind.CONTINUE -> continue
+                    }
+                }
+            }
+            NoneType.None
+        }
+
 
         defineNativeFunction("assert", "Throws an exception if the argument does not evaluate to true.",
             NoneType, Parameter("condition", BoolType), Parameter("message", StrType, StrNode.Const("Assertion failed"))) {
@@ -150,10 +180,6 @@ object AbsoluteRootScope : Scope() {
             it.globalRuntimeContext.run(calledFromCode = true)
         }
 
-        add(iteratorTrait)
-        add(iterableTrait)
-
-        add(IterableImpl(this, listType, ""))
     }
 
 

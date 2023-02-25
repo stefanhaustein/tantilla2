@@ -10,3 +10,5 @@ def main():
   print iterator.next
   print iterator.next
 
+  for2 iterable :
+    print $0
