@@ -186,6 +186,32 @@ abstract class Scope(
         )
     }
 
+    fun defineNativeGenericFunction(
+        genericParameterTypes: List<Type>,
+        name: String,
+        docString: String,
+        returnType: Type,
+        vararg parameter: Parameter,
+        operation: (LocalRuntimeContext) -> Any) {
+        val type = object : FunctionType {
+            override val returnType = returnType
+            override val parameters = parameter.toList()
+            override val genericParameterTypes = genericParameterTypes
+            override fun serializeType(writer: CodeWriter) {
+                FunctionType.serializeType(this, writer)
+            }
+        }
+        definitions[name] = NativeFunctionDefinition(
+            this,
+            if (parameter.isNotEmpty() && parameter[0].name == "self") Definition.Kind.METHOD else Definition.Kind.FUNCTION,
+            name,
+            docString,
+            type,
+            operation
+        )
+    }
+
+
     fun recurse(action: (Definition) -> Unit) {
         action(this)
         for (child in this) {

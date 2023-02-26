@@ -87,7 +87,10 @@ object LambdaParser {
         implicit: Boolean,
         genericTypeMap: GenericTypeMap
     ): Node {
-        val body = Parser.parseDefinitionsAndStatements(tokenizer, context.depth + 1, lambdaScope, definitionScope = lambdaScope)
+        println("parseClosureBody -- expectedReturnType: $expectedReturnType")
+
+        val body = Parser.parseDefinitionsAndStatements(
+            tokenizer, context.depth + 1, lambdaScope, definitionScope = lambdaScope)
 
         val refinedBody = TantillaExpressionParser.matchType(context, body, expectedReturnType, genericTypeMap)
 
@@ -117,6 +120,7 @@ object LambdaParser {
             lambdaScope.declareLocalVariable(parameterNames[i], parameter.type, false)
         }
 
+        println("parseTrailingClosure: expectedType: $expectedType")
         return parseClosureBody(tokenizer, context, expectedType, lambdaScope, expectedType.returnType, true, genericTypeMap)
     }
 

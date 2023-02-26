@@ -22,6 +22,19 @@ interface FunctionType : Type {
         return false
     }
 
+    override fun withGenericsResolved(typeList: List<Type>): FunctionType {
+        require(typeList.size == genericParameterTypes.size) {
+            "Generic parameter types $genericParameterTypes size doesn't match type list size $typeList for $this"}
+        if (genericParameterTypes.isEmpty()) {
+            return this
+        }
+        val map = mutableMapOf<Type, Type>()
+        for (i in typeList.indices) {
+            map.put(genericParameterTypes[i], typeList[i])
+        }
+        return mapTypes { map[it] ?: it }
+    }
+
     fun requireTraitMethodTypeMatch(name: String, traitMethodType: FunctionType) {
 
          if (!returnType.equalsIgnoringTypeVariables(traitMethodType.returnType)) {
@@ -58,6 +71,17 @@ interface FunctionType : Type {
         return true
     }
 
+    override fun mapTypes(mapping: (Type) -> Type): FunctionType {
+        val resolvedParameters = List(parameters.size) {
+            val parameter = parameters[it]
+            val type = parameter.type.mapTypes(mapping)
+            Parameter(parameter.name, type, parameter.defaultValueExpression, parameter.isVararg)
+        }
+
+        val resolvedReturnType = mapping(returnType)
+
+        return Impl(resolvedReturnType, resolvedParameters)
+    }
 
     override fun resolveGenerics(
         actualType: Type?,
@@ -65,16 +89,14 @@ interface FunctionType : Type {
         allowNoneMatch: Boolean,
         allowAs: UserRootScope?,
     ): FunctionType {
+        if (containsUnresolvedTypeParameters(map)) {
+            return super.resolveGenerics(actualType, map, allowNoneMatch, allowAs) as FunctionType
+        }
+
         if (actualType == null) {
-            val resolvedParameters = List<Parameter>(parameters.size) {
-                val parameter = parameters[it]
-                val type = parameter.type.resolveGenerics(null, map, false)
-                Parameter(parameter.name, type, parameter.defaultValueExpression, parameter.isVararg)
+            return mapTypes {
+                it.resolveGenerics(null, map, allowNoneMatch)
             }
-
-            val resolvedReturnType = returnType.resolveGenerics(null, map, false)
-
-            return Impl(resolvedReturnType, resolvedParameters)
         }
 
         if (actualType !is FunctionType) {
@@ -154,7 +176,11 @@ interface FunctionType : Type {
 
 
 
-    open class Impl(override val returnType: Type, override val parameters: List<Parameter>) : FunctionType {
+    open class Impl(
+        override val returnType: Type,
+        override val parameters: List<Parameter>,
+        override val genericParameterTypes: List<Type> = emptyList(),
+    ) : FunctionType {
 
         override fun toString() = CodeWriter(forTitle = true).appendType(this).toString()
 

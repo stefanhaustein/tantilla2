@@ -1,9 +1,11 @@
 package org.kobjects.tantilla2.core.classifier
 
 import org.kobjects.tantilla2.core.CodeWriter
-import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.definition.Scope
 import org.kobjects.tantilla2.core.definition.DocStringUpdatable
+import org.kobjects.tantilla2.core.definition.UserRootScope
+import org.kobjects.tantilla2.core.function.FunctionType
+import org.kobjects.tantilla2.core.type.GenericTypeMap
 import org.kobjects.tantilla2.core.type.MetaType
 import org.kobjects.tantilla2.core.type.Type
 
@@ -23,4 +25,54 @@ abstract class Classifier : Scope(), Type, DocStringUpdatable {
 
     override val type: Type
         get() = MetaType(this)
+
+
+    override fun equals(other: Any?): Boolean =
+        other is Classifier
+                && other.parentScope == parentScope
+                && other.name == name
+                && other.genericParameterTypes == genericParameterTypes
+
+    override fun mapTypes(mapping: (Type) -> Type): Type {
+        var anyChanged = false
+        val resolvedParameters = List(genericParameterTypes.size) {
+            val oldType = genericParameterTypes[it]
+            val newType = oldType.mapTypes(mapping)
+            if (newType != genericParameterTypes[it]) {
+                anyChanged = true
+            }
+            newType
+        }
+        return if (anyChanged) withGenericsResolved(resolvedParameters) else this
+    }
+
+    override fun resolveGenerics(
+        actualType: Type?,
+        map: GenericTypeMap,
+        allowNoneMatch: Boolean,
+        allowAs: UserRootScope?
+    ): Type {
+        if (genericParameterTypes.isEmpty()) {
+            return super.resolveGenerics(actualType, map, allowNoneMatch, allowAs)
+        }
+
+        if (containsUnresolvedTypeParameters(map)) {
+            return super.resolveGenerics(actualType, map, allowNoneMatch, allowAs)
+        }
+
+        if (actualType == null) {
+            return mapTypes(map::map)
+        }
+
+        if (actualType !is Classifier || actualType.parentScope != parentScope || actualType.name != name) {
+            return super.resolveGenerics(actualType, map, allowNoneMatch, allowAs)
+        }
+
+        val resolvedParameters = List<Type>(genericParameterTypes.size) {
+            genericParameterTypes[it].resolveGenerics(actualType.genericParameterTypes[it], map)
+        }
+
+        return withGenericsResolved(resolvedParameters)
+    }
+
 }

@@ -49,6 +49,21 @@ interface Type {
     fun equalsIgnoringTypeVariables(other: Type) =
         this is TypeParameter || other is TypeParameter || this == other || this.genericParameterTypes.isNotEmpty() || other.genericParameterTypes.isNotEmpty()
 
+    fun containsUnresolvedTypeParameters(map: GenericTypeMap) = genericParameterTypes.any { it is TypeParameter && map[it] == null }
+
+
+    fun mapTypeParametersToTypeVariables(map: GenericTypeMap): Type {
+        if (!containsUnresolvedTypeParameters(map)) {
+            return this
+        }
+        val replacements = genericParameterTypes.map {
+            if (it is TypeParameter) map.createVariable() else it
+        }
+        return withGenericsResolved(replacements)
+    }
+
+    fun mapTypes(mapping: (Type) -> Type) = mapping(this)
+
     /** Resolve generics in this type. Actual is the type implied by code, if available */
     fun resolveGenerics(
         actualType: Type?,
@@ -56,6 +71,11 @@ interface Type {
         allowNoneMatch: Boolean = false, //
         allowAs: UserRootScope? = null,
     ): Type {
+        if (containsUnresolvedTypeParameters(map)) {
+            val parametersResolved = mapTypeParametersToTypeVariables(map)
+            return parametersResolved.resolveGenerics(actualType, map, allowNoneMatch, allowAs)
+        }
+
         if (actualType != this && actualType != null) {
             if (allowAs != null && isConvertibleFrom(actualType, allowAs)) {
                 return this

@@ -87,7 +87,9 @@ object AbsoluteRootScope : Scope() {
 
 
         val ifTypeParameter = TypeParameter("T")
-        defineNativeFunction("if",
+        defineNativeGenericFunction(
+            listOf(ifTypeParameter),
+            "if",
             "Conditional",
             ifTypeParameter,
             Parameter("condition", BoolType),
@@ -141,7 +143,8 @@ object AbsoluteRootScope : Scope() {
             }
         }
 
-        defineNativeFunction(
+        defineNativeGenericFunction(
+            listOf(iterableTrait.elementType),
             "for2",
             "Iterate over the loop expression in the body.",
             NoneType,

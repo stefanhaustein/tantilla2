@@ -27,7 +27,9 @@ object ApplyParser {
             return RawNode(operation)
         }
 
-        val type = operation.returnType
+        val type = operation.returnType.mapTypeParametersToTypeVariables(genericTypeMap)
+
+        println("ParseMaybeApply - Type: $type")
 
         if (type !is FunctionType) {
             // Not a function, just skip () and error otherwise
@@ -119,6 +121,7 @@ object ApplyParser {
                 for (i in expectedParameters.indices) {
                     // The null check excludes varargs, the type check excludes lambda pairs
                     if (parameterExpressions[i] == null && expectedParameters[i].type is FunctionType) {
+                        println("parseMaybyApply -- expectedParameters[$i].type: ${expectedParameters[i].type}")
                         val node = LambdaParser.parseTrailingClosure(
                             tokenizer,
                             context,
