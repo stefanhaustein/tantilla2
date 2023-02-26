@@ -15,8 +15,8 @@ class MutableSetType(
     unparameterized,
     { (it.get(0) as List<Any>).toMutableSet() }
 ) {
-    override fun withGenericsResolved(genericTypeMap: GenericTypeMap) =
-        MutableSetType(genericTypeMap.resolve(elementType), this)
+    override fun withGenericsResolved(typeList: List<Type>) =
+        MutableSetType(typeList[0], this)
 
     override fun equals(other: Any?): Boolean =
         other is MutableSetType && other.elementType == elementType

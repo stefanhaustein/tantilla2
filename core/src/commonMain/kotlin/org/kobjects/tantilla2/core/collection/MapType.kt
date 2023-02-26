@@ -22,10 +22,10 @@ open class MapType(
 
     override val genericParameterTypes: List<Type> = listOf(keyType, valueType)
 
-    override fun withGenericsResolved(genericTypeMap: GenericTypeMap) =
+    override fun withGenericsResolved(typeList: List<Type>) =
         MapType(
-            genericTypeMap.resolve(keyType),
-            genericTypeMap.resolve(valueType),
+            typeList[0],
+            typeList[1],
             unparameterized = unparameterized ?: this)
 
     override fun isAssignableFrom(other: Type) =

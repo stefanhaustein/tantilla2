@@ -69,8 +69,8 @@ open class ListType(
 
     override val genericParameterTypes: List<Type> = listOf(elementType)
 
-    override fun withGenericsResolved(genericTypeMap: GenericTypeMap) =
-        ListType(genericTypeMap.resolve(elementType), unparameterized = unparameterized ?: this)
+    override fun withGenericsResolved(genericTypeList: List<Type>) =
+        ListType(genericTypeList[0], unparameterized = unparameterized ?: this)
 
     override fun isAssignableFrom(other: Type) = other is ListType && other.elementType == elementType
 

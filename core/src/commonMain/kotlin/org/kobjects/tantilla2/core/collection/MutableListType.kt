@@ -20,8 +20,8 @@ class MutableListType(
     unparameterized,
     {  (it.get(0) as List<*>).toMutableList() }
 ) {
-    override fun withGenericsResolved(genericTypeMap: GenericTypeMap) = MutableListType(
-        genericTypeMap.resolve(elementType), this)
+    override fun withGenericsResolved(typeList: List<Type>) = MutableListType(
+        typeList[0], this)
 
     override fun create(size: Int, init: (Int) -> Any) = MutableList(size, init)
 

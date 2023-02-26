@@ -11,7 +11,7 @@ import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.collection.ListType
 import org.kobjects.tantilla2.core.type.GenericTypeMap
 import org.kobjects.tantilla2.core.type.NoneType
-import org.kobjects.tantilla2.core.type.TypeVariable
+import org.kobjects.tantilla2.core.type.TypeParameter
 
 object TypeParser {
 
@@ -40,27 +40,24 @@ object TypeParser {
         val type = scope.resolveStaticOrError(name, scope == context.scope).getValue(null) as Type
 
         if (type.genericParameterTypes.isNotEmpty() && tokenizer.tryConsume("[")) {
-            val genericTypeMap = parseGenericTypeMap(tokenizer, context, type.genericParameterTypes)
-            return type.withGenericsResolved(genericTypeMap)
+            val resolvedTypeList = parseGenericTypeList(tokenizer, context)
+            return type.withGenericsResolved(resolvedTypeList)
         }
 
         return type
     }
 
     /** Precondition: "[" consumed. */
-    fun parseGenericTypeMap(
+    fun parseGenericTypeList(
         tokenizer: TantillaScanner,
         context: ParsingContext,
-        genericParameterTypes: List<Type>,
-        genericTypeMap: GenericTypeMap = GenericTypeMap()
-    ): GenericTypeMap {
-        var index = 0
+    ): List<Type> {
+        val result = mutableListOf<Type>()
         do {
-            val resolved = parseType(tokenizer, context)
-            genericTypeMap.put(genericParameterTypes[index++] as TypeVariable, resolved)
+            result.add(parseType(tokenizer, context))
         } while (tokenizer.tryConsume(","))
         tokenizer.consume("]")
-        return genericTypeMap
+        return result.toList()
     }
 
 

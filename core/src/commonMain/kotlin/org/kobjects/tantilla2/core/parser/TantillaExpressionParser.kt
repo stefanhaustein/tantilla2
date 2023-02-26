@@ -59,8 +59,8 @@ object TantillaExpressionParser {
             && (base.returnType as InstantiableMetaType).wrapped.genericParameterTypes.isNotEmpty()
         ) {
             val type = (base.returnType as InstantiableMetaType).wrapped
-            val genericTypeMap = TypeParser.parseGenericTypeMap(tokenizer, context, type.genericParameterTypes)
-            return StaticReference(type.withGenericsResolved(genericTypeMap) as Definition, true)
+            val genericTypeList = TypeParser.parseGenericTypeList(tokenizer, context)
+            return StaticReference(type.withGenericsResolved(genericTypeList) as Definition, true)
         }
         val result = ElementAt(base, parseExpression(tokenizer, context))
         tokenizer.consume("]")

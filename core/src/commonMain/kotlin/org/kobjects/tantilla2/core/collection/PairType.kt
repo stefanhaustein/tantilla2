@@ -20,8 +20,8 @@ open class PairType(
 
     override val genericParameterTypes: List<Type> = listOf(firstType, secondType)
 
-    override fun withGenericsResolved(genericTypeMap: GenericTypeMap) =
-        PairType(genericTypeMap.resolve(firstType), genericTypeMap.resolve(secondType),  unparameterized ?: this)
+    override fun withGenericsResolved(typeList: List<Type>) =
+        PairType(typeList[0], typeList[1],  unparameterized ?: this)
 
     override fun equals(other: Any?): Boolean =
         other is PairType && other.firstType == firstType && other.secondType == secondType

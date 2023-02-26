@@ -1,7 +1,6 @@
 package org.kobjects.tantilla2.core.type
 
 import org.kobjects.tantilla2.core.CodeWriter
-import org.kobjects.tantilla2.core.classifier.Classifier
 import org.kobjects.tantilla2.core.classifier.TraitDefinition.Companion.isConvertibleFrom
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.definition.UserRootScope
@@ -28,7 +27,7 @@ interface Type {
     val genericParameterTypes: List<Type>
         get() = emptyList()
 
-    fun withGenericsResolved(genericTypeMap: GenericTypeMap): Type =
+    fun withGenericsResolved(typeList: List<Type>): Type =
         throw UnsupportedOperationException()
 
     val unparameterized: Type?
@@ -48,7 +47,7 @@ interface Type {
     }
 
     fun equalsIgnoringTypeVariables(other: Type) =
-        this is TypeVariable || other is TypeVariable || this == other || this.genericParameterTypes.isNotEmpty() || other.genericParameterTypes.isNotEmpty()
+        this is TypeParameter || other is TypeParameter || this == other || this.genericParameterTypes.isNotEmpty() || other.genericParameterTypes.isNotEmpty()
 
     /** Resolve generics in this type. Actual is the type implied by code, if available */
     fun resolveGenerics(

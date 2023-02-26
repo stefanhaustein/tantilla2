@@ -32,15 +32,15 @@ object AbsoluteRootScope : Scope() {
         add(FloatType)
         add(IntType)
         add(StringableType)
-        add(PairType(TypeVariable("A"), TypeVariable("B")))
-        val listType = ListType(TypeVariable("E"))
+        add(PairType(TypeParameter("A"), TypeParameter("B")))
+        val listType = ListType(TypeParameter("E"))
         add(listType)
-        add(MutableListType(TypeVariable("E")))
-        add(MapType(TypeVariable("K"), TypeVariable("V")))
-        add(MutableMapType(TypeVariable("K"), TypeVariable("V")))
-        add(SetType(TypeVariable("E")))
-        add(MutableSetType(TypeVariable("E")))
-        add(OptionalType(TypeVariable("V")))
+        add(MutableListType(TypeParameter("E")))
+        add(MapType(TypeParameter("K"), TypeParameter("V")))
+        add(MutableMapType(TypeParameter("K"), TypeParameter("V")))
+        add(SetType(TypeParameter("E")))
+        add(MutableSetType(TypeParameter("E")))
+        add(OptionalType(TypeParameter("V")))
         add(StrType)
         add(MathScope)
 
@@ -86,17 +86,17 @@ object AbsoluteRootScope : Scope() {
         }
 
 
-        val ifTypeVariable = TypeVariable("T")
+        val ifTypeParameter = TypeParameter("T")
         defineNativeFunction("if",
             "Conditional",
-            ifTypeVariable,
+            ifTypeParameter,
             Parameter("condition", BoolType),
-            Parameter("then", FunctionType.Impl(ifTypeVariable, emptyList())),
+            Parameter("then", FunctionType.Impl(ifTypeParameter, emptyList())),
             Parameter(
                 "elif",
-                PairType(FunctionType.Impl(BoolType, emptyList()), FunctionType.Impl(ifTypeVariable, emptyList())),
+                PairType(FunctionType.Impl(BoolType, emptyList()), FunctionType.Impl(ifTypeParameter, emptyList())),
                 isVararg = true),
-            Parameter("else", FunctionType.Impl(ifTypeVariable, emptyList()), object : LeafNode() {
+            Parameter("else", FunctionType.Impl(ifTypeParameter, emptyList()), object : LeafNode() {
                 override fun eval(context: LocalRuntimeContext) = CallableImpl(FunctionType.Impl(NoneType, emptyList()), 0, body = object : Evaluable {
                     override fun eval(context: LocalRuntimeContext): Any {
                         return NoneType.None

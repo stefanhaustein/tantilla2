@@ -29,5 +29,5 @@ class OptionalType(val valueType: Type)  : NativeStructDefinition(
 
     override val genericParameterTypes: List<Type> = listOf(valueType)
 
-    override fun withGenericsResolved(genericTypeMap: GenericTypeMap) = OptionalType(genericTypeMap.resolve(valueType))
+    override fun withGenericsResolved(typeList: List<Type>) = OptionalType(typeList[0])
 }
