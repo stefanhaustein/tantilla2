@@ -97,7 +97,7 @@ object LambdaParser {
         val refinedType = if (expectedReturnType == null) FunctionType.Impl(refinedBody.returnType, functionType.parameters)
           else functionType
 
-        return LambdaReference(refinedType.resolveGenerics(null, genericTypeMap), lambdaScope.locals.size, refinedBody, implicit = implicit)
+        return LambdaReference(refinedType.resolveGenerics(null, genericTypeMap) as FunctionType, lambdaScope.locals.size, refinedBody, implicit = implicit)
     }
 
 

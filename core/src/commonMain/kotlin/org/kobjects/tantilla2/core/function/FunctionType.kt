@@ -83,22 +83,12 @@ interface FunctionType : Type {
         return Impl(resolvedReturnType, resolvedParameters)
     }
 
-    override fun resolveGenerics(
-        actualType: Type?,
+    override fun resolveGenericsImpl(
+        actualType: Type,
         map: GenericTypeMap,
         allowNoneMatch: Boolean,
         allowAs: UserRootScope?,
     ): FunctionType {
-        if (containsUnresolvedTypeParameters(map)) {
-            return super.resolveGenerics(actualType, map, allowNoneMatch, allowAs) as FunctionType
-        }
-
-        if (actualType == null) {
-            return mapTypes {
-                it.resolveGenerics(null, map, allowNoneMatch)
-            }
-        }
-
         if (actualType !is FunctionType) {
             return super.resolveGenerics(actualType, map, allowNoneMatch, allowAs) as FunctionType
         }

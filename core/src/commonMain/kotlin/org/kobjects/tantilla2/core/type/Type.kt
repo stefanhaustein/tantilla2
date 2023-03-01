@@ -76,7 +76,20 @@ interface Type {
             return parametersResolved.resolveGenerics(actualType, map, allowNoneMatch, allowAs)
         }
 
-        if (actualType != this && actualType != null) {
+        if (actualType == null) {
+            return mapTypes(map::map)
+        }
+
+        return resolveGenericsImpl(actualType, map, allowNoneMatch, allowAs)
+    }
+
+    fun resolveGenericsImpl(
+        actualType: Type,
+        map: GenericTypeMap,
+        allowNoneMatch: Boolean = false, //
+        allowAs: UserRootScope? = null,
+    ): Type {
+        if (actualType != this) {
             if (allowAs != null && isConvertibleFrom(actualType, allowAs)) {
                 return this
             }

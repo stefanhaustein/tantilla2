@@ -46,26 +46,18 @@ abstract class Classifier : Scope(), Type, DocStringUpdatable {
         return if (anyChanged) withGenericsResolved(resolvedParameters) else this
     }
 
-    override fun resolveGenerics(
-        actualType: Type?,
+    override fun resolveGenericsImpl(
+        actualType: Type,
         map: GenericTypeMap,
         allowNoneMatch: Boolean,
         allowAs: UserRootScope?
     ): Type {
-        if (genericParameterTypes.isEmpty()) {
-            return super.resolveGenerics(actualType, map, allowNoneMatch, allowAs)
-        }
-
-        if (containsUnresolvedTypeParameters(map)) {
-            return super.resolveGenerics(actualType, map, allowNoneMatch, allowAs)
-        }
-
-        if (actualType == null) {
-            return mapTypes(map::map)
-        }
-
-        if (actualType !is Classifier || actualType.parentScope != parentScope || actualType.name != name) {
-            return super.resolveGenerics(actualType, map, allowNoneMatch, allowAs)
+        if (actualType !is Classifier
+            || actualType.parentScope != parentScope
+            || actualType.name != name
+            || genericParameterTypes.isEmpty()
+        ) {
+            return super.resolveGenericsImpl(actualType, map, allowNoneMatch, allowAs)
         }
 
         val resolvedParameters = List<Type>(genericParameterTypes.size) {

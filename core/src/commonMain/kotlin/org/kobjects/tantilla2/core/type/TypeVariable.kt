@@ -23,7 +23,7 @@ class TypeVariable(val name: String): Type {
             if (map.fallback != null) {
                 return map.fallback
             }
-            if (actualType == null) {
+            if (actualType == null || actualType is TypeParameter || actualType is TypeVariable) {
                 throw IllegalStateException("Unable to resolve type variable $name")
             }
             map.put(this, actualType, allowNoneMatch)

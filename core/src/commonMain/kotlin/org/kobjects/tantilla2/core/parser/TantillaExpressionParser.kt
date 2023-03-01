@@ -34,24 +34,23 @@ object TantillaExpressionParser {
         }
         val actualType = expr.returnType
 
-        val resolvedExpectedType = if (genericTypeMap != null) {
-
+        val resolvedType = if (genericTypeMap != null) {
             println("ExpectedType: $expectedType actualType: $actualType")
             expectedType.resolveGenerics(actualType, genericTypeMap, true, context.scope.userRootScope())
         } else {
             expectedType
         }
 
-        if (resolvedExpectedType.isAssignableFrom(actualType) || resolvedExpectedType == NoneType) {
+        if (resolvedType.isAssignableFrom(actualType) || resolvedType == NoneType) {
             return expr
         }
 
-        if (resolvedExpectedType is TraitDefinition) {
-            val impl = resolvedExpectedType.requireImplementationFor(context.scope.userRootScope(), actualType)
-            return As(expr, impl, resolvedExpectedType, implicit = true)
+        if (resolvedType is TraitDefinition) {
+            val impl = resolvedType.requireImplementationFor(context.scope.userRootScope(), actualType)
+            return As(expr, impl, resolvedType, implicit = true)
         }
 
-        throw IllegalArgumentException("Can't convert $expr with type '${expr.returnType}' to '$resolvedExpectedType'")
+        throw IllegalArgumentException("Can't convert $expr with type '${expr.returnType}' to '$resolvedType'")
     }
 
     fun parseElementAt(tokenizer: TantillaScanner, context: ParsingContext, base: Node): Node {
