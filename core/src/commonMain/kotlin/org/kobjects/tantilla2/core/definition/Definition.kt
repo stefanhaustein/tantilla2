@@ -125,6 +125,12 @@ interface Definition : SerializableCode, Typed, Comparable<Definition> {
         return current
     }
 
+    fun added(scope: Scope) {}
+
+    fun withTypesMapped(mapping: (Type) -> Type): Definition {
+        throw UnsupportedOperationException()
+    }
+
     enum class SummaryKind {
         NESTED, COLLAPSED, EXPANDED
     }

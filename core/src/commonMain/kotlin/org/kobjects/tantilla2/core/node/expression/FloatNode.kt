@@ -58,8 +58,8 @@ object FloatNode {
         }
 
         init {
-            require(FloatType.isAssignableFrom(left.returnType)) { "Float type required for left operand of '$name'" }
-            require(FloatType.isAssignableFrom(right.returnType)) { "Float type required for right operand of '$name'" }
+            require(FloatType.isAssignableFrom(left.returnType)) { "Float type required for left operand of '$name'; got: ${left.returnType}" }
+            require(FloatType.isAssignableFrom(right.returnType)) { "Float type required for right operand of '$name'; got: ${right.returnType}" }
         }
 
     }

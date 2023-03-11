@@ -30,6 +30,7 @@ abstract class Scope(
             definition.index = locals.size
             locals.add(definition.name)
         }
+        definition.added(this)
     }
 
     fun declareLocalVariable(name: String, type: Type, mutable: Boolean): Int {

@@ -37,7 +37,7 @@ abstract class ImplDefinition(
             if (resolved == null && scope is Type) {
                 resolved = (scope as Type).resolve(traitMethod.name)
             }
-            if (resolved == null) { throw IllegalArgumentException("No implementation found for trait method $name") }
+            if (resolved == null) { throw IllegalArgumentException("No implementation found for trait method '${traitMethod.name}' in '$name'") }
 
             val resolvedMethod = resolved.getValue(null) as Callable
 

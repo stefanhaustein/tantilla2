@@ -77,6 +77,30 @@ object LambdaParser {
     }
 
 
+    fun parseForIn(
+        tokenizer: TantillaScanner,
+        context: ParsingContext,
+        expectedType: FunctionType? = null,
+        implicit: Boolean,
+        genericTypeMap: GenericTypeMap = GenericTypeMap()
+    ): Node {
+        val parsedParameters = parseLambdaParameterList(tokenizer, context, expectedType)
+        val type = parsedParameters.first
+        val parameterNames = parsedParameters.second
+
+        println("*** Lambda type parsed: $type")
+
+        tokenizer.consume(":")
+        val lambdaScope = LambdaScope(context.scope) // resolvedType = type)
+        for (i in type.parameters.indices) {
+            val parameter = type.parameters[i]
+            lambdaScope.declareLocalVariable(parameterNames[i], parameter.type, false)
+        }
+
+        return parseClosureBody(tokenizer, context, type, lambdaScope, expectedType?.returnType, implicit, genericTypeMap)
+    }
+
+
 
     fun parseClosureBody(
         tokenizer: TantillaScanner,

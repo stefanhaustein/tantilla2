@@ -1,15 +1,19 @@
 package org.kobjects.tantilla2.core.parser
 
 import org.kobjects.parserlib.tokenizer.ParsingException
-import org.kobjects.tantilla2.core.function.FunctionDefinition
-import org.kobjects.tantilla2.core.function.LocalVariableDefinition
+import org.kobjects.tantilla2.core.collection.IteratorTrait
 import org.kobjects.tantilla2.core.node.*
 import org.kobjects.tantilla2.core.collection.ListType
 import org.kobjects.tantilla2.core.collection.RangeType
 import org.kobjects.tantilla2.core.control.LoopControlSignal
-import org.kobjects.tantilla2.core.function.LambdaScope
+import org.kobjects.tantilla2.core.definition.AbsoluteRootScope
+import org.kobjects.tantilla2.core.function.*
+import org.kobjects.tantilla2.core.node.expression.Apply
+import org.kobjects.tantilla2.core.node.expression.StaticReference
 import org.kobjects.tantilla2.core.type.NoneType
 import org.kobjects.tantilla2.core.node.statement.*
+import org.kobjects.tantilla2.core.type.GenericTypeMap
+import org.kobjects.tantilla2.core.type.IntType
 
 object StatementParser {
 
@@ -123,15 +127,49 @@ object StatementParser {
         return WhileNode(condition, Parser.parseStatements(tokenizer, context.indent()))
     }
 
-    fun parseFor(tokenizer: TantillaScanner, context: ParsingContext): ForNode {
+    fun parseFor(tokenizer: TantillaScanner, context: ParsingContext): Node {
         tokenizer.consume("for")
         val iteratorName = tokenizer.consume(TokenType.IDENTIFIER) { "Loop variable name expected." }.text
         tokenizer.consume("in")
-        val iterableExpression = TantillaExpressionParser.parseExpression(tokenizer, context)
+        val genericTypeMap = GenericTypeMap()
+        val iterableExpression = TantillaExpressionParser.parseExpression(tokenizer, context) // , AbsoluteRootScope.iterableTrait, genericTypeMap)
+
+        println("GenericTypeMap: $genericTypeMap")
+
         tokenizer.consume(":")
+/*
+
+        val iterableType = iterableExpression.returnType
+
+        val elementType = iterableType.genericParameterTypes[0]
+
+        val lambdaScope = LambdaScope(context.scope) // resolvedType = type)
+        lambdaScope.declareLocalVariable(iteratorName, elementType, false)
+        val closure = LambdaParser.parseClosureBody(
+                tokenizer,
+                context,
+                FunctionType.Impl(NoneType, listOf(Parameter(iteratorName, elementType))),
+                lambdaScope,
+                NoneType,
+                implicit = true,
+           genericTypeMap
+        )
+
+        return Apply(
+            StaticReference(context.scope.resolveStaticOrError("for2", true), false),
+            NoneType,
+            listOf(iterableExpression, closure),
+            listOf(),
+        false, false)
+
+
+
+*/
+
+
         val iterableType = iterableExpression.returnType
         val iteratorType = when (iterableType) {
-            RangeType -> org.kobjects.tantilla2.core.type.IntType
+            is RangeType -> org.kobjects.tantilla2.core.type.IntType
             is ListType -> iterableType.elementType
             else -> throw RuntimeException("Can't iterate type $iterableType")
         }
@@ -139,6 +177,8 @@ object StatementParser {
         val iteratorIndex = context.scope.declareLocalVariable(
             iteratorName, iteratorType, false)
         val body = Parser.parseStatements(tokenizer, context.indent())
+
+
         return ForNode(iteratorName, iteratorIndex, iterableExpression, body)
     }
 

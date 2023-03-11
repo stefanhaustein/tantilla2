@@ -47,7 +47,12 @@ object AbsoluteRootScope : Scope() {
         add(iteratorTrait)
         add(iterableTrait)
 
+
         add(IterableImpl(this, listType, ""))
+
+
+        add(RangeType)
+        add(IterableImpl(this, RangeType, ""))
 
         defineNativeFunction("str",
             "Converts the value to a string.",

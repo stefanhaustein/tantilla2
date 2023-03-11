@@ -15,7 +15,7 @@ class ElementAt(
         if (baseType is ListType
             || baseType is StrType) {
             if (keyExpr.returnType != IntType) {
-                throw IllegalArgumentException("Index expression must be of type int.")
+                throw IllegalArgumentException("Index expression must be of type int; got: $baseType")
             }
         } else if (baseType is MapType) {
             if (!baseType.keyType.isAssignableFrom(keyExpr.returnType)) {

@@ -29,6 +29,7 @@ class IterableImpl(
     }*/
 
     init {
+        // TODO: Is this needed here? Seems to cause trouble with registration
         resolve()
     }
 

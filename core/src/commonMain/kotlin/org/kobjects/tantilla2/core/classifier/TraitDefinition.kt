@@ -10,19 +10,22 @@ import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.FunctionDefinition
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Parameter
-import org.kobjects.tantilla2.core.type.NoneType
-import org.kobjects.tantilla2.core.type.ScopeType
-import org.kobjects.tantilla2.core.type.Type
+import org.kobjects.tantilla2.core.type.*
 
 open class TraitDefinition(
     override val parentScope: Scope?,
     override val name: String,
     override var docString: String,
     override val genericParameterTypes: List<Type> = listOf(),
+    override val unparameterized: Type? = null
 ) : Classifier() {
 
     // The current vmt index. Determines the vmt size
     var traitIndex = 0
+
+    override fun withGenericsResolved(resolved: List<Type>): TraitDefinition {
+        return TraitDefinition(parentScope, name, docString, resolved, unparameterized ?: this)
+    }
 
 
     override fun isAssignableFrom(type: Type): Boolean {
@@ -44,7 +47,7 @@ open class TraitDefinition(
     }
 
     fun requireImplementationFor(userRootScope: UserRootScope, type: Type): ImplDefinition =
-        getImplementationForTypeOrNull(userRootScope, type) ?: throw IllegalStateException("$typeName for ${type.typeName} not found.")
+        getImplementationForTypeOrNull(userRootScope, type) ?: throw IllegalStateException("$typeName for ${type.typeName} not found; available: ${userRootScope.traitToClass}.")
 
     fun getImplementationForTypeOrNull(userRootScope: UserRootScope, type: Type): ImplDefinition? {
         val unresolvedImpls = userRootScope.unresolvedImpls.toList()
@@ -62,9 +65,12 @@ open class TraitDefinition(
         }
 
         // TODO: Figure out how to fix this properly for the static case
-        val scope = if (type is Scope) type.unparameterized ?: type else (type as ScopeType).scope
+        val unparameterizedType = if (type is Scope) type.unparameterized ?: type else (type as ScopeType).scope
 
-        val impl = userRootScope.traitToClass[this.unparameterized ?: this]?.get(scope)
+        val unparameterizedTrait = this.unparameterized ?: this
+        val allImplsForTrait = userRootScope.traitToClass[unparameterizedTrait]
+
+        val impl = allImplsForTrait?.get(unparameterizedType)
 
         return impl
     }
@@ -102,6 +108,25 @@ open class TraitDefinition(
     }
 
 
-
+    override fun resolveGenericsImpl(
+        actualType: Type,
+        map: GenericTypeMap,
+        allowNoneMatch: Boolean,
+        allowAs: UserRootScope?
+    ): Type {
+        if (allowAs != null) {
+            val impl = getImplementationForTypeOrNull(allowAs, actualType)
+            if (impl != null) {
+                val actualTrait = impl.trait
+                val resolvedParameters = List<Type>(genericParameterTypes.size) {
+                    if (actualTrait.genericParameterTypes[it] !is TypeVariable
+                        && actualTrait.genericParameterTypes[it] !is TypeParameter)
+                        actualTrait.genericParameterTypes[it] else genericParameterTypes[it]
+                }
+                return withGenericsResolved(resolvedParameters)
+            }
+        }
+        return super.resolveGenericsImpl(actualType, map, allowNoneMatch, allowAs)
+    }
 
 }
