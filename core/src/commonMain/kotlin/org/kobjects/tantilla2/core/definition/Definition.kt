@@ -127,7 +127,7 @@ interface Definition : SerializableCode, Typed, Comparable<Definition> {
 
     fun added(scope: Scope) {}
 
-    fun withTypesMapped(mapping: (Type) -> Type): Definition {
+    fun withTypesMapped(newParent: Scope, mapping: (Type) -> Type): Definition {
         throw UnsupportedOperationException()
     }
 

@@ -1,13 +1,22 @@
 package org.kobjects.tantilla2.core.classifier
 
+import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.definition.Scope
+import org.kobjects.tantilla2.core.function.Callable
+import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.type.Type
 
 class ResolvedGenericType(
     override val unparameterized: Classifier,
     override val genericParameterTypes: List<Type>
-) : Classifier() {
+) : Classifier(), Callable {
+    override val type: FunctionType
+
+    override fun eval(context: LocalRuntimeContext): Any {
+        return (unparameterized as Callable).eval(context)
+    }
+
     override val parentScope: Scope?
         get() = unparameterized.parentScope
 
@@ -25,12 +34,16 @@ class ResolvedGenericType(
 
     init {
         val map = mutableMapOf<Type, Type>()
+
         for (i in unparameterized.genericParameterTypes.indices) {
             map[unparameterized.genericParameterTypes[i]] = genericParameterTypes[i]
         }
+        map[unparameterized] = this
+
+        type = unparameterized.type.mapTypes{ map[it] ?: it } as FunctionType
 
         for (member in unparameterized) {
-            add(member.withTypesMapped { map[it] ?: it })
+            add(member.withTypesMapped(this) { map[it] ?: it })
         }
     }
 

@@ -90,9 +90,12 @@ interface Type {
         allowAs: UserRootScope? = null,
     ): Type {
         if (actualType != this) {
-            if (allowAs != null && isConvertibleFrom(actualType, allowAs)) {
-                return this
-            }
+            if (allowAs != null) {
+                if (isConvertibleFrom(actualType, allowAs)) {
+                    return this
+                }
+                throw IllegalArgumentException("Type mismatch. Expected: $this unparameterized:{${this.unparameterized}} actual: $actualType  ${allowAs!!.traitToClass[this.unparameterized ?: this]}")
+             }
             throw IllegalArgumentException("Type mismatch. Expected: $this actual: $actualType")
         }
         return this

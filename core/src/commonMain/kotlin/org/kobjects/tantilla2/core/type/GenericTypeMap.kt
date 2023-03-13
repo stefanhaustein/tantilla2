@@ -7,7 +7,7 @@ class GenericTypeMap(val fallback: Type? = null) {
 
     operator fun get(type: Type): Entry? = map[type]
 
-    fun put(type: TypeVariable, resolved: Type, rootLevel: Boolean = false) {
+    fun put(type: Type, resolved: Type, rootLevel: Boolean = false) {
         map.put(type, Entry(resolved, rootLevel))
     }
 
@@ -38,5 +38,8 @@ class GenericTypeMap(val fallback: Type? = null) {
     )
 
     fun createVariable() = TypeVariable("T${varCount++}")
+
+
+    override fun toString() = map.toString()
 
 }

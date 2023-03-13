@@ -2,6 +2,10 @@ package org.kobjects.tantilla2.aoc2022
 
 import org.kobjects.tantilla2.testing.TantillaTest
 
+
+
+
+
 class Day05Test : TantillaTest("""
 def test_day_05_a():
   let lines = INPUT.split("\n")

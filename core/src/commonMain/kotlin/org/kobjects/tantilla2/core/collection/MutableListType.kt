@@ -1,6 +1,7 @@
 package org.kobjects.tantilla2.core.collection
 
 import org.kobjects.tantilla2.core.LocalRuntimeContext
+import org.kobjects.tantilla2.core.definition.AbsoluteRootScope
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Parameter
@@ -63,6 +64,9 @@ class MutableListType(
         ) {
             (it[0] as (MutableList<Comparable<Any>>)).sort()
         }
+
+
+
 
         defineNativeFunction(
             "init",

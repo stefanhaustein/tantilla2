@@ -35,7 +35,8 @@ object AbsoluteRootScope : Scope() {
         add(PairType(TypeParameter("A"), TypeParameter("B")))
         val listType = ListType(TypeParameter("E"))
         add(listType)
-        add(MutableListType(TypeParameter("E")))
+        val mutableListType = MutableListType(TypeParameter("E"))
+        add(mutableListType)
         add(MapType(TypeParameter("K"), TypeParameter("V")))
         add(MutableMapType(TypeParameter("K"), TypeParameter("V")))
         add(SetType(TypeParameter("E")))
@@ -47,12 +48,13 @@ object AbsoluteRootScope : Scope() {
         add(iteratorTrait)
         add(iterableTrait)
 
-
         add(IterableImpl(this, listType, ""))
-
+        add(IterableImpl(this, mutableListType, ""))
 
         add(RangeType)
         add(IterableImpl(this, RangeType, ""))
+
+
 
         defineNativeFunction("str",
             "Converts the value to a string.",

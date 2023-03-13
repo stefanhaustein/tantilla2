@@ -12,14 +12,16 @@ class ElementAt(
 
     init {
         val baseType = baseExpr.returnType
-        if (baseType is ListType
-            || baseType is StrType) {
+        val unparameterized = baseType.unparameterized ?: baseType
+        if (unparameterized is ListType
+            || unparameterized is StrType) {
             if (keyExpr.returnType != IntType) {
                 throw IllegalArgumentException("Index expression must be of type int; got: $baseType")
             }
-        } else if (baseType is MapType) {
-            if (!baseType.keyType.isAssignableFrom(keyExpr.returnType)) {
-                throw IllegalArgumentException("Key expression must be of type ${baseType.keyType}")
+        } else if (unparameterized is MapType) {
+            val keyType = baseType.genericParameterTypes[0]
+            if (!keyType.isAssignableFrom(keyExpr.returnType)) {
+                throw IllegalArgumentException("Key expression must be of type ${keyType}")
             }
         } else {
             throw IllegalArgumentException("Base expression must be List, Map or str type for index access; actual type: $baseType")
@@ -48,10 +50,10 @@ class ElementAt(
     }
 
     override val returnType: Type
-        get() = when(baseExpr.returnType) {
+        get() = when(baseExpr.returnType.unparameterized ?: baseExpr.returnType) {
             StrType -> StrType
-            is ListType -> ((baseExpr.returnType) as ListType).elementType
-            is MapType -> ((baseExpr.returnType) as MapType).valueType
+            is ListType -> baseExpr.returnType.genericParameterTypes[0]
+            is MapType -> baseExpr.returnType.genericParameterTypes[1]
             else -> throw IllegalArgumentException()
         }
 

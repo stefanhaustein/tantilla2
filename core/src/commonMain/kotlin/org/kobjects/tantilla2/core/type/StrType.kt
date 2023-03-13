@@ -1,7 +1,12 @@
 package org.kobjects.tantilla2.core.type
 
+import org.kobjects.tantilla2.core.classifier.Adapter
+import org.kobjects.tantilla2.core.classifier.AdapterInstance
 import org.kobjects.tantilla2.core.classifier.NativeTypeDefinition
+import org.kobjects.tantilla2.core.collection.IterableTrait
 import org.kobjects.tantilla2.core.collection.ListType
+import org.kobjects.tantilla2.core.definition.AbsoluteRootScope
+import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.node.expression.IntNode
 
@@ -44,9 +49,15 @@ object StrType : NativeTypeDefinition(
             "join",
             "Joins the list parameter, separating elements with this string.",
             StrType,
-            Parameter("list", ListType(StrType))
+            Parameter("list", IterableTrait(StrType, AbsoluteRootScope.iterableTrait))
         ) {
-            (it[1] as List<Any>).joinToString(it[0] as String)
+            val iterable = it[1] as Adapter
+            val iterator = iterable.evalMethod(0, it) as Adapter
+            val aggregated = mutableListOf<Any>()
+            while (iterator.evalMethod(0, it) as Boolean) {
+                aggregated.add(iterator.evalMethod(1, it))
+            }
+            aggregated.joinToString(it[0] as String)
         }
         defineMethod(
             "ord",

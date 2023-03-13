@@ -34,6 +34,10 @@ abstract class Classifier : Scope(), Type, DocStringUpdatable {
                 && other.genericParameterTypes == genericParameterTypes
 
     override fun mapTypes(mapping: (Type) -> Type): Type {
+        if (mapping(this) != this) {
+            return mapping(this)
+        }
+                
         var anyChanged = false
         val resolvedParameters = List(genericParameterTypes.size) {
             val oldType = genericParameterTypes[it]
@@ -45,6 +49,10 @@ abstract class Classifier : Scope(), Type, DocStringUpdatable {
         }
         return if (anyChanged) withGenericsResolved(resolvedParameters) else this
     }
+
+    override fun withGenericsResolved(genericTypeList: List<Type>): Classifier =
+        ResolvedGenericType((this.unparameterized ?: this) as Classifier, genericTypeList)
+
 
     override fun resolveGenericsImpl(
         actualType: Type,

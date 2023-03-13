@@ -3,6 +3,7 @@ package org.kobjects.tantilla2.core.function
 import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.definition.Scope
+import org.kobjects.tantilla2.core.type.Type
 
 class NativeFunctionDefinition(
     override val parentScope: Scope,
@@ -38,4 +39,10 @@ class NativeFunctionDefinition(
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) = throw UnsupportedOperationException()
 
     override fun toString() = "def $name$type"
+
+    override fun withTypesMapped(newParent: Scope, mapping: (Type) -> Type) =
+       NativeFunctionDefinition(newParent, kind, name, docString, type.mapTypes(mapping), body)
+
+
+
 }
