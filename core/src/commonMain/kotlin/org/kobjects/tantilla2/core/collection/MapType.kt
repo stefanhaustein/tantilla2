@@ -26,7 +26,7 @@ open class MapType(
         MapType(
             typeList[0],
             typeList[1],
-            unparameterized = unparameterized ?: this)
+            unparameterized = unparameterized() as MapType)
 
     override fun isAssignableFrom(other: Type) =
         other is MapType && other.keyType == keyType && other.valueType == valueType

@@ -42,6 +42,8 @@ class ResolvedGenericType(
 
         type = unparameterized.type.mapTypes{ map[it] ?: it } as FunctionType
 
+        println("********* type: $type; map: $map")
+
         for (member in unparameterized) {
             add(member.withTypesMapped(this) { map[it] ?: it })
         }

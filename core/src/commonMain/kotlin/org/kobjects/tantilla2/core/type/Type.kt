@@ -31,8 +31,10 @@ interface Type {
         throw UnsupportedOperationException()
 
     val unparameterized: Type?
-        get() = null
-    
+        get() = this
+
+    fun unparameterized(): Type = unparameterized ?: this
+
     fun serializeGenerics(writer: CodeWriter) {
         val generics = genericParameterTypes
         if (generics.isNotEmpty()) {
@@ -94,7 +96,7 @@ interface Type {
                 if (isConvertibleFrom(actualType, allowAs)) {
                     return this
                 }
-                throw IllegalArgumentException("Type mismatch. Expected: $this unparameterized:{${this.unparameterized}} actual: $actualType  ${allowAs!!.traitToClass[this.unparameterized ?: this]}")
+                throw IllegalArgumentException("Type mismatch. Expected: $this unparameterized:{${this.unparameterized()}} actual: $actualType  ${allowAs!!.traitToClass[this.unparameterized ?: this]}")
              }
             throw IllegalArgumentException("Type mismatch. Expected: $this actual: $actualType")
         }

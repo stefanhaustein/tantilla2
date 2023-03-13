@@ -168,7 +168,7 @@ object StatementParser {
 
 
         val iterableType = iterableExpression.returnType
-        val iteratorType = when (iterableType.unparameterized ?: iterableType) {
+        val iteratorType = when (iterableType.unparameterized()) {
             is RangeType -> org.kobjects.tantilla2.core.type.IntType
             is ListType -> iterableType.genericParameterTypes[0]
             else -> throw RuntimeException("Can't iterate type $iterableType")

@@ -21,13 +21,17 @@ class MutableListType(
     unparameterized,
     {  (it.get(0) as List<*>).toMutableList() }
 ) {
+
+/*
     override fun withGenericsResolved(typeList: List<Type>) = MutableListType(
         typeList[0], this)
 
-    override fun create(size: Int, init: (Int) -> Any) = MutableList(size, init)
-
     override fun equals(other: Any?): Boolean =
         other is MutableListType && other.elementType == elementType
+     */
+
+    override fun create(size: Int, init: (Int) -> Any) = MutableList(size, init)
+
 
     init {
         defineMethod("append", "Appends an element to the list",

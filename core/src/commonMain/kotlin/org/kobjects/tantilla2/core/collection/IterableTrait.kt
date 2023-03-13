@@ -14,7 +14,7 @@ class IterableTrait(
 )) {
 
     fun withElementType(elementType: Type) = IterableTrait(
-        elementType, unparameterized ?: this)
+        elementType, unparameterized() as IterableTrait)
 
     override fun withGenericsResolved(genericTypeList: List<Type>) =
         withElementType(genericTypeList[0])

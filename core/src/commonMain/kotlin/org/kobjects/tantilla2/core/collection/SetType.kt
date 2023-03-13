@@ -31,7 +31,7 @@ open class SetType(
     override val genericParameterTypes: List<Type> = listOf(elementType)
 
     override fun withGenericsResolved(typeList: List<Type>) =
-        SetType(typeList[0], unparameterized = unparameterized ?: this)
+        SetType(typeList[0], unparameterized = unparameterized() as SetType)
 
     override fun isAssignableFrom(other: Type) = other is SetType && other.elementType == elementType
 

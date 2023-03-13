@@ -78,7 +78,7 @@ interface FunctionType : Type {
             Parameter(parameter.name, type, parameter.defaultValueExpression, parameter.isVararg)
         }
 
-        val resolvedReturnType = mapping(returnType)
+        val resolvedReturnType = returnType.mapTypes(mapping)
 
         return Impl(resolvedReturnType, resolvedParameters)
     }

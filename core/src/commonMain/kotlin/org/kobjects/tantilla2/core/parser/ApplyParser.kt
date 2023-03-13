@@ -138,9 +138,9 @@ object ApplyParser {
                 val name = tryConsumeNamedLambdaPrefix(tokenizer, context.depth, missingFunctionParameter.keys) ?: break
                 val index = missingFunctionParameter[name]!!
                 val type = expectedParameters[index].type
-                val expression = if (type is PairType) {
-                    val exprA = TantillaExpressionParser.parseExpression(tokenizer, context, type.firstType)
-                    val exprB = LambdaParser.parseTrailingClosure(tokenizer, context, type.secondType as FunctionType, genericTypeMap)
+                val expression = if (type.unparameterized() is PairType) {
+                    val exprA = TantillaExpressionParser.parseExpression(tokenizer, context, type.genericParameterTypes[0])
+                    val exprB = LambdaParser.parseTrailingClosure(tokenizer, context, type.genericParameterTypes[1] as FunctionType, genericTypeMap)
                     PairNode(exprA, exprB)
                 } else {
                     LambdaParser.parseTrailingClosure(
@@ -192,8 +192,9 @@ object ApplyParser {
 
     fun isFunctionOrFunctionPairType(type: Type) =
         type is FunctionType
-        || (type is PairType &&
-                type.firstType is FunctionType && type.secondType is FunctionType)
+        || (type.unparameterized() is PairType
+                && type.genericParameterTypes[0].unparameterized() is FunctionType
+                && type.genericParameterTypes[1].unparameterized() is FunctionType)
 
 
     fun tryConsumeNamedLambdaPrefix(tokenizer: TantillaScanner, indent: Int, names: Set<String>): String? {

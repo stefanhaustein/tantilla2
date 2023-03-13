@@ -51,7 +51,7 @@ abstract class Classifier : Scope(), Type, DocStringUpdatable {
     }
 
     override fun withGenericsResolved(genericTypeList: List<Type>): Classifier =
-        ResolvedGenericType((this.unparameterized ?: this) as Classifier, genericTypeList)
+        ResolvedGenericType(unparameterized() as Classifier, genericTypeList)
 
 
     override fun resolveGenericsImpl(
@@ -60,6 +60,10 @@ abstract class Classifier : Scope(), Type, DocStringUpdatable {
         allowNoneMatch: Boolean,
         allowAs: UserRootScope?
     ): Type {
+        if (name == "Pair" && actualType != null) {
+            println("bp")
+        }
+
         if (actualType !is Classifier
             || actualType.parentScope != parentScope
             || actualType.name != name

@@ -13,7 +13,7 @@ class InstantiableMetaType (
 ) {
     override fun resolve(name: String) = wrapped.resolveStatic(name, false)
 
-    override fun mapTypes(mapping: (Type) -> Type) = InstantiableMetaType(wrapped, parameters.map{
-        Parameter(it.name, mapping(it.type), it.defaultValueExpression, it.isVararg)
+    override fun mapTypes(mapping: (Type) -> Type) = InstantiableMetaType(wrapped.mapTypes(mapping) as Classifier, parameters.map{
+        Parameter(it.name, it.type.mapTypes(mapping), it.defaultValueExpression, it.isVararg)
     })
 }

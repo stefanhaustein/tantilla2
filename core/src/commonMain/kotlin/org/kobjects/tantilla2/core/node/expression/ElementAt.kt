@@ -12,7 +12,7 @@ class ElementAt(
 
     init {
         val baseType = baseExpr.returnType
-        val unparameterized = baseType.unparameterized ?: baseType
+        val unparameterized = baseType.unparameterized()
         if (unparameterized is ListType
             || unparameterized is StrType) {
             if (keyExpr.returnType != IntType) {
@@ -29,7 +29,7 @@ class ElementAt(
     }
 
     override fun requireAssignability(): Node {
-        val baseType = baseExpr.returnType
+        val baseType = baseExpr.returnType.unparameterized ?: baseExpr.returnType
         if (baseType !is MutableListType && baseType !is MutableMapType) {
             throw IllegalArgumentException("MutableMap or MutableList required for assignment but got type '$baseType' for expression '$baseExpr'")
         }
