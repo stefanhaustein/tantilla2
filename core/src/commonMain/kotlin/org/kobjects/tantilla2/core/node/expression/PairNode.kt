@@ -13,7 +13,7 @@ class PairNode(val a: Node, val b: Node) : Node() {
 
     override fun eval(context: LocalRuntimeContext) = Pair(a.eval(context), b.eval(context))
     override val returnType: Type
-        get() = PairType(a.returnType, b.returnType)
+        get() = PairType.withGenericsResolved(listOf( a.returnType, b.returnType))
 
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
         writer.append("Pair(")

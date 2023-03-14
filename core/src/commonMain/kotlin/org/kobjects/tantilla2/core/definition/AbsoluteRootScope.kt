@@ -32,7 +32,7 @@ object AbsoluteRootScope : Scope() {
         add(FloatType)
         add(IntType)
         add(StringableType)
-        add(PairType(TypeParameter("A"), TypeParameter("B")))
+        add(PairType)
         val listType = ListType(TypeParameter("E"))
         add(listType)
         val mutableListType = MutableListType(TypeParameter("E"))
@@ -103,7 +103,7 @@ object AbsoluteRootScope : Scope() {
             Parameter("then", FunctionType.Impl(ifTypeParameter, emptyList())),
             Parameter(
                 "elif",
-                PairType(FunctionType.Impl(BoolType, emptyList()), FunctionType.Impl(ifTypeParameter, emptyList())),
+                PairType.withGenericsResolved(listOf(FunctionType.Impl(BoolType, emptyList()), FunctionType.Impl(ifTypeParameter, emptyList()))),
                 isVararg = true),
             Parameter("else", FunctionType.Impl(ifTypeParameter, emptyList()), object : LeafNode() {
                 override fun eval(context: LocalRuntimeContext) = CallableImpl(FunctionType.Impl(NoneType, emptyList()), 0, body = object : Evaluable {
