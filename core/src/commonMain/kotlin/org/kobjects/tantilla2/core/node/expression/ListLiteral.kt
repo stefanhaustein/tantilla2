@@ -10,10 +10,10 @@ class ListLiteral(
 ) : Node() {
 
     override fun eval(context: LocalRuntimeContext): List<Any> {
-        return returnType.create(elements.size) { elements[it].eval(context)!! }
+        return (returnType.unparameterized() as ListType).create(elements.size) { elements[it].eval(context)!! }
     }
 
-    override val returnType = ListType(commonType(elements.map { it.returnType }))
+    override val returnType = ListType().withGenericsResolved  (listOf(commonType(elements.map { it.returnType })))
 
     override fun children(): List<Node> = elements
 

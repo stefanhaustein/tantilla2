@@ -11,14 +11,9 @@ import org.kobjects.tantilla2.core.type.IntType
 import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.type.NoneType
 
-class MutableListType(
-    elementType: Type,
-    unparameterized: MutableListType? = null
-) : ListType(
-    elementType,
+class MutableListType() : ListType(
     "MutableList",
     "A mutable list of elements.",
-    unparameterized,
     {  (it.get(0) as List<*>).toMutableList() }
 ) {
 
@@ -36,7 +31,7 @@ class MutableListType(
     init {
         defineMethod("append", "Appends an element to the list",
             NoneType,
-            Parameter("value", elementType)) {
+            Parameter("value", ELEMENT_TYPE)) {
             (it[0] as MutableList<Any>).add(it[1])
         }
 
@@ -49,13 +44,13 @@ class MutableListType(
         defineMethod("insert", "Inserts an value into the list at the given index",
             NoneType,
             Parameter("index", IntType),
-            Parameter("value", elementType)
+            Parameter("value", ELEMENT_TYPE)
         ) {
             (it[0] as MutableList<Any>).add(it.i32(1), it[2])
         }
 
         defineMethod("pop", "Remove the last element in this list and return it.",
-            elementType,
+            ELEMENT_TYPE,
             Parameter("index", IntType, IntNode.Const(-1))
             ) {
             val list = it[0] as MutableList<Any>
@@ -77,7 +72,7 @@ class MutableListType(
             "Create a mutable list of the given size, filled using the function parameter",
             this,
             Parameter("len", IntType),
-            Parameter("fill", FunctionType.Impl(elementType, listOf(Parameter("index", IntType)))),
+            Parameter("fill", FunctionType.Impl(ELEMENT_TYPE, listOf(Parameter("index", IntType)))),
         ) { context ->
             val size = context.i32(0)
             val fn = context[1] as Callable

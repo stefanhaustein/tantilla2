@@ -69,7 +69,7 @@ object StrType : NativeTypeDefinition(
         defineMethod(
             "split",
             "Split the string at given delimiter",
-            ListType(StrType),
+            ListType().withGenericsResolved(listOf(StrType)),
             Parameter("delimiter", StrType)
         ) {
             (it[0] as String).split(it[1] as String)

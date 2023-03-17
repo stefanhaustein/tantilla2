@@ -12,19 +12,18 @@ import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.type.GenericTypeMap
 import org.kobjects.tantilla2.core.type.IntType
 import org.kobjects.tantilla2.core.type.Type
+import org.kobjects.tantilla2.core.type.TypeParameter
 
 open class ListType(
-    val elementType: Type,
     name: String = "List",
     docString: String = "An immutable list of elements.",
-    override val unparameterized: ListType? = null,
     ctor:  (LocalRuntimeContext) -> Any = { it.get(0) }
 ) : NativeStructDefinition(
     null,
     name,
     docString,
     ctor,
-    Parameter("elements", elementType, isVararg = true),
+    Parameter("elements", ELEMENT_TYPE, isVararg = true),
 ), CollectionType {
 
     init {
@@ -33,14 +32,14 @@ open class ListType(
         }
 
         defineMethod("index", "Returns the index of the value in the list, or -1 if not found.",
-            IntType, Parameter("value", elementType)) {
+            IntType, Parameter("value", ELEMENT_TYPE)) {
             (it[0] as List<*>).indexOf(it[1]).toLong()
         }
 
         defineMethod(
             "iterator",
             "Returns an iterator for this list",
-            AbsoluteRootScope.iteratorTrait.withElementType(elementType)
+            AbsoluteRootScope.iteratorTrait.withElementType(ELEMENT_TYPE)
         ) {
             IteratorTrait.createAdapter((it[0] as List<Any>).iterator())
         }
@@ -50,7 +49,7 @@ open class ListType(
             "Create a list of the given size, filled using the function parameter",
             this,
             Parameter("len", IntType),
-            Parameter("fill", FunctionType.Impl(elementType, listOf(Parameter("index", IntType)))),
+            Parameter("fill", FunctionType.Impl(ELEMENT_TYPE, listOf(Parameter("index", IntType)))),
         ) { context ->
             val size = context.i32(0)
             val fn = context[1] as Callable
@@ -67,7 +66,7 @@ open class ListType(
 
     open fun create(size: Int, init: (Int) -> Any) = MutableList(size, init)
 
-    override val genericParameterTypes: List<Type> = listOf(elementType)
+    override val genericParameterTypes = listOf(ELEMENT_TYPE)
 
 //        ListType(genericTypeList[0], unparameterized = unparameterized ?: this)
 /*
@@ -77,4 +76,10 @@ open class ListType(
         other is ListType && other.elementType == elementType && other !is MutableListType
 
 */
+
+
+    companion object {
+        val ELEMENT_TYPE = TypeParameter("E")
+    }
+
     }

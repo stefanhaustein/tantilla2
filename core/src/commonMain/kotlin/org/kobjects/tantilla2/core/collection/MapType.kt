@@ -45,7 +45,7 @@ open class MapType(
 
 
         defineMethod("values", "Returns a list of the values contained in this map.",
-            ListType(valueType)
+            ListType().withGenericsResolved(listOf(valueType))
         ) {
             (it[0] as Map<Any,Any>).values.toList()
         }

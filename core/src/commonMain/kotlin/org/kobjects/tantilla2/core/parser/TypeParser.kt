@@ -71,7 +71,7 @@ object TypeParser {
             name = "\$$index"
         }
         val rawType = parseType(tokenizer, context)
-        val type = if (isVararg) ListType(rawType) else rawType
+        val type = if (isVararg) ListType().withGenericsResolved(listOf(rawType)) else rawType
         val defaultValue: Node? = if (tokenizer.tryConsume("="))
             TantillaExpressionParser.matchType(
                 context, TantillaExpressionParser.parseExpression(tokenizer, context), type)
