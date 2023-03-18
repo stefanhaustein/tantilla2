@@ -11,7 +11,7 @@ import org.kobjects.tantilla2.core.type.IntType
 import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.type.NoneType
 
-class MutableListType() : ListType(
+object MutableListType : ListType(
     "MutableList",
     "A mutable list of elements.",
     {  (it.get(0) as List<*>).toMutableList() }

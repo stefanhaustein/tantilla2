@@ -35,8 +35,7 @@ object AbsoluteRootScope : Scope() {
         add(PairType)
         val listType = ListType()
         add(listType)
-        val mutableListType = MutableListType()
-        add(mutableListType)
+        add(MutableListType)
         add(MapType(TypeParameter("K"), TypeParameter("V")))
         add(MutableMapType(TypeParameter("K"), TypeParameter("V")))
         add(SetType(TypeParameter("E")))
@@ -49,7 +48,7 @@ object AbsoluteRootScope : Scope() {
         add(iterableTrait)
 
         add(IterableImpl(this, listType, ""))
-        add(IterableImpl(this, mutableListType, ""))
+        add(IterableImpl(this, MutableListType, ""))
 
         add(RangeType)
         add(IterableImpl(this, RangeType, ""))
