@@ -35,7 +35,7 @@ object CollectionNode {
 
         init {
             val returnType = collectionExpr.returnType
-            if (returnType !is CollectionType) {
+            if (returnType.unparameterized() !is CollectionType) {
                 throw IllegalArgumentException("Collection expected for 'in'")
             }
             if (!returnType.genericParameterTypes[0].isAssignableFrom(valueExpr.returnType)) {

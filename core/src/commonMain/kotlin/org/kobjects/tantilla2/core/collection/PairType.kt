@@ -8,6 +8,7 @@ import org.kobjects.tantilla2.core.type.TypeParameter
 
 private val FIRST = TypeParameter("F")
 private val SECOND = TypeParameter("S")
+private val TYPE_LIST = listOf(FIRST, SECOND)
 
 object PairType : NativeStructDefinition(
     null,
@@ -18,7 +19,8 @@ object PairType : NativeStructDefinition(
     Parameter("second", SECOND),
 ), CollectionType {
 
-    override val genericParameterTypes: List<Type> = listOf(FIRST, SECOND)
+    override val genericParameterTypes: List<Type>
+        get() = TYPE_LIST
 
     init {
         defineMethod(

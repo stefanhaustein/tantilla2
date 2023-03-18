@@ -5,26 +5,16 @@ import org.kobjects.tantilla2.core.type.GenericTypeMap
 import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.type.NoneType
 
-class MutableSetType(
-    elementType: Type,
-    unparameterized: MutableSetType? = null,
-) : SetType(
-    elementType,
+object MutableSetType : SetType(
     "MutableSet",
     "A mutable set of elements.",
-    unparameterized,
     { (it.get(0) as List<Any>).toMutableSet() }
 ) {
-    override fun withGenericsResolved(typeList: List<Type>) =
-        MutableSetType(typeList[0], this)
-
-    override fun equals(other: Any?): Boolean =
-        other is MutableSetType && other.elementType == elementType
 
     init {
         defineMethod("add", "Adds an element to this set",
             NoneType,
-            Parameter("value", elementType)) {
+            Parameter("value", ELEMENT_TYPE_PARAMETER)) {
             (it[0] as MutableSet<Any>).add(it[1]!!)
         }
 

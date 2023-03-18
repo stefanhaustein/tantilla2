@@ -6,19 +6,18 @@ import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.type.GenericTypeMap
 import org.kobjects.tantilla2.core.type.IntType
 import org.kobjects.tantilla2.core.type.Type
+import org.kobjects.tantilla2.core.type.TypeParameter
 
 open class SetType(
-    val elementType: Type,
     name: String = "Set",
     docString: String = "An immutable set of elements.",
-    override val unparameterized: Type? = null,
     ctor:  (LocalRuntimeContext) -> Any = { (it.get(0) as List<Any>).toSet() }
 ) : NativeStructDefinition(
     null,
     name,
     docString,
     ctor,
-    Parameter("elements", elementType, isVararg = true),
+    Parameter("elements", ELEMENT_TYPE_PARAMETER, isVararg = true),
 ), CollectionType {
 
     init {
@@ -28,13 +27,11 @@ open class SetType(
 
     }
 
-    override val genericParameterTypes: List<Type> = listOf(elementType)
+    override val genericParameterTypes: List<Type>
+        get() = GENERIC_PARAMETER_YPES
 
-    override fun withGenericsResolved(typeList: List<Type>) =
-        SetType(typeList[0], unparameterized = unparameterized() as SetType)
-
-    override fun isAssignableFrom(other: Type) = other is SetType && other.elementType == elementType
-
-    override fun equals(other: Any?): Boolean =
-        other is SetType && other.elementType == elementType && other !is MutableSetType
+    companion object {
+        val ELEMENT_TYPE_PARAMETER = TypeParameter("E")
+        val GENERIC_PARAMETER_YPES = listOf(ELEMENT_TYPE_PARAMETER)
+    }
 }
