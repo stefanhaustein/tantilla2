@@ -6,7 +6,7 @@ import org.kobjects.tantilla2.core.classifier.TraitDefinition
 import org.kobjects.tantilla2.core.definition.CodeFragment
 import org.kobjects.tantilla2.core.definition.DefinitionUpdatable
 import org.kobjects.tantilla2.core.definition.Definition
-import org.kobjects.tantilla2.core.definition.Scope
+import org.kobjects.tantilla2.core.scope.Scope
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.node.expression.UnresolvedNode
 import org.kobjects.tantilla2.core.control.ReturnSignal

@@ -1,17 +1,12 @@
 package org.kobjects.tantilla2.core.collection
 
 import org.kobjects.tantilla2.core.LocalRuntimeContext
-import org.kobjects.tantilla2.core.classifier.AdapterInstance
-import org.kobjects.tantilla2.core.classifier.NativeAdapter
 import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
-import org.kobjects.tantilla2.core.definition.AbsoluteRootScope
-import org.kobjects.tantilla2.core.definition.SystemRootScope
+import org.kobjects.tantilla2.core.scope.AbsoluteRootScope
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Parameter
-import org.kobjects.tantilla2.core.type.GenericTypeMap
 import org.kobjects.tantilla2.core.type.IntType
-import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.type.TypeParameter
 
 open class ListType(

@@ -1,15 +1,8 @@
 package org.kobjects.tantilla2.core.collection
 
-import org.kobjects.tantilla2.core.TraitMethodBody
-import org.kobjects.tantilla2.core.classifier.LazyImplDefinition
 import org.kobjects.tantilla2.core.classifier.NativeImplDefinition
-import org.kobjects.tantilla2.core.classifier.TraitDefinition
-import org.kobjects.tantilla2.core.classifier.TraitDefinition.Companion.vmtIndex
-import org.kobjects.tantilla2.core.definition.AbsoluteRootScope
-import org.kobjects.tantilla2.core.definition.Scope
-import org.kobjects.tantilla2.core.definition.SystemRootScope
-import org.kobjects.tantilla2.core.function.Callable
-import org.kobjects.tantilla2.core.function.FunctionDefinition
+import org.kobjects.tantilla2.core.scope.AbsoluteRootScope
+import org.kobjects.tantilla2.core.scope.Scope
 import org.kobjects.tantilla2.core.type.Type
 
 class IterableImpl(

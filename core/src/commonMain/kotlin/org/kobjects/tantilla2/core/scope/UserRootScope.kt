@@ -1,11 +1,14 @@
-package org.kobjects.tantilla2.core.definition
+package org.kobjects.tantilla2.core.scope
 
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.classifier.*
+import org.kobjects.tantilla2.core.definition.ContextOwner
+import org.kobjects.tantilla2.core.definition.Definition
+import org.kobjects.tantilla2.core.definition.DocStringUpdatable
 
 class UserRootScope(
     override val parentScope: SystemRootScope,
-) : Scope(), ContextOwner, DocStringUpdatable {
+) : UnitScope(parentScope), ContextOwner, DocStringUpdatable {
     override var docString = ""
     val staticFieldDefinitions = mutableListOf<FieldDefinition?>()
 

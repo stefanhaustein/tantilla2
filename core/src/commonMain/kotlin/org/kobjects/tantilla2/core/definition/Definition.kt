@@ -4,6 +4,10 @@ import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.SerializableCode
 import org.kobjects.tantilla2.core.node.Node
+import org.kobjects.tantilla2.core.scope.AbsoluteRootScope
+import org.kobjects.tantilla2.core.scope.Scope
+import org.kobjects.tantilla2.core.scope.SystemRootScope
+import org.kobjects.tantilla2.core.scope.UserRootScope
 import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.type.Typed
 
@@ -74,7 +78,8 @@ interface Definition : SerializableCode, Typed, Comparable<Definition> {
             || parentScope == writer.scope
             || parentScope == AbsoluteRootScope
             || parentScope is UserRootScope
-            || parentScope is SystemRootScope) {
+            || parentScope is SystemRootScope
+        ) {
             writer.append(name)
         } else {
             // Check for imports

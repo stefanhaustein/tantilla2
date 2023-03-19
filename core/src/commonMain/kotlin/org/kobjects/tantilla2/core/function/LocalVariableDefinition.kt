@@ -1,9 +1,9 @@
 package org.kobjects.tantilla2.core.function
 
 import org.kobjects.tantilla2.core.*
-import org.kobjects.tantilla2.core.definition.AbstractFieldDefinition
+import org.kobjects.tantilla2.core.scope.AbstractFieldDefinition
 import org.kobjects.tantilla2.core.definition.Definition
-import org.kobjects.tantilla2.core.definition.Scope
+import org.kobjects.tantilla2.core.scope.Scope
 import org.kobjects.tantilla2.core.type.Type
 
 class LocalVariableDefinition (

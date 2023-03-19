@@ -1,8 +1,7 @@
-package org.kobjects.tantilla2.core.definition
+package org.kobjects.tantilla2.core.scope
 
 import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.definition.Definition
-import org.kobjects.tantilla2.core.definition.Scope
 import org.kobjects.tantilla2.core.serializeCode
 
 abstract class AbstractFieldDefinition(

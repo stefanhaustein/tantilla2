@@ -2,8 +2,8 @@ package org.kobjects.tantilla2.testing
 
 import org.kobjects.tantilla2.core.system.Lock
 import org.kobjects.tantilla2.core.system.SystemAbstraction
-import org.kobjects.tantilla2.core.definition.UserRootScope
-import org.kobjects.tantilla2.core.definition.SystemRootScope
+import org.kobjects.tantilla2.core.scope.UserRootScope
+import org.kobjects.tantilla2.core.scope.SystemRootScope
 import org.kobjects.tantilla2.core.system.ThreadHandle
 
 object TestSystemAbstraction : SystemAbstraction {

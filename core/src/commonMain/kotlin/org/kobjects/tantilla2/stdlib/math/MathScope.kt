@@ -1,12 +1,12 @@
 package org.kobjects.tantilla2.stdlib.math
 
-import org.kobjects.tantilla2.core.definition.UnitDefinition
+import org.kobjects.tantilla2.core.scope.UnitScope
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.node.expression.FloatNode
 import org.kobjects.tantilla2.core.type.FloatType
 import kotlin.math.*
 
-object MathScope : UnitDefinition(null, "math") {
+object MathScope : UnitScope(null, "math") {
 
     init {
         defineNativeFunction(

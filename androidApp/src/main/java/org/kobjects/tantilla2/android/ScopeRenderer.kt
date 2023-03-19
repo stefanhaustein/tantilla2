@@ -15,9 +15,7 @@ import androidx.compose.ui.unit.dp
 import org.kobjects.tantilla2.android.model.TantillaViewModel
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
-import org.kobjects.tantilla2.core.classifier.StructDefinition
-import org.kobjects.tantilla2.core.definition.AbsoluteRootScope
-import org.kobjects.tantilla2.core.definition.SystemRootScope
+import org.kobjects.tantilla2.core.scope.AbsoluteRootScope
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable

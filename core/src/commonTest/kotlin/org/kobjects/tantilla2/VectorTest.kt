@@ -1,13 +1,6 @@
 package org.kobjects.tantilla2
 
-import org.kobjects.tantilla2.core.*
-import org.kobjects.tantilla2.core.definition.Scope
-import org.kobjects.tantilla2.core.parser.Parser
 import org.kobjects.tantilla2.testing.TantillaTest
-import org.kobjects.tantilla2.testing.TestSystemAbstraction
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 
 class StructTest : TantillaTest("""
         struct Vector:

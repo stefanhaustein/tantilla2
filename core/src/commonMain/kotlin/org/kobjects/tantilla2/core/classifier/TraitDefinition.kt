@@ -1,15 +1,14 @@
 package org.kobjects.tantilla2.core.classifier
 
-import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.TraitMethodBody
-import org.kobjects.tantilla2.core.definition.ContextOwner
 import org.kobjects.tantilla2.core.definition.Definition
-import org.kobjects.tantilla2.core.definition.Scope
-import org.kobjects.tantilla2.core.definition.UserRootScope
+import org.kobjects.tantilla2.core.scope.Scope
+import org.kobjects.tantilla2.core.scope.UserRootScope
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.FunctionDefinition
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Parameter
+import org.kobjects.tantilla2.core.scope.ScopeType
 import org.kobjects.tantilla2.core.type.*
 
 open class TraitDefinition(

@@ -17,10 +17,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.kobjects.tantilla2.android.model.TantillaViewModel
-import org.kobjects.tantilla2.core.definition.AbsoluteRootScope
+import org.kobjects.tantilla2.core.scope.AbsoluteRootScope
 import org.kobjects.tantilla2.core.definition.Definition
-import org.kobjects.tantilla2.core.definition.UserRootScope
-import org.kobjects.tantilla2.core.definition.SystemRootScope
+import org.kobjects.tantilla2.core.scope.UserRootScope
+import org.kobjects.tantilla2.core.scope.SystemRootScope
 
 @Composable
 fun RenderAppBar(

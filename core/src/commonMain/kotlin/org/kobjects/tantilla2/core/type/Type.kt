@@ -3,7 +3,7 @@ package org.kobjects.tantilla2.core.type
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.classifier.TraitDefinition.Companion.isConvertibleFrom
 import org.kobjects.tantilla2.core.definition.Definition
-import org.kobjects.tantilla2.core.definition.UserRootScope
+import org.kobjects.tantilla2.core.scope.UserRootScope
 
 
 /**

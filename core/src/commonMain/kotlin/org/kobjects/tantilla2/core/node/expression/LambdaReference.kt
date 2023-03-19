@@ -2,7 +2,6 @@ package org.kobjects.tantilla2.core.node.expression
 
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.LocalRuntimeContext
-import org.kobjects.tantilla2.core.definition.AbsoluteRootScope
 import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Callable

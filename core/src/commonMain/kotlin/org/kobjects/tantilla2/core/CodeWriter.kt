@@ -1,8 +1,8 @@
 package org.kobjects.tantilla2.core
 
 import org.kobjects.konsole.Ansi
-import org.kobjects.tantilla2.core.definition.AbsoluteRootScope
-import org.kobjects.tantilla2.core.definition.Scope
+import org.kobjects.tantilla2.core.scope.AbsoluteRootScope
+import org.kobjects.tantilla2.core.scope.Scope
 import org.kobjects.tantilla2.core.node.*
 import org.kobjects.tantilla2.core.type.Type
 import quote

@@ -1,7 +1,10 @@
-package org.kobjects.tantilla2.core.definition
+package org.kobjects.tantilla2.core.scope
 
 import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.core.*
+import org.kobjects.tantilla2.core.definition.CodeFragment
+import org.kobjects.tantilla2.core.definition.Definition
+import org.kobjects.tantilla2.core.definition.DefinitionUpdatable
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.node.expression.StaticReference
 import org.kobjects.tantilla2.core.node.expression.UnresolvedNode

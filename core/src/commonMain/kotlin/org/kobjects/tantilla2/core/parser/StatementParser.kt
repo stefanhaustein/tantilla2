@@ -1,19 +1,15 @@
 package org.kobjects.tantilla2.core.parser
 
 import org.kobjects.parserlib.tokenizer.ParsingException
-import org.kobjects.tantilla2.core.collection.IteratorTrait
 import org.kobjects.tantilla2.core.node.*
-import org.kobjects.tantilla2.core.collection.ListType
-import org.kobjects.tantilla2.core.collection.RangeType
 import org.kobjects.tantilla2.core.control.LoopControlSignal
-import org.kobjects.tantilla2.core.definition.AbsoluteRootScope
+import org.kobjects.tantilla2.core.scope.AbsoluteRootScope
 import org.kobjects.tantilla2.core.function.*
 import org.kobjects.tantilla2.core.node.expression.Apply
 import org.kobjects.tantilla2.core.node.expression.StaticReference
 import org.kobjects.tantilla2.core.type.NoneType
 import org.kobjects.tantilla2.core.node.statement.*
 import org.kobjects.tantilla2.core.type.GenericTypeMap
-import org.kobjects.tantilla2.core.type.IntType
 
 object StatementParser {
 

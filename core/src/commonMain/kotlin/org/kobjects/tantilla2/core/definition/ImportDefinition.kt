@@ -2,7 +2,7 @@ package org.kobjects.tantilla2.core.definition
 
 import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.core.CodeWriter
-import org.kobjects.tantilla2.core.type.NoneType
+import org.kobjects.tantilla2.core.scope.Scope
 import org.kobjects.tantilla2.core.type.Type
 
 class ImportDefinition(

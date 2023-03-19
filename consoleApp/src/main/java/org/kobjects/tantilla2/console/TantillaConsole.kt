@@ -1,14 +1,11 @@
 package org.kobjects.tantilla2.console
 
-import java.io.BufferedReader
-import java.io.InputStreamReader
-
 import org.kobjects.tantilla2.core.GlobalRuntimeContext
 import org.kobjects.tantilla2.core.system.Lock
 import org.kobjects.tantilla2.core.system.SystemAbstraction
 import org.kobjects.tantilla2.core.system.ThreadHandle
-import org.kobjects.tantilla2.core.definition.UserRootScope
-import org.kobjects.tantilla2.core.definition.SystemRootScope
+import org.kobjects.tantilla2.core.scope.UserRootScope
+import org.kobjects.tantilla2.core.scope.SystemRootScope
 
 // ./gradlew consoleApp:run -q --console=plain
 

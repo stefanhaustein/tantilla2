@@ -6,7 +6,7 @@ import org.kobjects.tantilla2.android.stdlib.GraphicsSystemImpl
 import org.kobjects.tantilla2.android.stdlib.PenImpl
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.classifier.NativePropertyDefinition
-import org.kobjects.tantilla2.core.definition.SystemRootScope
+import org.kobjects.tantilla2.core.scope.SystemRootScope
 import org.kobjects.tantilla2.stdlib.graphics.GraphicsScope
 import org.kobjects.tantilla2.stdlib.graphics.ScreenDefinition
 

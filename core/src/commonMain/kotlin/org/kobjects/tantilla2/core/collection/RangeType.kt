@@ -1,11 +1,9 @@
 package org.kobjects.tantilla2.core.collection
 
-import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.classifier.NativeTypeDefinition
-import org.kobjects.tantilla2.core.definition.AbsoluteRootScope
-import org.kobjects.tantilla2.core.definition.Scope
+import org.kobjects.tantilla2.core.scope.AbsoluteRootScope
+import org.kobjects.tantilla2.core.scope.Scope
 import org.kobjects.tantilla2.core.type.IntType
-import org.kobjects.tantilla2.core.type.Type
 
 
 object RangeType : NativeTypeDefinition(null, "Range", "A range of integers"), CollectionType {

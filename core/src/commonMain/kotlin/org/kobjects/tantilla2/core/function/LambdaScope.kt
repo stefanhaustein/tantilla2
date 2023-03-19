@@ -1,7 +1,9 @@
 package org.kobjects.tantilla2.core.function
 
 import org.kobjects.tantilla2.core.definition.Definition
-import org.kobjects.tantilla2.core.definition.Scope
+import org.kobjects.tantilla2.core.scope.Scope
+import org.kobjects.tantilla2.core.scope.ScopeType
+import org.kobjects.tantilla2.core.type.Type
 
 class LambdaScope(
     override val parentScope: Scope?
@@ -14,4 +16,7 @@ class LambdaScope(
 
     override val supportsLocalVariables: Boolean
         get() = true
+
+    override val type: Type
+        get() = ScopeType(this)
 }

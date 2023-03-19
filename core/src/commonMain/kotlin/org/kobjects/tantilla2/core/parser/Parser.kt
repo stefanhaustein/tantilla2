@@ -9,6 +9,8 @@ import org.kobjects.tantilla2.core.node.statement.BlockNode
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.node.statement.Comment
 import org.kobjects.tantilla2.core.node.statement.WrappedStatement
+import org.kobjects.tantilla2.core.scope.Scope
+import org.kobjects.tantilla2.core.scope.UserRootScope
 import org.kobjects.tantilla2.core.type.Type
 
 object Parser {

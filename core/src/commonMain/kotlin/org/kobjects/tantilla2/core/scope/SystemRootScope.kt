@@ -1,19 +1,15 @@
-package org.kobjects.tantilla2.core.definition
+package org.kobjects.tantilla2.core.scope
 
 import org.kobjects.tantilla2.core.*
-import org.kobjects.tantilla2.core.collection.*
-import org.kobjects.tantilla2.core.node.LeafNode
-import org.kobjects.tantilla2.core.node.expression.StrNode
-import org.kobjects.tantilla2.core.control.LoopControlSignal
+import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.function.*
 import org.kobjects.tantilla2.core.type.*
-import org.kobjects.tantilla2.stdlib.math.MathScope
 import org.kobjects.tantilla2.core.system.SystemAbstraction
 
 class SystemRootScope(
     val systemAbstraction: SystemAbstraction,
     val runStateCallback: (GlobalRuntimeContext) -> Unit = {}
-) : Scope() {
+) : UnitScope(AbsoluteRootScope, "<SystemRootScope>", "System Root Scope") {
 
     init {
         defineNativeFunction("print",

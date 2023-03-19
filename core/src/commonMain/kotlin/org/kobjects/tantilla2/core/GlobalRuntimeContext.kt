@@ -3,7 +3,7 @@ package org.kobjects.tantilla2.core
 import org.kobjects.tantilla2.core.control.TantillaRuntimeException
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.definition.ContextOwner
-import org.kobjects.tantilla2.core.definition.UserRootScope
+import org.kobjects.tantilla2.core.scope.UserRootScope
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.LambdaScope

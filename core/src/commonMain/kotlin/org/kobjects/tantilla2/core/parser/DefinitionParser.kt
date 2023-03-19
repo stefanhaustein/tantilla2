@@ -1,6 +1,5 @@
 import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.parserlib.tokenizer.Token
-import org.kobjects.tantilla2.core.definition.FieldDefinition
 import org.kobjects.tantilla2.core.classifier.LazyImplDefinition
 import org.kobjects.tantilla2.core.classifier.StructDefinition
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
@@ -11,6 +10,7 @@ import org.kobjects.tantilla2.core.parser.Parser.indent
 import org.kobjects.tantilla2.core.parser.ParsingContext
 import org.kobjects.tantilla2.core.parser.TantillaScanner
 import org.kobjects.tantilla2.core.parser.TokenType
+import org.kobjects.tantilla2.core.scope.*
 
 object DefinitionParser {
 
@@ -113,7 +113,7 @@ object DefinitionParser {
                 val docString = Parser.readDocString(tokenizer)
                 val definition = when (kind) {
                     "struct" -> StructDefinition(context.scope, name, docString = docString)
-                    "unit" -> UnitDefinition(context.scope, name, docString = docString)
+                    "unit" -> UnitScope(context.scope, name, docString = docString)
                     else -> TraitDefinition(context.scope, name, docString = docString)
                 }
                 Parser.parseDefinitions(tokenizer, ParsingContext(definition, context.depth + 1))

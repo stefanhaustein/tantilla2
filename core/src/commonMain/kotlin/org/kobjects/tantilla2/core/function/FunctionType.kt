@@ -1,11 +1,10 @@
 package org.kobjects.tantilla2.core.function
 
 import org.kobjects.tantilla2.core.CodeWriter
-import org.kobjects.tantilla2.core.definition.UserRootScope
+import org.kobjects.tantilla2.core.scope.UserRootScope
 import org.kobjects.tantilla2.core.type.GenericTypeMap
 import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.type.NoneType
-import org.kobjects.tantilla2.core.type.PlaceHolderType
 
 interface FunctionType : Type {
     val returnType: Type

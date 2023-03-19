@@ -1,4 +1,4 @@
-package org.kobjects.tantilla2.core.definition
+package org.kobjects.tantilla2.core.scope
 
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.Evaluable
@@ -15,13 +15,7 @@ import org.kobjects.tantilla2.core.node.expression.StrNode
 import org.kobjects.tantilla2.core.type.*
 import org.kobjects.tantilla2.stdlib.math.MathScope
 
-object AbsoluteRootScope : Scope() {
-    override val parentScope: Scope?
-        get() = null
-    override val kind: Definition.Kind
-        get() = Definition.Kind.UNIT
-    override val name: String
-        get() = "Absolute Root Scope"
+object AbsoluteRootScope : UnitScope(null, "<Absolute Root Scope>", "Absolute Root Scope") {
 
     val iteratorTrait = IteratorTrait()
     val iterableTrait = IterableTrait()

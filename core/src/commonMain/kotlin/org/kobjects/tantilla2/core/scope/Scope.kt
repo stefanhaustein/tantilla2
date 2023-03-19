@@ -1,16 +1,17 @@
-package org.kobjects.tantilla2.core.definition
+package org.kobjects.tantilla2.core.scope
 
 import org.kobjects.parserlib.tokenizer.ParsingException
 import org.kobjects.tantilla2.core.CodeWriter
 import org.kobjects.tantilla2.core.LocalRuntimeContext
+import org.kobjects.tantilla2.core.definition.CodeFragment
+import org.kobjects.tantilla2.core.definition.Definition
+import org.kobjects.tantilla2.core.definition.DefinitionUpdatable
+import org.kobjects.tantilla2.core.definition.UnparseableDefinition
 import org.kobjects.tantilla2.core.function.*
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.parser.Parser
 import org.kobjects.tantilla2.core.parser.ParsingContext
 import org.kobjects.tantilla2.core.parser.TantillaScanner
-import org.kobjects.tantilla2.core.type.MetaType
-import org.kobjects.tantilla2.core.type.NoneType
-import org.kobjects.tantilla2.core.type.ScopeType
 import org.kobjects.tantilla2.core.type.Type
 
 abstract class Scope(

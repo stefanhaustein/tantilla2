@@ -3,7 +3,7 @@ package org.kobjects.tantilla2.stdlib.graphics
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.LocalRuntimeContext
 import org.kobjects.tantilla2.core.system.ThreadHandle
-import org.kobjects.tantilla2.core.definition.UnitDefinition
+import org.kobjects.tantilla2.core.scope.UnitScope
 import org.kobjects.tantilla2.core.type.FloatType
 import org.kobjects.tantilla2.core.type.IntType
 import org.kobjects.tantilla2.core.type.NoneType
@@ -12,7 +12,7 @@ import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Parameter
 
-class ScreenDefinition(graphicsScope: GraphicsScope) : UnitDefinition(null, "screen") {
+class ScreenDefinition(graphicsScope: GraphicsScope) : UnitScope(null, "screen") {
 
     init {
         add(

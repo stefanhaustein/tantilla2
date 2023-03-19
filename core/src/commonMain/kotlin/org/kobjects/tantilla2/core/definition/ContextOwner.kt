@@ -1,6 +1,8 @@
 package org.kobjects.tantilla2.core.definition
 
 import org.kobjects.tantilla2.core.LocalRuntimeContext
+import org.kobjects.tantilla2.core.scope.Scope
+import org.kobjects.tantilla2.core.scope.UserRootScope
 import toLiteral
 
 /**

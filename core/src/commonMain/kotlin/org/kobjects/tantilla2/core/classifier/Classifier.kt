@@ -1,11 +1,9 @@
 package org.kobjects.tantilla2.core.classifier
 
 import org.kobjects.tantilla2.core.CodeWriter
-import org.kobjects.tantilla2.core.definition.Definition
-import org.kobjects.tantilla2.core.definition.Scope
+import org.kobjects.tantilla2.core.scope.Scope
 import org.kobjects.tantilla2.core.definition.DocStringUpdatable
-import org.kobjects.tantilla2.core.definition.UserRootScope
-import org.kobjects.tantilla2.core.function.FunctionType
+import org.kobjects.tantilla2.core.scope.UserRootScope
 import org.kobjects.tantilla2.core.type.GenericTypeMap
 import org.kobjects.tantilla2.core.type.MetaType
 import org.kobjects.tantilla2.core.type.Type

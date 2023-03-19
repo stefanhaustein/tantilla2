@@ -1,6 +1,6 @@
 package org.kobjects.tantilla2.core.parser
 
-import org.kobjects.tantilla2.core.definition.Scope
+import org.kobjects.tantilla2.core.scope.Scope
 import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.classifier.LazyImplDefinition
 import org.kobjects.tantilla2.core.classifier.TraitDefinition
@@ -9,9 +9,7 @@ import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.function.Parameter
 import org.kobjects.tantilla2.core.node.Node
 import org.kobjects.tantilla2.core.collection.ListType
-import org.kobjects.tantilla2.core.type.GenericTypeMap
 import org.kobjects.tantilla2.core.type.NoneType
-import org.kobjects.tantilla2.core.type.TypeParameter
 
 object TypeParser {
 

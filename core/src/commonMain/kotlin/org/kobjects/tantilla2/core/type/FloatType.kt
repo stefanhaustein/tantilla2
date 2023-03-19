@@ -1,11 +1,7 @@
 package org.kobjects.tantilla2.core.type
 
-import org.kobjects.tantilla2.core.classifier.NativeStructDefinition
 import org.kobjects.tantilla2.core.classifier.NativeTypeDefinition
-import org.kobjects.tantilla2.core.definition.AbsoluteRootScope
 import org.kobjects.tantilla2.core.function.Parameter
-import org.kobjects.tantilla2.core.node.expression.As
-import org.kobjects.tantilla2.core.node.expression.FloatNode
 import kotlin.math.*
 
 object FloatType : NativeTypeDefinition(

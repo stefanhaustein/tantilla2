@@ -24,6 +24,9 @@ import org.kobjects.tantilla2.android.R
 import org.kobjects.tantilla2.core.control.TantillaRuntimeException
 import org.kobjects.tantilla2.core.definition.*
 import org.kobjects.tantilla2.core.function.FunctionDefinition
+import org.kobjects.tantilla2.core.scope.Scope
+import org.kobjects.tantilla2.core.scope.SystemRootScope
+import org.kobjects.tantilla2.core.scope.UserRootScope
 import java.io.File
 import java.nio.charset.StandardCharsets
 import kotlin.Exception
