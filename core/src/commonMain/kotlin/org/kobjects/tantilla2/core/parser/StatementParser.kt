@@ -132,16 +132,18 @@ object StatementParser {
         val iteratorName = tokenizer.consume(TokenType.IDENTIFIER) { "Loop variable name expected." }.text
         tokenizer.consume("in")
         val genericTypeMap = GenericTypeMap()
-        val iterableExpression = TantillaExpressionParser.parseExpression(tokenizer, context) // , AbsoluteRootScope.iterableTrait, genericTypeMap)
+        val iterableExpression = TantillaExpressionParser.parseExpression(tokenizer, context, AbsoluteRootScope.iterableTrait.mapTypeParametersToTypeVariables(genericTypeMap), genericTypeMap)
 
-        println("GenericTypeMap: $genericTypeMap")
 
         tokenizer.consume(":")
-/*
+
 
         val iterableType = iterableExpression.returnType
 
         val elementType = iterableType.genericParameterTypes[0]
+
+        println("***** ParseFor --- Iterable type: $iterableType; elementType: $elementType; GenericTypeMap: $genericTypeMap")
+
 
         val lambdaScope = LambdaScope(context.scope) // resolvedType = type)
         lambdaScope.declareLocalVariable(iteratorName, elementType, false)
@@ -156,15 +158,18 @@ object StatementParser {
         )
 
         return Apply(
-            StaticReference(context.scope.resolveStaticOrError("for2", true), false),
+            StaticReference(context.scope.resolveStaticOrError("for", true), false),
             NoneType,
             listOf(iterableExpression, closure),
-            listOf(),
+            listOf(
+                Apply.ParameterSerialization(iteratorName, iterableExpression, Apply.ParameterSerialization.Format.IN),
+                Apply.ParameterSerialization("", closure, Apply.ParameterSerialization.Format.TRAILING_CLOSURE)
+            ),
         false, false)
 
 
 
-*/
+/*
 
 
         val iterableType = iterableExpression.returnType
@@ -180,6 +185,8 @@ object StatementParser {
 
 
         return ForNode(iteratorName, iteratorIndex, iterableExpression, body)
+
+ */
     }
 
     fun parseIf(tokenizer: TantillaScanner, context: ParsingContext): IfNode {

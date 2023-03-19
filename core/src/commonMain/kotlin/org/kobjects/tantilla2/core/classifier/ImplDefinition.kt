@@ -51,6 +51,29 @@ abstract class ImplDefinition(
         get() = Definition.Kind.IMPL
 
 
+    fun forType(type: Type): ImplDefinition {
+        if (scope !is Type) {
+            return this
+        }
+        val scopeType = scope as Type
+        val map = mutableMapOf<Type, Type>()
+        for (i in type.genericParameterTypes.indices) {
+             map[scopeType.genericParameterTypes[i]] = type.genericParameterTypes[i]
+        }
 
+        println("Impl type map: $map")
+
+        val resolvedTrait = trait.mapTypes { map[it] ?: it } as TraitDefinition
+
+        val resolvedImpl = NativeImplDefinition(parentScope, resolvedTrait, scope, docString)
+
+        resolvedImpl.vmt = vmt
+        /*
+        for (def in this) {
+            resolvedImpl.add(def.withTypesMapped(resolvedImpl) { map[it] ?: it })
+        }*/
+
+        return resolvedImpl
+    }
 
 }

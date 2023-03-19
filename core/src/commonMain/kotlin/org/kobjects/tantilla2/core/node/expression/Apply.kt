@@ -60,10 +60,16 @@ class Apply(
         } else {
             writer.appendCode(base)
         }
+
+        for (parameter in parameterSerialization.filter { it.format == ParameterSerialization.Format.IN }) {
+            writer.append(" ")
+            writer.appendInfix(parentPrcedence, RawIdentifier(parameter.named), "in", Precedence.FOR_IN, parameter.node)
+        }
+
         val nodeList = mutableListOf<Node>()
         val prefixList = mutableListOf<String>()
 
-        for (parameter in parameterSerialization.filter { !it.asTrailingClosure }) {
+        for (parameter in parameterSerialization.filter { it.format == ParameterSerialization.Format.REGULAR }) {
             nodeList.add(parameter.node)
             if (parameter.named.isNotEmpty()) {
                 prefixList.add(parameter.named + " = ")
@@ -75,11 +81,11 @@ class Apply(
             writer.appendInBrackets("(", ")") {
                 writer.appendList(nodeList, prefixList)
             }
-        } else {
+        } else if (nodeList.isNotEmpty()) {
             writer.append(" ")
             writer.appendList(nodeList, prefixList)
         }
-        for (parameter in parameterSerialization.filter { it.asTrailingClosure }) {
+        for (parameter in parameterSerialization.filter { it.format == ParameterSerialization.Format.TRAILING_CLOSURE }) {
             if (parameter.named.isNotEmpty()) {
                 writer.newline()
                 writer.append(parameter.named)
@@ -106,8 +112,13 @@ class Apply(
     data class ParameterSerialization(
         val named: String,
         val node: Node,
-        val asTrailingClosure: Boolean = false
-    )
+        val format: Format = Format.REGULAR
+    ) {
+        enum class Format {
+            REGULAR, TRAILING_CLOSURE, IN
+        }
+
+    }
 
     override fun requireAssignability(): Node {
         require(asMethod) { "Method required for assignment." }

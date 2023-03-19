@@ -57,7 +57,7 @@ open class TraitDefinition(
                 userRootScope.classToTrait
                     .getOrPut(impl.scope) { mutableMapOf() }[impl.trait] = impl
                 userRootScope.traitToClass
-                    .getOrPut(impl.trait) { mutableMapOf() }[impl.scope] = impl
+                    .getOrPut(impl.trait.unparameterized() as TraitDefinition) { mutableMapOf() }[impl.scope] = impl
                 userRootScope.unresolvedImpls.remove(impl)
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -65,14 +65,14 @@ open class TraitDefinition(
         }
 
         // TODO: Figure out how to fix this properly for the static case
-        val unparameterizedType = if (type is Scope) type.unparameterized ?: type else (type as ScopeType).scope
+        val unparameterizedType = if (type is Scope) type.unparameterized() else (type as ScopeType).scope
 
-        val unparameterizedTrait = this.unparameterized ?: this
-        val allImplsForTrait = userRootScope.traitToClass[unparameterizedTrait]
-
+        val allImplsForTrait = userRootScope.traitToClass[unparameterized()]
         val impl = allImplsForTrait?.get(unparameterizedType)
 
-        return impl
+        println("unparameterized type: $unparameterizedType; trait:$this unparameterized trait: ${unparameterized()} Impls for trait: $allImplsForTrait; impl found: $impl")
+
+        return impl?.forType(type)
     }
 
     fun createVmt(resolveMethod: (Definition) -> Callable): List<Callable> {

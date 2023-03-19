@@ -47,11 +47,11 @@ object AbsoluteRootScope : Scope() {
         add(iteratorTrait)
         add(iterableTrait)
 
-        add(IterableImpl(this, listType, ""))
-        add(IterableImpl(this, MutableListType, ""))
+        add(IterableImpl(this, listType, listType.genericParameterTypes[0], ""))
+        add(IterableImpl(this, MutableListType, MutableListType.genericParameterTypes[0], ""))
 
         add(RangeType)
-        add(IterableImpl(this, RangeType, ""))
+        add(IterableImpl(this, RangeType, IntType,""))
 
 
 
@@ -151,7 +151,7 @@ object AbsoluteRootScope : Scope() {
 
         defineNativeGenericFunction(
             listOf(iterableTrait.elementType),
-            "for2",
+            "for",
             "Iterate over the loop expression in the body.",
             NoneType,
             Parameter("iterable", iterableTrait),

@@ -1,6 +1,7 @@
 package org.kobjects.tantilla2.core.classifier
 
 import org.kobjects.tantilla2.core.CodeWriter
+import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.definition.Scope
 import org.kobjects.tantilla2.core.definition.DocStringUpdatable
 import org.kobjects.tantilla2.core.definition.UserRootScope
@@ -32,6 +33,8 @@ abstract class Classifier : Scope(), Type, DocStringUpdatable {
                 && other.parentScope == parentScope
                 && other.name == name
                 && other.genericParameterTypes == genericParameterTypes
+
+    override fun hashCode(): Int = parentScope.hashCode() xor name.hashCode() xor genericParameterTypes.hashCode()
 
     override fun mapTypes(mapping: (Type) -> Type): Type {
         if (mapping(this) != this) {

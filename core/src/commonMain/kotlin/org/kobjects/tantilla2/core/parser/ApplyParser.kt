@@ -130,7 +130,7 @@ object ApplyParser {
                         )
                         parameterExpressions[i] = node
                         missingFunctionParameter.remove(expectedParameters[i].name)
-                        parameterSerialization.add(Apply.ParameterSerialization("", node, true))
+                        parameterSerialization.add(Apply.ParameterSerialization("", node, Apply.ParameterSerialization.Format.TRAILING_CLOSURE))
                         break
                     }
                 }
@@ -150,7 +150,7 @@ object ApplyParser {
                         genericTypeMap
                     )
                 }
-                parameterSerialization.add(Apply.ParameterSerialization(name, expression, true))
+                parameterSerialization.add(Apply.ParameterSerialization(name, expression, Apply.ParameterSerialization.Format.TRAILING_CLOSURE))
                 if (expectedParameters[index].isVararg) {
                     varargIndex = index
                     varargs.add(expression)

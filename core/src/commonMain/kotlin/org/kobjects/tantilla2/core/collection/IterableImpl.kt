@@ -10,12 +10,14 @@ import org.kobjects.tantilla2.core.definition.Scope
 import org.kobjects.tantilla2.core.definition.SystemRootScope
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.FunctionDefinition
+import org.kobjects.tantilla2.core.type.Type
 
 class IterableImpl(
     parentScope: Scope,
     scope: Scope,
+    elementType: Type,
     docString: String
-) : NativeImplDefinition(parentScope, AbsoluteRootScope.iterableTrait, scope, docString)  {
+) : NativeImplDefinition(parentScope, AbsoluteRootScope.iterableTrait.withElementType(elementType), scope, docString)  {
 
   /*  init {
         val vmt = Array<Callable?>(trait.traitIndex) { null }

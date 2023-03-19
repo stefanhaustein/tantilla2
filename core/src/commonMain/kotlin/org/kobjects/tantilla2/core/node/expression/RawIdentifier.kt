@@ -6,7 +6,7 @@ import org.kobjects.tantilla2.core.node.LeafNode
 import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.type.NoneType
 
-class Identifier(val name: String) : LeafNode() {
+class RawIdentifier(val name: String) : LeafNode() {
 
     override fun eval(context: LocalRuntimeContext) = throw UnsupportedOperationException()
 

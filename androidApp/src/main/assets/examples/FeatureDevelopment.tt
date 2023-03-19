@@ -1,5 +1,5 @@
 def main():
-  let list = List[Int](1, 2, 3)  #range(1, 4)
+  let list = range(1, 4)
 
   print list
 

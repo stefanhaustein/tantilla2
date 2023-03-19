@@ -96,7 +96,7 @@ interface Type {
                 if (isConvertibleFrom(actualType, allowAs)) {
                     return this
                 }
-                throw IllegalArgumentException("Type mismatch. Expected: $this unparameterized:{${this.unparameterized()}} actual: $actualType  ${allowAs!!.traitToClass[this.unparameterized ?: this]}")
+                throw IllegalArgumentException("Type mismatch. Expected: $this (unparameterized:{${this.unparameterized()}); actual: $actualType  ${allowAs!!.traitToClass[this.unparameterized ?: this]}")
              }
             throw IllegalArgumentException("Type mismatch. Expected: $this actual: $actualType")
         }

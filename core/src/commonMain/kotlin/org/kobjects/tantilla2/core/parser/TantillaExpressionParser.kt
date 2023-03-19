@@ -47,7 +47,8 @@ object TantillaExpressionParser {
 
         if (resolvedType is TraitDefinition) {
             val impl = resolvedType.requireImplementationFor(context.scope.userRootScope(), actualType)
-            return As(expr, impl, resolvedType, implicit = true)
+            println("Constructing 'as' with type ${impl.trait}")
+            return As(expr, impl, impl.trait, implicit = true)
         }
 
         throw IllegalArgumentException("Can't convert $expr with type '${expr.returnType}' to '$resolvedType'")
@@ -116,6 +117,9 @@ object TantillaExpressionParser {
         // Method in function form
         if (tokenizer.tryConsume("(") && tokenizer.current.text != ")") {
             val firstParameter = parseExpression(tokenizer, context)
+            if (firstParameter.returnType !is Scope) {
+                throw tokenizer.exception("Return type ${firstParameter.returnType} of $firstParameter is not a Scope!")
+            }
             val baseType = firstParameter.returnType as Scope
             val definition = baseType[name]
             if (!tokenizer.tryConsume(",") && tokenizer.current.text != ")") {

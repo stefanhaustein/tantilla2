@@ -30,7 +30,7 @@ class PropertyReference(
     }
 
     override fun serializeCode(writer: CodeWriter, parentPrecedence: Int) {
-        writer.appendInfix(parentPrecedence, base, ".", Precedence.DOT, Identifier(definition.name))
+        writer.appendInfix(parentPrecedence, base, ".", Precedence.DOT, RawIdentifier(definition.name))
     }
 
     override fun requireAssignability(): Node {
