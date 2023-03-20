@@ -16,7 +16,7 @@ import org.kobjects.tantilla2.core.type.Type
 
 abstract class Scope(
 ): Definition, Iterable<Definition> {
-    private val definitions = mutableMapOf<String, Definition>()
+    private val definitions by lazy { initDefinitions() }
     val locals = mutableListOf<String>()
 
     open val supportsMethods: Boolean
@@ -24,6 +24,8 @@ abstract class Scope(
 
     open val supportsLocalVariables: Boolean
         get() = false
+
+    open fun initDefinitions() = mutableMapOf<String, Definition>()
 
     fun add(definition: Definition) {
         definitions[definition.name] = definition

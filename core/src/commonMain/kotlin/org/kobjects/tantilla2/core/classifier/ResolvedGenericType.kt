@@ -8,7 +8,7 @@ import org.kobjects.tantilla2.core.function.FunctionType
 import org.kobjects.tantilla2.core.type.Type
 
 class ResolvedGenericType(
-    override val unparameterized: Classifier,
+    val unparameterized: Classifier,
     override val genericParameterTypes: List<Type>
 ) : Classifier(), Callable {
     override val type: FunctionType
@@ -32,21 +32,30 @@ class ResolvedGenericType(
             throw UnsupportedOperationException()
         }
 
-    init {
+    fun getTypeMap(): Map<Type, Type> {
         val map = mutableMapOf<Type, Type>()
 
         for (i in unparameterized.genericParameterTypes.indices) {
             map[unparameterized.genericParameterTypes[i]] = genericParameterTypes[i]
         }
         map[unparameterized] = this
+        return map.toMap()
+    }
 
-        type = unparameterized.type.mapTypes{ map[it] ?: it } as FunctionType
-
-        println("********* type: $type; map: $map")
-
+    override fun initDefinitions(): MutableMap<String, Definition> {
+        val map = getTypeMap()
+        val definitions = mutableMapOf<String, Definition>()
         for (member in unparameterized) {
-            add(member.withTypesMapped(this) { map[it] ?: it })
+            definitions[member.name] = member.withTypesMapped(this) { map[it] ?: it }
         }
+        return definitions
+    }
+
+    override fun unparameterized(): Classifier = unparameterized
+
+    init {
+        val map = getTypeMap()
+        type = unparameterized.type.mapTypes{ map[it] ?: it } as FunctionType
     }
 
 

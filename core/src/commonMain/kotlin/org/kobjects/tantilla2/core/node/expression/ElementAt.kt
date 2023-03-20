@@ -29,7 +29,7 @@ class ElementAt(
     }
 
     override fun requireAssignability(): Node {
-        val baseType = baseExpr.returnType.unparameterized ?: baseExpr.returnType
+        val baseType = baseExpr.returnType.unparameterized()
         if (baseType !is MutableListType && baseType !is MutableMapType) {
             throw IllegalArgumentException("MutableMap or MutableList required for assignment but got type '$baseType' for expression '$baseExpr'")
         }
@@ -50,7 +50,7 @@ class ElementAt(
     }
 
     override val returnType: Type
-        get() = when(baseExpr.returnType.unparameterized ?: baseExpr.returnType) {
+        get() = when(baseExpr.returnType.unparameterized()) {
             StrType -> StrType
             is ListType -> baseExpr.returnType.genericParameterTypes[0]
             is MapType -> baseExpr.returnType.genericParameterTypes[1]
