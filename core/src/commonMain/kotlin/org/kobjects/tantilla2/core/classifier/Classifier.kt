@@ -106,5 +106,16 @@ abstract class Classifier : Scope(), Type, DocStringUpdatable {
     override fun unparameterized(): Classifier = this
 
 
+    override fun initDefinitions(): MutableMap<String, Definition> {
+        val definitions = mutableMapOf<String, Definition>()
+        val map = getTypeMap()
+        if (map.isNotEmpty()) {
+            println("######## initDefinitions for $name: $map")
+            for (member in unparameterized()) {
+                definitions[member.name] = member.withTypesMapped(this) { map[it] ?: it }
+            }
+        }
+        return definitions
+    }
 
 }

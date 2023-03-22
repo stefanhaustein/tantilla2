@@ -8,7 +8,7 @@ import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.type.TypeParameter
 
 class IteratorTrait(
-    val elementType: Type = TypeParameter("T"),
+    val elementType: Type = TYPE_PARAMETER,
     override val unparameterized: IteratorTrait? = null,
 ) : TraitDefinition(null, "Iterator", "Able to iterate a sequence of elements", listOf(elementType)) {
 
@@ -35,6 +35,8 @@ class IteratorTrait(
     }
 
     companion object {
+        val TYPE_PARAMETER = TypeParameter("E")
+
         fun createAdapter(iterator: Iterator<Any>) =
             NativeAdapter(iterator) { self, index, _ ->
                 when(index) {

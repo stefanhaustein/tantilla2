@@ -4,8 +4,10 @@ import org.kobjects.tantilla2.core.*
 import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.function.Callable
 import org.kobjects.tantilla2.core.function.FunctionType
+import org.kobjects.tantilla2.core.scope.Scope
+import org.kobjects.tantilla2.core.type.Type
 
-class NativeTraitMethodDefinition(
+open class NativeTraitMethodDefinition(
     override val parentScope: TraitDefinition,
     override val name: String,
     override var docString: String,
@@ -43,4 +45,7 @@ class NativeTraitMethodDefinition(
         throw UnsupportedOperationException()
 
     override fun toString() = "def $name$type"
+
+    override fun withTypesMapped(newParent: Scope, mapping: (Type) -> Type) =
+        ParameterizedTraitMethodDefinition(newParent as TraitDefinition, this, mapping)
 }
