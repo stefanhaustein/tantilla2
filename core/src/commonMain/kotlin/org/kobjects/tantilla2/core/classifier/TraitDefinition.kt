@@ -16,14 +16,13 @@ open class TraitDefinition(
     override val name: String,
     override var docString: String,
     override val genericParameterTypes: List<Type> = listOf(),
-    open val unparameterized: TraitDefinition? = null
 ) : Classifier() {
 
     // The current vmt index. Determines the vmt size
     var traitIndex = 0
 
     override fun withGenericsResolved(resolved: List<Type>): TraitDefinition {
-        return TraitDefinition(parentScope, name, docString, resolved, unparameterized ?: this)
+        return ParameterizedTraitDefinition(this, resolved)
     }
 
 
@@ -83,8 +82,6 @@ open class TraitDefinition(
         }
         return vmt.toList() as List<Callable>
     }
-
-    override fun unparameterized(): TraitDefinition = unparameterized ?: this
 
 
     companion object {

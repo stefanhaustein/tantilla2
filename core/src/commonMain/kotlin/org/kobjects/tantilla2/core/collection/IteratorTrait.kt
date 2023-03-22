@@ -8,8 +8,8 @@ import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.type.TypeParameter
 
 class IteratorTrait(
-    val elementType: Type = TYPE_PARAMETER,
-    override val unparameterized: IteratorTrait? = null,
+     elementType: Type = TYPE_PARAMETER,
+    val unparameterized: IteratorTrait? = null,
 ) : TraitDefinition(null, "Iterator", "Able to iterate a sequence of elements", listOf(elementType)) {
 
 
@@ -17,6 +17,10 @@ class IteratorTrait(
 
     override fun withGenericsResolved(genericTypeList: List<Type>) =
         withElementType(genericTypeList[0])
+
+
+    override fun unparameterized(): TraitDefinition = unparameterized ?: this
+
 
     init {
         if (elementType !is TypeParameter && unparameterized == null) {
