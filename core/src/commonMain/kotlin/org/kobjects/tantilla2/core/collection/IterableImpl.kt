@@ -10,7 +10,7 @@ class IterableImpl(
     scope: Scope,
     elementType: Type,
     docString: String
-) : NativeImplDefinition(parentScope, AbsoluteRootScope.iterableTrait.withElementType(elementType), scope, docString)  {
+) : NativeImplDefinition(parentScope, AbsoluteRootScope.iterableTrait.withGenericsResolved(listOf(elementType)), scope, docString)  {
 
   /*  init {
         val vmt = Array<Callable?>(trait.traitIndex) { null }

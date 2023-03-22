@@ -1,6 +1,7 @@
 package org.kobjects.tantilla2.core.classifier
 
 import org.kobjects.tantilla2.core.CodeWriter
+import org.kobjects.tantilla2.core.definition.Definition
 import org.kobjects.tantilla2.core.scope.Scope
 import org.kobjects.tantilla2.core.definition.DocStringUpdatable
 import org.kobjects.tantilla2.core.scope.UserRootScope
@@ -52,7 +53,7 @@ abstract class Classifier : Scope(), Type, DocStringUpdatable {
     }
 
     override fun withGenericsResolved(genericTypeList: List<Type>): Classifier =
-        ResolvedGenericType(unparameterized() as Classifier, genericTypeList)
+        ParameterizedStructDefinition(unparameterized() as Classifier, genericTypeList)
 
 
     override fun resolveGenericsImpl(
@@ -79,5 +80,31 @@ abstract class Classifier : Scope(), Type, DocStringUpdatable {
 
         return withGenericsResolved(resolvedParameters)
     }
+
+    fun getTypeMap(): Map<Type, Type> {
+        if (unparameterized() == this) {
+            return emptyMap()
+        }
+        val map = mutableMapOf<Type, Type>()
+
+        for (i in unparameterized().genericParameterTypes.indices) {
+            val original = unparameterized().genericParameterTypes[i]
+            val replacement = genericParameterTypes[i]
+            if (original != replacement) {
+                map[original] = replacement
+            }
+        }
+        if (map.isEmpty()) {
+            return emptyMap()
+        }
+
+        map[unparameterized()] = this
+        return map.toMap()
+    }
+
+
+    override fun unparameterized(): Classifier = this
+
+
 
 }

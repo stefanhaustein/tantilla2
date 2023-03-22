@@ -144,12 +144,12 @@ object AbsoluteRootScope : UnitScope(null, "<Absolute Root Scope>", "Absolute Ro
         }
 
         defineNativeGenericFunction(
-            listOf(iterableTrait.elementType),
+            listOf(iterableTrait.genericParameterTypes[0]),
             "for",
             "Iterate over the loop expression in the body.",
             NoneType,
             Parameter("iterable", iterableTrait),
-            Parameter("body", FunctionType.Impl(NoneType, listOf(Parameter("i", iterableTrait.elementType)))),
+            Parameter("body", FunctionType.Impl(NoneType, listOf(Parameter("i", iterableTrait.genericParameterTypes[0])))),
         ) {
             val iterable = it[0] as Adapter
             val body = it[1] as Callable

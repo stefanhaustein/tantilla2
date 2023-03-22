@@ -47,7 +47,7 @@ object StrType : NativeTypeDefinition(
             "join",
             "Joins the list parameter, separating elements with this string.",
             StrType,
-            Parameter("list", IterableTrait(StrType, AbsoluteRootScope.iterableTrait))
+            Parameter("list", AbsoluteRootScope.iterableTrait.withGenericsResolved(listOf(StrType)))
         ) {
             val iterable = it[1] as Adapter
             val iterator = iterable.evalMethod(0, it) as Adapter
