@@ -8,25 +8,11 @@ import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.type.TypeParameter
 
 class IteratorTrait(
-     elementType: Type = TYPE_PARAMETER,
-    val unparameterized: IteratorTrait? = null,
-) : TraitDefinition(null, "Iterator", "Able to iterate a sequence of elements", listOf(elementType)) {
-
-
-    fun withElementType(elementType: Type) = IteratorTrait(elementType, unparameterized ?: this)
-
-    override fun withGenericsResolved(genericTypeList: List<Type>) =
-        withElementType(genericTypeList[0])
-
-
-    override fun unparameterized(): TraitDefinition = unparameterized ?: this
+) : TraitDefinition(null, "Iterator", "Able to iterate a sequence of elements", listOf(
+    TYPE_PARAMETER)) {
 
 
     init {
-        if (elementType !is TypeParameter && unparameterized == null) {
-            throw IllegalStateException()
-        }
-
         defineMethod(
             "has_next",
             "True if more items are available",
@@ -35,7 +21,7 @@ class IteratorTrait(
         defineMethod(
            "next",
            "Returns the next item and advances.",
-            elementType)
+            TYPE_PARAMETER)
     }
 
     companion object {

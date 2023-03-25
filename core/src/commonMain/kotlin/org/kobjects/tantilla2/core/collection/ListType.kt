@@ -34,7 +34,7 @@ open class ListType(
         defineMethod(
             "iterator",
             "Returns an iterator for this list",
-            AbsoluteRootScope.iteratorTrait.withElementType(ELEMENT_TYPE)
+            AbsoluteRootScope.iteratorTrait.withGenericsResolved(listOf(ELEMENT_TYPE))
         ) {
             IteratorTrait.createAdapter((it[0] as List<Any>).iterator())
         }

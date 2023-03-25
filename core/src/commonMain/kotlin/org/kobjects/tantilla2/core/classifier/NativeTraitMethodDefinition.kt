@@ -15,7 +15,7 @@ open class NativeTraitMethodDefinition(
 
 ) : Callable, Definition {
 
-    val vmtIndex = parentScope.traitIndex++
+    val vmtIndex = parentScope.nextTraitIndex++
 
     override val kind: Definition.Kind
         get() = Definition.Kind.METHOD

@@ -18,11 +18,15 @@ open class TraitDefinition(
     override val genericParameterTypes: List<Type> = listOf(),
 ) : Classifier() {
 
-    // The current vmt index. Determines the vmt size
-    var traitIndex = 0
+    // The current vmt index.
+    var nextTraitIndex = 0
+
+    // Accesses definitions to make sure lazy resolution is triggered and the value is up-to-date
+    val vmtSize
+        get() = definitions.size + nextTraitIndex - definitions.size
 
     override fun withGenericsResolved(resolved: List<Type>): TraitDefinition {
-        return ParameterizedTraitDefinition(this, resolved)
+        return ParameterizedTraitDefinition(unparameterized() as TraitDefinition, resolved)
     }
 
 
@@ -74,8 +78,9 @@ open class TraitDefinition(
     }
 
     fun createVmt(resolveMethod: (Definition) -> Callable): List<Callable> {
-        val vmt = Array<Callable?>(traitIndex) { null }
-        for (traitMethod in this) {
+
+        val vmt = Array<Callable?>(vmtSize) { null }
+        for (traitMethod in this.filter { it.isDynamic() }) {
             val vmtIndex = traitMethod.vmtIndex
             vmt[vmtIndex] = resolveMethod(traitMethod)
 

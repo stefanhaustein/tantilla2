@@ -7,27 +7,18 @@ import org.kobjects.tantilla2.core.type.Type
 import org.kobjects.tantilla2.core.type.TypeParameter
 
 class IterableTrait(
-     elementType: Type = TypeParameter("T"),
-    val unparameterized: IterableTrait? = null,
-) : TraitDefinition(null,"Iterable", "Is able to provide an iterator", listOf(elementType)
+) : TraitDefinition(null,"Iterable", "Is able to provide an iterator", listOf(ELEMENT_TYPE)
 ) {
-
-
-    fun withElementType(elementType: Type) = IterableTrait(
-        elementType, unparameterized() as IterableTrait)
-
-    override fun withGenericsResolved(genericTypeList: List<Type>) =
-        withElementType(genericTypeList[0])
-
-
-    override fun unparameterized(): TraitDefinition = unparameterized ?: this
-
 
     init {
         defineMethod(
             "iterator",
             "True if more items are available",
-            AbsoluteRootScope.iteratorTrait.withElementType(elementType))
+            AbsoluteRootScope.iteratorTrait.withGenericsResolved(listOf(ELEMENT_TYPE)))
+    }
+
+    companion object {
+        val ELEMENT_TYPE = TypeParameter("T")
     }
 
 }

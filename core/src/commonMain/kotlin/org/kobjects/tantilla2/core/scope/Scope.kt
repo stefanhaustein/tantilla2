@@ -16,7 +16,7 @@ import org.kobjects.tantilla2.core.type.Type
 
 abstract class Scope(
 ): Definition, Iterable<Definition> {
-    private val definitions by lazy { initDefinitions() }
+    protected val definitions by lazy { initDefinitions() }
     val locals = mutableListOf<String>()
 
     open val supportsMethods: Boolean

@@ -12,7 +12,7 @@ object RangeType : NativeTypeDefinition(null, "Range", "A range of integers"), C
         defineMethod(
             "iterator",
             "Returns an iterator for this range",
-            AbsoluteRootScope.iteratorTrait.withElementType(IntType)
+            AbsoluteRootScope.iteratorTrait.withGenericsResolved(listOf(IntType))
         ) {
             IteratorTrait.createAdapter((it[0] as LongRange).iterator())
         }

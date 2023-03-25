@@ -103,7 +103,7 @@ class FunctionDefinition (
                     docString = Parser.readDocString(tokenizer)
                 }
                 tokenizer.requireEof { "Trait methods must not have function bodies." }
-                resolvedBody = TraitMethodBody(parentScope.traitIndex++)
+                resolvedBody = TraitMethodBody(parentScope.nextTraitIndex++)
             } else {
                 tokenizer.consume(":")
                 docString = Parser.readDocString(tokenizer)
